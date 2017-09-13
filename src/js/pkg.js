@@ -259,6 +259,7 @@ Package.prototype.ls = function(cb, all) {
  * @param {String} [pkgname]* names of packages to be imported
  * @return {String} an import string to be evaluated in a local JS space
  * @method  import
+ * @deprecated Usage of the method has to be avoided. Use zebkit.require(...) instead.
  */
 Package.prototype.import = function() {
     var code = [];
@@ -283,10 +284,13 @@ Package.prototype.import = function() {
 };
 
 /**
- * Method to request sub-package or sub-packages be ready and visible in
- * passed callback. The method guarantees the callbacks be called the time
- * all zebkit data is loaded and ready.
- * @param {String} [packages]* name or names of sub-packages to make visible
+ * This method has to be used to start building a zebkit application. It
+ * expects a callback function where an application code has to be placed and
+ * number of required for the application packages names.  The call back gets
+ * the packages instances as its arguments. The method guarantees the callback
+ * is called at the time zebkit and requested packages are loaded, initialized
+ * and ready to be used.
+ * @param {String} [packages]* name or names of packages to make visible
  * in callback method
  * @param {Function} [callback] a method to be called. The method is called
  * in context of the given package and gets requested packages passed as the

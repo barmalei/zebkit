@@ -13,7 +13,7 @@
 
     <title>
         
-          UI layouts &middot; Zebkit - UI platform
+          Layout manager &middot; Zebkit - UI platform
         
     </title>
 
@@ -32,7 +32,7 @@
     <!-- RSS -->
     <link rel="alternate" type="application/rss+xml" title="RSS" href="/atom.xml">
 
-    <script type="text/javascript" src="/build/zebkit.js">  </script>
+    <script type="text/javascript" src="/build/zebkit.min.js?12092017">  </script>
 
     <script type="text/javascript">
         zebkit.ui.config("theme", "light");
@@ -48,9 +48,12 @@
         <table style="height:100%;border-width: 0px; border-color: #151515;">
             <tr>
                 <td colspan="2" align="center" style="border-width: 0px; margin: 0px; padding: 0px;">
-                    <a href="../index.html">
+                
+                    <a href="../dark/docs.layouts.html">
                         <img style="margin: 0px; padding: 0px;" src="/website/light/public/images/zebkit.logo.png" width="60%">
                     </a>
+                
+
                 </td>
             </tr>
             <tr>
@@ -81,6 +84,10 @@
 
 
                         
+                        
+                            
+                        
+                            
                         
                             
                         
@@ -171,6 +178,14 @@
                     
                         
                         
+                        
+                    
+                        
+                        
+                        
+                    
+                        
+                        
 
                             
                             
@@ -193,89 +208,82 @@
                             
                         
                             
-                                <!--
-
-
-                                -->
+                                
                             
                         
                             
-                                <!--
-
-
-                                -->
+                                
                             
                         
                             
-                                <!--
-
-
-                                -->
+                                
                             
                         
                             
-                                <!--
-
-
-                                -->
+                                
                             
                         
                             
-                                <!--
-
-
-                                -->
+                                
+                            
+                        
+                            
+                                
+                            
+                        
+                            
+                                
+                                    <a class="sidebar-nav-item active"
+                                       href="/website/light/docs.layouts.html">
+                                        <table cellpadding="0" cellspacing="0" style="padding: 0px;width:auto;margin:0px;">
+                                       <!--
+                                            <tr>
+                                                <td colspan="2" style="padding: 0px;" align="right">
+                                                    ┃
+                                                </td>
+                                            </tr>
+                                        -->
+                                            <tr>
+                                                <td style="padding: 0px;">
+                                                     Layout manager
+                                                </td>
+                                                <td style="padding: 0px;">
+                                                   &nbsp;◀┛&nbsp;&nbsp;
+                                                </td>
+                                            </tr>
+                                        </table>
+                                    </a>
+                                
                             
                         
                             
                         
                             
-                                <!--
-
-
-                                -->
+                                
                             
                         
                             
-                                <!--
-
-
-                                -->
+                                
                             
                         
                             
-                                <!--
-
-
-                                -->
+                                
                             
                         
                             
-                                <!--
-
-
-                                -->
+                                
                             
                         
                             
-                                <!--
-
-
-                                -->
+                                
                             
                         
                             
-                                <!--
-
-
-                                -->
+                                
                             
                         
                             
-                                <!--
-
-
-                                -->
+                                
                             
                         
                             
@@ -289,7 +297,11 @@
                         
                     
                         
+                        
+                        
                     
+                        
+                        
                         
                     
                         
@@ -397,42 +409,40 @@
       <div class="page">
 
     
-        <h1 class="page-title">UI layouts</h1>
+        <h1 class="page-title">Layout manager</h1>
     
 
-    <p>User interface has to be adjustable and adaptive to an environment and a hardware where it can be shown. To avoid potential UI layouting problems developers should not positioning and sizing UI components by assigning dedicated (x,y) coordinates and (width,height).</p>
+    <p>User interface has to be adaptive to an environment and a hardware where it can be shown. To avoid potential UI layouting problems developers should not positioning and sizing UI components by assigning dedicated (x,y) coordinates and (width,height) size.</p>
 
 <p>Layout managers is well known solution to get adaptive UI that helps developing adjustable UI layout. Layout manager doesn’t trust fixed UI components positions and sizes. It uses rules-based manner to order UI components. Layout manager “knows” two important things:</p>
 
 <ul>
-  <li>
-    <p>How to order UI children components</p>
-  </li>
-  <li>
-    <p>How to compute the component preferred size basing on its children components hierarchy</p>
-  </li>
+  <li>How to order UI child components of the given container component</li>
+  <li>How to compute the container component preferred size taking in account its child components hierarchy</li>
 </ul>
 
-<p>In zebkit layout manager usage looks something like below:</p>
+<p>Usage layout manager in zebkit looks something like the following:</p>
 
-<div class="highlighter-rouge"><pre class="highlight"><code><span class="p">...</span>
-<span class="kd">var</span> <span class="nx">pan</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">zebkit</span><span class="p">.</span><span class="nx">ui</span><span class="p">.</span><span class="nx">Panel</span><span class="p">();</span>
-<span class="c1">// set layout manager</span>
-<span class="nx">pan</span><span class="p">.</span><span class="nx">setLayout</span><span class="p">(</span><span class="k">new</span> <span class="nx">zebkit</span><span class="p">.</span><span class="nx">layout</span><span class="p">.</span><span class="nx">BorderLayout</span><span class="p">())</span> 
-<span class="p">...</span>
-<span class="c1">// border layout manager understand number of children components </span>
-<span class="c1">// alignments (top, center, left, etc). let's add a component at </span>
-<span class="c1">// the top of panel</span>
-<span class="nx">pan</span><span class="p">.</span><span class="nx">add</span><span class="p">(</span><span class="s2">"top"</span><span class="p">,</span> <span class="k">new</span> <span class="nx">zebkit</span><span class="p">.</span><span class="nx">ui</span><span class="p">.</span><span class="nx">Button</span><span class="p">(</span><span class="s2">"Ok"</span><span class="p">));</span>
-<span class="p">...</span>
+<div class="highlighter-rouge"><pre class="highlight"><code><span class="nx">zebkit</span><span class="p">.</span><span class="nx">require</span><span class="p">(</span><span class="s2">"ui"</span><span class="p">,</span> <span class="s2">"layout"</span><span class="p">,</span> <span class="kd">function</span><span class="p">(</span><span class="nx">ui</span><span class="p">,</span> <span class="nx">layout</span><span class="p">)</span> <span class="p">{</span>
+    <span class="p">...</span>
+    <span class="kd">var</span> <span class="nx">pan</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">ui</span><span class="p">.</span><span class="nx">Panel</span><span class="p">();</span>
+    <span class="c1">// Set layout manager for the container</span>
+    <span class="nx">pan</span><span class="p">.</span><span class="nx">setLayout</span><span class="p">(</span><span class="k">new</span> <span class="nx">layout</span><span class="p">.</span><span class="nx">BorderLayout</span><span class="p">())</span> 
+    <span class="p">...</span>
+    <span class="c1">// Border layout manager orders child components </span>
+    <span class="c1">// with number of predefined alignments (top, center, left, </span>
+    <span class="c1">// etc). Let's add a component at the top of panel</span>
+    <span class="nx">pan</span><span class="p">.</span><span class="nx">add</span><span class="p">(</span><span class="s2">"top"</span><span class="p">,</span> <span class="k">new</span> <span class="nx">ui</span><span class="p">.</span><span class="nx">Button</span><span class="p">(</span><span class="s2">"Ok"</span><span class="p">));</span>
+    <span class="p">...</span>
+<span class="p">});</span>
 </code></pre>
 </div>
 
-<p>Zebkit is supplied with number ready-to-use layout managers. In most cases they are enough for building UI application.</p>
+<p>Zebkit is supplied with a number ready-to-use layout managers. In most cases they are enough for building UI application.</p>
 
 <h3 id="raster-layout">Raster Layout</h3>
 
-<p>The layout manager orders children components basing on its exact locations and sizes that are set via “setLocation(x, y)”, “setSize(w,h)” or “setBounds(x, y, w, h)” methods. But also the manager can use preferred sizes and custom vertical and horizontal alignments to place the children components.</p>
+<p>The layout manager orders child components basing on its exact locations and sizes that are set via <strong>“setLocation(x, y)”</strong>, <strong>“setSize(w,h)”</strong> or <strong>“setBounds(x, y, w, h)”</strong> methods. But also the manager can use preferred sizes and custom vertical and horizontal alignments to place the child components.</p>
 
 <table class="zsample" style="margin:0px;" cellpadding="0" cellspacing="0">
     <tr style="padding: 0px;margin: 0px;">
@@ -466,7 +476,7 @@
 
 <h3 id="stack-layout">Stack Layout</h3>
 
-<p>This the most simple layout manager that place children components on top of each other stretching (or using preferred size) its to fill all available parent component space.</p>
+<p>This the most simple layout manager that place child components on top of each other stretching (or using preferred size) its to fill all available parent component space.</p>
 
 <table class="zsample" style="margin:0px;" cellpadding="0" cellspacing="0">
     <tr style="padding: 0px;margin: 0px;">
@@ -479,7 +489,7 @@
     </tr>
     <tr>
         <td align="center" style="padding:0px; margin:0px;">
-            <span style="color:red;font-size:14px;">Raster layout </span>
+            <span style="color:red;font-size:14px;">Stack layout </span>
         </td>
     </tr>
 </table>
@@ -489,11 +499,11 @@
     <span class="c1">// setup stack layout</span>
     <span class="nx">r</span><span class="p">.</span><span class="nx">setLayout</span><span class="p">(</span><span class="k">new</span> <span class="nx">lay</span><span class="p">.</span><span class="nx">StackLayout</span><span class="p">());</span>
 
-    <span class="c1">// add children component stretched vertically and </span>
+    <span class="c1">// add child component stretched vertically and </span>
     <span class="c1">// horizontally over the whole parent component area</span>
     <span class="nx">r</span><span class="p">.</span><span class="nx">add</span><span class="p">(</span><span class="k">new</span> <span class="nx">ui</span><span class="p">.</span><span class="nx">Button</span><span class="p">(</span><span class="s2">"Stretched\n\n\n\n button"</span><span class="p">));</span>
 
-    <span class="c1">// add children component sized according its </span>
+    <span class="c1">// add child component sized according its </span>
     <span class="c1">// preferred size</span>
     <span class="nx">r</span><span class="p">.</span><span class="nx">add</span><span class="p">(</span><span class="s2">"usePsSize"</span><span class="p">,</span> <span class="k">new</span> <span class="nx">ui</span><span class="p">.</span><span class="nx">Button</span><span class="p">(</span><span class="s2">"Ok"</span><span class="p">));</span>
 <span class="p">});</span>
@@ -502,7 +512,7 @@
 
 <h3 id="border-layout">Border Layout</h3>
 
-<p>The layout manager splits container area into five logical areas: “left”, “right”, “top”, “bottom”, “center”. Children component cab be added to occupy one of the listed above logical area:</p>
+<p>The layout manager splits container area into five logical areas: “left”, “right”, “top”, “bottom”, “center”. Child components can be added to occupy one of the listed above logical area:</p>
 
 <table class="zsample" style="margin:0px;" cellpadding="0" cellspacing="0">
     <tr style="padding: 0px;margin: 0px;">
@@ -537,7 +547,7 @@
 
 <h3 id="list-layout">List layout</h3>
 
-<p>List layout manager treats children components as sequence of list items ordered vertically. The items can be either aligned horizontally or stretched to occupy the whole available horizontal space.</p>
+<p>List layout manager treats child components as sequence of list items ordered vertically. The items can be either aligned horizontally or stretched to occupy the whole available horizontal space.</p>
 
 <table class="zsample" style="margin:0px;" cellpadding="0" cellspacing="0">
     <tr style="padding: 0px;margin: 0px;">
@@ -558,10 +568,10 @@
 <div class="highlighter-rouge"><pre class="highlight"><code><span class="nx">zebkit</span><span class="p">.</span><span class="nx">require</span><span class="p">(</span><span class="s2">"ui"</span><span class="p">,</span><span class="s2">"layout"</span><span class="p">,</span> <span class="kd">function</span><span class="p">(</span><span class="nx">ui</span><span class="p">,</span> <span class="nx">layout</span><span class="p">)</span> <span class="p">{</span>
     <span class="kd">var</span> <span class="nx">r</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">ui</span><span class="p">.</span><span class="nx">zCanvas</span><span class="p">().</span><span class="nx">root</span><span class="p">;</span>
     <span class="c1">// set list layout manager that orders components as list </span>
-    <span class="c1">// item and stretches children horizontally</span>
+    <span class="c1">// items and stretches child components horizontally</span>
     <span class="nx">r</span><span class="p">.</span><span class="nx">setLayout</span><span class="p">(</span><span class="k">new</span> <span class="nx">layout</span><span class="p">.</span><span class="nx">ListLayout</span><span class="p">());</span>
 
-    <span class="c1">// add children components</span>
+    <span class="c1">// add child components</span>
     <span class="nx">r</span><span class="p">.</span><span class="nx">add</span><span class="p">(</span><span class="k">new</span> <span class="nx">ui</span><span class="p">.</span><span class="nx">Button</span><span class="p">(</span><span class="s2">"Stretched Item 1"</span><span class="p">));</span>
     <span class="nx">r</span><span class="p">.</span><span class="nx">add</span><span class="p">(</span><span class="k">new</span> <span class="nx">ui</span><span class="p">.</span><span class="nx">Button</span><span class="p">(</span><span class="s2">"Stretched Item 1"</span><span class="p">));</span>
     <span class="nx">r</span><span class="p">.</span><span class="nx">add</span><span class="p">(</span><span class="k">new</span> <span class="nx">ui</span><span class="p">.</span><span class="nx">Button</span><span class="p">(</span><span class="s2">"Stretched Item 1"</span><span class="p">));</span>
@@ -571,7 +581,7 @@
 
 <h3 id="percentage-layout">Percentage layout</h3>
 
-<p>This layout manager orders children components vertically or horizontally according to requested in percents height or width.</p>
+<p>This layout manager orders child components vertically or horizontally according to specified as constraints height or width. Height and width are specified in percents.</p>
 
 <table class="zsample" style="margin:0px;" cellpadding="0" cellspacing="0">
     <tr style="padding: 0px;margin: 0px;">
@@ -608,7 +618,7 @@
 
 <h3 id="flow-layout">Flow layout</h3>
 
-<p>Flow layout manager orders children components vertically or horizontally according to its preferred size. Additionally the ordered components can be aligned vertically  (“top”, “bottom”, “center”) and horizontally (“left”, “right”, “center”).</p>
+<p>Flow layout manager orders child components vertically or horizontally according to its preferred size. Depending of a selected child components ordering (vertical or horizontal) they can be aligned “top”, “bottom”, “center” or “left”, “right”, “center”.</p>
 
 <table class="zsample" style="margin:0px;" cellpadding="0" cellspacing="0">
     <tr style="padding: 0px;margin: 0px;">
@@ -633,7 +643,7 @@
     <span class="c1">// vertical and horizontal alignments</span>
     <span class="nx">r</span><span class="p">.</span><span class="nx">setLayout</span><span class="p">(</span><span class="k">new</span> <span class="nx">lay</span><span class="p">.</span><span class="nx">FlowLayout</span><span class="p">(</span><span class="s2">"center"</span><span class="p">,</span><span class="s2">"center"</span><span class="p">,</span><span class="s2">"vertical"</span><span class="p">,</span><span class="mi">2</span><span class="p">));</span>
 
-    <span class="c1">// add children components</span>
+    <span class="c1">// add child components</span>
     <span class="nx">r</span><span class="p">.</span><span class="nx">add</span><span class="p">(</span><span class="k">new</span> <span class="nx">ui</span><span class="p">.</span><span class="nx">Button</span><span class="p">(</span><span class="s2">"VCentered"</span><span class="p">));</span>
     <span class="nx">r</span><span class="p">.</span><span class="nx">add</span><span class="p">(</span><span class="k">new</span> <span class="nx">ui</span><span class="p">.</span><span class="nx">Button</span><span class="p">(</span><span class="s2">"VCentered"</span><span class="p">));</span>
     <span class="nx">r</span><span class="p">.</span><span class="nx">add</span><span class="p">(</span><span class="k">new</span> <span class="nx">ui</span><span class="p">.</span><span class="nx">Button</span><span class="p">(</span><span class="s2">"VCentered"</span><span class="p">));</span>
@@ -643,7 +653,7 @@
 
 <h3 id="grid-layout">Grid layout</h3>
 
-<p>Grid layout splits container area to number of logical cells where children components have to be placed. Every children component can have specified constraints that says how the component has to be aligned inside the virtual cell (vertical alignment, horizontal alignment, stretching).</p>
+<p>Grid layout splits container area to number of logical cells where child components have to be placed. Every child component can have specified constraints that says how the component has to be aligned inside the virtual cell (vertical alignment, horizontal alignment, stretching).</p>
 
 <table class="zsample" style="margin:0px;" cellpadding="0" cellspacing="0">
     <tr style="padding: 0px;margin: 0px;">
@@ -667,7 +677,7 @@
     <span class="c1">// into four virtual cells (2 rows, and 2 columns)  </span>
     <span class="nx">r</span><span class="p">.</span><span class="nx">setLayout</span><span class="p">(</span><span class="k">new</span> <span class="nx">layout</span><span class="p">.</span><span class="nx">GridLayout</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span><span class="mi">2</span><span class="p">));</span>
 
-    <span class="c1">// add children components</span>
+    <span class="c1">// add child components</span>
     <span class="nx">r</span><span class="p">.</span><span class="nx">add</span><span class="p">(</span><span class="k">new</span> <span class="nx">ui</span><span class="p">.</span><span class="nx">Button</span><span class="p">(</span><span class="s2">"1x1"</span><span class="p">));</span>
     <span class="nx">r</span><span class="p">.</span><span class="nx">add</span><span class="p">(</span><span class="k">new</span> <span class="nx">ui</span><span class="p">.</span><span class="nx">Button</span><span class="p">(</span><span class="s2">"1x2"</span><span class="p">));</span>
     <span class="nx">r</span><span class="p">.</span><span class="nx">add</span><span class="p">(</span><span class="k">new</span> <span class="nx">ui</span><span class="p">.</span><span class="nx">Button</span><span class="p">(</span><span class="s2">"2x1"</span><span class="p">));</span>
@@ -678,11 +688,11 @@
 
 <h3 id="custom-layout-manager">Custom layout manager</h3>
 
-<p>If existent layout managers are not enough it is not a big deal to implement a custom one. To do it inherit “zebkit.layout.Layout” interface and implement the following two methods:</p>
+<p>If existent layout managers are not enough it is not a big deal to implement a custom one. To do it inherit <strong>“zebkit.layout.Layout”</strong> interface and implement the following two methods:</p>
 
 <ul>
-  <li><strong>“calcPreferredSize(target)”</strong> The method has to calculate a target component preferred size basing on its content (usually preferred size of its children component).</li>
-  <li><strong>“doLayout(target)”</strong> The method orders the target container children components basing on specific rules the manager implements.</li>
+  <li><strong>“calcPreferredSize(target)”</strong> The method has to calculate a target component preferred size basing on its content (usually preferred size of its child component).</li>
+  <li><strong>“doLayout(target)”</strong> The method orders the target container child components basing on specific rules the manager implements.</li>
 </ul>
 
 <p>Let’s develop layout manager that orders components along parent component diagonal:</p>
@@ -691,7 +701,7 @@
    <span class="c1">// declare layout manager class</span>
    <span class="nx">pkg</span><span class="p">.</span><span class="nx">DiagLayout</span> <span class="o">=</span> <span class="nx">Class</span><span class="p">(</span><span class="nx">zebkit</span><span class="p">.</span><span class="nx">layout</span><span class="p">.</span><span class="nx">Layout</span><span class="p">,[</span>
        <span class="c1">// preferred size target component wants to have is calculated </span>
-       <span class="c1">// as sum of preferred sizes of children components</span>
+       <span class="c1">// as sum of preferred sizes of child components</span>
        <span class="kd">function</span> <span class="nx">calcPreferredSize</span><span class="p">(</span><span class="nx">target</span><span class="p">)</span> <span class="p">{</span>
           <span class="kd">var</span> <span class="nx">psW</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span> <span class="nx">psH</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
           <span class="k">for</span><span class="p">(</span><span class="kd">var</span> <span class="nx">i</span><span class="o">=</span><span class="mi">0</span><span class="p">;</span> <span class="nx">i</span> <span class="o">&lt;</span> <span class="nx">target</span><span class="p">.</span><span class="nx">kids</span><span class="p">.</span><span class="nx">length</span><span class="p">;</span> <span class="nx">i</span><span class="o">++</span><span class="p">)</span> <span class="p">{</span>
@@ -704,7 +714,7 @@
           <span class="p">}</span>
           <span class="k">return</span> <span class="p">{</span> <span class="na">width</span><span class="p">:</span><span class="nx">psW</span><span class="p">,</span> <span class="na">height</span><span class="p">:</span><span class="nx">psH</span> <span class="p">};</span>
        <span class="p">},</span>
-       <span class="c1">// define rules how children components of the</span>
+       <span class="c1">// define rules how child components of the</span>
        <span class="c1">// given "target" have to be ordered</span>
        <span class="kd">function</span> <span class="nx">doLayout</span><span class="p">(</span><span class="nx">target</span><span class="p">)</span> <span class="p">{</span>
           <span class="kd">var</span> <span class="nx">x</span> <span class="o">=</span> <span class="nx">target</span><span class="p">.</span><span class="nx">getTop</span><span class="p">(),</span> <span class="nx">y</span> <span class="o">=</span> <span class="nx">target</span><span class="p">.</span><span class="nx">getLeft</span><span class="p">();</span>

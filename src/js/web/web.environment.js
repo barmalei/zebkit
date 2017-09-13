@@ -229,12 +229,11 @@
         /**
          * Loads an image by the given URL.
          * @param  {String|HTMLImageElement} img an image URL or image object
-         * @param  {Function} ready a call back method to be notified when the image has been completely
-         * loaded or failed. The method gets three parameters
-         *
-         *   - an URL to the image
-         *   - boolean loading result. true means success
-         *   - an image that has been loaded
+         * @param  {Function} success a call back method to be notified when the image has
+         * been successfully loaded. The method gets an image as its parameter.
+         * @param {Function} [error] a call back method to be notified if the image loading
+         * has failed. The method gets an image instance as its parameter and an exception
+         * that describes an error has happened.
          *
          * @example
          *      // load image

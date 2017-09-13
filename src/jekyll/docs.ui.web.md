@@ -212,7 +212,7 @@ The application catches "keyReleased" event to refresh the chart with entered by
 
 
 ```js
-zebkit.require("ui", "ui.web", "draw", function(ui, web, draw) {
+zebkit.require("ui", "ui.web", "draw", function(ui, web, dr) {
     var root = new ui.zCanvas(600, 200).root;
     root.setBorderLayout().setBorder("plain").setPadding(32);
     // Instantiate text field component 
@@ -230,7 +230,7 @@ zebkit.require("ui", "ui.web", "draw", function(ui, web, draw) {
         if (m !== null) {
             var min=parseFloat(m[1]), max=parseFloat(m[4]);
             if (max > min && !isNaN(min) && !isNaN(max)) {  
-                this.setBackground(new draw.FunctionRender(function(x){
+                this.setBackground(new dr.FunctionRender(function(x){
                   return Math.sin(x)*Math.cos(2*x)-Math.cos(x*x); 
                 }, min, max));
             }

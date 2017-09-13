@@ -13,7 +13,7 @@
 
     <title>
         
-           &middot; Zebkit - UI platform
+          Resources and configuration &middot; Zebkit - UI platform
         
     </title>
 
@@ -32,7 +32,7 @@
     <!-- RSS -->
     <link rel="alternate" type="application/rss+xml" title="RSS" href="/atom.xml">
 
-    <script type="text/javascript" src="/build/zebkit.js">  </script>
+    <script type="text/javascript" src="/build/zebkit.min.js?12092017">  </script>
 
     <script type="text/javascript">
         zebkit.ui.config("theme", "light");
@@ -48,9 +48,12 @@
         <table style="height:100%;border-width: 0px; border-color: #151515;">
             <tr>
                 <td colspan="2" align="center" style="border-width: 0px; margin: 0px; padding: 0px;">
-                    <a href="../index.html">
+                
+                    <a href="../dark/docs.ui.config.html">
                         <img style="margin: 0px; padding: 0px;" src="/website/light/public/images/zebkit.logo.png" width="60%">
                     </a>
+                
+
                 </td>
             </tr>
             <tr>
@@ -81,6 +84,10 @@
 
 
                         
+                        
+                            
+                        
+                            
                         
                             
                         
@@ -171,6 +178,14 @@
                     
                         
                         
+                        
+                    
+                        
+                        
+                        
+                    
+                        
+                        
 
                             
                             
@@ -193,89 +208,82 @@
                             
                         
                             
-                                <!--
-
-
-                                -->
+                                
                             
                         
                             
-                                <!--
-
-
-                                -->
+                                
                             
                         
                             
-                                <!--
-
-
-                                -->
+                                
                             
                         
                             
-                                <!--
-
-
-                                -->
+                                
                             
                         
                             
-                                <!--
-
-
-                                -->
+                                
+                            
+                        
+                            
+                                
+                            
+                        
+                            
+                                
                             
                         
                             
                         
                             
-                                <!--
-
-
-                                -->
+                                
                             
                         
                             
-                                <!--
-
-
-                                -->
+                                
+                                    <a class="sidebar-nav-item active"
+                                       href="/website/light/docs.ui.config.html">
+                                        <table cellpadding="0" cellspacing="0" style="padding: 0px;width:auto;margin:0px;">
+                                       <!--
+                                            <tr>
+                                                <td colspan="2" style="padding: 0px;" align="right">
+                                                    ┃
+                                                </td>
+                                            </tr>
+                                        -->
+                                            <tr>
+                                                <td style="padding: 0px;">
+                                                     Resources and configuration
+                                                </td>
+                                                <td style="padding: 0px;">
+                                                   &nbsp;◀┛&nbsp;&nbsp;
+                                                </td>
+                                            </tr>
+                                        </table>
+                                    </a>
+                                
                             
                         
                             
-                                <!--
-
-
-                                -->
+                                
                             
                         
                             
-                                <!--
-
-
-                                -->
+                                
                             
                         
                             
-                                <!--
-
-
-                                -->
+                                
                             
                         
                             
-                                <!--
-
-
-                                -->
+                                
                             
                         
                             
-                                <!--
-
-
-                                -->
+                                
                             
                         
                             
@@ -289,7 +297,11 @@
                         
                     
                         
+                        
+                        
                     
+                        
+                        
                         
                     
                         
@@ -397,8 +409,6 @@
       <div class="page">
 
     
-        <h1 class="page-title"></h1>
-    
 
     <h2 id="ui-component-self-configuration">UI component self configuration</h2>
 
@@ -408,8 +418,8 @@
 <span class="nx">zebkit</span><span class="p">.</span><span class="nx">ui</span><span class="p">.</span><span class="nx">Label</span><span class="p">.</span><span class="nx">color</span> <span class="o">=</span> <span class="s2">"orange"</span><span class="p">;</span>
 <span class="p">...</span>
 <span class="c1">// all label instances will have color set to "orange"</span>
-<span class="kd">var</span> <span class="nx">lab1</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">zebkit</span><span class="p">.</span><span class="nx">ui</span><span class="p">.</span><span class="nx">Label</span><span class="p">(</span><span class="s2">"Label"</span><span class="p">);</span>
-<span class="kd">var</span> <span class="nx">lab2</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">zebkit</span><span class="p">.</span><span class="nx">ui</span><span class="p">.</span><span class="nx">Label</span><span class="p">(</span><span class="s2">"Label"</span><span class="p">);</span>
+<span class="kd">var</span> <span class="nx">lab1</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">zebkit</span><span class="p">.</span><span class="nx">ui</span><span class="p">.</span><span class="nx">Label</span><span class="p">(</span><span class="s2">"Label 1"</span><span class="p">);</span>
+<span class="kd">var</span> <span class="nx">lab2</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">zebkit</span><span class="p">.</span><span class="nx">ui</span><span class="p">.</span><span class="nx">Label</span><span class="p">(</span><span class="s2">"Label 2"</span><span class="p">);</span>
 <span class="p">...</span>
 </code></pre>
 </div>
@@ -432,7 +442,7 @@
 
 <h2 id="configuration-resources">Configuration resources</h2>
 
-<p>By default UI configuration JSON files are stored on the same level with zebkit JS file in “rs” folder. The structure is shown below:</p>
+<p>By default UI configuration JSON files are stored on the same level with zebkit UI components JS file(s) in “rs” sub-folder. The structure of zebkit UI configuration resources are shown below:</p>
 
 <div class="highlighter-rouge"><pre class="highlight"><code><span class="o">[</span>rs]                      <span class="c"># root resource folder</span>
  +-- <span class="o">[</span>light]              <span class="c"># light theme resources folder</span>
@@ -450,64 +460,70 @@
 </code></pre>
 </div>
 
-<p>Loading JSON configurations setup static fields for appropriate class that later will be used as default properties values for the class instances. Configuration occurs on the package level. In other words zebkit keeps JSON configuration per package (if necessary). It is possible to load a custom configuration manually with “configWith([path])” method. For instance, imagine we have JSON below to customize text field component properties:</p>
+<p>Loading JSON configurations setups static fields for appropriate package entities (classes, interfaces, etc) that will be later used as default properties values for the entities instances. Configuration Zebkit keeps JSON configuration per package (if necessary). It is also possible to load a custom configuration manually with <strong>“configWith([path])”</strong> method. For instance, imagine we have created JSON shown below to customize text field component properties:</p>
 
-<div class="highlighter-rouge"><pre class="highlight"><code><span class="p">{</span>
-    <span class="p">...</span>
-    <span class="s2">"TextField"</span> <span class="err">:</span> <span class="p">{</span>
-        <span class="s2">"border"</span>    <span class="err">:</span><span class="p">{</span><span class="s2">"@zebkit.draw.Border"</span><span class="err">:</span><span class="p">[</span><span class="s2">"red"</span><span class="p">,</span> <span class="mi">2</span><span class="p">]},</span>
-        <span class="s2">"color"</span>     <span class="err">:</span><span class="s2">"white"</span><span class="p">,</span>
-        <span class="s2">"background"</span><span class="err">:</span><span class="p">{</span><span class="s2">"@zebkit.draw.Gradient"</span><span class="err">:</span><span class="p">[</span><span class="s2">"red"</span><span class="p">,</span><span class="s2">"orange"</span><span class="p">]}</span>
-    <span class="p">}</span>
-<span class="p">}</span>
-</code></pre>
+<div class="highlighter-rouge"><pre class="highlight"><code><span class="p">{</span><span class="w">
+    </span><span class="err">...</span><span class="w">
+    </span><span class="nt">"TextField"</span><span class="w"> </span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w">
+        </span><span class="nt">"border"</span><span class="w">    </span><span class="p">:{</span><span class="nt">"@zebkit.draw.Border"</span><span class="p">:[</span><span class="s2">"red"</span><span class="p">,</span><span class="w"> </span><span class="mi">2</span><span class="p">]},</span><span class="w">
+        </span><span class="nt">"color"</span><span class="w">     </span><span class="p">:</span><span class="s2">"white"</span><span class="p">,</span><span class="w">
+        </span><span class="nt">"background"</span><span class="p">:{</span><span class="nt">"@zebkit.draw.Gradient"</span><span class="p">:[</span><span class="s2">"red"</span><span class="p">,</span><span class="s2">"orange"</span><span class="p">]}</span><span class="w">
+    </span><span class="p">}</span><span class="w">
+</span><span class="p">}</span><span class="w">
+</span></code></pre>
 </div>
 
-<p>Then we can configure “zebkit.ui” package with the JSON as follow:</p>
+<p>To apply the JSON do the following:</p>
 
 <div class="highlighter-rouge"><pre class="highlight"><code><span class="nx">zebkit</span><span class="p">.</span><span class="nx">ui</span><span class="p">.</span><span class="nx">configWith</span><span class="p">(</span><span class="s2">"/tf.json"</span><span class="p">);</span>
 </code></pre>
 </div>
 
-<p>Pay attention how zebkit looks for required JSON:
-   - Passed path starts from “/” or is an URL (e.g. “http://text.com/tf.json”) then the path is considered as absolute path and is used as is to read the required resource
-   - Passed path</p>
+<p>Pay attention the way zebkit looks up for a required JSON :</p>
+
+<ul>
+  <li>If passed path starts from <strong>”/”</strong> or the passed path is a complete URL (e.g. “http://text.com/tf.json”) then the path is considered as an absolute and applied as is.</li>
+  <li>No path has been passed. In this case configuration file name is the package name (without “zebkit.” prefix) plus “.json” as extension.</li>
+  <li>Passed path is relative (neither starts from <strong>”/”</strong> nor URL). In this case the path is considered relative to an URL the given package has been loaded, or relative to <strong>“basedir”</strong> if it has been defined on the level of the package or one of his parent package.</li>
+</ul>
 
 <h2 id="theme-configuration">Theme configuration</h2>
 
-<p>By default zebkit expects theme resources are located in “rs” folder at the the same level where zebkit JS code is stored. To switch UI theme set theme name (has to match a sub-folder hosted in “rs” folder):</p>
+<p>By default zebkit expects a theme resources are located in appropriate sub-folder in “rs”. To switch UI theme set “theme” configuration variable (that has to match a sub-folder hosted in “rs” folder):</p>
 
 <div class="highlighter-rouge"><pre class="highlight"><code><span class="c1">// say to use light theme</span>
- <span class="c1">// name of theme folder</span>
+<span class="nx">zebkit</span><span class="p">.</span><span class="nx">ui</span><span class="p">.</span><span class="nx">config</span><span class="p">(</span><span class="s2">"theme"</span><span class="p">,</span> <span class="s2">"light"</span><span class="p">);</span>
 </code></pre>
 </div>
 
-<p>In a case if zebkit theme is placed in another place specify base directory where the theme resources are stored:</p>
+<p>In a case if zebkit theme is located in other place specify base directory where the theme resources are stored:</p>
 
 <div class="highlighter-rouge"><pre class="highlight"><code><span class="c1">// define path to custom theme    </span>
 <span class="nx">zebkit</span><span class="p">.</span><span class="nx">ui</span><span class="p">.</span><span class="nx">config</span><span class="p">(</span><span class="s2">"basedir"</span><span class="p">,</span><span class="s2">"http://test.com./myfolder/mytheme"</span><span class="p">);</span>
 </code></pre>
 </div>
 
-<p>If you has number of themes you can use place holder to simplify switching between these themes:
-<code class="highlighter-rouge">js
-// define path to light theme    
-zebkit.ui.config("basedir","http://test.com./myfolder/%{theme}");
-...
-// specify theme to be used
-zebkit.ui.config("theme", "mytheme1");
-</code></p>
+<p>If there are number of themes you need to host in a custom place specify “basedir” as follow:</p>
 
-<p><strong>Note:</strong> Note that configuration variables (theme, base directory, etc) have to be adjusted outside “require” or “package” zebkit  sections. In general it should look as follow:
-```js
-<script>
-    // adjust theme variable
-    zebkit.ui.config("theme","light");</script></p>
+<div class="highlighter-rouge"><pre class="highlight"><code><span class="c1">// define path to light theme    </span>
+<span class="nx">zebkit</span><span class="p">.</span><span class="nx">ui</span><span class="p">.</span><span class="nx">config</span><span class="p">(</span><span class="s2">"basedir"</span><span class="p">,</span><span class="s2">"http://test.com./myfolder/%{theme}"</span><span class="p">);</span>
+<span class="p">...</span>
+<span class="c1">// specify theme to be used</span>
+<span class="nx">zebkit</span><span class="p">.</span><span class="nx">ui</span><span class="p">.</span><span class="nx">config</span><span class="p">(</span><span class="s2">"theme"</span><span class="p">,</span> <span class="s2">"mytheme1"</span><span class="p">);</span>
+</code></pre>
+</div>
 
-<div class="highlighter-rouge"><pre class="highlight"><code>zebkit.require("ui", function(ui) {
-    // develop UI 
-    ...
-});  &lt;/script&gt; ```
+<p><strong>Note:</strong> Note that configuration variables (theme, base directory, etc) have to be adjusted outside of “require” or “package” zebkit sections. The customization should look something like the following:</p>
+
+<div class="highlighter-rouge"><pre class="highlight"><code><span class="nt">&lt;script&gt;</span>
+    <span class="c1">// adjust theme variable</span>
+    <span class="nx">zebkit</span><span class="p">.</span><span class="nx">ui</span><span class="p">.</span><span class="nx">config</span><span class="p">(</span><span class="s2">"theme"</span><span class="p">,</span><span class="s2">"light"</span><span class="p">);</span>
+
+    <span class="nx">zebkit</span><span class="p">.</span><span class="nx">require</span><span class="p">(</span><span class="s2">"ui"</span><span class="p">,</span> <span class="kd">function</span><span class="p">(</span><span class="nx">ui</span><span class="p">)</span> <span class="p">{</span>
+        <span class="c1">// develop UI </span>
+        <span class="p">...</span>
+    <span class="p">});</span> 
+<span class="nt">&lt;/script&gt;</span>
 </code></pre>
 </div>
 
@@ -518,6 +534,7 @@ zebkit.ui.config("theme", "mytheme1");
 <p>To load the JSON UI definition the following code can be used:</p>
 
 <div class="highlighter-rouge"><pre class="highlight"><code><span class="nx">zebkit</span><span class="p">.</span><span class="nx">require</span><span class="p">(</span><span class="s2">"ui"</span><span class="p">,</span> <span class="kd">function</span><span class="p">(</span><span class="nx">ui</span><span class="p">)</span> <span class="p">{</span>
+    <span class="c1">// load root component content with "simple.json" file</span>
     <span class="k">new</span> <span class="nx">ui</span><span class="p">.</span><span class="nx">zCanvas</span><span class="p">(</span><span class="mi">400</span><span class="p">,</span> <span class="mi">300</span><span class="p">).</span><span class="nx">root</span><span class="p">.</span><span class="nx">load</span><span class="p">(</span><span class="s2">"simple.json"</span><span class="p">);</span>
 <span class="p">});</span>
 </code></pre>
@@ -580,7 +597,7 @@ zebkit.ui.config("theme", "mytheme1");
     });
 </script>
 
-<p>There is “#actions” section in the JSON shown above. The section allows developers to declare simple event handling. In this particular case the section says to clear text area component text by button click. Full supported features of the section are shown below:</p>
+<p>A you can see there is “#actions” section in the JSON shown above. The section allows developers to declare simple events handling. In this particular case the section says to empty text area component value by button click. Full supported features of the section are shown below:</p>
 
 <table class="info">
 <tr><th>
@@ -602,6 +619,13 @@ Optional an event name that has to be handled from the source
 </td></tr>
 
 <tr><td>
+"#actions.condition"    
+</td><td>
+Optional a condition the source event is handled. Condition is dictionary of source properties and its values. If all properties values of the specified condition match the correspondent properties of source component the event 
+will be handled.   
+</td></tr>
+
+<tr><td>
 "#actions.targets" or
 <br />
 "#actions.target"    
@@ -613,6 +637,12 @@ List of targets ("#actions.targets") components or single target ("#actions.targ
 "#actions.target.path" 
 </td><td>
 Path to detect a target component
+</td></tr>
+
+<tr><td>
+"#actions.target.condition"    
+</td><td>
+Optional a condition the target "update" and "do" sections will be applied. Condition is dictionary of target properties and its values. If all properties values of the specified condition match the correspondent properties of target component "update" and "do" sections are applied to the target.
 </td></tr>
 
 <tr><td>
@@ -635,69 +665,69 @@ Set of actions over the target component
 
 <p>To combine multiple JSONs:</p>
 
-<div class="highlighter-rouge"><pre class="highlight"><code><span class="p">{</span>
-    <span class="s2">"%{../external1.json}"</span><span class="err">:</span> <span class="s1">''</span><span class="p">,</span>
-    <span class="s2">"%{../external2.json}"</span><span class="err">:</span> <span class="s1">''</span>
-    <span class="s2">"key"</span> <span class="err">:</span> <span class="p">{</span>
-        <span class="p">...</span>
-    <span class="p">}</span>
-<span class="p">}</span>
-</code></pre>
+<div class="highlighter-rouge"><pre class="highlight"><code><span class="p">{</span><span class="w">
+    </span><span class="nt">"%{../external1.json}"</span><span class="p">:</span><span class="w"> </span><span class="s2">""</span><span class="p">,</span><span class="w">
+    </span><span class="nt">"%{../external2.json}"</span><span class="p">:</span><span class="w"> </span><span class="s2">""</span><span class="p">,</span><span class="w">
+    </span><span class="nt">"key"</span><span class="w"> </span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w">
+        </span><span class="err">...</span><span class="w">
+    </span><span class="p">}</span><span class="w">
+</span><span class="p">}</span><span class="w">
+</span></code></pre>
 </div>
 
 <p>Or you can fulfill a value with the given JSON as follow:</p>
 
-<div class="highlighter-rouge"><pre class="highlight"><code><span class="p">{</span>
-    <span class="s2">"key"</span> <span class="err">:</span> <span class="s2">"%{../external.json}"</span>
-<span class="p">}</span>
-</code></pre>
+<div class="highlighter-rouge"><pre class="highlight"><code><span class="p">{</span><span class="w">
+    </span><span class="nt">"key"</span><span class="w"> </span><span class="p">:</span><span class="w"> </span><span class="s2">"%{../external.json}"</span><span class="w">
+</span><span class="p">}</span><span class="w">
+</span></code></pre>
 </div>
 
 <p>For example let use slightly modified JSON from previous UI example to populate the same UI four times:</p>
 
-<div class="highlighter-rouge"><pre class="highlight"><code><span class="p">{</span>
-    <span class="s2">"@zebkit.ui.Panel"</span><span class="err">:</span> <span class="p">[],</span>
-    <span class="s2">"layout"</span><span class="err">:</span> <span class="p">{</span> <span class="s2">"@zebkit.layout.StackLayout"</span> <span class="err">:</span> <span class="p">[]},</span>
-    <span class="s2">"kids"</span>  <span class="err">:</span> <span class="p">[{</span>
-        <span class="s2">"@zebkit.ui.Panel"</span><span class="p">:[],</span>
-        <span class="s2">"layout"</span> <span class="p">:</span> <span class="p">{</span> <span class="s2">"@zebkit.layout.BorderLayout"</span> <span class="p">:</span><span class="mi">4</span> <span class="p">},</span>
-        <span class="s2">"padding"</span><span class="err">:</span> <span class="mi">4</span><span class="p">,</span>
-        <span class="s2">"border"</span> <span class="err">:</span> <span class="s2">"plain"</span><span class="p">,</span>
-        <span class="s2">"kids"</span>   <span class="err">:</span> <span class="p">{</span>
-            <span class="s2">"top"</span><span class="err">:</span> <span class="p">{</span>
-                <span class="s2">"@zebkit.ui.BoldLabel"</span><span class="err">:</span> <span class="s2">"Simple application"</span><span class="p">,</span>
-                <span class="s2">"padding"</span>             <span class="err">:</span> <span class="mi">4</span>
-            <span class="p">},</span>
-            <span class="s2">"center"</span><span class="err">:</span> <span class="p">{</span> <span class="s2">"@zebkit.ui.TextArea"</span><span class="err">:</span> <span class="s2">""</span> <span class="p">},</span>
-            <span class="s2">"bottom"</span><span class="err">:</span> <span class="p">{</span>
-                <span class="s2">"@zebkit.ui.Button"</span><span class="err">:</span> <span class="s2">"Clear"</span><span class="p">,</span>
-                <span class="s2">"canHaveFocus"</span>     <span class="err">:</span> <span class="kc">false</span>
-            <span class="p">}</span>
-       <span class="p">}</span>
-    <span class="p">}],</span>
-    <span class="s2">"#actions"</span> <span class="err">:</span> <span class="p">[{</span>
-        <span class="s2">"source"</span>  <span class="p">:</span> <span class="s2">"//zebkit.ui.Button"</span><span class="p">,</span>
-        <span class="s2">"target"</span>  <span class="p">:</span> <span class="p">{</span>
-            <span class="s2">"path"</span>   <span class="p">:</span> <span class="s2">"//zebkit.ui.TextArea"</span><span class="p">,</span>
-            <span class="s2">"update"</span> <span class="p">:</span> <span class="p">{</span> <span class="s2">"value"</span><span class="p">:</span> <span class="s2">""</span> <span class="p">}</span>
-        <span class="p">}</span>
-    <span class="p">}]</span>
-<span class="p">}</span>
-</code></pre>
+<div class="highlighter-rouge"><pre class="highlight"><code><span class="p">{</span><span class="w">
+    </span><span class="nt">"@zebkit.ui.Panel"</span><span class="p">:</span><span class="w"> </span><span class="p">[],</span><span class="w">
+    </span><span class="nt">"layout"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nt">"@zebkit.layout.StackLayout"</span><span class="w"> </span><span class="p">:</span><span class="w"> </span><span class="p">[]},</span><span class="w">
+    </span><span class="nt">"kids"</span><span class="w">  </span><span class="p">:</span><span class="w"> </span><span class="p">[{</span><span class="w">
+        </span><span class="nt">"@zebkit.ui.Panel"</span><span class="p">:[],</span><span class="w">
+        </span><span class="nt">"layout"</span><span class="w"> </span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nt">"@zebkit.layout.BorderLayout"</span><span class="w"> </span><span class="p">:</span><span class="mi">4</span><span class="w"> </span><span class="p">},</span><span class="w">
+        </span><span class="nt">"padding"</span><span class="p">:</span><span class="w"> </span><span class="mi">4</span><span class="p">,</span><span class="w">
+        </span><span class="nt">"border"</span><span class="w"> </span><span class="p">:</span><span class="w"> </span><span class="s2">"plain"</span><span class="p">,</span><span class="w">
+        </span><span class="nt">"kids"</span><span class="w">   </span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w">
+            </span><span class="nt">"top"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w">
+                </span><span class="nt">"@zebkit.ui.BoldLabel"</span><span class="p">:</span><span class="w"> </span><span class="s2">"Simple application"</span><span class="p">,</span><span class="w">
+                </span><span class="nt">"padding"</span><span class="w">             </span><span class="p">:</span><span class="w"> </span><span class="mi">4</span><span class="w">
+            </span><span class="p">},</span><span class="w">
+            </span><span class="nt">"center"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nt">"@zebkit.ui.TextArea"</span><span class="p">:</span><span class="w"> </span><span class="s2">""</span><span class="w"> </span><span class="p">},</span><span class="w">
+            </span><span class="nt">"bottom"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w">
+                </span><span class="nt">"@zebkit.ui.Button"</span><span class="p">:</span><span class="w"> </span><span class="s2">"Clear"</span><span class="p">,</span><span class="w">
+                </span><span class="nt">"canHaveFocus"</span><span class="w">     </span><span class="p">:</span><span class="w"> </span><span class="kc">false</span><span class="w">
+            </span><span class="p">}</span><span class="w">
+       </span><span class="p">}</span><span class="w">
+    </span><span class="p">}],</span><span class="w">
+    </span><span class="nt">"#actions"</span><span class="w"> </span><span class="p">:</span><span class="w"> </span><span class="p">[{</span><span class="w">
+        </span><span class="nt">"source"</span><span class="w">  </span><span class="p">:</span><span class="w"> </span><span class="s2">"//zebkit.ui.Button"</span><span class="p">,</span><span class="w">
+        </span><span class="nt">"target"</span><span class="w">  </span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w">
+            </span><span class="nt">"path"</span><span class="w">   </span><span class="p">:</span><span class="w"> </span><span class="s2">"//zebkit.ui.TextArea"</span><span class="p">,</span><span class="w">
+            </span><span class="nt">"update"</span><span class="w"> </span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nt">"value"</span><span class="p">:</span><span class="w"> </span><span class="s2">""</span><span class="w"> </span><span class="p">}</span><span class="w">
+        </span><span class="p">}</span><span class="w">
+    </span><span class="p">}]</span><span class="w">
+</span><span class="p">}</span><span class="w">
+</span></code></pre>
 </div>
 
-<p>The JSON to load external JSON four times shown below:</p>
+<p>Find JSON to load external JSON mentioned above four times below:</p>
 
-<div class="highlighter-rouge"><pre class="highlight"><code><span class="p">{</span>
-    <span class="s2">"layout"</span> <span class="err">:</span> <span class="p">{</span> <span class="s2">"@zebkit.layout.GridLayout"</span><span class="err">:</span> <span class="p">[</span><span class="mi">2</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="kc">true</span><span class="p">,</span> <span class="kc">true</span><span class="p">]</span> <span class="p">},</span>
-    <span class="s2">"kids"</span>   <span class="err">:</span> <span class="p">[</span>
-        <span class="s2">"%{./simple.json}"</span><span class="p">,</span>
-        <span class="s2">"%{./simple.json}"</span><span class="p">,</span>
-        <span class="s2">"%{./simple.json}"</span><span class="p">,</span>
-        <span class="s2">"%{./simple.json}"</span>
-    <span class="p">]</span>
-<span class="p">}</span>
-</code></pre>
+<div class="highlighter-rouge"><pre class="highlight"><code><span class="p">{</span><span class="w">
+    </span><span class="nt">"layout"</span><span class="w"> </span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nt">"@zebkit.layout.GridLayout"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="mi">2</span><span class="p">,</span><span class="w"> </span><span class="mi">2</span><span class="p">,</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span><span class="w"> </span><span class="kc">true</span><span class="p">]</span><span class="w"> </span><span class="p">},</span><span class="w">
+    </span><span class="nt">"kids"</span><span class="w">   </span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="w">
+        </span><span class="s2">"%{./simple.json}"</span><span class="p">,</span><span class="w">
+        </span><span class="s2">"%{./simple.json}"</span><span class="p">,</span><span class="w">
+        </span><span class="s2">"%{./simple.json}"</span><span class="p">,</span><span class="w">
+        </span><span class="s2">"%{./simple.json}"</span><span class="w">
+    </span><span class="p">]</span><span class="w">
+</span><span class="p">}</span><span class="w">
+</span></code></pre>
 </div>
 
 <p>The result is the application below:</p>

@@ -13,7 +13,7 @@
 
     <title>
         
-          JSON and UI definition &middot; Zebkit - UI platform
+          IO &middot; Zebkit - UI platform
         
     </title>
 
@@ -32,7 +32,7 @@
     <!-- RSS -->
     <link rel="alternate" type="application/rss+xml" title="RSS" href="/atom.xml">
 
-    <script type="text/javascript" src="/build/zebkit.js">  </script>
+    <script type="text/javascript" src="/build/zebkit.min.js?12092017">  </script>
 
     <script type="text/javascript">
         zebkit.ui.config("theme", "dark");
@@ -48,9 +48,12 @@
         <table style="height:100%;border-width: 0px; border-color: #151515;">
             <tr>
                 <td colspan="2" align="center" style="border-width: 0px; margin: 0px; padding: 0px;">
-                    <a href="../index.html">
+                
+                    <a href="../light/docs.io.html">
                         <img style="margin: 0px; padding: 0px;" src="/website/dark/public/images/zebkit.logo.png" width="60%">
                     </a>
+                
+
                 </td>
             </tr>
             <tr>
@@ -81,6 +84,10 @@
 
 
                         
+                        
+                            
+                        
+                            
                         
                             
                         
@@ -171,6 +178,14 @@
                     
                         
                         
+                        
+                    
+                        
+                        
+                        
+                    
+                        
+                        
 
                             
                             
@@ -193,89 +208,82 @@
                             
                         
                             
-                                <!--
-
-
-                                -->
+                                
                             
                         
                             
-                                <!--
-
-
-                                -->
+                                
                             
                         
                             
-                                <!--
-
-
-                                -->
+                                
                             
                         
                             
-                                <!--
-
-
-                                -->
+                                
                             
                         
                             
-                                <!--
-
-
-                                -->
+                                
+                            
+                        
+                            
+                                
+                                    <a class="sidebar-nav-item active"
+                                       href="/website/dark/docs.io.html">
+                                        <table cellpadding="0" cellspacing="0" style="padding: 0px;width:auto;margin:0px;">
+                                       <!--
+                                            <tr>
+                                                <td colspan="2" style="padding: 0px;" align="right">
+                                                    ┃
+                                                </td>
+                                            </tr>
+                                        -->
+                                            <tr>
+                                                <td style="padding: 0px;">
+                                                     IO
+                                                </td>
+                                                <td style="padding: 0px;">
+                                                   &nbsp;◀┛&nbsp;&nbsp;
+                                                </td>
+                                            </tr>
+                                        </table>
+                                    </a>
+                                
+                            
+                        
+                            
+                                
                             
                         
                             
                         
                             
-                                <!--
-
-
-                                -->
+                                
                             
                         
                             
-                                <!--
-
-
-                                -->
+                                
                             
                         
                             
-                                <!--
-
-
-                                -->
+                                
                             
                         
                             
-                                <!--
-
-
-                                -->
+                                
                             
                         
                             
-                                <!--
-
-
-                                -->
+                                
                             
                         
                             
-                                <!--
-
-
-                                -->
+                                
                             
                         
                             
-                                <!--
-
-
-                                -->
+                                
                             
                         
                             
@@ -289,7 +297,11 @@
                         
                     
                         
+                        
+                        
                     
+                        
+                        
                         
                     
                         
@@ -397,154 +409,54 @@
       <div class="page">
 
     
-        <h1 class="page-title">JSON and UI definition</h1>
+        <h1 class="page-title">IO</h1>
     
 
-    <p>[purehtml id=26]
-JSON format is handy and clear way to declare various configurations, transfer data between clients and servers, etc. Zebra also utilizes JSON format and JSON-like JavaScript code style to define UI. In the first case you have to create JSON file, store it somewhere and than load it to build UI. In the second case, you just write JavaScript code following JSON-like style what can help to make your code more beautiful and simple. Thus you have three &quot;flavors&quot; of UI declaration: classical, JSON, JSON JavaScript like coding.</p>
+    <p>Zebkit <strong>“io”</strong> package collects different communication classes and methods to perform HTTP requests and do JRPC and XRPC services calls. Requests according to WEB recommendations works in asynchronous mode and return promise-like structure to track response and handle error.</p>
 
-<p><strong>Classical UI definition</strong></p>
+<div class="highlighter-rouge"><pre class="highlight"><code><span class="c1">// get data synchronously</span>
+<span class="nx">zebkit</span><span class="p">.</span><span class="nx">io</span><span class="p">.</span><span class="nx">GET</span><span class="p">(</span><span class="nx">url</span><span class="p">).</span><span class="nx">then</span><span class="p">(</span><span class="kd">function</span><span class="p">(</span><span class="nx">request</span><span class="p">)</span> <span class="p">{</span>
+    <span class="c1">// handle  HTTP GET response</span>
+<span class="p">}).</span><span class="k">catch</span><span class="p">(</span><span class="kd">function</span><span class="p">(</span><span class="nx">error</span><span class="p">)</span> <span class="p">{</span>
+    <span class="c1">// handle error </span>
+    <span class="p">...</span>
+<span class="p">}),</span>
+</code></pre>
+</div>
 
-<p>Let&#39;s build simple Zebra UI application following &quot;classical&quot; approach:</p>
+<p>Calling XRPC and JRPC service methods is also trivial thing:</p>
 
-<p>[wpcol_2third][js gutter=&quot;false&quot;]
-// create canvas
-var r=new zebra.ui.zCanvas(200,200).root;
-r.setLayout(new zebra.layout.BorderLayout(4,4));
-r.setPadding(4);
-r.setBorder(&quot;plain&quot;);</p>
+<div class="highlighter-rouge"><pre class="highlight"><code><span class="c1">// Connector to a XML-RPC server that has three methods</span>
+<span class="kd">var</span> <span class="nx">s</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">zebkit</span><span class="p">.</span><span class="nx">io</span><span class="p">.</span><span class="nx">XRPC</span><span class="p">(</span><span class="nx">url</span><span class="p">,</span> <span class="p">[</span> <span class="s2">"method1"</span><span class="p">,</span> <span class="s2">"method2"</span><span class="p">,</span> <span class="s2">"method3"</span> <span class="p">]);</span>
+ 
 
-<p>// add title label
-var l = new zebra.ui.BoldLabel(&quot;Simple application&quot;);
-l.setPadding(4);
-l.setBackground(&quot;lightGray&quot;);
-r.add(zebra.layout.TOP, l);
-r.add(zebra.layout.CENTER,
-      new zebra.ui.TextArea(&quot;&quot;));
-r.add(zebra.layout.BOTTOM,
-      new zebra.ui.Button(&quot;Clear&quot;));
-[/js][/wpcol<em>2third]
-[wpcol</em>1third_end]</p>
+<span class="c1">// call remote service methods</span>
+<span class="nx">s</span><span class="p">.</span><span class="nx">method1</span><span class="p">(</span><span class="nx">p1</span><span class="p">,</span> <span class="nx">p2</span><span class="p">).</span><span class="nx">then</span><span class="p">(</span><span class="kd">function</span><span class="p">(</span><span class="nx">result</span><span class="p">)</span> <span class="p">{</span>
+    <span class="c1">// handle result the service method has returned</span>
+    <span class="p">...</span> 
+<span class="p">}).</span><span class="k">catch</span><span class="p">(</span><span class="kd">function</span><span class="p">(</span><span class="nx">error</span><span class="p">)</span> <span class="p">{</span>
+    <span class="c1">// handle error</span>
+    <span class="p">...</span>
+<span class="p">});</span>
+</code></pre>
+</div>
 
-<p>[/wpcol<em>1third</em>end]</p>
+<p>The same manner works JRPC service communication:</p>
 
-<p><strong>JSON UI definition</strong></p>
+<div class="highlighter-rouge"><pre class="highlight"><code><span class="c1">// Connector to a JSON-RPC server that has three methods</span>
+<span class="kd">var</span> <span class="nx">s</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">zebkit</span><span class="p">.</span><span class="nx">io</span><span class="p">.</span><span class="nx">JRPC</span><span class="p">(</span><span class="nx">url</span><span class="p">,</span> <span class="p">[</span> <span class="s2">"method1"</span><span class="p">,</span> <span class="s2">"method2"</span><span class="p">,</span> <span class="s2">"method3"</span> <span class="p">]);</span>
+ 
 
-<p>Let&#39;s build the same UI basing on JSON definition:</p>
-
-<p>[js gutter=&quot;false&quot;] {
-   &quot;padding&quot;: 4,
-   &quot;layout&quot;: { &quot;$zebra.layout.BorderLayout&quot;:[ 4, 4] },
-   &quot;border&quot;: &quot;plain&quot;,
-   &quot;kids&quot;: {
-      &quot;TOP&quot;: {
-         &quot;$zebra.ui.BoldLabel&quot;: &quot;Simple application&quot;,
-         &quot;padding&quot;:4,
-         &quot;background&quot;: &quot;lightGray&quot;
-      },
-      &quot;CENTER&quot;: {
-         &quot;$zebra.ui.TextArea&quot;: &quot;&quot;
-      },
-     &quot;BOTTOM&quot;: {
-         &quot;$zebra.ui.Button&quot;: &quot;Clear&quot;
-     }
-  }
-}
-[/js]</p>
-
-<p>To load the JSON definition the following code can be used:
-[js gutter=&quot;false&quot;]
-   // create canvas and load JSON definition to its root
-   new zebra.ui.zCanvas(200, 200).root.load(&quot;myui.json&quot;);
-[/js]</p>
-
-<p>The result of the code shown above is an application with the same UI we have created with &quot;classical&quot; approach. It is expected the JSON definition is stored as &quot;myui.json&quot; file at the same place where your demo script is.</p>
-
-<p>Pay attention you can load JSON defined UI in any part of your application. &quot;zebra.ui.Panel&quot; class declare special &quot;load(ref)&quot; method to do it. So, you can keep complex UI definition in different JSON files. For example, let&#39;s load four panels that are placed in grid layout from the same JSON UI definition. Firstly let&#39;s write JSON definition:
-[js gutter=&quot;false&quot;]
-{
-    &quot;kids&quot;: [
-        {
-            &quot;$zebra.ui.Panel&quot;:[],
-            &quot;layout&quot; : { &quot;$zebra.layout.BorderLayout&quot; :[4, 4] },
-            &quot;padding&quot;: 4,
-            &quot;border&quot; : &quot;plain&quot;,
-            &quot;kids&quot;   : {
-                &quot;TOP&quot;: {
-                    &quot;$zebra.ui.BoldLabel&quot;: &quot;Simple application&quot;,
-                    &quot;padding&quot;            : 4,
-                    &quot;background&quot;         : &quot;lightGray&quot;
-                },</p>
-<div class="highlight"><pre><code class="language-" data-lang="">            "CENTER": {
-                "$zebra.ui.TextField": ""
-            },
-
-            "BOTTOM": {
-                "$zebra.ui.Button": "Clear"
-            }
-       }
-   }
-]
-</code></pre></div>
-<p>}
-[/js]</p>
-
-<p>Than load it four times:
-[wpcol_2third][js gutter=&quot;false&quot;]
-   // create canvas and load JSON definition to
-   // its root
-   var r = new zebra.ui.zCanvas(400, 350).root;
-   r.setLayout(new zebra.layout.GridLayout(2,2));
-   r.load(&quot;pan.json&quot;);
-   r.load(&quot;pan.json&quot;);
-   r.load(&quot;pan.json&quot;);
-   r.load(&quot;pan.json&quot;);
-[/js][/wpcol_2third][wpcol<em>1third</em>end][/wpcol<em>1third</em>end]</p>
-
-<p>The JSON definition loading works as follow:</p>
-
-<ul>
-<li><p>Read provided JSON definition by HTTP GET method</p></li>
-<li><p>Parse the read definition starting from &quot;kids&quot; field:</p>
-
-<ul>
-<li>
-Look for a property &quot;kids&quot; in &quot;r&quot; panel.</li>
-<li>
-Call &quot;kids&quot; property &quot;setKids&quot; setter from &quot;r&quot; panel. This causes creation by JSON description panel and adding it as &quot;r&quot; panel children component.</li>
-</ul></li>
-</ul>
-
-<p>Zebra interprets some JSON definition using special semantical rules. For instance the following JSON snippet:
-[js gutter=&quot;false&quot;]
-  ...
-  test : {
-     &quot;$zebra.ui.Panel&quot;:[]
-     padding: 10
-     ...
-  }
-  ...
-[/js]
-says: instantiate &quot;zebra.ui.Panel&quot; class, set property &quot;padding&quot; of the instance to 10 and assign the panel instance to &quot;test&quot; key.</p>
-
-<p><strong>JSON JavaScript code style UI definition</strong></p>
-
-<p>At last, let define the same UI following JSON like JavaScript coding:
-[js gutter=&quot;false&quot;]
-new zebra.ui.zCanvas(200,200).root.properties({
-   layout  : new zebra.layout.BorderLayout(4,4),
-   padding : 4,
-   border  : &quot;plain&quot;,
-   kids: {
-      TOP: new zebra.ui.BoldLabel(&quot;Simple application&quot;).properties({
-          padding: 4,
-          background: &quot;lightGray&quot;
-      }),
-      CENTER: new zebra.ui.TextArea(),
-      BOTTOM: new zebra.ui.Button(&quot;Clear&quot;)
-   }
-});
-[/js]</p>
+<span class="c1">// call remote service methods</span>
+<span class="nx">s</span><span class="p">.</span><span class="nx">method1</span><span class="p">(</span><span class="nx">p1</span><span class="p">,</span> <span class="nx">p2</span><span class="p">).</span><span class="nx">then</span><span class="p">(</span><span class="kd">function</span><span class="p">(</span><span class="nx">result</span><span class="p">)</span> <span class="p">{</span>
+    <span class="c1">// handle result the service method has returned</span>
+    <span class="p">...</span> 
+<span class="p">}).</span><span class="k">catch</span><span class="p">(</span><span class="kd">function</span><span class="p">(</span><span class="nx">error</span><span class="p">)</span> <span class="p">{</span>
+    <span class="c1">// handle error</span>
+    <span class="p">...</span>
+<span class="p">});</span>
+</code></pre>
+</div>
 
 </div>
 

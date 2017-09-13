@@ -1,0 +1,740 @@
+<!DOCTYPE html>
+<html lang="en-us">
+
+  <head>
+    <link href="http://gmpg.org/xfn/11" rel="profile">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta http-equiv="content-type" content="text/html; charset=utf-8">
+
+    <meta name="viewport"
+       content="user-scalable=no,width=device-width,initial-scale=1,maximum-scale=1">
+    <meta name="msapplication-tap-highlight" content="no">
+
+
+    <title>
+        
+          Data model &middot; Zebkit - UI platform
+        
+    </title>
+
+  <!-- CSS -->
+
+
+    <link rel="stylesheet" href="/website/light/public/css/poole-light.css">
+    <link rel="stylesheet" href="/website/light/public/css/syntax-light.css">
+    <link rel="stylesheet" href="/website/light/public/css/main-light.css">
+    <link rel="stylesheet" href="http://fonts.googleapis.com/css?family=PT+Sans:400,400italic,700|Abril+Fatface">
+    <link rel="stylesheet" href="http://fonts.googleapis.com/css?family=EB+Garamond">
+    <!-- Icons -->
+    <link rel="apple-touch-icon-precomposed" sizes="144x144" href="/website/light/public/apple-touch-icon-144-precomposed.png">
+    <link rel="shortcut icon" href="/website/light/public/favicon.ico">
+
+    <!-- RSS -->
+    <link rel="alternate" type="application/rss+xml" title="RSS" href="/atom.xml">
+
+    <script type="text/javascript" src="/build/zebkit.min.js?12092017">  </script>
+
+    <script type="text/javascript">
+        zebkit.ui.config("theme", "light");
+    </script>
+</head>
+
+
+
+  <body>
+
+    <div class="sidebar" style="padding: 0px;   border-right: 1px solid orange" >
+    <div class="container sidebar-sticky" style="padding: 0px; margin: 0px;">
+        <table style="height:100%;border-width: 0px; border-color: #151515;">
+            <tr>
+                <td colspan="2" align="center" style="border-width: 0px; margin: 0px; padding: 0px;">
+                
+                    <a href="../dark/docs.data.html">
+                        <img style="margin: 0px; padding: 0px;" src="/website/light/public/images/zebkit.logo.png" width="60%">
+                    </a>
+                
+
+                </td>
+            </tr>
+            <tr>
+                <td colspan="2" style="border-width: 0px;">
+                    <p style="margin:0px; font-style: italic;"><b style='color:orange; font-size:1.5rem;'>Zebkit</b> is HTML5 Canvas based UI platform developed with unique EasyOOP JavaScript concept and rich extendible components set</p>
+                </td>
+            </tr>
+
+            <tr style="height:100%;" valign="top" align="right">
+                <td colspan="2" style="border-width: 0px;">
+                    
+                    
+                        
+                        
+                        
+                    
+                        
+                        
+
+                            
+                            
+
+
+                            <a class="sidebar-nav-item "
+                               href="/website/light/about.html">
+                                Zebkit ?
+                            </a>
+
+
+                        
+                        
+                            
+                        
+                            
+                        
+                            
+                        
+                            
+                        
+                            
+                        
+                            
+                        
+                            
+                        
+                            
+                        
+                            
+                        
+                            
+                        
+                            
+                        
+                            
+                        
+                            
+                        
+                            
+                        
+                            
+                        
+                            
+                        
+                            
+                        
+                            
+                        
+                            
+                        
+                            
+                        
+                            
+                        
+                        
+
+
+                        
+                        
+                    
+                        
+                        
+
+                            
+                            
+
+
+                            <a class="sidebar-nav-item "
+                               href="/website/light/api.html">
+                                API Doc
+                            </a>
+
+
+                        
+
+
+                        
+                        
+                    
+                        
+                        
+                        
+                    
+                        
+                        
+                        
+                    
+                        
+                        
+                        
+                    
+                        
+                        
+                        
+                    
+                        
+                        
+                        
+                    
+                        
+                        
+                        
+                    
+                        
+                        
+                        
+                    
+                        
+                        
+                        
+                    
+                        
+                        
+
+                            
+                            
+
+
+                            <a class="sidebar-nav-item active"
+                               href="/website/light/docs.html">
+                                Documentation
+                            </a>
+
+
+                        
+                        
+                            
+                        
+                            
+                        
+                            
+                        
+                            
+                        
+                            
+                                
+                                    <a class="sidebar-nav-item active"
+                                       href="/website/light/docs.data.html">
+                                        <table cellpadding="0" cellspacing="0" style="padding: 0px;width:auto;margin:0px;">
+                                       <!--
+                                            <tr>
+                                                <td colspan="2" style="padding: 0px;" align="right">
+                                                    ┃
+                                                </td>
+                                            </tr>
+                                        -->
+                                            <tr>
+                                                <td style="padding: 0px;">
+                                                     Data model
+                                                </td>
+                                                <td style="padding: 0px;">
+                                                   &nbsp;◀┛&nbsp;&nbsp;
+                                                </td>
+                                            </tr>
+                                        </table>
+                                    </a>
+                                
+                            
+                        
+                            
+                                
+                            
+                        
+                            
+                                
+                            
+                        
+                            
+                                
+                            
+                        
+                            
+                                
+                            
+                        
+                            
+                                
+                            
+                        
+                            
+                                
+                            
+                        
+                            
+                        
+                            
+                                
+                            
+                        
+                            
+                                
+                            
+                        
+                            
+                                
+                            
+                        
+                            
+                                
+                            
+                        
+                            
+                                
+                            
+                        
+                            
+                                
+                            
+                        
+                            
+                                
+                            
+                        
+                            
+                        
+                            
+                        
+                        
+
+
+                        
+                        
+                    
+                        
+                        
+                        
+                    
+                        
+                        
+                        
+                    
+                        
+                        
+                        
+                    
+                        
+                        
+                        
+                    
+                        
+                        
+                        
+                    
+                        
+                        
+                        
+                    
+                        
+                        
+                        
+                    
+                        
+                        
+                        
+                    
+                        
+                        
+
+                            
+                            
+
+
+                            <a class="sidebar-nav-item "
+                               href="/website/light/getstarted.html">
+                                Get started
+                            </a>
+
+
+                        
+
+
+                        
+                        
+                    
+                </td>
+            </tr>
+
+            <tr style="height:90px;">
+                <td colspan="2"  style="border-width: 0px;padding: 0px;"></td>
+            </tr>
+
+            <tr>
+                <td align="right" colspan="2" style="border-width: 0px; border-top: 1px solid orange;">
+                    <small><a href="mailto:ask@zebkit.org">Andrei Vishneuski (c), 2017</a></small>
+                </td>
+            </tr>
+
+            <tr>
+                <td colspan="2" valign="top" align="right" style="border-width: 0px;padding: 0px;">
+                    <table style="width:240px;border-width: 0px; padding: 0px;" cellpadding="0" cellspacing="0">
+                        <tr style="padding: 0px;" border="1">
+                            <td style="width:60px;border-width: 0px;" align="right">
+                                <a href="https://github.com/barmalei/zebkit" title="Download">
+                                    <img alt="Download" title="Download" src="/website/light/public/images/github3.png" width="40px" height="40px">
+                                </a>
+                            </td>
+                            <td style="width:60px; border-width: 0px;" align="right">
+                                <a href="https://twitter.com/zebkit">
+                                    <img src="/website/light/public/images/twitter.png" width="40px" height="40px">
+                                </a>
+                            </td>
+                            <td style="width:60px; border-width: 0px;" align="right">
+                                <a href="https://nl.linkedin.com/in/andrei-vishneuski-34b52514">
+                                    <img src="/website/light/public/images/linkedin.png" width="40px" height="40px">
+                                </a>
+                            </td>
+
+                            <td style="width: 70px; border-width: 0px; " valign="center" align="right">
+                                <a href="../build/zebkit.runtime.zip">
+                                    <img src="/website/light/public/images/download-light.png" width="40px" height="40px">
+                                </a>
+                            </td>
+
+                        </tr>
+                    </table>
+                </td>
+
+            </tr>
+
+        </table>
+
+    <nav class="sidebar-nav">
+
+<!--
+      <a class="sidebar-nav-item" href="/website/light/">Home</a>
+ -->
+
+    </nav>
+
+  </div>
+</div>
+
+    <div class="content container">
+      <div class="page">
+
+    
+        <h1 class="page-title">Data model</h1>
+    
+
+    <p>Zebkit data models are number of simple classes that help to keep various data structures and track the structures updating.</p>
+
+<p>Data models classes and interfaces are hosted in separated and independent from UI “zebkit.data” package. Almost every zebkit data model can be represented with a JavaScript structure:</p>
+
+<table class="info">
+<tr><th>
+Zebkit data model
+</th><th>
+JavaScript type
+</th></tr>
+
+<tr><td>
+zebkit.data.ListModel
+</td><td>
+      <p>[1, 2, 3,…  ]</p>
+    </td></tr>
+
+<tr><td>
+zebkit.data.Text<br /> 
+zebkit.data.SingleLineTxt 
+</td><td>
+```js
+"The text", "Multiline\ntext"
+```
+</td></tr>
+
+<tr><td>
+zebkit.data.Matrix
+</td><td>
+      <div class="highlighter-rouge"><pre class="highlight"><code><span class="c1">// 2 rows 3 cols matrix</span>
+<span class="p">[</span> 
+  <span class="p">[</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">,</span><span class="mi">3</span><span class="p">],</span>
+  <span class="p">[</span><span class="mi">3</span><span class="p">,</span><span class="mi">4</span><span class="p">,</span><span class="mi">5</span><span class="p">]</span>
+<span class="p">]</span>
+</code></pre>
+      </div>
+    </td></tr>
+
+<tr><td>
+zebkit.data.TreeModel
+</td><td>
+      <div class="highlighter-rouge"><pre class="highlight"><code><span class="p">{</span><span class="w">
+  </span><span class="nt">"value"</span><span class="p">:</span><span class="w"> </span><span class="s2">"tree item"</span><span class="p">,</span><span class="w">
+  </span><span class="nt">"kids"</span><span class="w"> </span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s2">"Subitem 1"</span><span class="p">,</span><span class="w"> </span><span class="s2">"Subitem 2"</span><span class="w"> </span><span class="p">]</span><span class="w">
+</span><span class="p">}</span><span class="w">
+</span></code></pre>
+      </div>
+    </td></tr>
+</table>
+
+<p>JavaScript types can be used to construct an appropriate data model. Usually it is done by a data model class constructor.</p>
+
+<h2 id="listmodel-zebkitdatalistmodel">ListModel (zebkit.data.ListModel)</h2>
+
+<div class="highlighter-rouge"><pre class="highlight"><code><span class="c1">// create list model</span>
+<span class="kd">var</span> <span class="nx">l</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">zebkit</span><span class="p">.</span><span class="nx">data</span><span class="p">.</span><span class="nx">ListModel</span><span class="p">();</span>
+ 
+<span class="c1">// add three elements into the list</span>
+<span class="nx">l</span><span class="p">.</span><span class="nx">add</span><span class="p">(</span><span class="mi">1</span><span class="p">);</span>
+<span class="nx">l</span><span class="p">.</span><span class="nx">add</span><span class="p">(</span><span class="mi">2</span><span class="p">);</span>
+<span class="nx">l</span><span class="p">.</span><span class="nx">add</span><span class="p">(</span><span class="mi">3</span><span class="p">);</span>
+ 
+<span class="c1">// register the list element removal events handler</span>
+<span class="nx">l</span><span class="p">.</span><span class="nx">on</span><span class="p">(</span><span class="s2">"elementRemoved"</span><span class="p">,</span> <span class="kd">function</span><span class="p">(</span><span class="nx">listModel</span><span class="p">,</span> <span class="nx">removedValue</span><span class="p">,</span> <span class="nx">index</span><span class="p">)</span> <span class="p">{</span>
+   <span class="p">...</span>
+<span class="p">});</span>
+</code></pre>
+</div>
+
+<h2 id="matrix-zebkitdatamatrix">Matrix (zebkit.data.Matrix)</h2>
+
+<div class="highlighter-rouge"><pre class="highlight"><code><span class="c1">// create 2 x 2 matrix model</span>
+<span class="kd">var</span> <span class="nx">m</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">zebkit</span><span class="p">.</span><span class="nx">data</span><span class="p">.</span><span class="nx">Matrix</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span><span class="mi">2</span><span class="p">);</span>
+ 
+<span class="c1">// fill all cells of the matrix with values</span>
+<span class="c1">// the result is the following matrix:</span>
+<span class="c1">// [ 0, 1 ]</span>
+<span class="c1">// [ 2, 3 ]</span>
+<span class="k">for</span><span class="p">(</span><span class="kd">var</span> <span class="nx">i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="nx">i</span><span class="o">&lt;</span> <span class="nx">m</span><span class="p">.</span><span class="nx">rows</span> <span class="o">*</span> <span class="nx">m</span><span class="p">.</span><span class="nx">cols</span><span class="p">;</span> <span class="nx">i</span><span class="o">++</span><span class="p">)</span> <span class="p">{</span>
+   <span class="nx">m</span><span class="p">.</span><span class="nx">puti</span><span class="p">(</span><span class="nx">i</span><span class="p">,</span> <span class="nx">i</span><span class="p">);</span>
+<span class="p">}</span>
+ 
+<span class="c1">// catch matrix cell update events</span>
+<span class="nx">m</span><span class="p">.</span><span class="nx">on</span><span class="p">(</span><span class="s2">"cellModified"</span><span class="p">,</span> <span class="kd">function</span><span class="p">(</span><span class="nx">matrixModel</span><span class="p">,</span> <span class="nx">row</span><span class="p">,</span> <span class="nx">col</span><span class="p">,</span> <span class="nx">prevValue</span><span class="p">)</span> <span class="p">{</span>
+   <span class="p">...</span>
+<span class="p">});</span>
+</code></pre>
+</div>
+
+<h2 id="treemodel-zebkitdatatreemodel">TreeModel (zebkit.data.TreeModel)</h2>
+
+<p>Tree model is represented as a hierarchy of <strong>“zebkit.data.Item”</strong> class instances. “zebkit.data.Item” class is designed to keep tree model node value, references to its kids nodes and a reference to its parent node.</p>
+
+<p>JavaScript tree model:</p>
+
+<div class="highlighter-rouge"><pre class="highlight"><code><span class="p">{</span><span class="w">
+   </span><span class="nt">"value"</span><span class="p">:</span><span class="w"> </span><span class="s2">"Root"</span><span class="p">,</span><span class="w">
+   </span><span class="nt">"kids"</span><span class="w"> </span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="w">
+      </span><span class="s2">"Item 1"</span><span class="p">,</span><span class="w">
+      </span><span class="p">{</span><span class="w">
+         </span><span class="nt">"value"</span><span class="p">:</span><span class="w"> </span><span class="s2">"Item 2"</span><span class="p">,</span><span class="w">
+         </span><span class="nt">"kids"</span><span class="w"> </span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="w"> </span><span class="s2">"Item 2.1"</span><span class="p">,</span><span class="w"> </span><span class="s2">"Item 2.2"</span><span class="w"> </span><span class="p">]</span><span class="w">
+      </span><span class="p">}</span><span class="w">
+   </span><span class="p">]</span><span class="w">
+</span><span class="p">}</span><span class="w">
+</span></code></pre>
+</div>
+
+<p>Tree model structure:</p>
+
+<div class="highlighter-rouge"><pre class="highlight"><code>Root
+ |
+ +-- Item 1
+ +-- Item 2
+       |
+       +-- Item 2.1
+       +-- Item 2.2
+</code></pre>
+</div>
+
+<p>Find simple example of tree model usage:</p>
+
+<div class="highlighter-rouge"><pre class="highlight"><code><span class="c1">// create tree model</span>
+<span class="c1">// Root</span>
+<span class="c1">//  +-- Item 1</span>
+<span class="c1">//  +-- Item 2</span>
+<span class="c1">//       +--- Item 3</span>
+<span class="kd">var</span> <span class="nx">t</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">zebkit</span><span class="p">.</span><span class="nx">data</span><span class="p">.</span><span class="nx">TreeModel</span><span class="p">({</span>
+   <span class="na">value</span><span class="p">:</span> <span class="s2">"Root"</span><span class="p">,</span>
+   <span class="na">kids</span> <span class="p">:</span> <span class="p">[</span>
+      <span class="s2">"Item 1"</span><span class="p">,</span>
+      <span class="p">{</span>
+        <span class="na">value</span><span class="p">:</span> <span class="s2">"Item 2"</span><span class="p">,</span>
+        <span class="na">kids</span><span class="p">:</span> <span class="p">[</span>
+           <span class="s2">"Item 3"</span>
+        <span class="p">]</span>
+      <span class="p">}</span>
+   <span class="p">]</span>
+<span class="p">});</span>
+ 
+<span class="c1">// catch tree model item value modification events</span>
+<span class="nx">t</span><span class="p">.</span><span class="nx">on</span><span class="p">(</span><span class="s2">"itemModified"</span><span class="p">,</span> <span class="kd">function</span><span class="p">(</span><span class="nx">treeModel</span><span class="p">,</span> <span class="nx">item</span><span class="p">)</span> <span class="p">{</span>
+   <span class="p">...</span>
+<span class="p">});</span>
+ 
+<span class="c1">// update "Item 1" value with "New value"</span>
+<span class="nx">t</span><span class="p">.</span><span class="nx">setValue</span><span class="p">(</span><span class="nx">t</span><span class="p">.</span><span class="nx">root</span><span class="p">.</span><span class="nx">kids</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="s2">"New value"</span><span class="p">);</span>
+</code></pre>
+</div>
+
+<h3 id="textmodel-zebkitdatatextmodel-interface">TextModel (zebkit.data.TextModel interface)</h3>
+
+<p><strong>“zebkit.data.TextModel”</strong> is interface that has two implementations:</p>
+
+<ul>
+  <li>“zebkit.data.SingleLineTxt” - single line text</li>
+  <li>“zebkit.data.Text” - multi-lines text</li>
+</ul>
+
+<p>Simple example of tree model usage:</p>
+
+<div class="highlighter-rouge"><pre class="highlight"><code><span class="c1">// create three lines text model</span>
+<span class="kd">var</span> <span class="nx">t</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">zebkit</span><span class="p">.</span><span class="nx">data</span><span class="p">.</span><span class="nx">Text</span><span class="p">(</span><span class="s2">"One\nTwo\nThree"</span><span class="p">);</span>
+ 
+<span class="c1">// list text model lines</span>
+<span class="k">for</span><span class="p">(</span><span class="kd">var</span> <span class="nx">i</span><span class="o">=</span><span class="mi">0</span><span class="p">;</span> <span class="nx">i</span> <span class="o">&lt;</span> <span class="nx">t</span><span class="p">.</span><span class="nx">getLines</span><span class="p">();</span>  <span class="nx">i</span><span class="o">++</span><span class="p">)</span> <span class="p">{</span>
+   <span class="nx">print</span><span class="p">(</span><span class="nx">t</span><span class="p">.</span><span class="nx">getLine</span><span class="p">(</span><span class="nx">i</span><span class="p">));</span>
+<span class="p">}</span>
+ 
+<span class="c1">// catch text update events</span>
+<span class="nx">t</span><span class="p">.</span><span class="nx">on</span><span class="p">(</span><span class="kd">function</span><span class="p">(</span><span class="nx">e</span><span class="p">)</span> <span class="p">{</span>
+   <span class="p">...</span>
+<span class="p">});</span>
+</code></pre>
+</div>
+
+<h2 id="data-models-visualization">Data models visualization</h2>
+
+<p>Data models are used by UI components as a content that has to be visualized. The table below shows zebkit UI components and a data model they visualize:</p>
+
+<table class="info">
+<tr><th>
+UI Component  
+</th><th>
+Data model
+</th><th>
+Visualization
+</th></tr>
+
+<tr><td>
+zebkit.ui.Label<br />
+zebkit.ui.BoldLabel<br />
+zebkit.ui.TextField<br />
+zebkit.ui.TextArea<br />
+</td><td>
+zebkit.data.Text<br />
+zebkit.data.TextModel
+</td><td align="center">
+<canvas id="textxModel"></canvas>
+</td></tr>
+
+<tr><td>
+zebkit.ui.List
+</td><td>
+zebkit.data.List
+</td><td align="center">
+<canvas id="listModel"></canvas>
+</td></tr>
+
+<tr><td>
+zebkit.ui.grid.Grid
+</td><td>
+zebkit.data.Matrix
+</td><td align="center">
+<canvas id="matrixModel"></canvas>
+</td></tr>
+
+<tr><td>
+zebkit.ui.tree.Tree
+</td><td>
+zebkit.data.TreeModel
+</td><td align="center" valign="center">
+<canvas id="treeModel"></canvas>
+</td></tr>
+
+</table>
+
+<script type="text/javascript">
+    zebkit.resources("public/images/bmw_small.png",
+                     "public/images/honda_small.png",
+                     "public/images/saab_small.png",
+        function(bmw, honda, saab) {
+            zebkit.images = {};
+            zebkit.images.bmw   = bmw;
+            zebkit.images.honda = honda;
+            zebkit.images.saab  = saab;
+        }
+    );
+</script>
+
+<script type="text/javascript">
+    zebkit.require("data", "ui", "draw", function(data, ui, draw) {
+        var l = new ui.Label("Multi-line\ntext\nto show").setFont("200%");
+
+        new ui.zCanvas("textxModel", 200, 150).root.properties({
+           layout : new zebkit.layout.BorderLayout(),
+           padding: 4,
+           background: null,
+           kids : [ l ] 
+        });
+    });
+</script>
+
+<script type="text/javascript">
+    zebkit.require("data", "ui", "draw", function(data, ui, draw) {
+        var l = new ui.CompList([
+            new ui.ImageLabel("List item 1", zebkit.images.bmw, 24),
+            new ui.ImageLabel("List item 2", zebkit.images.honda, 24),
+            new ui.ImageLabel("List item 3", zebkit.images.saab, 24)
+        ]);
+
+        l.properties("/*", {
+            "font" : "150%"
+        });
+
+        new ui.zCanvas("listModel", 200, 150).root.properties({
+           layout : new zebkit.layout.BorderLayout(),
+           padding: 0,
+           background: null,
+           kids : [ l ] 
+        });
+    });
+</script>
+
+<script type="text/javascript">
+    zebkit.require("data", "ui", "ui.tree", function(data, ui, tree) {
+        var t = new zebkit.ui.tree.Tree({
+            value: "Item 1",
+            kids: [
+                "Item 2",
+                {
+                    value: "Item 3",
+                    kids:  [
+                        "Item 4",
+                        "Item 5"
+                    ]
+                }
+            ]
+        }).setFont("150%");
+
+        new ui.zCanvas("treeModel", 200, 150).root.properties({
+           layout : new zebkit.layout.BorderLayout(),
+           padding: 4,
+           kids : { center: t }
+        });
+    });
+</script>
+
+<script type="text/javascript">
+    zebkit.require("data", "ui", "ui.grid", function(data, ui, grid) {
+        var p = new zebkit.draw.Picture(zebkit.images.bmw,24,24);
+        var g = new grid.Grid([
+            [p, "Cell 1,2", "Cell 1,3"],
+            ["Cell 2,1", p, "Cell 2,3"],
+            ["Cell 3,1", "Cell 3,2", p]
+        ]);
+        g.setUsePsMetric(true);
+        g.setCellPadding(8);
+
+        new ui.zCanvas("matrixModel", 220, 150).root.properties({
+            layout : new zebkit.layout.FlowLayout("center", "center"),
+            padding: 4,
+            border: "plain",
+            kids : g
+        });
+    });
+</script>
+
+
+</div>
+
+    </div>
+
+
+  </body>
+</html>

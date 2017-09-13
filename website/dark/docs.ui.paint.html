@@ -32,7 +32,7 @@
     <!-- RSS -->
     <link rel="alternate" type="application/rss+xml" title="RSS" href="/atom.xml">
 
-    <script type="text/javascript" src="/build/zebkit.js">  </script>
+    <script type="text/javascript" src="/build/zebkit.min.js?12092017">  </script>
 
     <script type="text/javascript">
         zebkit.ui.config("theme", "dark");
@@ -48,9 +48,12 @@
         <table style="height:100%;border-width: 0px; border-color: #151515;">
             <tr>
                 <td colspan="2" align="center" style="border-width: 0px; margin: 0px; padding: 0px;">
-                    <a href="../index.html">
+                
+                    <a href="../light/docs.ui.paint.html">
                         <img style="margin: 0px; padding: 0px;" src="/website/dark/public/images/zebkit.logo.png" width="60%">
                     </a>
+                
+
                 </td>
             </tr>
             <tr>
@@ -81,6 +84,10 @@
 
 
                         
+                        
+                            
+                        
+                            
                         
                             
                         
@@ -171,6 +178,14 @@
                     
                         
                         
+                        
+                    
+                        
+                        
+                        
+                    
+                        
+                        
 
                             
                             
@@ -193,89 +208,82 @@
                             
                         
                             
-                                <!--
-
-
-                                -->
+                                
                             
                         
                             
-                                <!--
-
-
-                                -->
+                                
                             
                         
                             
-                                <!--
-
-
-                                -->
+                                
                             
                         
                             
-                                <!--
-
-
-                                -->
+                                
                             
                         
                             
-                                <!--
-
-
-                                -->
+                                
+                            
+                        
+                            
+                                
+                            
+                        
+                            
+                                
                             
                         
                             
                         
                             
-                                <!--
-
-
-                                -->
+                                
                             
                         
                             
-                                <!--
-
-
-                                -->
+                                
                             
                         
                             
-                                <!--
-
-
-                                -->
+                                
                             
                         
                             
-                                <!--
-
-
-                                -->
+                                
+                                    <a class="sidebar-nav-item active"
+                                       href="/website/dark/docs.ui.paint.html">
+                                        <table cellpadding="0" cellspacing="0" style="padding: 0px;width:auto;margin:0px;">
+                                       <!--
+                                            <tr>
+                                                <td colspan="2" style="padding: 0px;" align="right">
+                                                    ┃
+                                                </td>
+                                            </tr>
+                                        -->
+                                            <tr>
+                                                <td style="padding: 0px;">
+                                                     Component rendering
+                                                </td>
+                                                <td style="padding: 0px;">
+                                                   &nbsp;◀┛&nbsp;&nbsp;
+                                                </td>
+                                            </tr>
+                                        </table>
+                                    </a>
+                                
                             
                         
                             
-                                <!--
-
-
-                                -->
+                                
                             
                         
                             
-                                <!--
-
-
-                                -->
+                                
                             
                         
                             
-                                <!--
-
-
-                                -->
+                                
                             
                         
                             
@@ -289,7 +297,11 @@
                         
                     
                         
+                        
+                        
                     
+                        
+                        
                         
                     
                         
@@ -397,19 +409,47 @@
       <div class="page">
 
     
-        <h1 class="page-title">Component rendering</h1>
-    
 
-    <p>Every zebkit UI component is fully rendered on (HTML5) Canvas. The rendering is implemented with number of special methods component abstraction provides.  In most cases developers have to follow number of simple rules: </p>
+    <h2 id="ui-hierarchy-rendering">UI hierarchy rendering</h2>
+
+<p>Zebkit UI components hierarchy is rendered on (HTML5) Canvas surface. 
+Painting procedure starts traversing UI hierarchy (where every UI component is instance of <strong>“zebkit.ui.Panel”</strong> class) from <strong>zCanvas</strong> then switches to its child components and so on recursively. For every UI component in rendered hierarchy the painting procedure does the following:</p>
 
 <ul>
-<li>Inherit &quot;zebkit.ui.Panel&quot; class. All UI component have to be successors of basic panel class. </li>
-<li>Implement &quot;paint(g)&quot; method that gets 2D context and defines how to paint the custom component with the context.</li>
-<li>If a component changes its visual state (for instance a property of the component has been updated) inform zebkit engine the component has to be repainted via &quot;repaint()&quot; or &quot;repaint(x,y,w,h)&quot; method call. Pay attention &quot;paint(g)&quot; method never should be called directly. It is up to zebkit engine to call it in proper time with properly prepared 2D context.<br></li>
+  <li><strong>Prepare 2D context</strong> to be clipped according to the rendered component size and location and the canvas dirty area.</li>
+  <li><strong>Renders decorative elements</strong> defined with the component:
+    <ul>
+      <li><strong>Border view</strong>  Border can define the component shape, what has side effect to clipping area of provided 2D context.</li>
+      <li><strong>Background view</strong> It renders withing the shape defined by the component border.</li>
+      <li><strong>Call “update(g)”</strong> method of rendered component if it implements the method.</li>
+    </ul>
+  </li>
+  <li><strong>Call component “paint(g)”</strong> method if the rendered component implements it. The method gets 2D context that is clipped according to the component shape.</li>
+  <li><strong>Call component “paintOnTop(g)”</strong> method if the rendered component implements it. The method gets 2D context that is clipped only according the component size and location.</li>
+  <li><strong>Traverse and paint recursively</strong> child components the same manner as it has been described before.</li>
 </ul>
 
-<p>For instance:</p>
-<div class="highlight"><pre><code class="language-js" data-lang="js"><span class="nx">zebkit</span><span class="p">.</span><span class="nx">require</span><span class="p">(</span><span class="s2">"ui"</span><span class="p">,</span> <span class="s2">"layout"</span><span class="p">,</span> <span class="kd">function</span><span class="p">(</span><span class="nx">ui</span><span class="p">,</span> <span class="nx">layout</span><span class="p">)</span> <span class="p">{</span>
+<p>As it has been shown above rendering is localized with zebkit UI component. If a new fancy UI component has to be implemented and the component has to draw an own unique view, then do the following:</p>
+
+<ul>
+  <li>Inherit <strong>“zebkit.ui.Panel”</strong> class. All zebkit UI components have to be successors of the basic panel class.</li>
+  <li>Implement <strong>“paint(g)”</strong> method (or one of other required paint methods)  that gets 2D context and should define how to paint the custom component with the given 2D context.</li>
+  <li>Place the component to an UI hierarchy</li>
+</ul>
+
+<h2 id="re-painting">Re-painting</h2>
+
+<p>As it has been shown before, zebkit UI component should implement dedicated API paint method or methods to draw desired view. The open question is:</p>
+
+<ul>
+  <li>Who is responsible for calling paint methods a component implements ?</li>
+</ul>
+
+<p>First of all UI components never call implemented paint methods (<strong>“paint(g)”</strong>, <strong>“update(g)”</strong>, <strong>“paintOnTop(g)”</strong>) directly. It is up to zebkit painting procedure to call the methods when it has been requested, at proper time with properly prepared 2D context.</p>
+
+<p>Secondly painting procedure is initiated on-demand. UI components are provided with <strong>“repaint()”</strong>  or <strong>“repaint(z, y, width, height)”</strong> panel API method that is supposed to request a component re-painting. If a component changes its visual state, the component has to inform zebkit that the component or a part of the component have to be re-painted. To do it the component has to call <strong>“repaint(…)”</strong> method. For example:</p>
+
+<div class="highlighter-rouge"><pre class="highlight"><code><span class="nx">zebkit</span><span class="p">.</span><span class="nx">require</span><span class="p">(</span><span class="s2">"ui"</span><span class="p">,</span> <span class="s2">"layout"</span><span class="p">,</span> <span class="kd">function</span><span class="p">(</span><span class="nx">ui</span><span class="p">,</span> <span class="nx">layout</span><span class="p">)</span> <span class="p">{</span>
     <span class="kd">var</span> <span class="nx">MyUIComponent</span> <span class="o">=</span> <span class="nx">zebkit</span><span class="p">.</span><span class="nx">Class</span><span class="p">(</span><span class="nx">ui</span><span class="p">.</span><span class="nx">Panel</span><span class="p">,</span> <span class="p">[</span>
         <span class="kd">function</span> <span class="nx">paint</span><span class="p">(</span><span class="nx">g</span><span class="p">)</span> <span class="p">{</span>
             <span class="c1">// draw something with the given color</span>
@@ -427,49 +467,30 @@
     <span class="p">]);</span>
     <span class="p">...</span>
 <span class="p">})</span>
-</code></pre></div>
-<h3>UI component decorative elements</h3>
+</code></pre>
+</div>
 
-<p>Every zebkit UI component has number of predefined decorative elements that can be customized: </p>
+<h2 id="paint-methods-implementation">Paint methods implementation</h2>
+
+<p>As it has been mentioned before, to customize a component rendering the component can implement one of the following method or its combination:</p>
 
 <ul>
-<li><strong>background</strong>. Background of the component that can be set via &quot;setBackground(bg)&quot; method. The method can get a simple color definition: 
-
-<ul>
-<li><strong>hex color</strong> For instance: &quot;#CCFFDD&quot; </li>
-<li><strong>rgb color</strong> For instance: &quot;rgb(100,90,80)&quot; </li>
-<li><strong>rgba color</strong> For instance: &quot;rgba(33,44,55,0.5)&quot; </li>
-<li><strong>a color name</strong> For instance: &quot;blue&quot;</li>
-</ul></li>
+  <li>
+    <p><strong>“paint(…)”</strong> method is supposed to render the component “face” content. The clipping area is cut by the the component border gaps and component paddings</p>
+  </li>
+  <li>
+    <p><strong>“update(…)”</strong> method is supposed to render/fill the component background with a custom content. The clipping area is set to whole UI component size.</p>
+  </li>
+  <li>
+    <p><strong>“paintOnTop(…)”</strong> method is supposed to render decorative elements on component surface and its rendered child components. The clipping area is set to whole UI component size</p>
+  </li>
 </ul>
 
-<p>Or it is possible to pass something more complex (instances of &quot;zebkit.draw.View&quot; class) like gradient, pattern, anything what can be rendered.<br>
-   * <strong>border</strong> 
-   * <strong>Children UI components</strong> It could be a good idea to construct UI component from other UI components, since every UI component is a container that layouts its children components.</p>
-
-<h3>UI component rendering actions</h3>
-
-<p>The picture below shows side view of UI component. The rectangular parts express different painted component areas:</p>
-
-<p><a href="http://www.zebkit.com/wp-content/uploads/2013/06/paintw.png"><img src="http://www.zebkit.com/wp-content/uploads/2013/06/paintw-1024x392.png" alt="paintw"></a></p>
-
-<p>The painting process is split to sequence of steps that are demonstrated at the picture above:</p>
-
-<ul>
-<li><p><strong>Step I</strong> Draw component background view if it has been defined for the given UI component. Background view can be clipped by border view. It happens if: border view has been specified and border view implements &quot;outline(...)&quot; method</p></li>
-<li><p><strong>Step II</strong> Draw component border view if it has been defined for the given UI component</p></li>
-<li><p><strong>Step III</strong> If UI component implements &quot;update(...)&quot; method call it to fill background with a custom content. The clipping area is set to full UI component size</p></li>
-<li><p><strong>Step IV</strong> If UI component implements &quot;paint(...)&quot; method call it to render the component &quot;face&quot; content. The clipping area is cut by the the component border gaps and paddings</p></li>
-<li><p><strong>Step V</strong> Recursively paints all children components following the sequence of steps listed above</p></li>
-<li><p><strong>Step VI</strong> If component implements &quot;paintOnTop(...)&quot; method, call it to render necessary decorative elements over component surface and its rendered children components. The clipping area is set to full UI component size</p></li>
-<li><p><strong>Step VII</strong> That is all ! :)</p></li>
-</ul>
-
-<p>Component rendering customization is quite simple thing. Let&#39;s implement step by step al these three methods to draw gray cross on red background marked with white border:</p>
+<p>Let’s implement step by step all these three methods to draw “gray” cross on “red” background marked with “white” border:</p>
 
 <p><strong>paint(g)</strong></p>
 
-<p>Inherit the basic top level &quot;zebra.ui.Panel&quot; UI component class and implement &quot;paint(g)&quot; method that draws gray cross:</p>
+<p>Inherit the basic top level “zebra.ui.Panel” UI component class and implement “paint(g)” method that draws gray cross:</p>
 
 <table>
 <tr><td>
@@ -491,9 +512,9 @@
     </tr>
 </table>
           
+</td>
+<td>
 
-<p></td>
-<td></p>
 
 <table class="zsample" style="margin:0px;" cellpadding="0" cellspacing="0">
     <tr style="padding: 0px;margin: 0px;">
@@ -511,9 +532,9 @@
     </tr>
 </table>
                     
+</td>
+<td>
 
-<p></td>
-<td></p>
 
 <table class="zsample" style="margin:0px;" cellpadding="0" cellspacing="0">
     <tr style="padding: 0px;margin: 0px;">
@@ -531,11 +552,11 @@
     </tr>
 </table>
                     
-
-<p></td>
+</td>
 </tr>
-</table></p>
-<div class="highlight"><pre><code class="language-js" data-lang="js"><span class="nx">zebkit</span><span class="p">.</span><span class="nx">require</span><span class="p">(</span><span class="s2">"ui"</span><span class="p">,</span> <span class="s2">"layout"</span><span class="p">,</span> <span class="kd">function</span><span class="p">(</span><span class="nx">ui</span><span class="p">,</span> <span class="nx">layout</span><span class="p">)</span> <span class="p">{</span>
+</table>
+
+<div class="highlighter-rouge"><pre class="highlight"><code><span class="nx">zebkit</span><span class="p">.</span><span class="nx">require</span><span class="p">(</span><span class="s2">"ui"</span><span class="p">,</span> <span class="s2">"layout"</span><span class="p">,</span> <span class="kd">function</span><span class="p">(</span><span class="nx">ui</span><span class="p">,</span> <span class="nx">layout</span><span class="p">)</span> <span class="p">{</span>
     <span class="c1">// inherit "zebkit.ui.Panel" and implement "paint()"</span>
     <span class="nx">ui</span><span class="p">.</span><span class="nx">PaintComponent</span><span class="o">=</span><span class="nx">zebkit</span><span class="p">.</span><span class="nx">Class</span><span class="p">(</span><span class="nx">ui</span><span class="p">.</span><span class="nx">Panel</span><span class="p">,[</span>
         <span class="kd">function</span> <span class="nx">paint</span><span class="p">(</span><span class="nx">g</span><span class="p">)</span> <span class="p">{</span>
@@ -551,7 +572,9 @@
     <span class="nx">c</span><span class="p">.</span><span class="nx">root</span><span class="p">.</span><span class="nx">setLayout</span><span class="p">(</span><span class="k">new</span> <span class="nx">layout</span><span class="p">.</span><span class="nx">BorderLayout</span><span class="p">());</span>
     <span class="nx">c</span><span class="p">.</span><span class="nx">root</span><span class="p">.</span><span class="nx">add</span><span class="p">(</span><span class="s2">"center"</span><span class="p">,</span> <span class="k">new</span> <span class="nx">ui</span><span class="p">.</span><span class="nx">PaintComponent</span><span class="p">());</span>
 <span class="p">});</span>
-</code></pre></div>
+</code></pre>
+</div>
+
 <script>
 zebkit.require("ui", "layout", function(ui, layout) {
     var z = new ui.zCanvas("paintSample1", 150, 150);
@@ -594,8 +617,9 @@ zebkit.require("ui", "layout", function(ui, layout) {
 
 <p><strong>update(g)</strong></p>
 
-<p>Inherit developed on previous step &quot;PaintComponent&quot; class and extend it with &quot;update(g)&quot; method that fills the component background with red color:</p>
-<div class="highlight"><pre><code class="language-js" data-lang="js"><span class="nx">zebkit</span><span class="p">.</span><span class="nx">require</span><span class="p">(</span><span class="s2">"ui"</span><span class="p">,</span> <span class="s2">"layout"</span><span class="p">,</span> <span class="kd">function</span><span class="p">(</span><span class="nx">ui</span><span class="p">,</span> <span class="nx">layout</span><span class="p">)</span> <span class="p">{</span>
+<p>Inherit developed on previous step “PaintComponent” class and extend it with “update(g)” method that fills the component background with red color:</p>
+
+<div class="highlighter-rouge"><pre class="highlight"><code><span class="nx">zebkit</span><span class="p">.</span><span class="nx">require</span><span class="p">(</span><span class="s2">"ui"</span><span class="p">,</span> <span class="s2">"layout"</span><span class="p">,</span> <span class="kd">function</span><span class="p">(</span><span class="nx">ui</span><span class="p">,</span> <span class="nx">layout</span><span class="p">)</span> <span class="p">{</span>
     <span class="c1">// extend "PaintComponent" class with "update" method</span>
     <span class="nx">ui</span><span class="p">.</span><span class="nx">UpdateComponent</span><span class="o">=</span><span class="nx">zebra</span><span class="p">.</span><span class="nx">Class</span><span class="p">(</span><span class="nx">ui</span><span class="p">.</span><span class="nx">PaintComponent</span><span class="p">,[</span>
         <span class="kd">function</span> <span class="nx">update</span><span class="p">(</span><span class="nx">g</span><span class="p">)</span> <span class="p">{</span>
@@ -608,11 +632,14 @@ zebkit.require("ui", "layout", function(ui, layout) {
     <span class="nx">c</span><span class="p">.</span><span class="nx">root</span><span class="p">.</span><span class="nx">setLayout</span><span class="p">(</span><span class="k">new</span> <span class="nx">layout</span><span class="p">.</span><span class="nx">BorderLayout</span><span class="p">());</span>
     <span class="nx">c</span><span class="p">.</span><span class="nx">root</span><span class="p">.</span><span class="nx">add</span><span class="p">(</span><span class="s2">"center"</span><span class="p">,</span> <span class="k">new</span> <span class="nx">ui</span><span class="p">.</span><span class="nx">UpdateComponent</span><span class="p">());</span>
 <span class="p">});</span>
-</code></pre></div>
+</code></pre>
+</div>
+
 <p><strong>paintOnTop(g)</strong></p>
 
-<p>Inherit developed on previous step &quot;UpdateComponent&quot; class and extend it with &quot;paintOnTop(g)&quot; method that draws white rectangle over gray cross:</p>
-<div class="highlight"><pre><code class="language-js" data-lang="js"><span class="nx">zebkit</span><span class="p">.</span><span class="nx">require</span><span class="p">(</span><span class="s2">"ui"</span><span class="p">,</span> <span class="s2">"layout"</span><span class="p">,</span> <span class="kd">function</span><span class="p">(</span><span class="nx">ui</span><span class="p">,</span> <span class="nx">layout</span><span class="p">)</span> <span class="p">{</span>
+<p>Inherit developed on previous step “UpdateComponent” class and extend it with “paintOnTop(g)” method that draws white rectangle over gray cross:</p>
+
+<div class="highlighter-rouge"><pre class="highlight"><code><span class="nx">zebkit</span><span class="p">.</span><span class="nx">require</span><span class="p">(</span><span class="s2">"ui"</span><span class="p">,</span> <span class="s2">"layout"</span><span class="p">,</span> <span class="kd">function</span><span class="p">(</span><span class="nx">ui</span><span class="p">,</span> <span class="nx">layout</span><span class="p">)</span> <span class="p">{</span>
     <span class="c1">// extend "UpdateComponent" class with "paintOnTop"</span>
     <span class="c1">// method</span>
     <span class="nx">ui</span><span class="p">.</span><span class="nx">PaintOnTopComponent</span><span class="o">=</span><span class="nx">zebkit</span><span class="p">.</span><span class="nx">Class</span><span class="p">(</span><span class="nx">ui</span><span class="p">.</span><span class="nx">UpdateComponent</span><span class="p">,[</span>
@@ -628,7 +655,204 @@ zebkit.require("ui", "layout", function(ui, layout) {
     <span class="nx">c</span><span class="p">.</span><span class="nx">root</span><span class="p">.</span><span class="nx">setLayout</span><span class="p">(</span><span class="k">new</span> <span class="nx">layout</span><span class="p">.</span><span class="nx">BorderLayout</span><span class="p">());</span>
     <span class="nx">c</span><span class="p">.</span><span class="nx">root</span><span class="p">.</span><span class="nx">add</span><span class="p">(</span><span class="s2">"center"</span><span class="p">,</span> <span class="k">new</span> <span class="nx">ui</span><span class="p">.</span><span class="nx">PaintOnTopComponent</span><span class="p">());</span>
 <span class="p">});</span>
-</code></pre></div>
+</code></pre>
+</div>
+
+<h2 id="ui-component-decorative-elements">UI component decorative elements</h2>
+
+<p>Zebkit UI component has number of predefined decorative elements that can be customized:</p>
+
+<ul>
+  <li><strong>background</strong>. Background of a component can be set via <strong>“setBackground(bg)”</strong> method. The method can get a simple color definition or an instance of <strong>“zebkit.draw.View”</strong> class like image, gradient, pattern anything what can be rendered:
+    <ul>
+      <li><strong>hex color</strong> For instance: “#CCFFDD”</li>
+      <li><strong>rgb color</strong> For instance: “rgb(100,90,80)”</li>
+      <li><strong>rgba color</strong> For instance: “rgba(33,44,55,0.5)”</li>
+      <li><strong>a color name</strong> For instance: “blue”</li>
+      <li><strong>instance of zebkit.draw.View</strong></li>
+    </ul>
+  </li>
+  <li><strong>border</strong>. Border of a component can be set via <strong>“setBorder(br)”</strong> method that expects an instance of <strong>“zebkit.draw.View”</strong> class as a parameter. There are number ready to use borders views available in zebkit:
+    <ul>
+      <li><strong>“zebkit.draw.Border”</strong> - standard border view.</li>
+      <li><strong>“zebkit.draw.RoundBorder”</strong> - round border view.</li>
+      <li><strong>“zebkit.draw.Etched”</strong>, <strong>“zebkit.draw.Sunken”, __“zebkit.draw.Raised”</strong> set of windows-like border views.</li>
+    </ul>
+  </li>
+</ul>
+
+<h2 id="ui-component-shape">UI component shape</h2>
+
+<p>By default zebkit component is a rectangle with the given width and height. Component shape customization can be done with setting a border view that has to implement <strong>“outline(g,x,y,w,h,d)”</strong> method. The outline method setups closed path in passed 2D context that defines the shape and returns <code class="highlighter-rouge">true</code> if the context path has to be applied as a shape.</p>
+
+<p>For instance let’s create round zebkit UI component. As the first step let’s implement a view that setups round 2D path:</p>
+
+<div class="highlighter-rouge"><pre class="highlight"><code><span class="nx">zebkit</span><span class="p">.</span><span class="nx">require</span><span class="p">(</span><span class="s2">"ui"</span><span class="p">,</span> <span class="s2">"draw"</span><span class="p">,</span> <span class="s2">"layout"</span><span class="p">,</span> <span class="kd">function</span><span class="p">(</span><span class="nx">ui</span><span class="p">,</span> <span class="nx">draw</span><span class="p">,</span> <span class="nx">layout</span><span class="p">)</span> <span class="p">{</span>
+    <span class="kd">var</span> <span class="nx">RoundShape</span> <span class="o">=</span> <span class="nx">zebkit</span><span class="p">.</span><span class="nx">Class</span><span class="p">(</span><span class="nx">draw</span><span class="p">.</span><span class="nx">View</span><span class="p">,</span> <span class="p">[</span>
+        <span class="kd">function</span> <span class="nx">outline</span><span class="p">(</span><span class="nx">g</span><span class="p">,</span><span class="nx">x</span><span class="p">,</span><span class="nx">y</span><span class="p">,</span><span class="nx">w</span><span class="p">,</span><span class="nx">h</span><span class="p">,</span><span class="nx">d</span><span class="p">)</span> <span class="p">{</span>
+            <span class="k">if</span> <span class="p">(</span><span class="nx">w</span> <span class="o">===</span> <span class="nx">h</span><span class="p">)</span> <span class="p">{</span>
+                <span class="nx">g</span><span class="p">.</span><span class="nx">beginPath</span><span class="p">();</span>
+                <span class="nx">g</span><span class="p">.</span><span class="nx">arc</span><span class="p">(</span><span class="nb">Math</span><span class="p">.</span><span class="nx">floor</span><span class="p">(</span><span class="nx">x</span> <span class="o">+</span> <span class="nx">w</span><span class="o">/</span><span class="mi">2</span><span class="p">)</span> <span class="o">+</span> <span class="p">(</span><span class="nx">w</span> <span class="o">%</span> <span class="mi">2</span> <span class="o">===</span> <span class="mi">0</span> <span class="p">?</span> <span class="mi">0</span> <span class="p">:</span> <span class="mf">0.5</span><span class="p">),</span>
+                      <span class="nb">Math</span><span class="p">.</span><span class="nx">floor</span><span class="p">(</span><span class="nx">y</span> <span class="o">+</span> <span class="nx">h</span><span class="o">/</span><span class="mi">2</span><span class="p">)</span> <span class="o">+</span> <span class="p">(</span><span class="nx">h</span> <span class="o">%</span> <span class="mi">2</span> <span class="o">===</span> <span class="mi">0</span> <span class="p">?</span> <span class="mi">0</span> <span class="p">:</span> <span class="mf">0.5</span><span class="p">),</span>
+                      <span class="nb">Math</span><span class="p">.</span><span class="nx">floor</span><span class="p">((</span><span class="nx">w</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span><span class="o">/</span><span class="mi">2</span><span class="p">),</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">2</span> <span class="o">*</span> <span class="nb">Math</span><span class="p">.</span><span class="nx">PI</span><span class="p">,</span> <span class="kc">false</span><span class="p">);</span>
+                <span class="nx">g</span><span class="p">.</span><span class="nx">closePath</span><span class="p">();</span>
+            <span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
+                <span class="nx">g</span><span class="p">.</span><span class="nx">ovalPath</span><span class="p">(</span><span class="nx">x</span><span class="p">,</span><span class="nx">y</span><span class="p">,</span><span class="nx">w</span><span class="p">,</span><span class="nx">h</span><span class="p">);</span>
+            <span class="p">}</span>
+            <span class="k">return</span> <span class="kc">true</span><span class="p">;</span> <span class="c1">// say to apply it as shape</span>
+        <span class="p">}</span>
+    <span class="p">]);</span> 
+<span class="p">});</span>
+</code></pre>
+</div>
+
+<p>Then let’s use the developed above shape to a component:</p>
+
+<div class="highlighter-rouge"><pre class="highlight"><code><span class="nx">zebkit</span><span class="p">.</span><span class="nx">require</span><span class="p">(</span><span class="s2">"ui"</span><span class="p">,</span> <span class="s2">"draw"</span><span class="p">,</span> <span class="s2">"layout"</span><span class="p">,</span> <span class="kd">function</span><span class="p">(</span><span class="nx">ui</span><span class="p">,</span> <span class="nx">draw</span><span class="p">,</span> <span class="nx">layout</span><span class="p">)</span> <span class="p">{</span>
+    <span class="p">...</span>
+    <span class="kd">var</span> <span class="nx">r</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">ui</span><span class="p">.</span><span class="nx">zCanvas</span><span class="p">(</span><span class="s2">"roundShape"</span><span class="p">,</span> <span class="mi">300</span><span class="p">,</span> <span class="mi">300</span><span class="p">).</span><span class="nx">root</span><span class="p">;</span>
+    <span class="nx">r</span><span class="p">.</span><span class="nx">setLayout</span><span class="p">(</span><span class="k">new</span> <span class="nx">layout</span><span class="p">.</span><span class="nx">BorderLayout</span><span class="p">());</span>
+    <span class="nx">r</span><span class="p">.</span><span class="nx">add</span><span class="p">(</span><span class="k">new</span> <span class="nx">ui</span><span class="p">.</span><span class="nx">Panel</span><span class="p">({</span>
+        <span class="na">border</span><span class="p">:</span> <span class="k">new</span> <span class="nx">RoundShape</span><span class="p">(),</span>  <span class="c1">// set shape via border</span>
+        <span class="na">background</span><span class="p">:</span> <span class="k">new</span> <span class="nx">draw</span><span class="p">.</span><span class="nx">Gradient</span><span class="p">(</span><span class="s2">"red"</span><span class="p">,</span> <span class="s2">"orange"</span><span class="p">)</span>
+    <span class="p">}));</span>
+<span class="p">});</span>
+</code></pre>
+</div>
+
+<p>The result is shown below:</p>
+
+<table class="zsample" style="margin:0px;" cellpadding="0" cellspacing="0">
+    <tr style="padding: 0px;margin: 0px;">
+        <td valign="top" rowspan="2" style="left-padding: 8px; margin: 0px;">
+            
+        </td>
+        <td align="center" valign="center" style="padding: 0px; margin: 0px;">
+            <canvas id="roundShape1" style="padding: 0px; margin: 0px;"></canvas>
+        </td>
+    </tr>
+    <tr>
+        <td align="center" style="padding:0px; margin:0px;">
+            <span style="color:red;font-size:14px;">Custom shape </span>
+        </td>
+    </tr>
+</table>
+
+<script type="text/javascript">
+zebkit.require("ui", "draw", "layout", function(ui, draw, layout) {
+    var RoundShape = zebkit.Class(draw.View, [
+        function outline(g,x,y,w,h,d) {
+            if (w === h) {
+                g.beginPath();
+                g.arc(Math.floor(x + w/2) + (w % 2 === 0 ? 0 : 0.5),
+                      Math.floor(y + h/2) + (h % 2 === 0 ? 0 : 0.5),
+                      Math.floor((w - 1)/2), 0, 2 * Math.PI, false);
+                g.closePath();
+            } else {
+                g.ovalPath(x,y,w,h);
+            }
+            return true;
+        }
+    ]); 
+
+    var r = new ui.zCanvas("roundShape1", 300, 300).root;
+    r.setLayout(new layout.BorderLayout());
+    r.add(new ui.Panel({
+        border: new RoundShape(),
+        background: new draw.Gradient("red", "orange")
+    }));
+});
+</script>
+
+<p>If the shaped component needs to handle input events, it is necessary to aware events manager which points belong to the component taking in account its round shape. It has to be done with <strong>“contains(x, y)”</strong> method implementation. The method returns <code class="highlighter-rouge">true</code> if the given point is inside the component shape. Let’s extending our example with possibility to change background color depending where mouse pointer is located:</p>
+
+<div class="highlighter-rouge"><pre class="highlight"><code><span class="nx">zebkit</span><span class="p">.</span><span class="nx">require</span><span class="p">(</span><span class="s2">"ui"</span><span class="p">,</span> <span class="s2">"draw"</span><span class="p">,</span> <span class="s2">"layout"</span><span class="p">,</span> <span class="kd">function</span><span class="p">(</span><span class="nx">ui</span><span class="p">,</span> <span class="nx">draw</span><span class="p">,</span> <span class="nx">layout</span><span class="p">)</span> <span class="p">{</span>
+    <span class="p">...</span>
+    <span class="nx">r</span><span class="p">.</span><span class="nx">add</span><span class="p">(</span><span class="k">new</span> <span class="nx">ui</span><span class="p">.</span><span class="nx">Panel</span><span class="p">({</span>
+        <span class="na">border</span><span class="p">:</span> <span class="k">new</span> <span class="nx">RoundShape</span><span class="p">(),</span>
+        <span class="na">background</span><span class="p">:</span> <span class="k">new</span> <span class="nx">draw</span><span class="p">.</span><span class="nx">Gradient</span><span class="p">(</span><span class="s2">"red"</span><span class="p">,</span> <span class="s2">"orange"</span><span class="p">)</span>
+    <span class="p">},</span> 
+    <span class="p">[</span>
+        <span class="c1">// say if the given point is inside component</span>
+        <span class="kd">function</span> <span class="nx">contains</span><span class="p">(</span><span class="nx">x</span><span class="p">,</span> <span class="nx">y</span><span class="p">)</span> <span class="p">{</span>
+            <span class="kd">var</span> <span class="nx">a</span> <span class="o">=</span> <span class="k">this</span><span class="p">.</span><span class="nx">width</span> <span class="o">/</span> <span class="mi">2</span><span class="p">,</span> <span class="nx">b</span> <span class="o">=</span> <span class="k">this</span><span class="p">.</span><span class="nx">height</span> <span class="o">/</span> <span class="mi">2</span><span class="p">;</span>
+            <span class="nx">x</span> <span class="o">-=</span> <span class="nx">a</span><span class="p">;</span> <span class="nx">y</span> <span class="o">=</span> <span class="o">-</span><span class="nx">y</span> <span class="o">+</span> <span class="nx">b</span><span class="p">;</span>
+            <span class="k">return</span> <span class="p">(</span><span class="nx">x</span> <span class="o">*</span> <span class="nx">x</span><span class="p">)</span><span class="o">/</span><span class="p">(</span><span class="nx">a</span> <span class="o">*</span> <span class="nx">a</span><span class="p">)</span> <span class="o">+</span> <span class="p">(</span><span class="nx">y</span> <span class="o">*</span> <span class="nx">y</span><span class="p">)</span><span class="o">/</span><span class="p">(</span><span class="nx">b</span> <span class="o">*</span> <span class="nx">b</span><span class="p">)</span> <span class="o">&lt;=</span> <span class="mi">1</span><span class="p">;</span>
+        <span class="p">},</span>
+        <span class="c1">// handle pointer entered event</span>
+        <span class="kd">function</span> <span class="nx">pointerEntered</span><span class="p">(</span><span class="nx">e</span><span class="p">)</span> <span class="p">{</span>
+            <span class="k">this</span><span class="p">.</span><span class="nx">setBackground</span><span class="p">(</span><span class="k">new</span> <span class="nx">draw</span><span class="p">.</span><span class="nx">Gradient</span><span class="p">(</span><span class="s2">"orange"</span><span class="p">,</span> <span class="s2">"blue"</span><span class="p">));</span>  
+        <span class="p">},</span>
+        <span class="c1">// handle pointer exited event</span>
+        <span class="kd">function</span> <span class="nx">pointerExited</span><span class="p">(</span><span class="nx">e</span><span class="p">)</span> <span class="p">{</span>
+            <span class="k">this</span><span class="p">.</span><span class="nx">setBackground</span><span class="p">(</span><span class="k">new</span> <span class="nx">draw</span><span class="p">.</span><span class="nx">Gradient</span><span class="p">(</span><span class="s2">"red"</span><span class="p">,</span> <span class="s2">"orange"</span><span class="p">));</span>
+        <span class="p">}</span>
+    <span class="p">]));</span>
+<span class="p">});</span>
+</code></pre>
+</div>
+
+<p>The result is shown below:</p>
+
+<table class="zsample" style="margin:0px;" cellpadding="0" cellspacing="0">
+    <tr style="padding: 0px;margin: 0px;">
+        <td valign="top" rowspan="2" style="left-padding: 8px; margin: 0px;">
+            
+        </td>
+        <td align="center" valign="center" style="padding: 0px; margin: 0px;">
+            <canvas id="roundShape2" style="padding: 0px; margin: 0px;"></canvas>
+        </td>
+    </tr>
+    <tr>
+        <td align="center" style="padding:0px; margin:0px;">
+            <span style="color:red;font-size:14px;">Custom shape </span>
+        </td>
+    </tr>
+</table>
+
+<script type="text/javascript">  
+zebkit.require("ui", "draw", "layout", function(ui, draw, layout) {
+    var RoundShape = zebkit.Class(draw.View, [
+        function outline(g,x,y,w,h,d) {
+            if (w === h) {
+                g.beginPath();
+                g.arc(Math.floor(x + w/2) + (w % 2 === 0 ? 0 : 0.5),
+                      Math.floor(y + h/2) + (h % 2 === 0 ? 0 : 0.5),
+                      Math.floor((w - 1)/2), 0, 2 * Math.PI, false);
+                g.closePath();
+            } else {
+                g.ovalPath(x,y,w,h);
+            }
+            return true;
+        }
+    ]); 
+
+    var r = new ui.zCanvas("roundShape2", 300, 300).root;
+    r.setLayout(new layout.BorderLayout());
+    r.add(new ui.Panel({
+        border: new RoundShape(),
+        background: new draw.Gradient("red", "orange")
+    }, 
+    [
+        function contains(x, y) {
+            var a = this.width / 2, b = this.height / 2;
+            x -= a;
+            y  = -y + b;
+            return (x * x)/(a * a) + (y * y)/(b * b) <= 1;
+        },
+
+        function pointerEntered(e) {
+            this.setBackground(new draw.Gradient("orange", "blue"));  
+        },
+
+        function pointerExited(e) {
+            this.setBackground(new draw.Gradient("red", "orange"));
+        }
+    ]));
+});
+</script>
+
+
 </div>
 
     </div>

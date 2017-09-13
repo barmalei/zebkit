@@ -32,7 +32,7 @@
     <!-- RSS -->
     <link rel="alternate" type="application/rss+xml" title="RSS" href="/atom.xml">
 
-    <script type="text/javascript" src="/build/zebkit.js">  </script>
+    <script type="text/javascript" src="/build/zebkit.min.js?12092017">  </script>
 
     <script type="text/javascript">
         zebkit.ui.config("theme", "light");
@@ -48,9 +48,12 @@
         <table style="height:100%;border-width: 0px; border-color: #151515;">
             <tr>
                 <td colspan="2" align="center" style="border-width: 0px; margin: 0px; padding: 0px;">
-                    <a href="../index.html">
+                
+                    <a href="../dark/docs.draw.html">
                         <img style="margin: 0px; padding: 0px;" src="/website/light/public/images/zebkit.logo.png" width="60%">
                     </a>
+                
+
                 </td>
             </tr>
             <tr>
@@ -81,6 +84,10 @@
 
 
                         
+                        
+                            
+                        
+                            
                         
                             
                         
@@ -171,6 +178,14 @@
                     
                         
                         
+                        
+                    
+                        
+                        
+                        
+                    
+                        
+                        
 
                             
                             
@@ -193,89 +208,82 @@
                             
                         
                             
-                                <!--
-
-
-                                -->
+                                
                             
                         
                             
-                                <!--
-
-
-                                -->
+                                
+                                    <a class="sidebar-nav-item active"
+                                       href="/website/light/docs.draw.html">
+                                        <table cellpadding="0" cellspacing="0" style="padding: 0px;width:auto;margin:0px;">
+                                       <!--
+                                            <tr>
+                                                <td colspan="2" style="padding: 0px;" align="right">
+                                                    ┃
+                                                </td>
+                                            </tr>
+                                        -->
+                                            <tr>
+                                                <td style="padding: 0px;">
+                                                     Decorative elements
+                                                </td>
+                                                <td style="padding: 0px;">
+                                                   &nbsp;◀┛&nbsp;&nbsp;
+                                                </td>
+                                            </tr>
+                                        </table>
+                                    </a>
+                                
                             
                         
                             
-                                <!--
-
-
-                                -->
+                                
                             
                         
                             
-                                <!--
-
-
-                                -->
+                                
                             
                         
                             
-                                <!--
-
-
-                                -->
+                                
+                            
+                        
+                            
+                                
+                            
+                        
+                            
+                                
                             
                         
                             
                         
                             
-                                <!--
-
-
-                                -->
+                                
                             
                         
                             
-                                <!--
-
-
-                                -->
+                                
                             
                         
                             
-                                <!--
-
-
-                                -->
+                                
                             
                         
                             
-                                <!--
-
-
-                                -->
+                                
                             
                         
                             
-                                <!--
-
-
-                                -->
+                                
                             
                         
                             
-                                <!--
-
-
-                                -->
+                                
                             
                         
                             
-                                <!--
-
-
-                                -->
+                                
                             
                         
                             
@@ -289,7 +297,11 @@
                         
                     
                         
+                        
+                        
                     
+                        
+                        
                         
                     
                         
@@ -412,12 +424,12 @@ zebkit.resources("public/images/pattern.png",
 );
 </script>
 
-<p>Zebkit supplies “zebkit.draw” package that collects classes and interfaces  responsible for rendering different objects: borders, graphical elements, texts and so on. As soon a developer needs to render a re-usable decorative element it makes sense to implement it basin on the package abstraction.</p>
+<p>Zebkit supplies <strong>“zebkit.draw”</strong> package that collects classes and interfaces are responsible for rendering different objects: borders, graphical elements, texts and so on. As soon a developer needs to render a re-usable decorative element it makes sense to implement it basing on the package abstraction.</p>
 
 <p>In general there are two base classes for implementing rendered objects:</p>
 
 <ul>
-  <li><strong>zebkit.draw.View</strong> Paints a visual element on the provided surface. Developing a new decorative element requires the view class inherits “zebkit.draw.View” class and implements “paint(g,x,y,w,h,c)” method. The method is responsible for painting the visual element on a rectangular surface “(x,y,w,h)” with the given “2D” context “g”. For instance let’s implement view that shows color board:</li>
+  <li><strong>zebkit.draw.View</strong> Paints a visual element on the provided surface. Developing a new decorative element requires the view class inherits “zebkit.draw.View” class and implements <strong>“paint(g,x,y,w,h,c)”</strong> method. The method is responsible for painting the visual element on a rectangular surface “(x,y,w,h)” with the given “2D” context “g”. For instance let’s implement view that shows color board:</li>
 </ul>
 
 <table class="zsample" style="margin:0px;" cellpadding="0" cellspacing="0">
@@ -483,7 +495,7 @@ zebkit.require("draw","ui", function(draw, ui) {
 </div>
 
 <ul>
-  <li><strong>zebkit.draw.Render</strong> Render class is successor of “zebkit.draw.View” class that is designed to render or visualize the given target object (for instance text, image etc). From the implementation point of view it is close to “zebkit.draw.View” classes: you also should implement “paint(g,x,y,w,h,c)” method, but the method has to render a “target” object on teh given rectangular surface. For instance, let’s implement render that draw the given function (target object):</li>
+  <li><strong>zebkit.draw.Render</strong> Render class is successor of “zebkit.draw.View” class that is designed to render or visualize the given target object (for instance text, image etc). From the implementation point of view it is close to “zebkit.draw.View” classes: you also should implement <strong>“paint(g,x,y,w,h,c)”</strong> method, but the method has to render a “target” object on the given rectangular surface. For instance, let’s implement render that draw the given function (target object):</li>
 </ul>
 
 <table class="zsample" style="margin:0px;" cellpadding="0" cellspacing="0">
@@ -547,24 +559,27 @@ zebkit.require("draw","ui", function(draw, ui) {
 
         <span class="kd">function</span> <span class="nx">paint</span><span class="p">(</span><span class="nx">g</span><span class="p">,</span><span class="nx">x</span><span class="p">,</span><span class="nx">y</span><span class="p">,</span><span class="nx">w</span><span class="p">,</span><span class="nx">h</span><span class="p">,</span><span class="nx">c</span><span class="p">)</span> <span class="p">{</span>
           <span class="kd">var</span> <span class="nx">fy</span><span class="o">=</span><span class="p">[],</span><span class="nx">dx</span><span class="o">=</span><span class="p">(</span><span class="k">this</span><span class="p">.</span><span class="nx">x2</span><span class="o">-</span><span class="k">this</span><span class="p">.</span><span class="nx">x1</span><span class="p">)</span><span class="o">/</span><span class="mi">200</span><span class="p">,</span><span class="nx">my</span><span class="o">=-</span><span class="mi">1000000</span><span class="p">,</span><span class="nx">mny</span><span class="o">=</span><span class="mi">1000000</span><span class="p">;</span>
+          <span class="c1">// calculate function values for the given range and </span>
+          <span class="c1">// the function minimal and maximal values </span>
           <span class="k">for</span><span class="p">(</span><span class="kd">var</span> <span class="nx">x</span> <span class="o">=</span> <span class="k">this</span><span class="p">.</span><span class="nx">x1</span><span class="p">,</span><span class="nx">i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="nx">x</span> <span class="o">&lt;</span> <span class="k">this</span><span class="p">.</span><span class="nx">x2</span><span class="p">;</span> <span class="nx">x</span><span class="o">+=</span> <span class="nx">dx</span><span class="p">,</span><span class="nx">i</span><span class="o">++</span><span class="p">)</span> <span class="p">{</span>
               <span class="nx">fy</span><span class="p">[</span><span class="nx">i</span><span class="p">]</span> <span class="o">=</span> <span class="k">this</span><span class="p">.</span><span class="nx">target</span><span class="p">(</span><span class="nx">x</span><span class="p">);</span> <span class="c1">// call target function </span>
               <span class="k">if</span> <span class="p">(</span><span class="nx">fy</span><span class="p">[</span><span class="nx">i</span><span class="p">]</span> <span class="o">&gt;</span> <span class="nx">my</span><span class="p">)</span> <span class="nx">my</span> <span class="o">=</span> <span class="nx">fy</span><span class="p">[</span><span class="nx">i</span><span class="p">];</span>
               <span class="k">if</span> <span class="p">(</span><span class="nx">fy</span><span class="p">[</span><span class="nx">i</span><span class="p">]</span> <span class="o">&lt;</span> <span class="nx">mny</span><span class="p">)</span> <span class="nx">mny</span> <span class="o">=</span> <span class="nx">fy</span><span class="p">[</span><span class="nx">i</span><span class="p">];</span>
           <span class="p">}</span>
-          <span class="kd">var</span> <span class="nx">cx</span> <span class="o">=</span><span class="p">(</span><span class="nx">w</span><span class="o">-</span><span class="mi">8</span><span class="p">)</span><span class="o">/</span><span class="p">(</span><span class="k">this</span><span class="p">.</span><span class="nx">x2</span><span class="o">-</span><span class="k">this</span><span class="p">.</span><span class="nx">x1</span><span class="p">),</span><span class="nx">cy</span><span class="o">=</span><span class="p">(</span><span class="nx">h</span><span class="o">-</span><span class="mi">8</span><span class="p">)</span><span class="o">/</span><span class="p">(</span><span class="nx">maxy</span> <span class="o">-</span> <span class="nx">miny</span><span class="p">),</span>
-              <span class="nx">t</span>  <span class="o">=</span> <span class="kd">function</span> <span class="p">(</span><span class="nx">xy</span><span class="p">,</span> <span class="nx">ct</span><span class="p">)</span> <span class="p">{</span> <span class="k">return</span> <span class="nx">ct</span> <span class="o">*</span> <span class="nx">xy</span><span class="p">;</span> <span class="p">};</span>
+          <span class="kd">var</span> <span class="nx">cx</span> <span class="o">=</span> <span class="p">(</span><span class="nx">w</span> <span class="o">-</span> <span class="mi">8</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="k">this</span><span class="p">.</span><span class="nx">x2</span> <span class="o">-</span> <span class="k">this</span><span class="p">.</span><span class="nx">x1</span><span class="p">),</span> 
+              <span class="nx">cy</span> <span class="o">=</span> <span class="p">(</span><span class="nx">h</span> <span class="o">-</span> <span class="mi">8</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="nx">maxy</span> <span class="o">-</span> <span class="nx">miny</span><span class="p">);</span>
           <span class="nx">g</span><span class="p">.</span><span class="nx">beginPath</span><span class="p">();</span>
           <span class="nx">g</span><span class="p">.</span><span class="nx">setColor</span><span class="p">(</span><span class="s2">"red"</span><span class="p">);</span>
           <span class="nx">g</span><span class="p">.</span><span class="nx">lineWidth</span> <span class="o">=</span> <span class="mi">4</span><span class="p">;</span>
-          <span class="nx">g</span><span class="p">.</span><span class="nx">moveTo</span><span class="p">(</span><span class="mi">4</span><span class="p">,</span> <span class="mi">4</span> <span class="o">+</span> <span class="nx">t</span><span class="p">(</span><span class="nx">fy</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">-</span> <span class="nx">miny</span><span class="p">,</span> <span class="nx">cy</span><span class="p">));</span>
-          <span class="k">for</span><span class="p">(</span><span class="kd">var</span> <span class="nx">x</span><span class="o">=</span><span class="k">this</span><span class="p">.</span><span class="nx">x1</span><span class="o">+</span><span class="nx">dx</span><span class="p">,</span><span class="nx">i</span><span class="o">=</span><span class="mi">1</span><span class="p">;</span><span class="nx">i</span><span class="o">&lt;</span><span class="nx">fy</span><span class="p">.</span><span class="nx">length</span><span class="p">;</span><span class="nx">x</span><span class="o">+=</span><span class="nx">dx</span><span class="p">,</span><span class="nx">i</span><span class="o">++</span><span class="p">)</span> <span class="p">{</span>
-              <span class="nx">g</span><span class="p">.</span><span class="nx">lineTo</span><span class="p">(</span><span class="mi">4</span><span class="o">+</span><span class="nx">t</span><span class="p">(</span><span class="nx">x</span><span class="o">-</span><span class="k">this</span><span class="p">.</span><span class="nx">x1</span><span class="p">,</span> <span class="nx">cx</span><span class="p">),</span><span class="mi">4</span><span class="o">+</span><span class="nx">t</span><span class="p">(</span><span class="nx">fy</span><span class="p">[</span><span class="nx">i</span><span class="p">]</span><span class="o">-</span><span class="nx">miny</span><span class="p">,</span> <span class="nx">cy</span><span class="p">));</span>
+          <span class="nx">g</span><span class="p">.</span><span class="nx">moveTo</span><span class="p">(</span><span class="mi">4</span><span class="p">,</span> <span class="mi">4</span> <span class="o">+</span> <span class="p">(</span><span class="nx">fy</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">-</span> <span class="nx">miny</span><span class="p">)</span> <span class="o">*</span> <span class="nx">cy</span><span class="p">);</span>
+          <span class="k">for</span><span class="p">(</span><span class="kd">var</span> <span class="nx">vx</span> <span class="o">=</span> <span class="nx">dx</span><span class="p">,</span> <span class="nx">i</span> <span class="o">=</span> <span class="mi">1</span><span class="p">;</span> <span class="nx">i</span> <span class="o">&lt;</span> <span class="nx">fy</span><span class="p">.</span><span class="nx">length</span><span class="p">;</span> <span class="nx">vx</span> <span class="o">+=</span> <span class="nx">dx</span><span class="p">,</span> <span class="nx">i</span><span class="o">++</span><span class="p">)</span> <span class="p">{</span>
+              <span class="nx">g</span><span class="p">.</span><span class="nx">lineTo</span><span class="p">(</span><span class="mi">4</span> <span class="o">+</span> <span class="nx">vx</span> <span class="o">*</span> <span class="nx">cx</span><span class="p">),</span>
+                       <span class="mi">4</span> <span class="o">+</span> <span class="p">(</span><span class="nx">fy</span><span class="p">[</span><span class="nx">i</span><span class="p">]</span> <span class="o">-</span> <span class="nx">miny</span><span class="p">)</span> <span class="o">*</span> <span class="nx">cy</span><span class="p">));</span>
           <span class="p">}</span>
           <span class="nx">g</span><span class="p">.</span><span class="nx">stroke</span><span class="p">();</span>
         <span class="p">}</span>
     <span class="p">]);</span>
-    <span class="kd">var</span> <span class="nx">canvas</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">ui</span><span class="p">.</span><span class="nx">zCanvas</span><span class="p">(</span><span class="s2">"drawView2"</span><span class="p">,</span> <span class="mi">400</span><span class="p">,</span> <span class="mi">200</span><span class="p">);</span>
+    <span class="kd">var</span> <span class="nx">canvas</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">ui</span><span class="p">.</span><span class="nx">zCanvas</span><span class="p">(</span><span class="mi">400</span><span class="p">,</span> <span class="mi">200</span><span class="p">);</span>
     <span class="c1">// implemented render as, the canvas root background</span>
     <span class="nx">canvas</span><span class="p">.</span><span class="nx">root</span><span class="p">.</span><span class="nx">setBackground</span><span class="p">(</span><span class="k">new</span> <span class="nx">FunctionRender</span><span class="p">(</span><span class="kd">function</span><span class="p">(</span><span class="nx">x</span><span class="p">)</span> <span class="p">{</span>
         <span class="k">return</span> <span class="nb">Math</span><span class="p">.</span><span class="nx">cos</span><span class="p">(</span><span class="nx">x</span><span class="p">)</span> <span class="o">*</span> <span class="nb">Math</span><span class="p">.</span><span class="nx">sin</span><span class="p">(</span><span class="nx">x</span><span class="p">)</span> <span class="o">-</span> <span class="mi">2</span> <span class="o">*</span> <span class="nb">Math</span><span class="p">.</span><span class="nx">sin</span><span class="p">(</span><span class="nx">x</span><span class="o">*</span><span class="nx">x</span><span class="p">);</span>
@@ -575,7 +590,7 @@ zebkit.require("draw","ui", function(draw, ui) {
 
 <h2 id="standard-views-and-renders">Standard views and renders</h2>
 
-<p>Zebkit provide rich set of various predefined views and renders.</p>
+<p>Zebkit provides rich set of various predefined views and renders.</p>
 
 <h3 id="border-view-zebkitdrawborder">Border view (zebkit.draw.Border)</h3>
 
@@ -1039,6 +1054,8 @@ zebkit.require("draw","ui","layout",function(draw, ui, lay) {
     var c = new ui.zCanvas("arrowView1", 300, 300);
     c.root.setLayout(new lay.BorderLayout(16));
 
+    draw.ArrowView.prototype.color = "orange";
+
     c.root.add("left",new ui.ViewPan().setView(new draw.ArrowView("left")))
     .setPreferredSize(40, -1);
     c.root.add("top",new ui.ViewPan().setView(new draw.ArrowView("top")))
@@ -1078,8 +1095,8 @@ zebkit.require("draw","ui","layout",function(draw, ui, lay) {
 
     var pan = new ui.ViewPan().setBackground(new draw.ViewSet({
         "Pattern"  : new draw.Pattern(ui.imgPattern),
-        "Gradient" : new draw.Gradient("red", "green"),
-        "+Color"   : "#44AAff"
+        "+Gradient" : new draw.Gradient("red", "green"),
+        "Color"   : "#44AAff"
     })).setBorder("plain");
 
     c.root.add(pan);
@@ -1210,9 +1227,9 @@ zebkit.require("draw","ui",function(draw, ui) {
 <p>View gaps are important what the given view or render is going to be used as a border view for an UI component. In this case the gaps the given view provides adds extra paddings to the UI component metrics. View gaps have to be defined by implementing “getLeft()”, “getRight()”, “getBottom()”, “getTop()” method or methods:</p>
 
 <div class="highlighter-rouge"><pre class="highlight"><code>    <span class="kd">var</span> <span class="nx">MyView</span> <span class="o">=</span> <span class="nx">zebkit</span><span class="p">.</span><span class="nx">Class</span><span class="p">(</span><span class="nx">zebkit</span><span class="p">.</span><span class="nx">draw</span><span class="p">.</span><span class="nx">View</span><span class="p">,</span> <span class="p">[</span>
-         <span class="kd">function</span> <span class="nx">paint</span><span class="p">(</span><span class="nx">g</span><span class="p">,</span><span class="nx">x</span><span class="p">,</span><span class="nx">y</span><span class="p">,</span><span class="nx">w</span><span class="p">,</span><span class="nx">h</span><span class="p">,</span><span class="nx">c</span><span class="p">)</span> <span class="p">{</span>
+        <span class="kd">function</span> <span class="nx">paint</span><span class="p">(</span><span class="nx">g</span><span class="p">,</span><span class="nx">x</span><span class="p">,</span><span class="nx">y</span><span class="p">,</span><span class="nx">w</span><span class="p">,</span><span class="nx">h</span><span class="p">,</span><span class="nx">c</span><span class="p">)</span> <span class="p">{</span>
             <span class="p">...</span> <span class="c1">// paint something</span>
-         <span class="p">},</span>
+        <span class="p">},</span>
         <span class="c1">// get top gap</span>
         <span class="kd">function</span> <span class="nx">getTop</span><span class="p">()</span> <span class="p">{</span>
            <span class="k">return</span> <span class="mi">10</span><span class="p">;</span>

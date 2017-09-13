@@ -1,5 +1,5 @@
 {
-    "layout": { "@zebkit.layout.StackLayout" : []},
+    "layout": { "@zebkit.layout.StackLayout" : [] },
     "kids"  : [{
         "@zebkit.ui.Panel":[],
         "layout" : { "@zebkit.layout.BorderLayout" :4 },
@@ -19,8 +19,8 @@
     }],
 
     "#actions" : [{
-        "source"  : "//zebkit.ui.Button",
-        "target"  : {
+        "source"   : "//zebkit.ui.Button",
+        "target"   : {
             "path"   : "//zebkit.ui.TextArea",
             "update" : { "value": "" }
         }

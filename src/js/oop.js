@@ -731,7 +731,7 @@ var classTemplateFields = {
     },
 
     /**
-     * Tests if the given class inherits the given class or interface.
+     * Tests if the class inherits the given class or interface.
      * @param  {zebkit.Class | zebkit.Interface}  clazz a class or interface.
      * @return {Boolean} true if the class or interface is inherited with
      * the class.

@@ -32,7 +32,7 @@
     <!-- RSS -->
     <link rel="alternate" type="application/rss+xml" title="RSS" href="/atom.xml">
 
-    <script type="text/javascript" src="/build/zebkit.js">  </script>
+    <script type="text/javascript" src="/build/zebkit.min.js?12092017">  </script>
 
     <script type="text/javascript">
         zebkit.ui.config("theme", "light");
@@ -48,9 +48,12 @@
         <table style="height:100%;border-width: 0px; border-color: #151515;">
             <tr>
                 <td colspan="2" align="center" style="border-width: 0px; margin: 0px; padding: 0px;">
-                    <a href="../index.html">
+                
+                    <a href="../dark/docs.easyoop.html">
                         <img style="margin: 0px; padding: 0px;" src="/website/light/public/images/zebkit.logo.png" width="60%">
                     </a>
+                
+
                 </td>
             </tr>
             <tr>
@@ -81,6 +84,10 @@
 
 
                         
+                        
+                            
+                        
+                            
                         
                             
                         
@@ -171,6 +178,14 @@
                     
                         
                         
+                        
+                    
+                        
+                        
+                        
+                    
+                        
+                        
 
                             
                             
@@ -193,89 +208,82 @@
                             
                         
                             
-                                <!--
-
-
-                                -->
+                                
                             
                         
                             
-                                <!--
-
-
-                                -->
+                                
                             
                         
                             
-                                <!--
-
-
-                                -->
+                                
                             
                         
                             
-                                <!--
-
-
-                                -->
+                                
+                                    <a class="sidebar-nav-item active"
+                                       href="/website/light/docs.easyoop.html">
+                                        <table cellpadding="0" cellspacing="0" style="padding: 0px;width:auto;margin:0px;">
+                                       <!--
+                                            <tr>
+                                                <td colspan="2" style="padding: 0px;" align="right">
+                                                    ┃
+                                                </td>
+                                            </tr>
+                                        -->
+                                            <tr>
+                                                <td style="padding: 0px;">
+                                                     Easy OOP
+                                                </td>
+                                                <td style="padding: 0px;">
+                                                   &nbsp;◀┛&nbsp;&nbsp;
+                                                </td>
+                                            </tr>
+                                        </table>
+                                    </a>
+                                
                             
                         
                             
-                                <!--
-
-
-                                -->
+                                
+                            
+                        
+                            
+                                
+                            
+                        
+                            
+                                
                             
                         
                             
                         
                             
-                                <!--
-
-
-                                -->
+                                
                             
                         
                             
-                                <!--
-
-
-                                -->
+                                
                             
                         
                             
-                                <!--
-
-
-                                -->
+                                
                             
                         
                             
-                                <!--
-
-
-                                -->
+                                
                             
                         
                             
-                                <!--
-
-
-                                -->
+                                
                             
                         
                             
-                                <!--
-
-
-                                -->
+                                
                             
                         
                             
-                                <!--
-
-
-                                -->
+                                
                             
                         
                             
@@ -289,7 +297,11 @@
                         
                     
                         
+                        
+                        
                     
+                        
+                        
                         
                     
                         
@@ -433,8 +445,8 @@
 <p><strong>Access to parent context</strong></p>
 
 <ul>
-  <li>Use <em>$super(…)</em> method to call a parent method implementation</li>
-  <li><em>$super(…)</em> works correct for deep hierarchy tracking properly an order of methods execution</li>
+  <li>Use <strong>$super(…)</strong> method to call a parent method implementation</li>
+  <li><strong>$super(…)</strong> works correct for deep hierarchy tracking properly an order of methods execution</li>
 </ul>
 
 <div class="highlighter-rouge"><pre class="highlight"><code><span class="kd">var</span> <span class="nx">A</span> <span class="o">=</span> <span class="nx">zebkit</span><span class="p">.</span><span class="nx">Class</span><span class="p">([</span>
@@ -464,10 +476,10 @@
 
 <ul>
   <li>Zebkit easy OOP supports single parent inheritance</li>
-  <li>Pass a parent class to be inherited as the first parameter of <em>“zebkit.Class()”</em> method</li>
+  <li>Pass a parent class to be inherited as the first parameter of <strong>“zebkit.Class(…)”</strong> method</li>
   <li>Class methods can be overridden, but not overloaded</li>
   <li>Constructor is inherited</li>
-  <li>Use <em>“zebkit.instanceOf()</em> operator instead of standard JS <em>“instanceof”</em></li>
+  <li>Use <strong>“zebkit.instanceOf()</strong> operator instead of standard JS <strong>“instanceof”</strong></li>
 </ul>
 
 <div class="highlighter-rouge"><pre class="highlight"><code><span class="c1">// Define class A with class method  "abc()"</span>
@@ -491,12 +503,12 @@
 <p><strong>Mixing (Interface)</strong> Mixing is way to share common functionality between classes without necessity to support improper multi inheritance OOP concept.</p>
 
 <ul>
-  <li>Mix methods set has to be declared with <em>“zebkit.Interface(…)”</em></li>
-  <li><em>“zebkit.Interface()”</em> can declare set of methods and initializer</li>
+  <li>Mix methods set has to be declared with <strong>“zebkit.Interface(…)”</strong></li>
+  <li><strong>“zebkit.Interface()”</strong> can declare set of methods</li>
   <li>Interface cannot inherit other interfaces and classes</li>
 </ul>
 
-<div class="highlighter-rouge"><pre class="highlight"><code><span class="c1">// Declare Mix1 and Mix2 interfaces  </span>
+<div class="highlighter-rouge"><pre class="highlight"><code><span class="c1">// Declare Mix1 and Mix2 interfaces  x§</span>
 <span class="kd">var</span> <span class="nx">Mix1</span> <span class="o">=</span> <span class="nx">zebkit</span><span class="p">.</span><span class="nx">Interface</span><span class="p">([</span>
     <span class="kd">function</span> <span class="nx">abc</span><span class="p">()</span> <span class="p">{</span> <span class="p">...</span> <span class="p">}</span>
 <span class="p">]);</span> 
@@ -606,11 +618,11 @@
 </code></pre>
 </div>
 
-<p><strong>Packaging</strong> It is recommended to use package system zebkit provides. The packages are organized as hierarchy (the same way Java does it). Packages are accessible from predefined <em>“zebkit”</em> global package with using dot notation. The main rules you should follow:</p>
+<p><strong>Packaging</strong> It is recommended to use package system zebkit provides. The packages are organized as hierarchy (the same way Java does it). Packages are accessible from predefined <strong>“zebkit”</strong> global package with using dot notation. The main rules you should follow:</p>
 
 <ul>
-  <li>Declare a package variables and classes safely with <em>“zebkit.package(…)”</em> method</li>
-  <li>Safely access to packages stuff with <em>“zebkit.require(…)”</em> method</li>
+  <li>Declare a package variables and classes safely with <strong>“zebkit.package(…)”</strong> method</li>
+  <li>Safely access to packages stuff with <strong>“zebkit.require(…)”</strong> method</li>
   <li>Use dot notation to access package stuff</li>
 </ul>
 
@@ -631,7 +643,7 @@
 </code></pre>
 </div>
 
-<p><strong>Import package stuff in your scope</strong> Not always handy to access classes and variables by pointing full path to its (<em>“zebkit.ui.grid.Grid”</em>). Zebkit helps importing fields from the given package(s) into a local scope by using <em>zebkit.import()__ method that should be used in combination with JS “eval()” standard method. Pay attention that using JS “eval()” method is bad practice. It is recommended to use _“zebkit.require(…)”</em> method where it is possible.</p>
+<p><strong>Import package stuff in your scope</strong> Not always handy to access classes and variables by pointing full path to its (<strong>“zebkit.ui.grid.Grid”</strong>). Zebkit helps importing fields from the given package(s) into a local scope by using <strong>zebkit.import()</strong> method that should be used in combination with JS “eval()” standard method. Pay attention that using JS “eval()” method is bad practice. It is recommended to use <strong>“zebkit.require(…)”</strong> method.</p>
 
 <div class="highlighter-rouge"><pre class="highlight"><code><span class="c1">// Define variables in "test" package </span>
 <span class="nx">zebkit</span><span class="p">.</span><span class="kr">package</span><span class="p">(</span><span class="s2">"test"</span><span class="p">,</span> <span class="kd">function</span><span class="p">()</span> <span class="p">{</span>
@@ -659,9 +671,9 @@
 <p><strong>Dynamic class extensions</strong> Zebkit classes can be extended dynamically either on the class level (extend class definition with new methods and variables) or on the class instance level.</p>
 
 <ul>
-  <li>Use <em>“extend(…)”</em> method to extend a class or a class instance</li>
+  <li>Use <strong>“extend(…)”</strong> method to extend a class or a class instance with new methods and fields</li>
   <li>Extending of a class causes his new instances will get the extensions</li>
-  <li>Extending an instance has effect only for the given class instance</li>
+  <li>Extending an instance of a class has effect only for the given class instance</li>
 </ul>
 
 <div class="highlighter-rouge"><pre class="highlight"><code><span class="kd">var</span> <span class="nx">A</span> <span class="o">=</span> <span class="nx">zebkit</span><span class="p">.</span><span class="nx">Class</span><span class="p">([</span>

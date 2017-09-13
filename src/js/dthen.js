@@ -1,6 +1,7 @@
 /**
- * Sequential tasks runner (D-then). Allows developers to execute number of steps (async and sync) in the
- * exact order they have been called by runner. The ideas of the runner implementation is making the
+ * Promise-like sequential tasks runner (D-then). Allows developers to execute
+ * number of steps (async and sync) in the exact order they have been called with
+ * the class instance. The idea of the runner implementation is making the
  * code more readable and plain nevertheless it includes asynchronous parts:
  * @example
 
@@ -71,6 +72,7 @@ DoIt.prototype = {
                 body.call(this, err);
             }
         }
+        return this;
     },
 
     /**
@@ -92,7 +94,7 @@ DoIt.prototype = {
      * @method  then
      * @param  {Function} body a method to be executed. The method can get results
      * of previous step execution as its arguments. The method is called in context
-     * of instance of a DoIt instance.
+     * of a DoIt instance.
      * @chainable
      */
     then : function(body, completed) {
@@ -261,7 +263,7 @@ DoIt.prototype = {
     },
 
     /**
-     * Wait before the given doit is ready to be called.
+     * Wait for the given doit redness.
      * @param  {zebkit.DoIt} r a runner
      * @example
      *
@@ -399,8 +401,8 @@ DoIt.prototype = {
      * Method to catch error that has occurred during the doit sequence execution.
      * @param  {Function} [body] a callback to handle the error. The method
      * gets an error that has happened as its argument. If there is no argument
-     * the error will be printed in output. If body is null then no error output
-     * is expected.
+     * the error will be printed in output. If passed argument is null then
+     * no error output is expected.
      * @chainable
      * @method catch
      */
@@ -462,7 +464,7 @@ DoIt.prototype = {
 
     /**
      * Throw an exception if an error has happened before the method call,
-     * otherwise fo nothing.
+     * otherwise do nothing.
      * @method  throw
      * @chainable
      */

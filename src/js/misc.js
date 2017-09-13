@@ -413,7 +413,7 @@ var $uriRE = /^(([a-zA-Z]+)\:\/\/([^\/:]+)?(\:[0-9]+)?(\/)?)?([^?]+)?(\?.+)?/;
 
 /**
  * URI class. Pass either a full uri (as a string or zebkit.URI) or number of an URI parts
- * (scheme, host, etc) to constructor it.
+ * (scheme, host, etc) to construct it.
  * @param {String} [uri] an URI.
  * @param {String} [scheme] a scheme.
  * @param {String} [host] a host.

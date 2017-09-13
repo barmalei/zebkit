@@ -32,7 +32,7 @@
     <!-- RSS -->
     <link rel="alternate" type="application/rss+xml" title="RSS" href="/atom.xml">
 
-    <script type="text/javascript" src="/build/zebkit.js">  </script>
+    <script type="text/javascript" src="/build/zebkit.min.js?12092017">  </script>
 
     <script type="text/javascript">
         zebkit.ui.config("theme", "dark");
@@ -48,9 +48,12 @@
         <table style="height:100%;border-width: 0px; border-color: #151515;">
             <tr>
                 <td colspan="2" align="center" style="border-width: 0px; margin: 0px; padding: 0px;">
-                    <a href="../index.html">
+                
+                    <a href="../light/docs.html">
                         <img style="margin: 0px; padding: 0px;" src="/website/dark/public/images/zebkit.logo.png" width="60%">
                     </a>
+                
+
                 </td>
             </tr>
             <tr>
@@ -81,6 +84,10 @@
 
 
                         
+                        
+                            
+                        
+                            
                         
                             
                         
@@ -171,6 +178,14 @@
                     
                         
                         
+                        
+                    
+                        
+                        
+                        
+                    
+                        
+                        
 
                             
                             
@@ -193,89 +208,61 @@
                             
                         
                             
-                                <!--
-
-
-                                -->
+                                
                             
                         
                             
-                                <!--
-
-
-                                -->
+                                
                             
                         
                             
-                                <!--
-
-
-                                -->
+                                
                             
                         
                             
-                                <!--
-
-
-                                -->
+                                
                             
                         
                             
-                                <!--
-
-
-                                -->
+                                
+                            
+                        
+                            
+                                
+                            
+                        
+                            
+                                
                             
                         
                             
                         
                             
-                                <!--
-
-
-                                -->
+                                
                             
                         
                             
-                                <!--
-
-
-                                -->
+                                
                             
                         
                             
-                                <!--
-
-
-                                -->
+                                
                             
                         
                             
-                                <!--
-
-
-                                -->
+                                
                             
                         
                             
-                                <!--
-
-
-                                -->
+                                
                             
                         
                             
-                                <!--
-
-
-                                -->
+                                
                             
                         
                             
-                                <!--
-
-
-                                -->
+                                
                             
                         
                             
@@ -289,7 +276,11 @@
                         
                     
                         
+                        
+                        
                     
+                        
+                        
                         
                     
                         
@@ -399,61 +390,64 @@
     
 
     <table width="100%">
-<tr><td width="50%" valign="top" markdown="1">
-### Concept
-<hr>
+<tr><td width="50%" valign="top">
+      <h3 id="concept">Concept</h3>
+      <hr />
 
-<a href="docs.intro.html">Artifacts and packaging</a>
-<br/>(what you get with zebkit)<br/>
+      <p><a href="docs.intro.html">Artifacts and packaging</a>
+<br />(what you get with zebkit)<br /></p>
 
-<a href="docs.easyoop.html">Easy OOP</a>    
-(abstractions everywhere)<br/>
+      <p><a href="docs.easyoop.html">Easy OOP</a>  <br />
+(abstractions everywhere)<br /></p>
 
-<a href="docs.zson.html">Zson</a>
-<br/>(JSON as a config and descriptive language)<br/>
+      <p><a href="docs.zson.html">Zson</a>
+<br />(JSON as a config and descriptive language)<br /></p>
 
-<a href="docs.dthen.html">D-then</a>
-<br/>(asynchronous calls as a sequence)<br/>
+      <p><a href="docs.dthen.html">D-then</a>
+<br />(asynchronous calls as a sequence)<br /></p>
 
-<hr>
-<a href="#">Data models</a>
-<br/>(list, text, matrix, etc)    
+      <p><a href="docs.data.html">Data models</a>
+<br />(list, text, matrix, etc)</p>
 
-<hr>
-<a href="#">IO</a>
-<br/>(list, text, matrix, etc)    
+      <p><a href="docs.io.html">IO</a>
+<br />(GET, POST, JRPC, XRPC)</p>
 
-</td>
+    </td>
 
-<td width="50%" valign="top" markdown="1">
-### UI 
-<hr>
+<td width="50%" valign="top">
+      <h3 id="ui">UI</h3>
+      <hr />
 
-<a href="docs.ui.component.html">Component</a>
-<br/>(key properties, metrics, etc)
+      <p><a href="docs.ui.component.html">UI Component</a>
+<br />(key properties, metrics, etc)</p>
 
-<a href="docs.ui.paint.html">Rendering</a>
-<br/>(everything can be rendered)
+      <p><a href="docs.ui.paint.html">Component rendering</a>
+<br />(everything can be rendered)</p>
 
-<a href="docs.layouts.html">Layout management</a>
-<br/>(rules based layouting)<br/>
+      <p><a href="docs.layouts.html">Layout management</a>
+<br />(rules based layouting)<br /></p>
 
-<a href="docs.ui.event.html">Event handling</a>
-<br/>(how to catch event)
+      <p><a href="docs.ui.event.html">Event handling</a>
+<br />(how to catch event)</p>
 
-<a href="docs.ui.config.html">Resources and configuration</a>
-<br/>(define forms with Zson)
+      <p><a href="docs.ui.config.html">Resources and configuration</a>
+<br />(define forms with Zson)</p>
 
-<hr>
-<a href="docs.draw.html">Draw</a>
-<br/>(Draw primitive, visualize objects)    
+      <hr />
 
-<hr>
+      <p><a href="docs.draw.html">Draw</a>
+<br />(Draw primitive, visualize objects)</p>
+    </td></tr>
 
-<a href="#">HTML Element</a>
+<tr><td colspan="2" width="100%">
+<hr />
+<a href="docs.ui.web.html">HTML Element</a>
+<br />(embedding HTML elements into zebkit layout)
 </td></tr>
 
-<tr><td width="50%" valign="top" colspan="2" markdown="1">
+<tr><td width="50%" valign="top" colspan="2">
+
+      <!--
 ### Core UI Components
 <hr>
 <a href="doc.ui.component.html">Label, Button, etc</a>
@@ -462,8 +456,9 @@
 <a href="doc.ui.component.html">Fields</a>
 <a href="doc.ui.component.html">Tree</a>
 <a href="doc.ui.component.html">Grid</a>
-    
-</td></tr></table>
+-->
+    </td></tr></table>
+
 
 </div>
 

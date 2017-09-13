@@ -32,7 +32,7 @@
     <!-- RSS -->
     <link rel="alternate" type="application/rss+xml" title="RSS" href="/atom.xml">
 
-    <script type="text/javascript" src="/build/zebkit.js">  </script>
+    <script type="text/javascript" src="/build/zebkit.min.js?12092017">  </script>
 
     <script type="text/javascript">
         zebkit.ui.config("theme", "light");
@@ -48,9 +48,12 @@
         <table style="height:100%;border-width: 0px; border-color: #151515;">
             <tr>
                 <td colspan="2" align="center" style="border-width: 0px; margin: 0px; padding: 0px;">
-                    <a href="../index.html">
+                
+                    <a href="../dark/docs.intro.html">
                         <img style="margin: 0px; padding: 0px;" src="/website/light/public/images/zebkit.logo.png" width="60%">
                     </a>
+                
+
                 </td>
             </tr>
             <tr>
@@ -81,6 +84,10 @@
 
 
                         
+                        
+                            
+                        
+                            
                         
                             
                         
@@ -171,6 +178,14 @@
                     
                         
                         
+                        
+                    
+                        
+                        
+                        
+                    
+                        
+                        
 
                             
                             
@@ -193,89 +208,82 @@
                             
                         
                             
-                                <!--
-
-
-                                -->
+                                
                             
                         
                             
-                                <!--
-
-
-                                -->
+                                
                             
                         
                             
-                                <!--
-
-
-                                -->
+                                
                             
                         
                             
-                                <!--
-
-
-                                -->
+                                
                             
                         
                             
-                                <!--
-
-
-                                -->
+                                
+                                    <a class="sidebar-nav-item active"
+                                       href="/website/light/docs.intro.html">
+                                        <table cellpadding="0" cellspacing="0" style="padding: 0px;width:auto;margin:0px;">
+                                       <!--
+                                            <tr>
+                                                <td colspan="2" style="padding: 0px;" align="right">
+                                                    ┃
+                                                </td>
+                                            </tr>
+                                        -->
+                                            <tr>
+                                                <td style="padding: 0px;">
+                                                     Start with zebkit
+                                                </td>
+                                                <td style="padding: 0px;">
+                                                   &nbsp;◀┛&nbsp;&nbsp;
+                                                </td>
+                                            </tr>
+                                        </table>
+                                    </a>
+                                
+                            
+                        
+                            
+                                
+                            
+                        
+                            
+                                
                             
                         
                             
                         
                             
-                                <!--
-
-
-                                -->
+                                
                             
                         
                             
-                                <!--
-
-
-                                -->
+                                
                             
                         
                             
-                                <!--
-
-
-                                -->
+                                
                             
                         
                             
-                                <!--
-
-
-                                -->
+                                
                             
                         
                             
-                                <!--
-
-
-                                -->
+                                
                             
                         
                             
-                                <!--
-
-
-                                -->
+                                
                             
                         
                             
-                                <!--
-
-
-                                -->
+                                
                             
                         
                             
@@ -289,7 +297,11 @@
                         
                     
                         
+                        
+                        
                     
+                        
+                        
                         
                     
                         
@@ -400,18 +412,21 @@
         <h1 class="page-title">Start with zebkit</h1>
     
 
-    <p>In general zebkit is a JavaScript framework that is supposed to be used for UI development. In the same time the framework provides a lot of artifacts and concepts that are abstracted from UI stuff and can be used independently:</p>
+    <p>Zebkit is a JavaScript framework that is supposed to be used for UI development. In the same time the framework provides a lot of artifacts and concepts that are abstracted from UI stuff and can be used independently:</p>
 
 <ul>
   <li><strong>Easy OOP</strong>. This this the basement for everything in zebkit: packaging, various components buildings, resource management.</li>
-  <li><strong>Zson</strong>. JSON as JavaScript objects descriptive language with extended  possibility of inclusions, object instantiations and so on.</li>
-  <li><strong>Data model</strong>. Number of classes and interfaces to represent difefrent data models like list, tree, matrix and so on</li>
-  <li>etc</li>
+  <li><strong>Zson</strong>. Zson extends interpretation of standard JSON with introducing advanced possibilities such as of extra JSON inclusions, object instantiations, references support and so on.</li>
+  <li><strong>Data model package</strong>. Number of classes and interfaces to represent different data models like list, tree, matrix and so on</li>
+  <li><strong>Dthen</strong>. Promise-like approach to make typical JS callback and asynchronous code style looking more plain, readable and controllable.</li>
+  <li><strong>Views and renders package</strong>. Number of various graphical elements ready to be rendered on a canvas surface.</li>
+  <li><strong>IO package</strong>. Simple package to communicate to restful, XRPC, JRPC services.</li>
+  <li>and so on</li>
 </ul>
 
 <h2 id="choose-zebkit-version">Choose zebkit version</h2>
 
-<p>All zebkit artifacts are published on web site. They are applicable either for remote usage or can be downloaded and hosted in a local environment. The artifacts are hosted on web site as follow:</p>
+<p>All zebkit artifacts are published on web site. They are applicable either for remote usage or can be downloaded and hosted in a local environment. The artifacts are hosted on zebkit web site as follow:</p>
 
 <div class="highlighter-rouge"><pre class="highlight"><code>http://www.zebkit.org/ver        <span class="c"># root zebkit versions URL</span>
    |
@@ -433,14 +448,17 @@
 
 <p><strong>What the latest zebkit version is</strong></p>
 
-<p>The <strong>latest</strong> (<a href="http://www.zebkit.org/ver/latest">http://www.zebkit.org/ver/latest</a>) is the version that is considered as the most stable and bug free snapshot of github version. For developers using the latest means:
-   * They stick to the most actual and quite stable version with the hottest fixes and the most recent new features.
-   * They should never care about bloody version name or code to address the version they need. They always get the latest one. 
-   * They are in a risk with the latest version updates. That means a recent update of the latest version can add a bug or (in rare cases) even backward compatible issues.</p>
+<p>The <strong>latest</strong> (<a href="http://www.zebkit.org/ver/latest">http://www.zebkit.org/ver/latest</a>) is the version that is considered as the most stable and bug free snapshot of github version. For developers using the latest means:</p>
+
+<ul>
+  <li>They stick to the most actual and quite stable version with the hottest fixes and the most recent new features and improvements.</li>
+  <li>They should never care about bloody version name or code to address the version they need. They always get the latest one.</li>
+  <li>They are in a risk with the latest version updates. That means a recent update of the latest version can add a bug or (in rare cases) even backward compatible issues.</li>
+</ul>
 
 <p><strong>What released zebkit versions are</strong></p>
 
-<p>There is also zebkit release versions are identified with year and month. The versions are updated only in a case of critical bugs that have not been fixed in subsequent versions. The appropriate artifacts are available by the following pattern: <a href="#">http://zebkit.org/ver/year.month/* </a></p>
+<p>There are also zebkit release versions are published on web site. They are identified with release year and month. The versions are updated only in a case of critical bugs that have not been fixed in subsequent versions. The appropriate artifacts are available by the following pattern: <a href="#">http://zebkit.org/ver/year.month/* </a></p>
 
 <p>For instance released at May of 2017 version can be fetched with the following URL: <a href="http://zebkit.org/ver/2017.05/zebkit.js">http://zebkit.org/ver/2017.05/zebkit.js
 </a></p>
@@ -451,13 +469,13 @@
 
 <ul>
   <li>
-    <p>Include the version of zebkit hosted on zebkit web site. The latest stable version is available by fixed URL (or add any other desired version): <a href="#">http://zebkit.org/ver/latest/zebkit.[min.]js</a></p>
+    <p>Include the version of zebkit hosted on zebkit web site. The latest stable version is available by fixed URL (or choose other desired version): <a href="#">http://zebkit.org/ver/latest/zebkit.[min.]js</a></p>
   </li>
   <li>
-    <p>Download required runtime package and unzip it in context of your WEB server. Again the latest zebkit version can be found by the following URL: <a href="http://zebkit.org/ver/latest/zebkit.runtime.zip">http://zebkit.org/ver/latest/zebkit.runtime.zip</a></p>
+    <p>Download required runtime package and unzip it in context of your WEB server. The latest zebkit version bundle can be found with the following URL: <a href="http://zebkit.org/ver/latest/zebkit.runtime.zip">http://zebkit.org/ver/latest/zebkit.runtime.zip</a></p>
   </li>
   <li>
-    <p>Checkout version from github and read the instruction how it can be used: <a href="https://github.com/barmalei/zebkit">https://github.com/barmalei/zebkit</a></p>
+    <p>Checkout version from github and read the instruction how it can be built and used: <a href="https://github.com/barmalei/zebkit">https://github.com/barmalei/zebkit</a></p>
   </li>
 </ul>
 
@@ -484,30 +502,34 @@
 </code></pre>
 </div>
 
-<h2 id="develop-with-zebkit-packages">Develop with zebkit package(s)</h2>
+<p>That is all, your page is ready to start developing with zebkit.</p>
 
-<p>Zebkit stuff is organized as hierarchy of packages. Package is key zebkit structure that unites number of classes, methods, variables and interfaces that are designed for some functional purposes.</p>
+<h2 id="developing-with-zebkit">Developing with zebkit</h2>
 
-<p>When zebkit is included into an HTML page you will get global “zebkit” variable. This is the root package you have to start from:</p>
+<p>Zebkit stuff is organized as hierarchy of <strong>packages</strong>. Package is key zebkit structure that unites number of classes, methods, variables and interfaces that are designed for dedicated functional purposes.</p>
 
-<div class="highlighter-rouge"><pre class="highlight"><code><span class="c1">// request "zebkit.ui", "zebkit.layout" and "zebkit.ui.grid" package  </span>
-<span class="nx">zebkit</span><span class="p">.</span><span class="nx">require</span><span class="p">(</span><span class="s2">"ui"</span><span class="p">,</span> <span class="s2">"layout"</span><span class="p">,</span> <span class="s2">"ui.grid"</span><span class="p">,</span> <span class="kd">function</span><span class="p">(</span><span class="nx">ui</span><span class="p">,</span> <span class="nx">layout</span><span class="p">,</span> <span class="nx">grid</span><span class="p">)</span> <span class="p">{</span>
+<p>Including zebkit into an HTML page adds “zebkit” variable to the global space. This variable points to root - “zebkit” - package to start with:</p>
+
+<div class="highlighter-rouge"><pre class="highlight"><code><span class="c1">// request "zebkit.ui","zebkit.layout" and "zebkit.ui.grid" packages  </span>
+<span class="nx">zebkit</span><span class="p">.</span><span class="nx">require</span><span class="p">(</span><span class="s2">"ui"</span><span class="p">,</span><span class="s2">"layout"</span><span class="p">,</span><span class="s2">"ui.grid"</span><span class="p">,</span> <span class="kd">function</span><span class="p">(</span><span class="nx">ui</span><span class="p">,</span> <span class="nx">layout</span><span class="p">,</span> <span class="nx">grid</span><span class="p">)</span> <span class="p">{</span>
     <span class="kd">var</span> <span class="nx">button</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">ui</span><span class="p">.</span><span class="nx">Button</span><span class="p">(</span><span class="s2">"My Button"</span><span class="p">);</span>
     <span class="p">...</span>
 <span class="p">});</span>
 </code></pre>
 </div>
 
-<p>Above zebkit “require” call does the following:</p>
+<p><strong>“zebkit.require(…)”</strong> method call illustrated in snippet above does the following:</p>
 
 <ul>
-  <li>Requests three packages: “zebkit.ui”, “zebkit.layout”, “zebkit.ui.grid”</li>
-  <li>Call callback method that guarantees that all the tree packages are ready to be used: the HTML page is completely loaded and requested packages are completely configured.</li>
+  <li>Requests three packages references: “zebkit.ui”, “zebkit.layout”, “zebkit.ui.grid”</li>
+  <li>Calls passed callback method at the moment all other packages are ready for usage: an HTML page is completely loaded and requested packages are completely configured.</li>
 </ul>
 
-<p>Inside the require callback method you should start developing a zebkit application.</p>
+<p>Callback method is the safe place to start developing zebkit application.</p>
 
-<p>When you develop your own zebkit code it should be reasonable to stick to zebkit package concept. That means re-usable components, classes and other things should placed in a package or packages. Creation of a zebkit package is simple:</p>
+<h2 id="package-re-usable-code">Package re-usable code</h2>
+
+<p>Developing a custom zebkit code should be done within zebkit package concept. Re-usable components, classes and other entities should be placed in zebkit package or packages. Creation of a new zebkit package is simple:</p>
 
 <div class="highlighter-rouge"><pre class="highlight"><code><span class="c1">// create new package </span>
 <span class="nx">zebkit</span><span class="p">.</span><span class="kr">package</span><span class="p">(</span><span class="s2">"mypackage"</span><span class="p">,</span> <span class="kd">function</span><span class="p">(</span><span class="nx">pkg</span><span class="p">,</span> <span class="nx">Class</span><span class="p">)</span> <span class="p">{</span>
@@ -539,15 +561,20 @@
 
 <h2 id="package-configuration">Package configuration</h2>
 
-<p>Package can be configured with a JSON.</p>
+<p>Package entities can be configured with a JSON. The most simple way to initiate the configuration is to pass true as last parameter of <strong>“zebkit.package(…)”</strong> method:</p>
 
-<ul>
-  <li></li>
-</ul>
+<div class="highlighter-rouge"><pre class="highlight"><code><span class="c1">// create new package configured with JSON configuration</span>
+<span class="nx">zebkit</span><span class="p">.</span><span class="nx">require</span><span class="p">(</span><span class="s2">"mypackage"</span><span class="p">,</span> <span class="kd">function</span><span class="p">(</span><span class="nx">mypkg</span><span class="p">)</span> <span class="p">{</span>
+    <span class="p">...</span>
+<span class="p">},</span> <span class="kc">true</span><span class="p">);</span>
+</code></pre>
+</div>
+
+<p>It is suppose JSON file has to be stored alone with the package JavaScript code and the name of the configuration file has to be full package name (without “zebkit prefix”) plus “.json” extension. In example mentioned above the name of configuration file is “mypackage.json”</p>
 
 <h2 id="standard-zebkit-packages">Standard zebkit packages</h2>
 
-<p>Standard packages that are supplied with zebkit (embedded with “zebkit.js”) are listed in the table below:</p>
+<p>Standard packages that are supplied with zebkit (included into “zebkit.[min.]js”) are listed in the table below:</p>
 
 <table class="info">
 <tr><th>Package name</th><th>Description</th></tr>
@@ -555,7 +582,7 @@
 <tr>
 <td>zebkit</td>
 <td>
-The root zebkit package that provides core easy OOP classes and interfaces.  
+This is the root zebkit package that provides core easy OOP classes and interfaces.  
 </td>
 </tr>
 
@@ -576,35 +603,35 @@ The package provides number of classes and interfaces to represent simple data m
 <tr>
 <td>zebkit.layout</td>
 <td>
-The package provides number of layout manager that can be easily adapted to layout rectangular UI elements. Zebra UI is widely used to layout Rich UI components.
+The package provides number of layout manager that can be easily adapted to layout rectangular UI elements. Zebra UI widely uses the package to layout Rich UI components.
 </td>
 </tr>
 
 <tr>
 <td>zebkit.io</td>
 <td>
-The package contains number of classes, methods that are helpful to communicate to a remote HTTP, XML-RPC or JSON-RPC service.
+The package contains number of classes, methods that are helpful to communicate to a remote HTTP, XML-RPC or JSON-RPC services.
 </td>
 </tr>
 
 <tr>
 <td>zebkit.draw</td>
 <td>
-The package provides number of renders and views that are able to draw different kind of objects: texts, shapes, images, etc.
+The package provides number of elementary renders and views that are able to draw different kind of objects: texts, shapes, images, etc.
 </td>
 </tr>
 
 <tr>
 <td>zebkit.ui<br />zebkit.ui.grid<br />zebkit.ui.tree<br />zebkit.ui.design</td>
 <td>
-The packages provide huge amount of different abstract UI components that are supposed to be used to build Rich UI WEB application that are rendered on HTML Canvas element. Abstract means they are free from WEB specific what make possible porting it to other platforms and environments.
+The packages provide huge amount of different UI components that are supposed to be used to build Rich UI WEB application rendered on HTML5 Canvas element. The UI components are implemented the way they are free from WEB specific. It makes possible porting the components to other platforms and environments without the components code update.
 </td>
 </tr>
 
 <tr>
 <td>zebkit.ui.event</td>
 <td>
-The package provide UI events related stuff.
+The package provides UI events related stuff.
 </td>
 </tr>
 
@@ -626,7 +653,7 @@ The package provides implementations of required abstractions for WEB environmen
 
 <h2 id="extra-zebkit-packages">Extra zebkit packages</h2>
 
-<p>There are number extension packages listed below. These packages are supplied in separate JavaScript files:</p>
+<p>There are number add-on packages listed below. These packages are supplied in separate JavaScript files:</p>
 
 <table class="info">
 <tr><th>Package name</th><th>Description</th></tr>

@@ -13,7 +13,7 @@
 
     <title>
         
-           &middot; Zebkit - UI platform
+          UI Component &middot; Zebkit - UI platform
         
     </title>
 
@@ -32,7 +32,7 @@
     <!-- RSS -->
     <link rel="alternate" type="application/rss+xml" title="RSS" href="/atom.xml">
 
-    <script type="text/javascript" src="/build/zebkit.js">  </script>
+    <script type="text/javascript" src="/build/zebkit.min.js?12092017">  </script>
 
     <script type="text/javascript">
         zebkit.ui.config("theme", "light");
@@ -48,9 +48,12 @@
         <table style="height:100%;border-width: 0px; border-color: #151515;">
             <tr>
                 <td colspan="2" align="center" style="border-width: 0px; margin: 0px; padding: 0px;">
-                    <a href="../index.html">
+                
+                    <a href="../dark/docs.ui.component.html">
                         <img style="margin: 0px; padding: 0px;" src="/website/light/public/images/zebkit.logo.png" width="60%">
                     </a>
+                
+
                 </td>
             </tr>
             <tr>
@@ -81,6 +84,10 @@
 
 
                         
+                        
+                            
+                        
+                            
                         
                             
                         
@@ -171,6 +178,14 @@
                     
                         
                         
+                        
+                    
+                        
+                        
+                        
+                    
+                        
+                        
 
                             
                             
@@ -193,89 +208,82 @@
                             
                         
                             
-                                <!--
-
-
-                                -->
+                                
                             
                         
                             
-                                <!--
-
-
-                                -->
+                                
                             
                         
                             
-                                <!--
-
-
-                                -->
+                                
                             
                         
                             
-                                <!--
-
-
-                                -->
+                                
                             
                         
                             
-                                <!--
-
-
-                                -->
+                                
+                            
+                        
+                            
+                                
+                            
+                        
+                            
+                                
                             
                         
                             
                         
                             
-                                <!--
-
-
-                                -->
+                                
+                                    <a class="sidebar-nav-item active"
+                                       href="/website/light/docs.ui.component.html">
+                                        <table cellpadding="0" cellspacing="0" style="padding: 0px;width:auto;margin:0px;">
+                                       <!--
+                                            <tr>
+                                                <td colspan="2" style="padding: 0px;" align="right">
+                                                    ┃
+                                                </td>
+                                            </tr>
+                                        -->
+                                            <tr>
+                                                <td style="padding: 0px;">
+                                                     UI Component
+                                                </td>
+                                                <td style="padding: 0px;">
+                                                   &nbsp;◀┛&nbsp;&nbsp;
+                                                </td>
+                                            </tr>
+                                        </table>
+                                    </a>
+                                
                             
                         
                             
-                                <!--
-
-
-                                -->
+                                
                             
                         
                             
-                                <!--
-
-
-                                -->
+                                
                             
                         
                             
-                                <!--
-
-
-                                -->
+                                
                             
                         
                             
-                                <!--
-
-
-                                -->
+                                
                             
                         
                             
-                                <!--
-
-
-                                -->
+                                
                             
                         
                             
-                                <!--
-
-
-                                -->
+                                
                             
                         
                             
@@ -289,7 +297,11 @@
                         
                     
                         
+                        
+                        
                     
+                        
+                        
                         
                     
                         
@@ -397,14 +409,99 @@
       <div class="page">
 
     
-        <h1 class="page-title"></h1>
-    
 
-    <p>The key root zebkit UI component is “<strong>zebkit.ui.Panel</strong>”. Every zebkit UI component is an instance of “zebkit.ui.Panel” class. This class unifies all existent zebkit components with common API, event handling, metrics and behavior. Even if you instantiate a zebkit HTML component it will be represented as an instance of “zebkit.ui.Panel” class.</p>
+    <h2 id="zebkituipanel">zebkit.ui.Panel</h2>
 
-<p>“zebkit.ui.Panel” is container, what means it can embeds other UI components as its children component. The children components are ordered with a alyout manager of the container has set.</p>
+<div class="highlighter-rouge"><pre class="highlight"><code>                zebkit.layout.Layoutable 
+                          |
+                    zebkit.ui.Panel
+                          |
+        +-----------------+-----------+--------------+  
+        |                             |              |
+zebkit.ui.web.HTMLElement      zebkit.ui.Button    Many others
+                                                zebkit UI components  
+</code></pre>
+</div>
 
-<p>Zebkit UI application is hierarchy of ordered with layout managers UI components that are rendered on HTML5 Canvas. To start building an application layout you have to instantiate zebkit canvas component (“zebkit.ui.zCanvas”). The instance is either bound to existent HTML5 Canvas element or dynamically  creates HTML5 Canvas element in DOM tree:</p>
+<p>Zebkit UI components are instances of <strong>“zebkit.ui.Panel”</strong> class. The class unifies UI components with common API, events handling, metrics and behavior. <strong>“zebkit.ui.Panel”</strong> class provides the following main UI component possibilities and features:</p>
+
+<ul>
+  <li><strong>Container</strong> Panel is a container that can host other zebkit UI components as its child components. The child components are ordered inside the container with a layout manager the container is set. In most cases zebkit UI applications are multi-levels hierarchy of various UI components that are ordered with different layout manages:</li>
+</ul>
+
+<div class="highlighter-rouge"><pre class="highlight"><code>    <span class="nx">zebkit</span><span class="p">.</span><span class="nx">require</span><span class="p">(</span><span class="s2">"ui"</span><span class="p">,</span> <span class="s2">"layout"</span><span class="p">,</span> <span class="kd">function</span><span class="p">(</span><span class="nx">ui</span><span class="p">,</span> <span class="nx">layout</span><span class="p">)</span> <span class="p">{</span>
+        <span class="p">...</span>
+        <span class="c1">// create panel with border layout manager</span>
+        <span class="kd">var</span> <span class="nx">panel</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">ui</span><span class="p">.</span><span class="nx">Panel</span><span class="p">(</span><span class="k">new</span> <span class="nx">layout</span><span class="p">.</span><span class="nx">BorderLayout</span><span class="p">());</span>
+        <span class="c1">// add button component at the top part of the container</span>
+        <span class="nx">panel</span><span class="p">.</span><span class="nx">add</span><span class="p">(</span><span class="s2">"top"</span><span class="p">,</span> <span class="k">new</span> <span class="nx">ui</span><span class="p">.</span><span class="nx">Button</span><span class="p">(</span><span class="s2">"Button"</span><span class="p">));</span>
+        <span class="c1">// add text area component to occupy central part of the </span>
+        <span class="c1">// container</span>
+        <span class="nx">panel</span><span class="p">.</span><span class="nx">add</span><span class="p">(</span><span class="s2">"center"</span><span class="p">,</span> <span class="k">new</span> <span class="nx">ui</span><span class="p">.</span><span class="nx">TextArea</span><span class="p">(</span><span class="s2">"Text area"</span><span class="p">));</span>
+        <span class="p">...</span>
+    <span class="p">});</span>
+</code></pre>
+</div>
+
+<ul>
+  <li><strong>Rendering</strong> Panel participates in zebkit UI application rendering process. By overriding appropriate panel method(s) - <strong>“paint(g)”</strong> or/and <strong>“update(g)”</strong> or/and <strong>“paintOnTop(g)”</strong> - developers can paint desired visual content using passed 2D graphical context:</li>
+</ul>
+
+<div class="highlighter-rouge"><pre class="highlight"><code>    <span class="nx">zebkit</span><span class="p">.</span><span class="nx">require</span><span class="p">(</span><span class="s2">"ui"</span><span class="p">,</span> <span class="kd">function</span><span class="p">(</span><span class="nx">ui</span><span class="p">)</span> <span class="p">{</span>
+        <span class="p">...</span>
+        <span class="c1">// instantiate anonymous panel class that implements </span>
+        <span class="c1">// "paint(g)" method to draw red circle in the panel </span>
+        <span class="kd">var</span> <span class="nx">panel</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">ui</span><span class="p">.</span><span class="nx">Panel</span><span class="p">([</span>
+            <span class="kd">function</span> <span class="nx">paint</span><span class="p">(</span><span class="nx">g</span><span class="p">)</span> <span class="p">{</span>
+                <span class="nx">g</span><span class="p">.</span><span class="nx">setColor</span><span class="p">(</span><span class="s2">"red"</span><span class="p">);</span>
+                <span class="nx">g</span><span class="p">.</span><span class="nx">beginPath</span><span class="p">();</span>
+                <span class="nx">g</span><span class="p">.</span><span class="nx">arc</span><span class="p">(</span><span class="nb">Math</span><span class="p">.</span><span class="nx">floor</span><span class="p">(</span><span class="k">this</span><span class="p">.</span><span class="nx">width</span>  <span class="o">/</span> <span class="mi">2</span><span class="p">),</span>
+                      <span class="nb">Math</span><span class="p">.</span><span class="nx">floor</span><span class="p">(</span><span class="k">this</span><span class="p">.</span><span class="nx">height</span> <span class="o">/</span> <span class="mi">2</span><span class="p">),</span>
+                      <span class="nb">Math</span><span class="p">.</span><span class="nx">floor</span><span class="p">((</span><span class="k">this</span><span class="p">.</span><span class="nx">width</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span><span class="o">/</span><span class="mi">2</span><span class="p">),</span><span class="mi">0</span><span class="p">,</span><span class="mi">2</span><span class="o">*</span><span class="nb">Math</span><span class="p">.</span><span class="nx">PI</span><span class="p">,</span><span class="kc">false</span><span class="p">);</span>
+                <span class="nx">g</span><span class="p">.</span><span class="nx">closePath</span><span class="p">();</span>
+                <span class="nx">g</span><span class="p">.</span><span class="nx">fill</span><span class="p">();</span>
+            <span class="p">}</span>
+        <span class="p">]);</span>
+        <span class="p">...</span>
+    <span class="p">});</span>
+</code></pre>
+</div>
+
+<ul>
+  <li><strong>Input events handling</strong> Panel is designed to catch number of input events via implementing appropriate events handler methods (<strong>pointerPressed(e)</strong>, <strong>“pointerReleased(e)”</strong>, <strong>“keyPressed(e)”</strong> and many others).</li>
+</ul>
+
+<div class="highlighter-rouge"><pre class="highlight"><code>    <span class="nx">zebkit</span><span class="p">.</span><span class="nx">require</span><span class="p">(</span><span class="s2">"ui"</span><span class="p">,</span> <span class="kd">function</span><span class="p">(</span><span class="nx">ui</span><span class="p">)</span> <span class="p">{</span>
+        <span class="p">...</span>
+        <span class="c1">// Handle pointer entered and exited events</span>
+        <span class="kd">var</span> <span class="nx">panel</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">ui</span><span class="p">.</span><span class="nx">Panel</span><span class="p">([</span>
+            <span class="kd">function</span> <span class="nx">pointerEntered</span><span class="p">(</span><span class="nx">e</span><span class="p">)</span> <span class="p">{</span>
+                <span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="s2">"Pointer is in the panel"</span><span class="p">);</span>
+            <span class="p">},</span>
+
+            <span class="kd">function</span> <span class="nx">pointerExited</span><span class="p">(</span><span class="nx">e</span><span class="p">)</span> <span class="p">{</span>
+                <span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="s2">"Pointer is out of the panel"</span><span class="p">);</span>
+            <span class="p">}</span>
+        <span class="p">]);</span>
+        <span class="p">...</span>
+    <span class="p">});</span>
+</code></pre>
+</div>
+
+<h2 id="placing-ui-hierarchy">Placing UI hierarchy</h2>
+
+<p>Zebkit UI components framework utilizes HTML5 Canvas as a target surface to render UI components hierarchy (theoretically zebkit can be adapted to any Canvas-like surface). The surface is abstracted with <strong>“zebkit.ui.zCanvas”</strong> class that as any other UI component, inherits <strong>“zebkit.ui.Panel”</strong>. zCanvas is the destination to place an UI hierarchy. To do it follow the steps listed below:</p>
+
+<ul>
+  <li>
+    <p><strong>Instantiate “zebkit.ui.zCanvas” class.</strong> Depending on arguments that have been passed the canvas instance sticks to an existing DOM HTML5 Canvas element or creates a new one in the DOM tree.</p>
+  </li>
+  <li>
+    <p><strong>Put UI hierarchy into zCanvas “root” layer.</strong> zCanvas has layered structure. As a container (<strong>zebkit.ui.Panel</strong>) it hosts number if child layers designed for different purposes (showing pop-up, windows, etc). It is expected “root” layer has to be used for placing zebkit UI components hierarchy.</p>
+  </li>
+</ul>
+
+<p>For example:</p>
 
 <div class="highlighter-rouge"><pre class="highlight"><code><span class="nx">zebkit</span><span class="p">.</span><span class="nx">require</span><span class="p">(</span><span class="s2">"ui"</span><span class="p">,</span> <span class="s2">"layout"</span><span class="p">,</span> <span class="kd">function</span><span class="p">(</span><span class="nx">ui</span><span class="p">,</span> <span class="nx">layout</span><span class="p">)</span> <span class="p">{</span>
     <span class="c1">// create HTML Canvas element where zebkit UI to host</span>
@@ -425,12 +522,16 @@
 </code></pre>
 </div>
 
-<p>Below is shown simple zebkit application that shows hierarchy of UI components:</p>
+<h2 id="simple-zebkit-application">Simple zebkit application</h2>
+
+<p>Find below a simple zebkit application that builds the following UI components hierarchy:</p>
 
 <table>
 <tr><td>
-      <div class="highlighter-rouge"><pre class="highlight"><code>zebkit.ui.zCanvas
-  +-root
+
+      <div class="highlighter-rouge"><pre class="highlight"><code><span class="c"># HTML5 Canvas surface</span>
+zebkit.ui.zCanvas 
+  +-root  <span class="c"># root layer </span>
      |
      +-zebkit.ui.Panel 
         |   <span class="o">(</span>blue<span class="o">)</span>
@@ -439,17 +540,18 @@
         |   <span class="o">(</span><span class="s2">"Test Label"</span><span class="o">)</span>
         |
         +- zebkit.ui.Button 
-        |   <span class="o">(</span><span class="s2">"Test Button"</span><span class="o">)</span>
+        |   <span class="o">(</span><span class="s2">"Button"</span><span class="o">)</span>
         |
         +- zebkit.ui.Panel 
             | <span class="o">(</span>orange<span class="o">)</span>
             |
             +-zebkit.ui.TextField
-             <span class="o">(</span><span class="s2">"Test Text Field"</span><span class="o">)</span>
+             <span class="o">(</span><span class="s2">"Text Field"</span><span class="o">)</span>
 </code></pre>
       </div>
+
     </td><td>
-      
+
 
 <table class="zsample" style="margin:0px;" cellpadding="0" cellspacing="0">
     <tr style="padding: 0px;margin: 0px;">
@@ -471,37 +573,282 @@
 </table>
 
 <script type="text/javascript">
-zebkit.require("ui", "layout", function(ui, layout) {
-    var p = new ui.Panel();
-    p.setBorder(new zebkit.draw.Border("white", 2)); 
-    p.setBounds(10,10, 380, 280); 
-    p.setBackground("#3F76AA");    
-                
-    var l = new ui.Label("Test Label"); 
-    l.setColor("white");
-    l.setFont("bold");
-    l.setBounds(10, 10, 360, 50); 
-    p.add(l);                     
-    var b = new ui.Button("Test Button"); 
-    b.setBounds(10, 60, 270, 50); 
-    p.add(b);                     
-    var pp = new ui.Panel();  
-    pp.setBounds(10, 120, 280, 250);
-    pp.setBackground("orange");     
-    p.add(pp);                    
-
-    var tf = new ui.TextField("Test Text Field");
-    tf.setBounds(10, 10, 200, 30);
-    tf.toPreferredHeight();
-    tf.setBorder(new zebkit.draw.Border("white"));
-    pp.add(tf);
-
-    new ui.zCanvas("layoutSample", 300, 400)
-          .root
-          .setLayout(new layout.BorderLayout())
-          .add("center", p); 
+zebkit.require("ui","layout","draw",function(ui,layout,draw) {
+    var root = new ui.zCanvas("layoutSample", 300, 420).root;
+    root.properties({
+        layout: new layout.BorderLayout(),
+        kids  : {
+            "center": new ui.Panel({
+                border: new draw.Border("white", 2),
+                bounds: [10,10, 380, 280],
+                background: "#3F76AA",
+                kids: [
+                    new ui.Label("Test Label").properties({
+                        color: "white",
+                        font: "bold",
+                        bounds: [10, 10, 360, 50]
+                    }),
+                    new ui.Button("Button").setBounds(10,60,270,50),
+                    new ui.Panel({
+                        bounds: [10, 120, 280, 270],
+                        background: "orange",
+                        kids: [
+                            new ui.TextField("Text Field")
+                            .setBounds(10, 10, 250, 30)
+                            .toPreferredHeight()
+                            .setBorder(new draw.Border("white"))  
+                        ]
+                    })
+                ]
+            })
+        }
+    });
 });
 </script>
+
+<p>The application code is shown below:</p>
+
+<div class="highlighter-rouge"><pre class="highlight"><code><span class="nx">zebkit</span><span class="p">.</span><span class="nx">require</span><span class="p">(</span><span class="s2">"ui"</span><span class="p">,</span><span class="s2">"layout"</span><span class="p">,</span><span class="s2">"draw"</span><span class="p">,</span><span class="kd">function</span><span class="p">(</span><span class="nx">ui</span><span class="p">,</span><span class="nx">layout</span><span class="p">,</span><span class="nx">draw</span><span class="p">)</span> <span class="p">{</span>
+    <span class="p">(</span><span class="k">new</span> <span class="nx">ui</span><span class="p">.</span><span class="nx">zCanvas</span><span class="p">(</span><span class="s2">"layoutSample"</span><span class="p">,</span> <span class="mi">300</span><span class="p">,</span> <span class="mi">420</span><span class="p">)).</span><span class="nx">root</span><span class="p">.</span><span class="nx">properties</span><span class="p">({</span>
+        <span class="na">layout</span><span class="p">:</span> <span class="k">new</span> <span class="nx">layout</span><span class="p">.</span><span class="nx">BorderLayout</span><span class="p">(),</span>
+        <span class="na">kids</span>  <span class="p">:</span> <span class="p">{</span>
+            <span class="s2">"center"</span><span class="p">:</span> <span class="k">new</span> <span class="nx">ui</span><span class="p">.</span><span class="nx">Panel</span><span class="p">({</span>
+                <span class="na">border</span><span class="p">:</span> <span class="k">new</span> <span class="nx">draw</span><span class="p">.</span><span class="nx">Border</span><span class="p">(</span><span class="s2">"white"</span><span class="p">,</span> <span class="mi">2</span><span class="p">),</span>
+                <span class="na">bounds</span><span class="p">:</span> <span class="p">[</span><span class="mi">10</span><span class="p">,</span><span class="mi">10</span><span class="p">,</span> <span class="mi">380</span><span class="p">,</span> <span class="mi">280</span><span class="p">],</span>
+                <span class="na">background</span><span class="p">:</span> <span class="s2">"#3F76AA"</span><span class="p">,</span>
+                <span class="na">kids</span><span class="p">:</span> <span class="p">[</span>
+                    <span class="k">new</span> <span class="nx">ui</span><span class="p">.</span><span class="nx">Label</span><span class="p">(</span><span class="s2">"Test Label"</span><span class="p">).</span><span class="nx">properties</span><span class="p">({</span>
+                        <span class="na">color</span><span class="p">:</span> <span class="s2">"white"</span><span class="p">,</span>
+                        <span class="na">font</span><span class="p">:</span> <span class="s2">"bold"</span><span class="p">,</span>
+                        <span class="na">bounds</span><span class="p">:</span> <span class="p">[</span><span class="mi">10</span><span class="p">,</span> <span class="mi">10</span><span class="p">,</span> <span class="mi">360</span><span class="p">,</span> <span class="mi">50</span><span class="p">]</span>
+                    <span class="p">}),</span>
+                    <span class="k">new</span> <span class="nx">ui</span><span class="p">.</span><span class="nx">Button</span><span class="p">(</span><span class="s2">"Button"</span><span class="p">).</span><span class="nx">setBounds</span><span class="p">(</span><span class="mi">10</span><span class="p">,</span><span class="mi">60</span><span class="p">,</span><span class="mi">270</span><span class="p">,</span><span class="mi">50</span><span class="p">),</span>
+                    <span class="k">new</span> <span class="nx">ui</span><span class="p">.</span><span class="nx">Panel</span><span class="p">({</span>
+                        <span class="na">bounds</span><span class="p">:</span> <span class="p">[</span><span class="mi">10</span><span class="p">,</span> <span class="mi">120</span><span class="p">,</span> <span class="mi">280</span><span class="p">,</span> <span class="mi">270</span><span class="p">],</span>
+                        <span class="na">background</span><span class="p">:</span> <span class="s2">"orange"</span><span class="p">,</span>
+                        <span class="na">kids</span><span class="p">:</span> <span class="p">[</span>
+                            <span class="k">new</span> <span class="nx">ui</span><span class="p">.</span><span class="nx">TextField</span><span class="p">(</span><span class="s2">"Text Field"</span><span class="p">)</span>
+                            <span class="p">.</span><span class="nx">setBounds</span><span class="p">(</span><span class="mi">10</span><span class="p">,</span> <span class="mi">10</span><span class="p">,</span> <span class="mi">250</span><span class="p">,</span> <span class="mi">30</span><span class="p">)</span>
+                            <span class="p">.</span><span class="nx">toPreferredHeight</span><span class="p">()</span>
+                            <span class="p">.</span><span class="nx">setBorder</span><span class="p">(</span><span class="k">new</span> <span class="nx">draw</span><span class="p">.</span><span class="nx">Border</span><span class="p">(</span><span class="s2">"white"</span><span class="p">))</span>  
+                        <span class="p">]</span>
+                    <span class="p">})</span>
+                <span class="p">]</span>
+            <span class="p">})</span>
+        <span class="p">}</span>
+    <span class="p">});</span>
+<span class="p">});</span>
+</code></pre>
+</div>
+
+<h2 id="ui-container-api">UI container API</h2>
+
+<p>It has been mentioned many times zebkit UI is organized as a multi-level hierarchy of various UI components. To manage the hierarchy UI component API provides the following methods and fields:</p>
+
+<table class="info">
+<tr><th>Method or field</th><th>Description</th></tr>
+
+<tr><td>
+      <p><strong>UI hierarchy fields</strong>:<br />
+<em>parent</em>, <em>kids</em></p>
+    </td><td>
+References to a parent component (parent) and array of child components (kids) 
+</td></tr>
+
+<tr><td>
+      <p><strong>Insertion API</strong>:<br />
+<em>add([constraints],component)</em><br /> 
+<em>setAt(index,component)</em><br /> 
+<em>setByConstraints(constraints,component)</em><br /> 
+<em>insert(index,constraints,component)</em></p>
+    </td><td>
+Add, insert, re-set a child component. 
+</td></tr>
+
+<tr><td>
+      <p><strong>Removal API</strong>:<br /> 
+<em>removeAt(index)</em><br />
+<em>remove(comp)</em><br />
+<em>removeAll()</em><br />
+<em>removeMe()</em></p>
+    </td><td> 
+Remove child component by child component index, by passed child component instance, all children or the given component.
+</td></tr>
+
+<tr><td>
+      <p><strong>Layout API</strong>:<br /> 
+<em>layout</em><br />
+<em>constraints</em><br />
+<em>byConstraints(ctr)</em><br />
+<em>setLayout(ctr)</em></p>
+    </td><td> 
+Setup layout manager, find child components by its constraints.
+</td></tr>
+
+</table>
+
+<p>UI component defines a layout manager to order its child components. Layout manager is special class that:</p>
+
+<ul>
+  <li>
+    <p>inherits <strong>“zebkit.layout.Layout”</strong> interface</p>
+  </li>
+  <li>
+    <p>Implement <strong>“calcPreferredSize(comp)”</strong> method to calculate component “pure” preferred size (the size that does not take in account border and padding gaps)</p>
+  </li>
+  <li>
+    <p>Implement <strong>“doLayout(comp)”</strong> method that knows how to place child components basing on some rules</p>
+  </li>
+</ul>
+
+<p>Layout manager is mandatory. If an UI component has not defined a layout manager a default one is taken. The default layout manager doesn’t have any special rules to order child components. Actually it does nothing, what means defined with a child component size and coordinates (“x”, “y”, “width”, “height”) will have effect.</p>
+
+<p>For more details consult “zebkit.ui.Panel” API documentation.</p>
+
+<h2 id="traveling-over-ui-components-hierarchy">Traveling over UI components hierarchy</h2>
+
+<p>Finding components in an UI hierarchy is implemented with “<strong>byPath(…)</strong>” method that is a part of panel API. The method gets two parameters:</p>
+
+<ul>
+  <li><strong>XPath like</strong> simplified expression</li>
+  <li><strong>Call back</strong> method that is called every time a new component in the traversing hierarchy matches the given expression</li>
+</ul>
+
+<p>The XPath like expression has to satisfy number of requirements:</p>
+
+<ul>
+  <li>Has to start with one of the following characters combination:
+    <ul>
+      <li><strong>”.”</strong>  to include current component in traversing. “//” or “/” have to follow <strong>”.”</strong>.</li>
+      <li><strong>”/”</strong>  to include all immediate child components in traversing</li>
+      <li><strong>”//”</strong> to include all child components on all levels in traversing</li>
+    </ul>
+  </li>
+  <li>Has to define path part after <strong>”/”</strong> or <strong>”//”</strong>. The path part van be one of the following:
+    <ul>
+      <li>A component class name (e.g. “zebkit.ui.Label”) to match components of the specified class</li>
+      <li>A component class name with <strong>”~”</strong> prefix (e.g. “~zebkit.ui.Label”) to match components that are instance of the class</li>
+      <li><strong>“*“</strong> to match any component</li>
+    </ul>
+  </li>
+  <li>Can contain number of path parts delimited with “/” or “//”</li>
+</ul>
+
+<p>Let’s imagine we have the following UI hierarchy:</p>
+
+<div class="highlighter-rouge"><pre class="highlight"><code>zcan <span class="o">(</span><span class="s2">"zebkit.ui.zCanvas"</span><span class="o">)</span>
+  |
+  +-- root <span class="o">(</span><span class="s2">"zebkit.ui.Panel"</span><span class="o">)</span>
+       +-- pan1 <span class="o">(</span><span class="s2">"zebkit.ui.Panel"</span><span class="o">)</span>
+       |     | 
+       |     +-- lab1 <span class="o">(</span><span class="s2">"zebkit.ui.Label"</span><span class="o">)</span>
+       |     +-- tf1  <span class="o">(</span><span class="s2">"zebkit.ui.TextField"</span><span class="o">)</span>
+       |
+       +-- pan2 <span class="o">(</span><span class="s2">"zebkit.ui.Panel"</span><span class="o">)</span>
+             | 
+             +-- ta1 <span class="o">(</span><span class="s2">"zebkit.ui.TextArea"</span><span class="o">)</span>
+             +-- bt1 <span class="o">(</span><span class="s2">"zebkit.ui.Button"</span><span class="o">)</span>  
+</code></pre>
+</div>
+
+<p>Then examples of path expressions and traversing results are shown in the table below:</p>
+<table class="info">
+<tr><th>
+Path
+</th><th>
+Result    
+</th></tr>
+
+<tr><td>
+      <p><em>zcan.byPath(“//*”, callback)</em></p>
+    </td><td>
+root, pan1, lab1, tf1, pan2, ta1, bt1    
+</td></tr>
+
+<tr><td>
+      <p><em>zcan.byPath(“/*”, callback)</em></p>
+    </td><td>
+root    
+</td></tr>
+
+<tr><td>
+      <p><em>zcan.byPath(“./zebkit.ui.Panel”, callback)</em></p>
+    </td><td>
+zcan, root    
+</td></tr>
+
+<tr><td>
+      <p><em>zcan.byPath(“//zebkit.ui.Label”, callback)</em></p>
+    </td><td>
+lab1
+</td></tr>
+
+<tr><td>
+      <p><em>zcan.byPath(“//~zebkit.ui.Label”, callback)</em></p>
+    </td><td>
+lab1, tf1, ta1<br />(since tf1 and ta1 are instances<br />of "zebkit.ui.Label" class)
+</td></tr>
+
+<tr><td>
+      <p><em>zcan.byPath(“/*/*“,callback)</em></p>
+    </td><td>
+pan1, pan2
+</td></tr>
+
+<tr><td>
+      <p><em>pan1.byPath(“./*“,callback)</em></p>
+    </td><td>
+pan1, lab1, tf1
+</td></tr>
+
+</table>
+
+<p>It is possible to use id shortcut path to find a component by its id (if the id has been set with <strong>“setId(id)”</strong> method). The shortcut path expression starts form <strong>”#”</strong> prefix that precedes an id value:</p>
+
+<div class="highlighter-rouge"><pre class="highlight"><code><span class="c1">// found component in hierarchy by its id </span>
+<span class="kd">var</span> <span class="nx">foundComp</span> <span class="o">=</span> <span class="nx">root</span><span class="p">.</span><span class="nx">byPath</span><span class="p">(</span><span class="s2">"#test"</span><span class="p">);</span>
+</code></pre>
+</div>
+
+<p>Optionally path part can include property value filter that defines a property value traversing component have to match:</p>
+
+<div class="highlighter-rouge"><pre class="highlight"><code><span class="c1">// find all visible labels component </span>
+<span class="nx">root</span><span class="p">.</span><span class="nx">byPath</span><span class="p">(</span><span class="s2">"//zebkit.ui.Label[@isVisible=true]"</span><span class="p">,</span><span class="kd">function</span><span class="p">(</span><span class="nx">found</span><span class="p">)</span> <span class="p">{</span>
+    <span class="p">...</span>
+<span class="p">});</span>
+</code></pre>
+</div>
+
+<div class="highlighter-rouge"><pre class="highlight"><code><span class="c1">// find all labels component that defines id property</span>
+<span class="nx">root</span><span class="p">.</span><span class="nx">byPath</span><span class="p">(</span><span class="s2">"//zebkit.ui.Label[@id]"</span><span class="p">,</span> <span class="kd">function</span><span class="p">(</span><span class="nx">foundComp</span><span class="p">)</span> <span class="p">{</span>
+    <span class="p">...</span>
+<span class="p">});</span>
+</code></pre>
+</div>
+
+<p>XPath like expressions can be optionally used with other “zebkit.ui.Panel” API methods:</p>
+
+<ul>
+  <li><strong>properties(…)</strong> to apply the given properties set to UI components that match the passed xpath-like expression:</li>
+</ul>
+
+<div class="highlighter-rouge"><pre class="highlight"><code>    <span class="c1">// Make visible all child text field components on ll level  </span>
+    <span class="c1">// for the root  </span>
+    <span class="nx">root</span><span class="p">.</span><span class="nx">properties</span><span class="p">(</span><span class="s2">"//zebkit.ui.TextField"</span><span class="p">,</span> <span class="p">{</span> <span class="na">visisble</span><span class="p">:</span> <span class="kc">true</span> <span class="p">});</span>
+</code></pre>
+</div>
+
+<ul>
+  <li><strong>on(…)</strong> and <strong>off(…)</strong>  to register or un-register events listener handler for UI components that match the passed xpath-like expression:</li>
+</ul>
+
+<div class="highlighter-rouge"><pre class="highlight"><code>    <span class="c1">// Register listener for all found button components </span>
+    <span class="c1">// that are child of the root recursively  </span>
+    <span class="nx">root</span><span class="p">.</span><span class="nx">on</span><span class="p">(</span><span class="s2">"//zebkit.ui.Button"</span><span class="p">,</span> <span class="kd">function</span><span class="p">(</span><span class="nx">button</span><span class="p">)</span> <span class="p">{</span>
+        <span class="p">...</span>
+    <span class="p">});</span>
+</code></pre>
+</div>
 
 <h2 id="ui-component-metrics">UI Component metrics</h2>
 
@@ -550,112 +897,27 @@ component paddings and appropriate setters to setup the paddings.
 getLeft(),getRight()<br />
 getTop(),getBottom()
 </td><td>
-calculated gaps as amount of padding and border sizes.
+calculated gaps as amount of padding and border gaps.
 </td></tr>
 
 <tr><td>
-getLeft(),getRight()<br />
-getTop(),getBottom()
+border.getLeft(),border.getRight()<br />
+border.getTop(),border.getBottom()
 </td><td>
-border gaps
+border gaps if border is has been defined for the component
 </td></tr>
 
 </table>
-
-<h2 id="ui-component-as-a-container">UI Component as a container</h2>
-
-<p>Zebra UI components are organized as hierarchy where every top level UI component can have 0 to N children UI components. To keep the hierarchy UI component API provides the following methods and fields:</p>
-
-<table class="info">
-<tr><th>Method or field</th><th>Description</th></tr>
-
-<tr><td>
-      <p><em>parent</em></p>
-    </td><td>
-reference to parent component
-</td></tr>
-
-<tr><td>
-      <p><em>kids</em></p>
-    </td><td> 
-array of children UI components
-</td></tr>
-
-<tr><td>
-      <p><em>add(component)</em></p>
-    </td><td>
-add a new children component
-</td></tr>
-
-<tr><td>
-      <p><em>add(constraints, component)</em></p>
-    </td><td>
-add a new children component with the given constraint
-</td></tr>
-
-<tr><td>
-      <p><em>set(constraints, component)</em></p>
-    </td><td>
-re-set existing children UI component with the given constraints or add new one if there is not a kid with the specified constraints
-</td></tr>
-
-<tr><td>
-      <p><em>insert(index, constraints, component)</em></p>
-    </td><td>
-insert a new kid component at the given index and constraints
-</td></tr>
-
-<tr><td>
-      <p><em>removeAt(index)</em></p>
-    </td><td> 
-remove children component at the given index of "kids" array
-</td></tr>
-
-<tr><td>
-      <p><em>remove(comp)</em></p>
-    </td><td>
-remove the given children component
-</td></tr>
-
-<tr><td>
-      <p><em>removeAll()</em></p>
-    </td><td>
-remove all children components
-</td></tr>
-
-</table>
-
-<p>Every UI component defines a layout manager to layout its children components. Layout manager is special class that:</p>
-
-<ul>
-  <li>
-    <p>inherits <strong>“zebkit.layout.Layout”</strong> interface</p>
-  </li>
-  <li>
-    <p>Declare <strong>“calcPreferredSize(comp)”</strong> method to calculate component “pure” preferred size (the size that does not take in account border and padding gaps)</p>
-  </li>
-  <li>
-    <p>Declare <strong>“doLayout(comp)”</strong> method that knows how to place children components basing on some rules</p>
-  </li>
-</ul>
-
-<p>Layout manager is mandatory. If an UI component has not defined a layout manager a default one is taken. The default layout manager doesn’t have any special rules to order children components. Actually it does nothing, what means component bounds (“x”, “y”, “width”, “height”) have effect.</p>
 
 <h2 id="component-validation">Component validation</h2>
 
 <p>For the sake of performance UI component saves its state to avoid redundant preferred size calculation, repainting and lay outing. The state can be valid or invalid. Developer can check the component state by accessing <strong>“isValid”</strong> boolean property. The following methods allow developers to control a component state:</p>
 
 <ul>
-  <li>
-    <p><strong>invalidate()</strong> Call to invalidate a component metric and layout.</p>
-  </li>
-  <li>
-    <p><strong>validate()</strong> Call to validate a component. Validation initiates the following actions:</p>
-
+  <li><strong>invalidate()</strong> Call to invalidate a component metric and layout.</li>
+  <li><strong>validate()</strong> Call to validate a component. Validation initiates the following actions:
     <ul>
-      <li>
-        <p>Calculate component metrics (preferred size) if it is in invalid state. Developer can declare <strong>“recalc()”</strong> method in a UI component class that will be called every time the component metric has to be re-calculated. It supposed <strong>“recalc()”</strong> method should calculate some component specific metics that have influence to component preferred size.</p>
-      </li>
+      <li>Calculate component metrics (preferred size) if it is in invalid state. Developer can declare <strong>“recalc()”</strong> method in a UI component class that will be called every time the component metric has to be re-calculated. It supposed <strong>“recalc()”</strong> method should calculate some component specific metics that have influence to component preferred size.</li>
       <li>Lay outing children component if necessary</li>
       <li>Call <strong>“validate()”</strong> method for all children component</li>
     </ul>

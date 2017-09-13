@@ -32,7 +32,7 @@
     <!-- RSS -->
     <link rel="alternate" type="application/rss+xml" title="RSS" href="/atom.xml">
 
-    <script type="text/javascript" src="/build/zebkit.js">  </script>
+    <script type="text/javascript" src="/build/zebkit.min.js?12092017">  </script>
 
     <script type="text/javascript">
         zebkit.ui.config("theme", "light");
@@ -48,9 +48,12 @@
         <table style="height:100%;border-width: 0px; border-color: #151515;">
             <tr>
                 <td colspan="2" align="center" style="border-width: 0px; margin: 0px; padding: 0px;">
-                    <a href="../index.html">
+                
+                    <a href="../dark/docs.dthen.html">
                         <img style="margin: 0px; padding: 0px;" src="/website/light/public/images/zebkit.logo.png" width="60%">
                     </a>
+                
+
                 </td>
             </tr>
             <tr>
@@ -81,6 +84,10 @@
 
 
                         
+                        
+                            
+                        
+                            
                         
                             
                         
@@ -171,6 +178,14 @@
                     
                         
                         
+                        
+                    
+                        
+                        
+                        
+                    
+                        
+                        
 
                             
                             
@@ -193,89 +208,82 @@
                             
                         
                             
-                                <!--
-
-
-                                -->
+                                
                             
                         
                             
-                                <!--
-
-
-                                -->
+                                
                             
                         
                             
-                                <!--
-
-
-                                -->
+                                
+                                    <a class="sidebar-nav-item active"
+                                       href="/website/light/docs.dthen.html">
+                                        <table cellpadding="0" cellspacing="0" style="padding: 0px;width:auto;margin:0px;">
+                                       <!--
+                                            <tr>
+                                                <td colspan="2" style="padding: 0px;" align="right">
+                                                    ┃
+                                                </td>
+                                            </tr>
+                                        -->
+                                            <tr>
+                                                <td style="padding: 0px;">
+                                                     D-then
+                                                </td>
+                                                <td style="padding: 0px;">
+                                                   &nbsp;◀┛&nbsp;&nbsp;
+                                                </td>
+                                            </tr>
+                                        </table>
+                                    </a>
+                                
                             
                         
                             
-                                <!--
-
-
-                                -->
+                                
                             
                         
                             
-                                <!--
-
-
-                                -->
+                                
+                            
+                        
+                            
+                                
+                            
+                        
+                            
+                                
                             
                         
                             
                         
                             
-                                <!--
-
-
-                                -->
+                                
                             
                         
                             
-                                <!--
-
-
-                                -->
+                                
                             
                         
                             
-                                <!--
-
-
-                                -->
+                                
                             
                         
                             
-                                <!--
-
-
-                                -->
+                                
                             
                         
                             
-                                <!--
-
-
-                                -->
+                                
                             
                         
                             
-                                <!--
-
-
-                                -->
+                                
                             
                         
                             
-                                <!--
-
-
-                                -->
+                                
                             
                         
                             
@@ -289,7 +297,11 @@
                         
                     
                         
+                        
+                        
                     
+                        
+                        
                         
                     
                         
@@ -400,11 +412,11 @@
         <h1 class="page-title">D-then</h1>
     
 
-    <p>Writing and subsequent reading JS code can make developers crazy because of callbacks JS software is normally overloaded. Especially “curved” code is encouraged by asynchronous calls. JS Promises are good to make JS code better looking and understandable. But in a context of zebkit project standard promises concept was not enough.</p>
+    <p>Writing and subsequent reading JS code can make developers crazy because of callbacks JS software is normally overloaded. JS Promises are good solution to make JS code better looking and understandable. But in a context of zebkit project standard promises concept was not enough.</p>
 
-<p>As an better alternative top JS Promise, zebkit has introduced ‘DoIt’ approach that have the following key advantages:</p>
+<p>As an better alternative to JS Promise, zebkit has introduced <strong>‘Dthen’</strong> approach that offers the following key advantages:</p>
 
-<p><strong>Simply run a sequence of methods.</strong> No reject or resolve callbacks have to be called:</p>
+<p><strong>Simply run a sequence of methods.</strong> No “reject” or “resolve” callbacks are expected to be called:</p>
 
 <div class="highlighter-rouge"><pre class="highlight"><code><span class="k">new</span> <span class="nx">zebkit</span><span class="p">.</span><span class="nx">DoIt</span><span class="p">().</span><span class="nx">then</span><span class="p">(</span><span class="kd">function</span><span class="p">()</span> <span class="p">{</span>
     <span class="c1">// first executed method</span>
@@ -421,7 +433,7 @@
 </code></pre>
 </div>
 
-<p><strong>Run methods in an order you add it.</strong> Synchronous, asynchronous methods can be combined in the executed sequence where every next step run only when previous one is completed:</p>
+<p><strong>Run methods in an order you add it.</strong> Synchronous or asynchronous methods can be combined in the executed sequence where every next step is run only when previous one has been completed:</p>
 
 <div class="highlighter-rouge"><pre class="highlight"><code><span class="kd">var</span> <span class="nx">rn</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">zebkit</span><span class="p">.</span><span class="nx">DoIt</span><span class="p">().</span><span class="nx">then</span><span class="p">(</span><span class="kd">function</span><span class="p">()</span> <span class="p">{</span>
     <span class="c1">// first executed method</span>
@@ -443,7 +455,7 @@
 </code></pre>
 </div>
 
-<p><strong>Embedded sequences are possible.</strong> Embedded execution method sequences can be useful to make your code more readable. Embedded sequence don’t pass its result with outer sequence:</p>
+<p><strong>Embedded sequences are possible.</strong> Embedded execution methods sequences can be useful to make your code more readable. Embedded sequences don’t share its result with outer sequence:</p>
 
 <div class="highlighter-rouge"><pre class="highlight"><code><span class="k">new</span> <span class="nx">zebkit</span><span class="p">.</span><span class="nx">DoIt</span><span class="p">().</span><span class="nx">then</span><span class="p">(</span><span class="kd">function</span><span class="p">()</span> <span class="p">{</span>
     <span class="k">return</span> <span class="mi">10</span><span class="p">;</span> 
@@ -459,7 +471,7 @@
 </code></pre>
 </div>
 
-<p><strong>Multiple sequences execution can be combined.</strong> A sequence can be run as a part of other sequence or can its run can be synchronized with another one:</p>
+<p><strong>Synchronizing multiple sequences.</strong> A sequence can be run as a part of other sequence:</p>
 
 <div class="highlighter-rouge"><pre class="highlight"><code><span class="kd">var</span> <span class="nx">doit1</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">zebkit</span><span class="p">.</span><span class="nx">DoIt</span><span class="p">().</span><span class="nx">then</span><span class="p">(</span><span class="kd">function</span><span class="p">()</span> <span class="p">{</span>
     <span class="p">...</span>  <span class="c1">// first executed method</span>
@@ -502,7 +514,7 @@
 </code></pre>
 </div>
 
-<p><strong>Asynchronous are easy to control.</strong> Calling ‘join’ method multiple times are used to join results of multiple asynchronous code execution:</p>
+<p><strong>Asynchronous are easy to control.</strong>:</p>
 
 <div class="highlighter-rouge"><pre class="highlight"><code><span class="k">new</span> <span class="nx">zebkit</span><span class="p">.</span><span class="nx">DoIt</span><span class="p">().</span><span class="nx">then</span><span class="p">(</span><span class="kd">function</span><span class="p">()</span> <span class="p">{</span>
     <span class="c1">// three asynchronous results in one method</span>

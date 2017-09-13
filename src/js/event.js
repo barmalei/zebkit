@@ -628,7 +628,7 @@ var EventProducer = Interface([
 
 
 /**
- * @extends the class with the given events support.
+ * Extends zebkit.Class with the given events support.
  * @param {String} [args]* list of events names
  * @method events
  * @for  zebkit.Class

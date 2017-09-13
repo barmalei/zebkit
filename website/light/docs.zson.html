@@ -32,7 +32,7 @@
     <!-- RSS -->
     <link rel="alternate" type="application/rss+xml" title="RSS" href="/atom.xml">
 
-    <script type="text/javascript" src="/build/zebkit.js">  </script>
+    <script type="text/javascript" src="/build/zebkit.min.js?12092017">  </script>
 
     <script type="text/javascript">
         zebkit.ui.config("theme", "light");
@@ -48,9 +48,12 @@
         <table style="height:100%;border-width: 0px; border-color: #151515;">
             <tr>
                 <td colspan="2" align="center" style="border-width: 0px; margin: 0px; padding: 0px;">
-                    <a href="../index.html">
+                
+                    <a href="../dark/docs.zson.html">
                         <img style="margin: 0px; padding: 0px;" src="/website/light/public/images/zebkit.logo.png" width="60%">
                     </a>
+                
+
                 </td>
             </tr>
             <tr>
@@ -81,6 +84,10 @@
 
 
                         
+                        
+                            
+                        
+                            
                         
                             
                         
@@ -171,6 +178,14 @@
                     
                         
                         
+                        
+                    
+                        
+                        
+                        
+                    
+                        
+                        
 
                             
                             
@@ -193,89 +208,82 @@
                             
                         
                             
-                                <!--
-
-
-                                -->
+                                
                             
                         
                             
-                                <!--
-
-
-                                -->
+                                
                             
                         
                             
-                                <!--
-
-
-                                -->
+                                
                             
                         
                             
-                                <!--
-
-
-                                -->
+                                
                             
                         
                             
-                                <!--
-
-
-                                -->
+                                
+                            
+                        
+                            
+                                
+                            
+                        
+                            
+                                
                             
                         
                             
                         
                             
-                                <!--
-
-
-                                -->
+                                
                             
                         
                             
-                                <!--
-
-
-                                -->
+                                
                             
                         
                             
-                                <!--
-
-
-                                -->
+                                
                             
                         
                             
-                                <!--
-
-
-                                -->
+                                
                             
                         
                             
-                                <!--
-
-
-                                -->
+                                
                             
                         
                             
-                                <!--
-
-
-                                -->
+                                
                             
                         
                             
-                                <!--
-
-
-                                -->
+                                
+                                    <a class="sidebar-nav-item active"
+                                       href="/website/light/docs.zson.html">
+                                        <table cellpadding="0" cellspacing="0" style="padding: 0px;width:auto;margin:0px;">
+                                       <!--
+                                            <tr>
+                                                <td colspan="2" style="padding: 0px;" align="right">
+                                                    ┃
+                                                </td>
+                                            </tr>
+                                        -->
+                                            <tr>
+                                                <td style="padding: 0px;">
+                                                     Zson
+                                                </td>
+                                                <td style="padding: 0px;">
+                                                   &nbsp;◀┛&nbsp;&nbsp;
+                                                </td>
+                                            </tr>
+                                        </table>
+                                    </a>
+                                
                             
                         
                             
@@ -289,7 +297,11 @@
                         
                     
                         
+                        
+                        
                     
+                        
+                        
                         
                     
                         
@@ -397,22 +409,21 @@
       <div class="page">
 
     
-        <h1 class="page-title">Zson</h1>
-    
 
-    <h3 id="zson-features">Zson features</h3>
-
-<p>JSON is for ages becoming is widely used format to keep configuration, exchange and store data etc. Zebkit uses JSON:</p>
+    <p>JSON for ages is widely used format to keep configuration, exchange and store data etc. Zebkit uses JSON:</p>
 
 <ul>
   <li>To configure UI components properties</li>
   <li>As a descriptive language to define UI forms</li>
+  <li>As a form to define coupled hierarchy of objects</li>
 </ul>
 
-<p>Pure JSON is too basic and limited. Zebkit extends JSON interpretation to support number of advanced features. The new JSON interpretation is called Zson. Zson supports the following:</p>
+<h2 id="zson-features">Zson features</h2>
+
+<p>Standard JSON format is quite simple and often cannot cover desired requirements. Zebkit extends JSON interpretation to support number of advanced features. The new JSON interpretation is called <strong>Zson</strong> (<strong>zebkit.Zson</strong> class), the number of new JSON features it introduces are the following:</p>
 
 <ul>
-  <li><strong>Class instantiation.</strong> A JSON field value can be described as an instance of a class. For instance, “a” field in the JSON below will be set to an instance of JS “RegExp” (a = new RegExp(“[a-z]+”,”i”)) class:</li>
+  <li><strong>Class instantiation.</strong> A JSON field value can be fulfilled with an instance of a class. Imagine we have “a” field. Let’s set the field with an instance of JS “RegExp” (<code class="highlighter-rouge">a = new RegExp("[a-z]+","i")</code>) class:</li>
 </ul>
 
 <div class="highlighter-rouge"><pre class="highlight"><code><span class="w">    </span><span class="p">{</span><span class="w"> </span><span class="nt">"a"</span><span class="w"> </span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nt">"@RegExp"</span><span class="w"> </span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="w"> </span><span class="s2">"[a-z]+"</span><span class="p">,</span><span class="w"> </span><span class="s2">"i"</span><span class="w"> </span><span class="p">]</span><span class="w"> </span><span class="p">}</span><span class="w"> </span><span class="p">}</span><span class="w">
@@ -420,7 +431,7 @@
 </div>
 
 <ul>
-  <li><strong>Properties.</strong> Loading a JS object with a JSON takes in account the target object can have setter methods for a dedicated properties. For the following JSON zebkit tries to call <strong>“setTest(100)”</strong> method of the target object if the method is available:</li>
+  <li><strong>Properties.</strong> Loading a JS object with a JSON takes in account the target object can define setter methods for a dedicated properties. For the following JSON zebkit tries to call <strong>“setTest(100)”</strong> method of the target object if the method is available:</li>
 </ul>
 
 <div class="highlighter-rouge"><pre class="highlight"><code><span class="w">    </span><span class="p">{</span><span class="w"> </span><span class="nt">"test"</span><span class="p">:</span><span class="w"> </span><span class="mi">100</span><span class="w"> </span><span class="p">}</span><span class="w">
@@ -428,7 +439,7 @@
 </div>
 
 <ul>
-  <li><strong>References.</strong> A value can be set as reference to other JSON value. For instance “b” field value is set to 12:</li>
+  <li><strong>References.</strong> A value can be set as reference to other JSON value. For instance in example below “b” field value will be set to 12:</li>
 </ul>
 
 <div class="highlighter-rouge"><pre class="highlight"><code><span class="w">    </span><span class="p">{</span><span class="w">  </span><span class="nt">"a"</span><span class="p">:</span><span class="w"> </span><span class="mi">12</span><span class="p">,</span><span class="w"> </span><span class="nt">"b"</span><span class="p">:</span><span class="w"> </span><span class="s2">"%{a}"</span><span class="w"> </span><span class="p">}</span><span class="w"> 
@@ -436,7 +447,7 @@
 </div>
 
 <ul>
-  <li><strong>Expressions.</strong> Expression is JS code that is evaluated and then assigned to a JSON field as a value. For instance the value of “a” field below will be resolved as JS expression and set to 20:</li>
+  <li><strong>Expressions.</strong> Expression is JS code that is evaluated and then assigned to a JSON field. For instance the value of “a” field below will be resolved as JS expression and set to 20:</li>
 </ul>
 
 <div class="highlighter-rouge"><pre class="highlight"><code><span class="w">    </span><span class="p">{</span><span class="w">  </span><span class="nt">"a"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nt">".expr"</span><span class="w"> </span><span class="p">:</span><span class="w"> </span><span class="s2">"10 + 10"</span><span class="w"> </span><span class="p">}</span><span class="w"> </span><span class="p">}</span><span class="w">
@@ -444,61 +455,71 @@
 </div>
 
 <ul>
-  <li><strong>Image, textual file and embedded JSON loadings.</strong>  JSON values can be references to external resources like images, JSON, etc. For instance to load image and set it as “a” field value the following JSON can be used:</li>
+  <li><strong>Image, textual file and external JSON loadings.</strong>  JSON values can  refer to external resources like images, JSON. For instance to load image as “a” field value do the following: <code class="highlighter-rouge"><span class="p">{</span><span class="w"> </span><span class="nt">"a"</span><span class="p">:</span><span class="w"> </span><span class="s2">"%{&lt;img&gt; picture.jpg}"</span><span class="w"> </span><span class="p">}</span></code>. External files referenced with Zson:
+    <ul>
+      <li>
+        <p>Loaded asynchronously.</p>
+      </li>
+      <li>
+        <p>Can be loaded recursively. That means loaded files can contain references to external resources and so on.</p>
+      </li>
+      <li>
+        <p>Zebkit Zson keeps the loadings files in order. That means any subsequent field value can be a reference to a an externally loaded field.</p>
+      </li>
+    </ul>
+
+    <p>For instance Zson below loads “embedded.json” and set the loaded content as a value of “e” field. In its turn “f” field is reference to loaded “e”:</p>
+  </li>
 </ul>
 
-<div class="highlighter-rouge"><pre class="highlight"><code><span class="w">    </span><span class="p">{</span><span class="w">  </span><span class="nt">"a"</span><span class="p">:</span><span class="w"> </span><span class="s2">"%{&lt;img&gt; http://test.com/picture.jpg}"</span><span class="w"> </span><span class="p">}</span><span class="w">
+<div class="highlighter-rouge"><pre class="highlight"><code><span class="w">    </span><span class="p">{</span><span class="w">  </span><span class="nt">"a"</span><span class="w"> </span><span class="p">:</span><span class="w"> </span><span class="mi">100</span><span class="p">,</span><span class="w">
+       </span><span class="nt">"b"</span><span class="w"> </span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nt">"c"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nt">"@Date"</span><span class="w"> </span><span class="p">:</span><span class="w"> </span><span class="p">[]</span><span class="w"> </span><span class="p">}</span><span class="w"> </span><span class="p">},</span><span class="w"> 
+       </span><span class="nt">"d"</span><span class="w"> </span><span class="p">:</span><span class="w"> </span><span class="s2">"%{a}"</span><span class="p">,</span><span class="w">
+       </span><span class="nt">"e"</span><span class="w"> </span><span class="p">:</span><span class="w"> </span><span class="s2">"%{&lt;json&gt; http://test.com/embedded.json}"</span><span class="p">,</span><span class="w">
+       </span><span class="nt">"f"</span><span class="w"> </span><span class="p">:</span><span class="w"> </span><span class="s2">"%{e.m.k}"</span><span class="w">
+    </span><span class="p">}</span><span class="w">
 </span></code></pre>
 </div>
 
-<p>Pay attention that external files are loaded asynchronously. You can load multiple external files recursively. Zebkit keeps the loadings in order. That means any subsequent field value can be a reference to a an externally loaded field. For instance:</p>
-
-<div class="highlighter-rouge"><pre class="highlight"><code><span class="p">{</span><span class="w">  </span><span class="nt">"a"</span><span class="w"> </span><span class="p">:</span><span class="w"> </span><span class="mi">100</span><span class="p">,</span><span class="w">
-   </span><span class="nt">"b"</span><span class="w"> </span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nt">"c"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nt">"@Date"</span><span class="w"> </span><span class="p">:</span><span class="w"> </span><span class="p">[]</span><span class="w"> </span><span class="p">}</span><span class="w"> </span><span class="p">},</span><span class="w"> 
-   </span><span class="nt">"d"</span><span class="w"> </span><span class="p">:</span><span class="w"> </span><span class="s2">"%{a}"</span><span class="p">,</span><span class="w">
-   </span><span class="nt">"e"</span><span class="w"> </span><span class="p">:</span><span class="w"> </span><span class="s2">"%{&lt;json&gt; http://test.com/embedded.json}"</span><span class="p">,</span><span class="w">
-   </span><span class="nt">"f"</span><span class="w"> </span><span class="p">:</span><span class="w"> </span><span class="s2">"%{e.m.k}"</span><span class="w">
-</span><span class="p">}</span><span class="w">
-</span></code></pre>
-</div>
-
-<p>Where “embedded.json” is:</p>
+<p>Where “embedded.json” is the following:</p>
 
 <div class="highlighter-rouge"><pre class="highlight"><code><span class="p">{</span><span class="w">  </span><span class="nt">"m"</span><span class="w"> </span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w">  </span><span class="nt">"k"</span><span class="w"> </span><span class="p">:</span><span class="w"> </span><span class="s2">"Hello"</span><span class="w"> </span><span class="p">}</span><span class="w"> </span><span class="p">}</span><span class="w">
 </span></code></pre>
 </div>
 
+<p>The result of the Zson loading described below:</p>
+
 <ul>
   <li><strong>“a”</strong> equals 100</li>
-  <li><strong>“c”</strong> is an instance of JS “Date” class</li>
-  <li><strong>“d”</strong> is reference that will be resolved to value “a” key has (100)</li>
-  <li><strong>“e”</strong> value will be loaded and set to data “http://test.com/data.txt” URL points</li>
-  <li><strong>“f”</strong> value is a reference to JSON content that is loaded as external JSON. In this case “f” equals “Hello”.</li>
+  <li><strong>“c”</strong> is an instance of JavaScript “Date” class</li>
+  <li><strong>“d”</strong> is reference to “a” filed. It is resolved to equal 100</li>
+  <li><strong>“e”</strong> value is set to loaded “http://test.com/embedded.json”. It equals  <code class="highlighter-rouge"><span class="p">{</span><span class="nt">"m"</span><span class="p">:{</span><span class="w">  </span><span class="nt">"k"</span><span class="p">:</span><span class="w"> </span><span class="s2">"Hello"</span><span class="w"> </span><span class="p">}}</span></code></li>
+  <li><strong>“f”</strong> value is a reference to JSON content that is loaded with external JSON. In this case “f” equals “Hello”.</li>
 </ul>
 
-<div class="highlighter-rouge"><pre class="highlight"><code><span class="k">new</span> <span class="nx">Zson</span><span class="p">().</span><span class="nx">then</span><span class="p">(</span><span class="kd">function</span><span class="p">(</span><span class="s2">"config.json"</span><span class="p">,</span> <span class="nx">conf</span><span class="p">)</span> <span class="p">{</span>
-    <span class="p">...</span> <span class="c1">// handle fully loaded json</span>
+<p>The code that load the Zson us shown below:</p>
+
+<div class="highlighter-rouge"><pre class="highlight"><code><span class="k">new</span> <span class="nx">Zson</span><span class="p">().</span><span class="nx">then</span><span class="p">(</span><span class="kd">function</span><span class="p">(</span><span class="s2">"config.json"</span><span class="p">,</span> <span class="nx">zson</span><span class="p">)</span> <span class="p">{</span>
+    <span class="nx">zson</span><span class="p">.</span><span class="nx">root</span> <span class="c1">// handle fully loaded json </span>
 <span class="p">});</span>  
 </code></pre>
 </div>
 
-<h3 id="configure-js-objects-with-zson">Configure JS objects with Zson</h3>
+<h2 id="configure-js-objects-with-zson">Configure JS objects with Zson</h2>
 
 <p>Zson can be used to configure classes and class instances with required properties. The way to do it looks as follow:</p>
 
 <ul>
-  <li>Imagine we declare simple class:</li>
+  <li>Imagine we declare simple class “A”:</li>
 </ul>
 
 <div class="highlighter-rouge"><pre class="highlight"><code><span class="kd">var</span> <span class="nx">A</span> <span class="o">=</span> <span class="nx">zebkit</span><span class="p">.</span><span class="nx">Class</span><span class="p">([</span>
-    <span class="kd">function</span><span class="p">(</span><span class="nx">a</span><span class="p">,</span> <span class="nx">b</span><span class="p">,</span> <span class="nx">c</span><span class="p">)</span> <span class="p">{</span>  <span class="c1">// constructor</span>
-        <span class="k">this</span><span class="p">.</span><span class="nx">a</span> <span class="o">=</span> <span class="nx">a</span><span class="p">;</span>
-        <span class="k">this</span><span class="p">.</span><span class="nx">b</span> <span class="o">=</span> <span class="nx">b</span><span class="p">;</span>
-        <span class="k">this</span><span class="p">.</span><span class="nx">c</span> <span class="o">=</span> <span class="nx">c</span><span class="p">;</span>
+    <span class="kd">function</span><span class="p">()</span> <span class="p">{</span>  <span class="c1">// constructor</span>
+        <span class="k">this</span><span class="p">.</span><span class="nx">b</span> <span class="o">=</span> <span class="k">this</span><span class="p">.</span><span class="nx">a</span> <span class="o">=</span> <span class="kc">null</span><span class="p">;</span>
     <span class="p">},</span>
 
-    <span class="kd">function</span> <span class="nx">setD</span><span class="p">(</span><span class="nx">d</span><span class="p">)</span> <span class="p">{</span> <span class="c1">// setter of property "d" </span>
-        <span class="k">this</span><span class="p">.</span><span class="nx">d</span> <span class="o">=</span> <span class="nx">d</span><span class="p">;</span>
+    <span class="kd">function</span> <span class="nx">setC</span><span class="p">(</span><span class="nx">c</span><span class="p">)</span> <span class="p">{</span> <span class="c1">// setter of property "c" </span>
+        <span class="k">this</span><span class="p">.</span><span class="nx">c</span> <span class="o">=</span> <span class="nx">c</span><span class="p">;</span>
     <span class="p">}</span>
 <span class="p">]);</span> 
 </code></pre>
@@ -509,15 +530,15 @@
 </ul>
 
 <div class="highlighter-rouge"><pre class="highlight"><code><span class="p">{</span><span class="w">  
-    </span><span class="nt">"d"</span><span class="w"> </span><span class="p">:</span><span class="w"> </span><span class="s2">"value of property 'd'"</span><span class="p">,</span><span class="w">
-    </span><span class="nt">"c"</span><span class="w"> </span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nt">"@Date"</span><span class="p">:</span><span class="w"> </span><span class="p">[]</span><span class="w"> </span><span class="p">},</span><span class="w">
+    </span><span class="nt">"a"</span><span class="w"> </span><span class="p">:</span><span class="w"> </span><span class="s2">"value of property 'a'"</span><span class="p">,</span><span class="w">
+    </span><span class="nt">"b"</span><span class="w"> </span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nt">"@Date"</span><span class="p">:</span><span class="w"> </span><span class="p">[]</span><span class="w"> </span><span class="p">},</span><span class="w">
     </span><span class="nt">"c"</span><span class="w"> </span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">,</span><span class="mi">3</span><span class="w"> </span><span class="p">]</span><span class="w">
 </span><span class="p">}</span><span class="w">
 </span></code></pre>
 </div>
 
 <ul>
-  <li>And at last instantiate the class and configure the instance with JSON:</li>
+  <li>Then we instantiate the class and configure the instance with JSON:</li>
 </ul>
 
 <div class="highlighter-rouge"><pre class="highlight"><code><span class="kd">var</span> <span class="nx">a</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">A</span><span class="p">();</span>
@@ -525,6 +546,14 @@
 <span class="nx">zebkit</span><span class="p">.</span><span class="nx">Zson</span><span class="p">.</span><span class="nx">then</span><span class="p">(</span><span class="s2">"config.json"</span><span class="p">,</span> <span class="nx">a</span><span class="p">);</span>  
 </code></pre>
 </div>
+
+<p>The result is:</p>
+
+<ul>
+  <li>“a” field of the class instance equals “value of property ‘a’”</li>
+  <li>“b” field of the class instance is set to an instance of JS Date class</li>
+  <li>“c” field of the class instance is set to [1,2,3] via calling the property setter method - “setC(c)”.</li>
+</ul>
 
 </div>
 

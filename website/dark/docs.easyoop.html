@@ -32,7 +32,7 @@
     <!-- RSS -->
     <link rel="alternate" type="application/rss+xml" title="RSS" href="/atom.xml">
 
-    <script type="text/javascript" src="/build/zebkit.js">  </script>
+    <script type="text/javascript" src="/build/zebkit.min.js?12092017">  </script>
 
     <script type="text/javascript">
         zebkit.ui.config("theme", "dark");
@@ -48,9 +48,12 @@
         <table style="height:100%;border-width: 0px; border-color: #151515;">
             <tr>
                 <td colspan="2" align="center" style="border-width: 0px; margin: 0px; padding: 0px;">
-                    <a href="../index.html">
+                
+                    <a href="../light/docs.easyoop.html">
                         <img style="margin: 0px; padding: 0px;" src="/website/dark/public/images/zebkit.logo.png" width="60%">
                     </a>
+                
+
                 </td>
             </tr>
             <tr>
@@ -81,6 +84,10 @@
 
 
                         
+                        
+                            
+                        
+                            
                         
                             
                         
@@ -171,6 +178,14 @@
                     
                         
                         
+                        
+                    
+                        
+                        
+                        
+                    
+                        
+                        
 
                             
                             
@@ -193,89 +208,82 @@
                             
                         
                             
-                                <!--
-
-
-                                -->
+                                
                             
                         
                             
-                                <!--
-
-
-                                -->
+                                
                             
                         
                             
-                                <!--
-
-
-                                -->
+                                
                             
                         
                             
-                                <!--
-
-
-                                -->
+                                
+                                    <a class="sidebar-nav-item active"
+                                       href="/website/dark/docs.easyoop.html">
+                                        <table cellpadding="0" cellspacing="0" style="padding: 0px;width:auto;margin:0px;">
+                                       <!--
+                                            <tr>
+                                                <td colspan="2" style="padding: 0px;" align="right">
+                                                    ┃
+                                                </td>
+                                            </tr>
+                                        -->
+                                            <tr>
+                                                <td style="padding: 0px;">
+                                                     Easy OOP
+                                                </td>
+                                                <td style="padding: 0px;">
+                                                   &nbsp;◀┛&nbsp;&nbsp;
+                                                </td>
+                                            </tr>
+                                        </table>
+                                    </a>
+                                
                             
                         
                             
-                                <!--
-
-
-                                -->
+                                
+                            
+                        
+                            
+                                
+                            
+                        
+                            
+                                
                             
                         
                             
                         
                             
-                                <!--
-
-
-                                -->
+                                
                             
                         
                             
-                                <!--
-
-
-                                -->
+                                
                             
                         
                             
-                                <!--
-
-
-                                -->
+                                
                             
                         
                             
-                                <!--
-
-
-                                -->
+                                
                             
                         
                             
-                                <!--
-
-
-                                -->
+                                
                             
                         
                             
-                                <!--
-
-
-                                -->
+                                
                             
                         
                             
-                                <!--
-
-
-                                -->
+                                
                             
                         
                             
@@ -289,7 +297,11 @@
                         
                     
                         
+                        
+                        
                     
+                        
+                        
                         
                     
                         
@@ -400,16 +412,17 @@
         <h1 class="page-title">Easy OOP</h1>
     
 
-    <p><br/></p>
+    <p><br /></p>
 
-<p><strong>Simple concept</strong> </p>
+<p><strong>Simple concept</strong></p>
 
 <ul>
-<li>Use <em>&quot;zebkit.Class(...)&quot;</em> method to declare zebkit classes</li>
-<li>Pass parent class (optionally), interfaces (optionally) and array of methods that the given class has to have</li>
-<li>Method with empty name is reserved for constructor</li>
+  <li>Use <em>“zebkit.Class(…)”</em> method to declare zebkit classes</li>
+  <li>Pass parent class (optionally), interfaces (optionally) and array of methods that the given class has to have</li>
+  <li>Method with empty name is reserved for constructor</li>
 </ul>
-<div class="highlight"><pre><code class="language-js" data-lang="js"><span class="c1">// Declare "MyClass" class</span>
+
+<div class="highlighter-rouge"><pre class="highlight"><code><span class="c1">// Declare "MyClass" class</span>
 <span class="kd">var</span> <span class="nx">MyClass</span> <span class="o">=</span> <span class="nx">zebkit</span><span class="p">.</span><span class="nx">Class</span><span class="p">([</span>
     <span class="c1">// Declare class constructor</span>
     <span class="kd">function</span> <span class="p">()</span> <span class="p">{</span>
@@ -426,14 +439,17 @@
 <span class="c1">// Call method "abc"</span>
 <span class="nx">myClassInstance</span><span class="p">.</span><span class="nx">abc</span><span class="p">();</span> 
 <span class="nx">myClassInstance</span><span class="p">.</span><span class="nx">a</span><span class="p">;</span> <span class="c1">// 10 </span>
-</code></pre></div>
-<p><strong>Access to parent context</strong> </p>
+</code></pre>
+</div>
+
+<p><strong>Access to parent context</strong></p>
 
 <ul>
-<li>Use <em>$super(...)</em> method to call a parent method implementation</li>
-<li><em>$super(...)</em> works correct for deep hierarchy tracking properly an order of methods execution </li>
+  <li>Use <strong>$super(…)</strong> method to call a parent method implementation</li>
+  <li><strong>$super(…)</strong> works correct for deep hierarchy tracking properly an order of methods execution</li>
 </ul>
-<div class="highlight"><pre><code class="language-js" data-lang="js"><span class="kd">var</span> <span class="nx">A</span> <span class="o">=</span> <span class="nx">zebkit</span><span class="p">.</span><span class="nx">Class</span><span class="p">([</span>
+
+<div class="highlighter-rouge"><pre class="highlight"><code><span class="kd">var</span> <span class="nx">A</span> <span class="o">=</span> <span class="nx">zebkit</span><span class="p">.</span><span class="nx">Class</span><span class="p">([</span>
     <span class="kd">function</span><span class="p">(</span><span class="nx">a</span><span class="p">)</span> <span class="p">{</span> <span class="k">this</span><span class="p">.</span><span class="nx">varA</span> <span class="o">=</span> <span class="nx">a</span><span class="p">;</span> <span class="p">},</span>
     <span class="kd">function</span> <span class="nx">abc</span><span class="p">()</span> <span class="p">{</span> <span class="k">return</span> <span class="mi">2</span><span class="p">;</span> <span class="p">}</span>
 <span class="p">]);</span>
@@ -453,17 +469,20 @@
 <span class="nx">b</span><span class="p">.</span><span class="nx">varA</span><span class="p">;</span>  <span class="c1">// 2</span>
 <span class="nx">b</span><span class="p">.</span><span class="nx">varB</span><span class="p">;</span>  <span class="c1">// 5</span>
 <span class="nx">b</span><span class="p">.</span><span class="nx">abc</span><span class="p">();</span> <span class="c1">// 3 + 2 = 5   </span>
-</code></pre></div>
-<p><strong>Inheritance</strong> </p>
+</code></pre>
+</div>
+
+<p><strong>Inheritance</strong></p>
 
 <ul>
-<li>Zebkit easy OOP supports single parent inheritance </li>
-<li>Pass a parent class to be inherited as the first parameter of <em>&quot;zebkit.Class()&quot;</em> method</li>
-<li>Class methods can be overridden, but not overloaded</li>
-<li>Constructor is inherited</li>
-<li>Use <em>&quot;zebkit.instanceOf()</em> operator instead of standard JS <em>&quot;instanceof&quot;</em><br></li>
+  <li>Zebkit easy OOP supports single parent inheritance</li>
+  <li>Pass a parent class to be inherited as the first parameter of <strong>“zebkit.Class(…)”</strong> method</li>
+  <li>Class methods can be overridden, but not overloaded</li>
+  <li>Constructor is inherited</li>
+  <li>Use <strong>“zebkit.instanceOf()</strong> operator instead of standard JS <strong>“instanceof”</strong></li>
 </ul>
-<div class="highlight"><pre><code class="language-js" data-lang="js"><span class="c1">// Define class A with class method  "abc()"</span>
+
+<div class="highlighter-rouge"><pre class="highlight"><code><span class="c1">// Define class A with class method  "abc()"</span>
 <span class="kd">var</span> <span class="nx">A</span> <span class="o">=</span> <span class="nx">zebkit</span><span class="p">.</span><span class="nx">Class</span><span class="p">([</span>
     <span class="kd">function</span> <span class="nx">abc</span><span class="p">()</span> <span class="p">{</span> <span class="p">...</span> <span class="p">}</span>
 <span class="p">]);</span>
@@ -478,15 +497,18 @@
 <span class="nx">zebkit</span><span class="p">.</span><span class="nx">instanceOf</span><span class="p">(</span><span class="nx">b</span><span class="p">,</span> <span class="nx">A</span><span class="p">)</span> <span class="c1">// true</span>
 <span class="nx">zebkit</span><span class="p">.</span><span class="nx">instanceOf</span><span class="p">(</span><span class="nx">b</span><span class="p">,</span> <span class="nx">B</span><span class="p">)</span> <span class="c1">// true</span>
 <span class="nx">zebkit</span><span class="p">.</span><span class="nx">instanceOf</span><span class="p">(</span><span class="nx">a</span><span class="p">,</span> <span class="nx">B</span><span class="p">)</span> <span class="c1">// false</span>
-</code></pre></div>
+</code></pre>
+</div>
+
 <p><strong>Mixing (Interface)</strong> Mixing is way to share common functionality between classes without necessity to support improper multi inheritance OOP concept.</p>
 
 <ul>
-<li>Mix methods set has to be declared with <em>&quot;zebkit.Interface(...)&quot;</em></li>
-<li><em>&quot;zebkit.Interface()&quot;</em> can declare set of methods and initializer </li>
-<li>Interface cannot inherit other interfaces and classes</li>
+  <li>Mix methods set has to be declared with <strong>“zebkit.Interface(…)”</strong></li>
+  <li><strong>“zebkit.Interface()”</strong> can declare set of methods</li>
+  <li>Interface cannot inherit other interfaces and classes</li>
 </ul>
-<div class="highlight"><pre><code class="language-js" data-lang="js"><span class="c1">// Declare Mix1 and Mix2 interfaces  </span>
+
+<div class="highlighter-rouge"><pre class="highlight"><code><span class="c1">// Declare Mix1 and Mix2 interfaces  x§</span>
 <span class="kd">var</span> <span class="nx">Mix1</span> <span class="o">=</span> <span class="nx">zebkit</span><span class="p">.</span><span class="nx">Interface</span><span class="p">([</span>
     <span class="kd">function</span> <span class="nx">abc</span><span class="p">()</span> <span class="p">{</span> <span class="p">...</span> <span class="p">}</span>
 <span class="p">]);</span> 
@@ -506,9 +528,12 @@
 <span class="nx">a</span><span class="p">.</span><span class="nx">abc</span><span class="p">();</span>
 <span class="nx">b</span><span class="p">.</span><span class="nx">abc</span><span class="p">();</span>
 <span class="nx">b</span><span class="p">.</span><span class="nx">cde</span><span class="p">();</span>
-</code></pre></div>
+</code></pre>
+</div>
+
 <p><strong>Parametrized interfaces</strong> A declared interface can be parametrized. Parametrization is a declaration of the same interface (with the identical set of methods) but with another default properties set.</p>
-<div class="highlight"><pre><code class="language-js" data-lang="js"><span class="c1">// Declare an interface that renders rectangle </span>
+
+<div class="highlighter-rouge"><pre class="highlight"><code><span class="c1">// Declare an interface that renders rectangle </span>
 <span class="kd">var</span> <span class="nx">DrawRect</span> <span class="o">=</span> <span class="nx">zebkit</span><span class="p">.</span><span class="nx">Interface</span><span class="p">([</span>
     <span class="kd">function</span> <span class="nx">paint</span><span class="p">(</span><span class="nx">g</span><span class="p">)</span> <span class="p">{</span>
         <span class="k">if</span> <span class="p">(</span><span class="k">typeof</span> <span class="k">this</span><span class="p">.</span><span class="nx">color</span> <span class="o">!==</span> <span class="s1">'undefined'</span><span class="p">)</span> <span class="p">{</span>
@@ -529,15 +554,18 @@
     <span class="na">color</span><span class="p">:</span> <span class="s2">"red"</span><span class="p">,</span>
     <span class="na">lineWidth</span><span class="p">:</span> <span class="mi">4</span>
 <span class="p">});</span>
-</code></pre></div>
+</code></pre>
+</div>
+
 <p><strong>Anonymous classes</strong> Anonymous classes is one of the greatest feature zebkit Easy OOP provides. Zebkit allows developers to customize classes during the classes instantiation.</p>
 
 <ul>
-<li>Pass to instantiated class array of anonymous class methods to customize it as the last argument</li>
-<li>Original class methods and constructor can be overridden with anonymous methods</li>
-<li>Super context is accessible from an anonymous class methods</li>
+  <li>Pass to instantiated class array of anonymous class methods to customize it as the last argument</li>
+  <li>Original class methods and constructor can be overridden with anonymous methods</li>
+  <li>Super context is accessible from an anonymous class methods</li>
 </ul>
-<div class="highlight"><pre><code class="language-js" data-lang="js"><span class="c1">// Declare class A</span>
+
+<div class="highlighter-rouge"><pre class="highlight"><code><span class="c1">// Declare class A</span>
 <span class="kd">var</span> <span class="nx">A</span> <span class="o">=</span> <span class="nx">zebkit</span><span class="p">.</span><span class="nx">Class</span><span class="p">([</span>
     <span class="kd">function</span><span class="p">(</span><span class="nx">p</span><span class="p">)</span> <span class="p">{</span>  <span class="c1">// Constructor</span>
         <span class="k">this</span><span class="p">.</span><span class="nx">v</span> <span class="o">=</span> <span class="nx">p</span><span class="p">;</span>
@@ -557,15 +585,18 @@
 <span class="p">]);</span>
 <span class="nx">a</span><span class="p">.</span><span class="nx">abc</span><span class="p">();</span> <span class="c1">// 20</span>
 <span class="nx">a</span><span class="p">.</span><span class="nx">v</span><span class="p">;</span>     <span class="c1">// 1 + 1 = 2</span>
-</code></pre></div>
-<p><strong>Static methods and variables</strong> </p>
+</code></pre>
+</div>
+
+<p><strong>Static methods and variables</strong></p>
 
 <ul>
-<li>Static variables and methods have to be declared inside special <em>&quot;$clazz()&quot;</em> method. The method is called in a class scope context</li>
-<li>Static variables are inheritable </li>
-<li>Static variables whose names start from &quot;$&quot; character are not inheritable</li>
+  <li>Static variables and methods have to be declared inside special <em>“$clazz()”</em> method. The method is called in a class scope context</li>
+  <li>Static variables are inheritable</li>
+  <li>Static variables whose names start from “$” character are not inheritable</li>
 </ul>
-<div class="highlight"><pre><code class="language-js" data-lang="js"><span class="kd">var</span> <span class="nx">A</span> <span class="o">=</span> <span class="nx">zebkit</span><span class="p">.</span><span class="nx">Class</span><span class="p">([</span>
+
+<div class="highlighter-rouge"><pre class="highlight"><code><span class="kd">var</span> <span class="nx">A</span> <span class="o">=</span> <span class="nx">zebkit</span><span class="p">.</span><span class="nx">Class</span><span class="p">([</span>
     <span class="c1">// Declare static stuff inside the  method</span>
     <span class="kd">function</span> <span class="nx">$clazz</span><span class="p">()</span> <span class="p">{</span>  
        <span class="k">this</span><span class="p">.</span><span class="nx">staticVar</span>    <span class="o">=</span> <span class="mi">10</span><span class="p">;</span>
@@ -584,15 +615,18 @@
 <span class="nx">B</span><span class="p">.</span><span class="nx">staticVar</span><span class="p">;</span>    <span class="c1">// 10 (inherited) </span>
 <span class="nx">B</span><span class="p">.</span><span class="nx">$staticVar</span><span class="p">;</span>   <span class="c1">// undefined</span>
 <span class="nx">B</span><span class="p">.</span><span class="nx">staticMethod</span> <span class="o">==</span> <span class="nx">A</span><span class="p">.</span><span class="nx">staticMethod</span><span class="p">;</span><span class="c1">// true</span>
-</code></pre></div>
-<p><strong>Packaging</strong> It is recommended to use package system zebkit provides. The packages are organized as hierarchy (the same way Java does it). Packages are accessible from predefined <em>&quot;zebkit&quot;</em> global package with using dot notation. The main rules you should follow:</p>
+</code></pre>
+</div>
+
+<p><strong>Packaging</strong> It is recommended to use package system zebkit provides. The packages are organized as hierarchy (the same way Java does it). Packages are accessible from predefined <strong>“zebkit”</strong> global package with using dot notation. The main rules you should follow:</p>
 
 <ul>
-<li>Declare a package variables and classes safely with <em>&quot;zebkit.package(...)&quot;</em> method</li>
-<li>Safely access to packages stuff with <em>&quot;zebkit.require(...)&quot;</em> method</li>
-<li>Use dot notation to access package stuff </li>
+  <li>Declare a package variables and classes safely with <strong>“zebkit.package(…)”</strong> method</li>
+  <li>Safely access to packages stuff with <strong>“zebkit.require(…)”</strong> method</li>
+  <li>Use dot notation to access package stuff</li>
 </ul>
-<div class="highlight"><pre><code class="language-js" data-lang="js"><span class="c1">// Define stuff in "test" package </span>
+
+<div class="highlighter-rouge"><pre class="highlight"><code><span class="c1">// Define stuff in "test" package </span>
 <span class="nx">zebkit</span><span class="p">.</span><span class="kr">package</span><span class="p">(</span><span class="s2">"test"</span><span class="p">,</span> <span class="kd">function</span><span class="p">()</span> <span class="p">{</span>
     <span class="k">this</span><span class="p">.</span><span class="nx">v</span> <span class="o">=</span> <span class="s2">"Hello 1"</span><span class="p">;</span> 
 <span class="p">});</span> 
@@ -606,37 +640,43 @@
 <span class="nx">zebkit</span><span class="p">.</span><span class="nx">require</span><span class="p">(</span><span class="s2">"test"</span><span class="p">,</span> <span class="kd">function</span><span class="p">(</span><span class="nx">test</span><span class="p">)</span> <span class="p">{</span>
    <span class="nx">test</span><span class="p">.</span><span class="nx">v</span> <span class="c1">// "Hello 1" </span>
 <span class="p">});</span> 
-</code></pre></div>
-<p><strong>Import package stuff in your scope</strong> Not always handy to access classes and variables by pointing full path to its (<em>&quot;zebkit.ui.grid.Grid&quot;</em>). Zebkit helps importing fields from the given package(s) into a local scope by using <em>zebkit.import()</em>_ method that should be used in combination with JS &quot;eval()&quot; standard method. Pay attention that using JS &quot;eval()&quot; method is bad practice. It is recommended to use <em>&quot;zebkit.require(...)&quot;</em> method where it is possible.</p>
-<div class="highlight"><pre><code class="language-js" data-lang="js"><span class="c1">// Define variables in "test" package </span>
+</code></pre>
+</div>
+
+<p><strong>Import package stuff in your scope</strong> Not always handy to access classes and variables by pointing full path to its (<strong>“zebkit.ui.grid.Grid”</strong>). Zebkit helps importing fields from the given package(s) into a local scope by using <strong>zebkit.import()</strong> method that should be used in combination with JS “eval()” standard method. Pay attention that using JS “eval()” method is bad practice. It is recommended to use <strong>“zebkit.require(…)”</strong> method.</p>
+
+<div class="highlighter-rouge"><pre class="highlight"><code><span class="c1">// Define variables in "test" package </span>
 <span class="nx">zebkit</span><span class="p">.</span><span class="kr">package</span><span class="p">(</span><span class="s2">"test"</span><span class="p">,</span> <span class="kd">function</span><span class="p">()</span> <span class="p">{</span>
     <span class="k">this</span><span class="p">.</span><span class="nx">variable</span> <span class="o">=</span> <span class="s2">"Hello 1"</span><span class="p">;</span> 
     <span class="k">this</span><span class="p">.</span><span class="nx">A</span> <span class="o">=</span> <span class="nx">zebkit</span><span class="p">.</span><span class="nx">Class</span><span class="p">([...]);</span>
     <span class="k">this</span><span class="p">.</span><span class="nx">$variable</span> <span class="o">=</span> <span class="mi">100</span><span class="p">;</span>
 <span class="p">});</span>
-
+ 
 <span class="c1">// Use zebkit.require() to write zebkit code safely </span>
 <span class="nx">zebkit</span><span class="p">.</span><span class="nx">require</span><span class="p">(</span><span class="kd">function</span><span class="p">()</span> <span class="p">{</span>
     <span class="c1">// Import fields from "test" package into current scope </span>
     <span class="nb">eval</span><span class="p">(</span><span class="nx">zebkit</span><span class="p">.</span><span class="kr">import</span><span class="p">(</span><span class="s2">"test"</span><span class="p">));</span>
-
+  
     <span class="c1">// Now access variables directly</span>
     <span class="nx">variable</span><span class="p">;</span> <span class="c1">// "Hello 1"</span>
     <span class="k">new</span> <span class="nx">A</span><span class="p">();</span>  <span class="c1">// new instance of class zebkit.test.A</span>
-
+  
     <span class="c1">// variables whose names start from '$' character </span>
     <span class="c1">// are not imported</span>
     <span class="nx">$variable</span><span class="p">;</span><span class="c1">// undefined</span>
 <span class="p">});</span>
-</code></pre></div>
+</code></pre>
+</div>
+
 <p><strong>Dynamic class extensions</strong> Zebkit classes can be extended dynamically either on the class level (extend class definition with new methods and variables) or on the class instance level.</p>
 
 <ul>
-<li>Use <em>&quot;extend(...)&quot;</em> method to extend a class or a class instance</li>
-<li>Extending of a class causes his new instances will get the extensions</li>
-<li>Extending an instance has effect only for the given class instance </li>
+  <li>Use <strong>“extend(…)”</strong> method to extend a class or a class instance with new methods and fields</li>
+  <li>Extending of a class causes his new instances will get the extensions</li>
+  <li>Extending an instance of a class has effect only for the given class instance</li>
 </ul>
-<div class="highlight"><pre><code class="language-js" data-lang="js"><span class="kd">var</span> <span class="nx">A</span> <span class="o">=</span> <span class="nx">zebkit</span><span class="p">.</span><span class="nx">Class</span><span class="p">([</span>
+
+<div class="highlighter-rouge"><pre class="highlight"><code><span class="kd">var</span> <span class="nx">A</span> <span class="o">=</span> <span class="nx">zebkit</span><span class="p">.</span><span class="nx">Class</span><span class="p">([</span>
     <span class="kd">function</span> <span class="nx">abc</span><span class="p">()</span> <span class="p">{</span> <span class="k">return</span> <span class="mi">10</span><span class="p">;</span> <span class="p">}</span>
 <span class="p">]);</span>
 <span class="c1">// Extend class "A" with "cba()" method and override "abc()" method </span>
@@ -655,7 +695,10 @@
 <span class="p">]);</span>
 <span class="nx">a</span><span class="p">.</span><span class="nx">q</span><span class="p">();</span> <span class="c1">// call "q()" instance specific method</span>
 <span class="nx">aa</span><span class="p">.</span><span class="nx">q</span><span class="p">;</span>  <span class="c1">// undefined</span>
-</code></pre></div>
+</code></pre>
+</div>
+
+
 </div>
 
     </div>

@@ -97,12 +97,12 @@ zebkit.require("ui", "layout", function(ui, layout) {
            g.setColor("lightGray");
            g.fillRect(8,this.height/3,
                       this.width-16,this.height/4);
-           g.fillRect(this.width/3,8,
+           g.fillRect(this.width/3, 8,
                       this.width/4,this.height-16);
         }
     ]);
     // create canvas and add just developed component
-    var c = new ui.zCanvas(150,150);
+    var c = new ui.zCanvas(150, 150);
     c.root.setLayout(new layout.BorderLayout());
     c.root.add("center", new ui.PaintComponent());
 });
@@ -159,11 +159,11 @@ zebkit.require("ui", "layout", function(ui, layout) {
     ui.UpdateComponent=zebra.Class(ui.PaintComponent,[
         function update(g) {
            g.setColor("red");
-           g.fillRect(0,0,this.width, this.height);
+           g.fillRect(0, 0,this.width, this.height);
         }
     ]);
     // create canvas and add just developed component
-    var c = new ui.zCanvas(150,150);
+    var c = new ui.zCanvas(150, 150);
     c.root.setLayout(new layout.BorderLayout());
     c.root.add("center", new ui.UpdateComponent());
 });
@@ -182,12 +182,12 @@ zebkit.require("ui", "layout", function(ui, layout) {
         function paintOnTop(g) {
            g.setColor("white");
            g.lineWidth = 3;
-           g.rect(3,3,this.width-6, this.height-6);
+           g.rect(3, 3,this.width - 6, this.height - 6);
            g.stroke();
         }
     ]);
     // create canvas and add just developed component
-    var c = new ui.zCanvas(150,150);
+    var c = new ui.zCanvas(150, 150);
     c.root.setLayout(new layout.BorderLayout());
     c.root.add("center", new ui.PaintOnTopComponent());
 });

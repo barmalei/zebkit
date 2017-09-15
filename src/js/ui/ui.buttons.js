@@ -562,6 +562,12 @@ zebkit.package("ui", function(pkg, Class) {
             this.$group = null;
 
             /**
+             *  Called every time the check box state has been updated
+             *  @param {zebkit.ui.Checkbox} ch a check box that has triggered the swicth
+             *  @method  switched
+             */
+
+            /**
              * Set the check box state.
              * @param {Boolean} v a state of the check box
              * @method setValue

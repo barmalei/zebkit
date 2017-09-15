@@ -53,12 +53,12 @@ zebkit.require("ui", "layout", "ui.design", function(ui, layout, design) {
             bottom: new ui.Button("Align", [
                 function fire() {
                     this.$super();
-                    var y = 10, c = root.findAll("zebkit.ui.design.ShaperPan");
-                    for(var i=0; i < c.length; i++)  {
-                        c[i].toPreferredSize();
-                        c[i].setLocation(10, y);
-                        y += c[i].height + 5;
-                    }
+                    var y = 10; 
+                    root.byPath("//zebkit.ui.design.ShaperPan", function(c) {
+                        c.toPreferredSize();
+                        c.setLocation(10, y);
+                        y += c.height + 5;                        
+                    });
                 }
             ])
         }

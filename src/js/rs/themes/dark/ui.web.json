@@ -55,11 +55,13 @@
     },
 
     "HtmlTextField": {
-        "inheritProperties" : true
+        "inheritProperties" : true,
+        "color": "black"
     },
 
     "HtmlTextArea": {
         "inheritProperties" : true,
-        "resizeable"  :  false
+        "resizeable"  :  false,
+        "color": "black"
     }
 }

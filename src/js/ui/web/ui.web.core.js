@@ -8,7 +8,6 @@ zebkit.package("ui.web", function(pkg, Class) {
      * @access package
      */
 
-
     /**
      * HTML element UI component wrapper class. The class represents an HTML element as if it is standard
      * UI component. It helps to use some standard HTML element as zebkit UI components and embeds it
@@ -173,7 +172,6 @@ zebkit.package("ui.web", function(pkg, Class) {
                                         // and manage its visibility
 
             this.$sizeAdjusted = false;
-
 
             this.wrap = function(c) {
                 this.setLayout(new zebkit.layout.StackLayout());
@@ -767,11 +765,11 @@ zebkit.package("ui.web", function(pkg, Class) {
                 //          -- the kid component is in visible area
                 var c = e.source;
                 if (c.isDOMElement === true) {
-                    c.$container.style.visibility = c.isVisible === false || $isInInvisibleState(c) ? "hidden"
-                                                                                                    : "visible";
+                    c.$container.style.visibility = (c.isVisible === false || $isInInvisibleState(c) ? "hidden"
+                                                                                                     : "visible");
                 } else if (typeof c.$domKids !== 'undefined') {
                     $domElements(c, function(e) {
-                        e.$container.style.visibility = e.isVisible === false || $isInInvisibleState(e) ? "hidden" : "visible";
+                        e.$container.style.visibility = (e.isVisible === false || $isInInvisibleState(e) ? "hidden" : "visible");
                     });
                 }
             };
@@ -858,8 +856,13 @@ zebkit.package("ui.web", function(pkg, Class) {
                 // if detached element is DOM element we have to
                 // remove it from DOM tree
                 if (c.isDOMElement === true) {
-                    c.$container.parentNode.removeChild(c.$container);
-                    c.$container.parentNode = null;
+                    // DOM component can be detached from document
+                    // with a parent component removal so let's
+                    // check if it has a DOM parent
+                    if (c.$container.parentNode !== null) {
+                        c.$container.parentNode.removeChild(c.$container);
+                        c.$container.parentNode = null;
+                    }
                 } else {
                     removeDOMChildren(c);
                 }

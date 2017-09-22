@@ -816,6 +816,21 @@ zebkit.package("layout", function(pkg, Class) {
             };
 
             /**
+             * Remove a component by the given constraints.
+             * @param {Object} ctr a constraints
+             * @return {zebkit.layout.Layoutable} a removed component
+             * @method removeByConstraints
+             */
+            this.removeByConstraints = function(ctr) {
+                var c = this.byConstraints(ctr);
+                if (c !== null) {
+                    return this.remove(c);
+                } else {
+                    return null;
+                }
+            };
+
+            /**
              * The method can be implemented to be informed every time a children component
              * has been removed
              * @param {Integer} i a children component index at which it has been removed

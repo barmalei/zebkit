@@ -757,7 +757,7 @@ var classTemplateFields = {
     }
 };
 
-
+// methods are populated in all instances of zebkit classes
 var classTemplateProto = {
     /**
      * Extend existent class instance with the given methods and interfaces

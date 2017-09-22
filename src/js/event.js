@@ -485,6 +485,10 @@ var EventProducer = Interface([
                 }
             }
 
+            if (instanceOf(this, PathSearch) === false) {
+                throw new Error("Path search is not supported");
+            }
+
             this.byPath(pt, function(node) {
                 // try to initiate
                 if (typeof node._ === 'undefined' && typeof node.clazz.Listeners !== 'undefined') {
@@ -626,6 +630,27 @@ var EventProducer = Interface([
     }
 ]);
 
+classTemplateProto.isEventFired = function(name) {
+    if (typeof this.clazz.Listeners === 'undefined') {
+        return false;
+    }
+
+    if (arguments.length === 0) {
+        name = "fired";
+    }
+
+    var names = this.clazz.Listeners.eventNames;
+    if (names.length === 1) {
+        return names[0] === name;
+    }
+
+    for(var i = 0; i < names.length; i++) {
+        if (names[i] === name) {
+            return true;
+        }
+    }
+    return false;
+};
 
 /**
  * Extends zebkit.Class with the given events support.
@@ -663,13 +688,8 @@ classTemplateFields.events = function() {
 };
 
 
-
-// TODO: should be at least re-named to better name
-var Fireable = Interface();
-
 $export({
     "Event"          : Event,
-    "Fireable"       : Fireable,
     "Listeners"      : Listeners,
     "ListenersClass" : $NewListener,
     "EventProducer"  : EventProducer

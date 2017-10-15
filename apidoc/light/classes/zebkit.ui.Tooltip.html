@@ -506,11 +506,6 @@
                                                <a href="../classes/zebkit.ui.CompList.html">zebkit.ui.CompList</a>
                                             </td>
                                         </tr>
-                                        <tr class="classNameCell" className="zebkit.ui.CompositeEvStatePan" name="allClassesItem">
-                                            <td>
-                                               <a href="../classes/zebkit.ui.CompositeEvStatePan.html">zebkit.ui.CompositeEvStatePan</a>
-                                            </td>
-                                        </tr>
                                         <tr class="classNameCell" className="zebkit.ui.CompRender" name="allClassesItem">
                                             <td>
                                                <a href="../classes/zebkit.ui.CompRender.html">zebkit.ui.CompRender</a>
@@ -576,6 +571,11 @@
                                                <a href="../classes/zebkit.ui.event.FocusManager.html">zebkit.ui.event.FocusManager</a>
                                             </td>
                                         </tr>
+                                        <tr class="classNameCell" className="zebkit.ui.event.InputEventState" name="allClassesItem">
+                                            <td>
+                                               <a href="../classes/zebkit.ui.event.InputEventState.html">zebkit.ui.event.InputEventState</a>
+                                            </td>
+                                        </tr>
                                         <tr class="classNameCell" className="zebkit.ui.event.KeyEvent" name="allClassesItem">
                                             <td>
                                                <a href="../classes/zebkit.ui.event.KeyEvent.html">zebkit.ui.event.KeyEvent</a>
@@ -614,6 +614,11 @@
                                         <tr class="classNameCell" className="zebkit.ui.EvStatePan" name="allClassesItem">
                                             <td>
                                                <a href="../classes/zebkit.ui.EvStatePan.html">zebkit.ui.EvStatePan</a>
+                                            </td>
+                                        </tr>
+                                        <tr class="classNameCell" className="zebkit.ui.FocusableComposite" name="allClassesItem">
+                                            <td>
+                                               <a href="../classes/zebkit.ui.FocusableComposite.html">zebkit.ui.FocusableComposite</a>
                                             </td>
                                         </tr>
                                         <tr class="classNameCell" className="zebkit.ui.grid.BaseCaption" name="allClassesItem">
@@ -981,9 +986,9 @@
                                                <a href="../classes/zebkit.ui.web.HtmlTextInput.html">zebkit.ui.web.HtmlTextInput</a>
                                             </td>
                                         </tr>
-                                        <tr class="classNameCell" className="zebkit.ui.web.HtmlWinCanvas" name="allClassesItem">
+                                        <tr class="classNameCell" className="zebkit.ui.web.HtmlWindow" name="allClassesItem">
                                             <td>
-                                               <a href="../classes/zebkit.ui.web.HtmlWinCanvas.html">zebkit.ui.web.HtmlWinCanvas</a>
+                                               <a href="../classes/zebkit.ui.web.HtmlWindow.html">zebkit.ui.web.HtmlWindow</a>
                                             </td>
                                         </tr>
                                         <tr class="classNameCell" className="zebkit.ui.web.PopupLayer" name="allClassesItem">
@@ -1437,6 +1442,12 @@ figured border.</p>
                                     </small>
                                     &nbsp;&nbsp;
                                     <small style="white-space: nowrap;">
+                                        <a href="zebkit.layout.Layoutable.html#methods_removeByConstraints">
+                                            <b>removeByConstraints(</b>ctr<b>)</b>
+                                        </a>
+                                    </small>
+                                    &nbsp;&nbsp;
+                                    <small style="white-space: nowrap;">
                                         <a href="zebkit.layout.Layoutable.html#methods_removeMe">
                                             <b>removeMe(</b>[after]<b>)</b>
                                         </a>
@@ -1480,7 +1491,7 @@ figured border.</p>
                                     &nbsp;&nbsp;
                                     <small style="white-space: nowrap;">
                                         <a href="zebkit.ui.Panel.html#methods_setBorder">
-                                            <b>setBorder(</b>v<b>)</b>
+                                            <b>setBorder(</b>[v]<b>)</b>
                                         </a>
                                     </small>
                                     &nbsp;&nbsp;
@@ -2043,10 +2054,9 @@ children component layouting on the parent component.</p>
             <div id="events">
                     <ul style="list-style:none;">
                             <li>
-                                <a class="name" href="#events_child&lt;EventName&gt;"><b>child&lt;EventName&gt;</b>
+                                <a class="name" href="#events_childEventName"><b>childEventName</b>
                                     (
-                                        id, src, e
-an
+                                        e
                                     )
                                 </a>
                             </li>
@@ -2081,7 +2091,7 @@ an
                             <li>
                                 <a class="name" href="#events_compMoved"><b>compMoved</b>
                                     (
-                                        c, px, py, e
+                                        e
                                     )
                                 </a>
                             </li>
@@ -2208,10 +2218,10 @@ an
                 <br/>
                 <table>
                         <tr>
-                            <td><a name="events_child&lt;EventName&gt;"></a>
+                            <td><a name="events_childEventName"></a>
 <div class="events item">
     <strong>
-        <code>child&amp;lt;EventName&amp;gt;</code>
+        <code>childEventName</code>
     </strong>
 
 
@@ -2220,38 +2230,19 @@ an
 
     <p>It is also possible to listen all the listed above event for children component. To handle
 the event register listener method following the pattern below:</p>
-<pre class="code prettyprint"><code>    var p = new zebkit.ui.Panel();
-    p.child&lt;EventName&gt; = function(e) { ... }; // add event handler</code></pre>
+<pre class="code prettyprint"><code>var p = new zebkit.ui.Panel();
+p.childPointerPressed = function(e) { ... }; // add event handler</code></pre>
 
 
         <br/>
         <strong>Parameters:</strong>
         <ul>
                 <li>
-                        <span class="name"><code>id</code></span>
-                        <strong class="type">
-                            &lt;Integer&gt;
-                        </strong>
-                    <p>a component event ID. The id can have one of the following value:</p>
-
-
-                </li>
-                <li>
-                        <span class="name"><code>src</code></span>
-                        <strong class="type">
-                            &lt;<a href="../classes/zebkit.ui.Panel.html" class="crosslink">zebkit.ui.Panel</a>&gt;
-                        </strong>
-                    <p>a component that triggers the event</p>
-
-
-                </li>
-                <li>
-                        <span class="name">`e
-an`</span>
+                        <span class="name"><code>e</code></span>
                         <strong class="type">
                             &lt;<a href="../classes/zebkit.ui.event.KeyEvent.html" class="crosslink">zebkit.ui.event.KeyEvent</a> | <a href="../classes/zebkit.ui.event.PointerEvent.html" class="crosslink">zebkit.ui.event.PointerEvent</a> | <a href="../classes/zebkit.ui.event.CompEvent.html" class="crosslink">zebkit.ui.event.CompEvent</a> | <a href="../classes/zebkit.ui.event.FocusEvent.html" class="crosslink">zebkit.ui.event.FocusEvent</a>&gt;
                         </strong>
-                    <p>UI event fired by a child component.</p>
+                    <p>an UI event fired by a child component.</p>
 
 
                 </li>
@@ -2325,8 +2316,8 @@ input focus) UI component</p>
     <p>Implement the event handler method to catch component added event
 The event is triggered every time the component has been inserted into
 another one.</p>
-<pre class="code prettyprint"><code>    var p = new zebkit.ui.Panel();
-    p.compAdded = function(e) { ... }; // add event handler</code></pre>
+<pre class="code prettyprint"><code>var p = new zebkit.ui.Panel();
+p.compAdded = function(e) { ... }; // add event handler</code></pre>
 
 
         <br/>
@@ -2338,9 +2329,7 @@ another one.</p>
                             &lt;<a href="../classes/zebkit.ui.event.CompEvent.html" class="crosslink">zebkit.ui.event.CompEvent</a>&gt;
                         </strong>
                     <p>a component event. The source of the passed event
-is set to a container component, "kid" field is set to a component that has been
-added to the container, "constraints" holds a constraints the child component has been
-added.</p>
+is set to a container component.</p>
 
 
                 </li>
@@ -2363,8 +2352,8 @@ added.</p>
     <p>Implement the event handler method to catch component enabled event
 The event is triggered every time a component enabled state has been
 updated.</p>
-<pre class="code prettyprint"><code>    var p = new zebkit.ui.Panel();
-    p.compEnabled = function(e) { ... }; // add event handler</code></pre>
+<pre class="code prettyprint"><code>var p = new zebkit.ui.Panel();
+p.compEnabled = function(e) { ... }; // add event handler</code></pre>
 
 
         <br/>
@@ -2398,48 +2387,20 @@ updated.</p>
     <p>Implement the event handler method to catch component moved event
 The event is triggered every time the component location has been
 updated.</p>
-<pre class="code prettyprint"><code>    var p = new zebkit.ui.Panel();
-    p.compMoved = function(e) { ... }; // add event handler</code></pre>
+<pre class="code prettyprint"><code> var p = new zebkit.ui.Panel();
+ p.compMoved = function(e) { ... }; // add event handler</code></pre>
 
 
         <br/>
         <strong>Parameters:</strong>
         <ul>
                 <li>
-                        <span class="name"><code>c</code></span>
-                        <strong class="type">
-                            &lt;<a href="../classes/zebkit.ui.Panel.html" class="crosslink">zebkit.ui.Panel</a>&gt;
-                        </strong>
-                    <p>a component that has been moved</p>
-
-
-                </li>
-                <li>
-                        <span class="name"><code>px</code></span>
-                        <strong class="type">
-                            &lt;Integer&gt;
-                        </strong>
-                    <p>a previous x coordinate the moved component had</p>
-
-
-                </li>
-                <li>
-                        <span class="name"><code>py</code></span>
-                        <strong class="type">
-                            &lt;Integer&gt;
-                        </strong>
-                    <p>a previous y coordinate the moved component had</p>
-
-
-                </li>
-                <li>
                         <span class="name"><code>e</code></span>
                         <strong class="type">
                             &lt;<a href="../classes/zebkit.ui.event.CompEvent.html" class="crosslink">zebkit.ui.event.CompEvent</a>&gt;
                         </strong>
                     <p>a component event. Source of the event
-is a component that has been moved. "prevX" and "prevY" fields hold
-a previous location the component had.</p>
+is a component that has been moved.</p>
 
 
                 </li>
@@ -2462,8 +2423,8 @@ a previous location the component had.</p>
     <p>Implement the event handler method to catch component removed event
 The event is triggered every time the component has been removed from
 its parent UI component.</p>
-<pre class="code prettyprint"><code>    var p = new zebkit.ui.Panel();
-    p.compRemoved = function(e) { ... }; // add event handler</code></pre>
+<pre class="code prettyprint"><code>var p = new zebkit.ui.Panel();
+p.compRemoved = function(e) { ... }; // add event handler</code></pre>
 
 
         <br/>
@@ -2475,9 +2436,7 @@ its parent UI component.</p>
                             &lt;<a href="../classes/zebkit.ui.event.CompEvent.html" class="crosslink">zebkit.ui.event.CompEvent</a>&gt;
                         </strong>
                     <p>a component event. The source of the passed event
-is set to the container component. "kid" field is set to a child component that has
-been removed from the container and "index" field is set to the index the kid component
-was added before it had been removed from the container.</p>
+is set to the container component.</p>
 
 
                 </li>
@@ -2500,8 +2459,8 @@ was added before it had been removed from the container.</p>
     <p>Implement the event handler method to catch component shown event
 The event is triggered every time a component visibility state has
 been updated.</p>
-<pre class="code prettyprint"><code>    var p = new zebkit.ui.Panel();
-    p.compShown = function(e) { ... }; // add event handler</code></pre>
+<pre class="code prettyprint"><code>var p = new zebkit.ui.Panel();
+p.compShown = function(e) { ... }; // add event handler</code></pre>
 
 
         <br/>
@@ -2534,8 +2493,8 @@ been updated.</p>
 
     <p>Implement the event handler method to catch the component sized event
 The event is triggered every time the component has been re-sized.</p>
-<pre class="code prettyprint"><code>    var p = new zebkit.ui.Panel();
-    p.compSized = function(e) { ... }; // add event handler</code></pre>
+<pre class="code prettyprint"><code>var p = new zebkit.ui.Panel();
+p.compSized = function(e) { ... }; // add event handler</code></pre>
 
 
         <br/>
@@ -2570,8 +2529,8 @@ keep a previous size the component had.</p>
 
     <p>Implement the event handler method to catch component focus gained event
 The event is triggered every time a component has gained focus.</p>
-<pre class="code prettyprint"><code>    var p = new zebkit.ui.Panel();
-    p.focusGained = function(e) { ... }; // add event handler</code></pre>
+<pre class="code prettyprint"><code>var p = new zebkit.ui.Panel();
+p.focusGained = function(e) { ... }; // add event handler</code></pre>
 
 
         <br/>
@@ -2604,8 +2563,8 @@ The event is triggered every time a component has gained focus.</p>
 
     <p>Implement the event handler method to catch component focus lost event
 The event is triggered every time a component has lost focus</p>
-<pre class="code prettyprint"><code>    var p = new zebkit.ui.Panel();
-    p.focusLost = function(e) { ... }; // add event handler</code></pre>
+<pre class="code prettyprint"><code>var p = new zebkit.ui.Panel();
+p.focusLost = function(e) { ... }; // add event handler</code></pre>
 
 
         <br/>
@@ -2638,8 +2597,8 @@ The event is triggered every time a component has lost focus</p>
 
     <p>Implement the event handler method to catch key pressed event The event is triggered every
 time a key has been pressed.</p>
-<pre class="code prettyprint"><code>    var p = new zebkit.ui.Panel();
-    p.keyPressed = function(e) { ... }; // add event handler</code></pre>
+<p>var p = new zebkit.ui.Panel();
+p.keyPressed = function(e) { ... }; // add event handler</p>
 
 
         <br/>
@@ -2672,8 +2631,8 @@ time a key has been pressed.</p>
 
     <p>Implement the event handler method to catch key released event
 The event is triggered every time a key has been released.</p>
-<pre class="code prettyprint"><code>    var p = new zebkit.ui.Panel();
-    p.keyReleased = function(e) { ... }; // add event handler</code></pre>
+<pre class="code prettyprint"><code>var p = new zebkit.ui.Panel();
+p.keyReleased = function(e) { ... }; // add event handler</code></pre>
 
 
         <br/>
@@ -2706,8 +2665,8 @@ The event is triggered every time a key has been released.</p>
 
     <p>Implement the event handler method to catch key types event The event is triggered every
 time a key has been typed.</p>
-<pre class="code prettyprint"><code>    var p = new zebkit.ui.Panel();
-    p.keyTyped = function(e) { ... }; // add event handler</code></pre>
+<pre class="code prettyprint"><code>var p = new zebkit.ui.Panel();
+p.keyTyped = function(e) { ... }; // add event handler</code></pre>
 
 
         <br/>
@@ -2741,8 +2700,8 @@ time a key has been typed.</p>
     <p>Implement the event handler method to catch pointer clicked event. The event is triggered every
 time a pointer button has been clicked. Click events are generated only if no one pointer moved
 or drag events has been generated in between pointer pressed -&gt; pointer released events sequence.</p>
-<pre class="code prettyprint"><code>    var p = new zebkit.ui.Panel();
-    p.pointerClicked = function(e) { ... }; // add event handler</code></pre>
+<pre class="code prettyprint"><code>var p = new zebkit.ui.Panel();
+p.pointerClicked = function(e) { ... }; // add event handler</code></pre>
 
 
         <br/>
@@ -2776,8 +2735,8 @@ or drag events has been generated in between pointer pressed -&gt; pointer relea
     <p>Implement the event handler method to catch pointer drag ended event. The event is triggered
 every time a pointer cursor has been moved last time when a pointer button has been pressed.
 Or when a finger has been moved last time over a touch screen.</p>
-<pre class="code prettyprint"><code>    var p = new zebkit.ui.Panel();
-    p.pointerDragEnded = function(e) { ... }; // add event handler</code></pre>
+<pre class="code prettyprint"><code>var p = new zebkit.ui.Panel();
+p.pointerDragEnded = function(e) { ... }; // add event handler</code></pre>
 
 
         <br/>
@@ -2811,8 +2770,8 @@ Or when a finger has been moved last time over a touch screen.</p>
     <p>Implement the event handler method to catch pointer dragged event. The event is triggered every
 time a pointer cursor has been moved when a pointer button has been pressed. Or when a finger
 has been moved over a touch screen.</p>
-<pre class="code prettyprint"><code>    var p = new zebkit.ui.Panel();
-    p.pointerDragged = function(e) { ... }; // add event handler</code></pre>
+<pre class="code prettyprint"><code>var p = new zebkit.ui.Panel();
+p.pointerDragged = function(e) { ... }; // add event handler</code></pre>
 
 
         <br/>
@@ -2846,8 +2805,8 @@ has been moved over a touch screen.</p>
     <p>Implement the event handler method to catch pointer drag started event. The event is triggered
 every time a pointer cursor has been moved first time when a pointer button has been pressed.
 Or when a finger has been moved first time over a touch screen.</p>
-<pre class="code prettyprint"><code>    var p = new zebkit.ui.Panel();
-    p.pointerDragStarted = function(e) { ... }; // add event handler</code></pre>
+<pre class="code prettyprint"><code>var p = new zebkit.ui.Panel();
+p.pointerDragStarted = function(e) { ... }; // add event handler</code></pre>
 
 
         <br/>
@@ -2880,8 +2839,8 @@ Or when a finger has been moved first time over a touch screen.</p>
 
     <p>Implement the event handler method to catch pointer entered event. The event is triggered every
 time a pointer cursor entered the given component.</p>
-<pre class="code prettyprint"><code>    var p = new zebkit.ui.Panel();
-    p.pointerEntered = function(e) { ... }; // add event handler</code></pre>
+<pre class="code prettyprint"><code>var p = new zebkit.ui.Panel();
+p.pointerEntered = function(e) { ... }; // add event handler</code></pre>
 
 
         <br/>
@@ -2914,8 +2873,8 @@ time a pointer cursor entered the given component.</p>
 
     <p>Implement the event handler method to catch pointer exited event. The event is triggered every
 time a pointer cursor exited the given component.</p>
-<pre class="code prettyprint"><code>    var p = new zebkit.ui.Panel();
-    p.pointerExited = function(e) { ... }; // add event handler</code></pre>
+<pre class="code prettyprint"><code>var p = new zebkit.ui.Panel();
+p.pointerExited = function(e) { ... }; // add event handler</code></pre>
 
 
         <br/>
@@ -2948,8 +2907,8 @@ time a pointer cursor exited the given component.</p>
 
     <p>Implement the event handler method  to catch pointer moved event. The event is triggered every time
 a pointer cursor has been moved with no a pointer button pressed.</p>
-<pre class="code prettyprint"><code>    var p = new zebkit.ui.Panel();
-    p.pointerMoved = function(e) { ... }; // add event handler</code></pre>
+<pre class="code prettyprint"><code>var p = new zebkit.ui.Panel();
+p.pointerMoved = function(e) { ... }; // add event handler</code></pre>
 
 
         <br/>
@@ -2982,8 +2941,8 @@ a pointer cursor has been moved with no a pointer button pressed.</p>
 
     <p>Implement the event handler method to catch pointer pressed event. The event is triggered every time
 a pointer button has been pressed or a finger has touched a touch screen.</p>
-<pre class="code prettyprint"><code>    var p = new zebkit.ui.Panel();
-    p.pointerPressed = function(e) { ... }; // add event handler</code></pre>
+<pre class="code prettyprint"><code>var p = new zebkit.ui.Panel();
+p.pointerPressed = function(e) { ... }; // add event handler</code></pre>
 
 
         <br/>
@@ -3016,8 +2975,8 @@ a pointer button has been pressed or a finger has touched a touch screen.</p>
 
     <p>Implement the event handler method to catch pointer released event. The event is triggered every time
 a pointer button has been released or a finger has untouched a touch screen.</p>
-<pre class="code prettyprint"><code>    var p = new zebkit.ui.Panel();
-    p.pointerReleased = function(e) { ... }; // add event handler</code></pre>
+<pre class="code prettyprint"><code>var p = new zebkit.ui.Panel();
+p.pointerReleased = function(e) { ... }; // add event handler</code></pre>
 
 
         <br/>

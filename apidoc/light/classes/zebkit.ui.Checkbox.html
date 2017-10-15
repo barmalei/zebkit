@@ -506,11 +506,6 @@
                                                <a href="../classes/zebkit.ui.CompList.html">zebkit.ui.CompList</a>
                                             </td>
                                         </tr>
-                                        <tr class="classNameCell" className="zebkit.ui.CompositeEvStatePan" name="allClassesItem">
-                                            <td>
-                                               <a href="../classes/zebkit.ui.CompositeEvStatePan.html">zebkit.ui.CompositeEvStatePan</a>
-                                            </td>
-                                        </tr>
                                         <tr class="classNameCell" className="zebkit.ui.CompRender" name="allClassesItem">
                                             <td>
                                                <a href="../classes/zebkit.ui.CompRender.html">zebkit.ui.CompRender</a>
@@ -576,6 +571,11 @@
                                                <a href="../classes/zebkit.ui.event.FocusManager.html">zebkit.ui.event.FocusManager</a>
                                             </td>
                                         </tr>
+                                        <tr class="classNameCell" className="zebkit.ui.event.InputEventState" name="allClassesItem">
+                                            <td>
+                                               <a href="../classes/zebkit.ui.event.InputEventState.html">zebkit.ui.event.InputEventState</a>
+                                            </td>
+                                        </tr>
                                         <tr class="classNameCell" className="zebkit.ui.event.KeyEvent" name="allClassesItem">
                                             <td>
                                                <a href="../classes/zebkit.ui.event.KeyEvent.html">zebkit.ui.event.KeyEvent</a>
@@ -614,6 +614,11 @@
                                         <tr class="classNameCell" className="zebkit.ui.EvStatePan" name="allClassesItem">
                                             <td>
                                                <a href="../classes/zebkit.ui.EvStatePan.html">zebkit.ui.EvStatePan</a>
+                                            </td>
+                                        </tr>
+                                        <tr class="classNameCell" className="zebkit.ui.FocusableComposite" name="allClassesItem">
+                                            <td>
+                                               <a href="../classes/zebkit.ui.FocusableComposite.html">zebkit.ui.FocusableComposite</a>
                                             </td>
                                         </tr>
                                         <tr class="classNameCell" className="zebkit.ui.grid.BaseCaption" name="allClassesItem">
@@ -981,9 +986,9 @@
                                                <a href="../classes/zebkit.ui.web.HtmlTextInput.html">zebkit.ui.web.HtmlTextInput</a>
                                             </td>
                                         </tr>
-                                        <tr class="classNameCell" className="zebkit.ui.web.HtmlWinCanvas" name="allClassesItem">
+                                        <tr class="classNameCell" className="zebkit.ui.web.HtmlWindow" name="allClassesItem">
                                             <td>
-                                               <a href="../classes/zebkit.ui.web.HtmlWinCanvas.html">zebkit.ui.web.HtmlWinCanvas</a>
+                                               <a href="../classes/zebkit.ui.web.HtmlWindow.html">zebkit.ui.web.HtmlWindow</a>
                                             </td>
                                         </tr>
                                         <tr class="classNameCell" className="zebkit.ui.web.PopupLayer" name="allClassesItem">
@@ -1124,6 +1129,11 @@
                    zebkit.ui.Checkbox
                 </strong>
 
+                    <br/>
+                    <strong>
+                        mixed with
+                    </strong>
+                        <span class="type">&lt;<a href="../classes/zebkit.ui.FocusableComposite.html" class="crosslink">zebkit.ui.FocusableComposite</a>&gt;</span>
 
 
                         <br/>
@@ -1131,7 +1141,7 @@
                             extends
                         </strong>
 
-                        <span class="type">&lt;<a href="../classes/zebkit.ui.CompositeEvStatePan.html" class="crosslink">zebkit.ui.CompositeEvStatePan</a>&gt;</span>
+                        <span class="type">&lt;<a href="../classes/zebkit.ui.EvStatePan.html" class="crosslink">zebkit.ui.EvStatePan</a>&gt;</span>
             </td>
                 <td align="right" valign="top">
                     <a href="../classes/zebkit.ui.html">
@@ -1246,11 +1256,6 @@ as follow:</p>
                 </a>
             </li>
 
-            <li>
-                <a href="#events">
-                        Events
-                </a>
-            </li>
 
             <li>
                 <a href="#implementations">
@@ -1333,6 +1338,24 @@ as follow:</p>
 
                                         <td>
                                             <b>
+                                                <a class="name" href="#methods_switched">switched (ch)</a>
+                                            </b>
+                                        </td>
+                                    </tr>
+                                    <tr style="background:none;">
+                                        <td>
+                                                    <strong> public </strong>
+
+                                        </td>
+
+                                        <td>
+                                                <span class="type">
+                                                    void
+                                                </span>
+                                        </td>
+
+                                        <td>
+                                            <b>
                                                 <a class="name" href="#methods_toggle">toggle ( )</a>
                                             </b>
                                         </td>
@@ -1365,512 +1388,68 @@ as follow:</p>
                         <strong>Inherited methods:</strong>
                         <div style="padding:6px;">
                                     <small style="white-space: nowrap;">
-                                        <a href="zebkit.layout.Layoutable.html#methods_$setConstraints">
-                                            <b>$setConstraints(</b>c<b>)</b>
-                                        </a>
-                                    </small>
-                                    &nbsp;&nbsp;
-                                    <small style="white-space: nowrap;">
-                                        <a href="zebkit.layout.Layoutable.html#methods_add">
-                                            <b>add(</b>constr, d<b>)</b>
-                                        </a>
-                                    </small>
-                                    &nbsp;&nbsp;
-                                    <small style="white-space: nowrap;">
-                                        <a href="zebkit.layout.Layoutable.html#methods_byConstraints">
-                                            <b>byConstraints(</b>[p], c<b>)</b>
-                                        </a>
-                                    </small>
-                                    &nbsp;&nbsp;
-                                    <small style="white-space: nowrap;">
-                                        <a href="zebkit.PathSearch.html#methods_byPath">
-                                            <b>byPath(</b>path, [cb]<b>)</b>
-                                        </a>
-                                    </small>
-                                    &nbsp;&nbsp;
-                                    <small style="white-space: nowrap;">
-                                        <a href="zebkit.ui.ViewPan.html#methods_calcPreferredSize">
-                                            <b>calcPreferredSize(</b>t<b>)</b>
-                                        </a>
-                                    </small>
-                                    &nbsp;&nbsp;
-                                    <small style="white-space: nowrap;">
-                                        <a href="zebkit.layout.Layoutable.html#methods_doLayout">
-                                            <b>doLayout(</b> <b>)</b>
-                                        </a>
-                                    </small>
-                                    &nbsp;&nbsp;
-                                    <small style="white-space: nowrap;">
-                                        <a href="zebkit.EventProducer.html#methods_fire">
-                                            <b>fire(</b>event, [path], [params]<b>)</b>
-                                        </a>
-                                    </small>
-                                    &nbsp;&nbsp;
-                                    <small style="white-space: nowrap;">
-                                        <a href="zebkit.ui.Panel.html#methods_focused">
-                                            <b>focused(</b> <b>)</b>
-                                        </a>
-                                    </small>
-                                    &nbsp;&nbsp;
-                                    <small style="white-space: nowrap;">
-                                        <a href="zebkit.layout.Layoutable.html#methods_getBottom">
-                                            <b>getBottom(</b> <b>)</b>
-                                        </a>
-                                    </small>
-                                    &nbsp;&nbsp;
-                                    <small style="white-space: nowrap;">
-                                        <a href="zebkit.ui.Panel.html#methods_getCanvas">
-                                            <b>getCanvas(</b> <b>)</b>
-                                        </a>
-                                    </small>
-                                    &nbsp;&nbsp;
-                                    <small style="white-space: nowrap;">
-                                        <a href="zebkit.ui.Panel.html#methods_getComponentAt">
-                                            <b>getComponentAt(</b>x, y<b>)</b>
-                                        </a>
-                                    </small>
-                                    &nbsp;&nbsp;
-                                    <small style="white-space: nowrap;">
-                                        <a href="zebkit.layout.Layoutable.html#methods_getHorPadding">
-                                            <b>getHorPadding(</b> <b>)</b>
-                                        </a>
-                                    </small>
-                                    &nbsp;&nbsp;
-                                    <small style="white-space: nowrap;">
-                                        <a href="zebkit.layout.Layoutable.html#methods_getLeft">
-                                            <b>getLeft(</b> <b>)</b>
-                                        </a>
-                                    </small>
-                                    &nbsp;&nbsp;
-                                    <small style="white-space: nowrap;">
-                                        <a href="zebkit.layout.Layoutable.html#methods_getPreferredSize">
-                                            <b>getPreferredSize(</b> <b>)</b>
-                                        </a>
-                                    </small>
-                                    &nbsp;&nbsp;
-                                    <small style="white-space: nowrap;">
-                                        <a href="zebkit.layout.Layoutable.html#methods_getRight">
-                                            <b>getRight(</b> <b>)</b>
-                                        </a>
-                                    </small>
-                                    &nbsp;&nbsp;
-                                    <small style="white-space: nowrap;">
-                                        <a href="zebkit.layout.Layoutable.html#methods_getTop">
-                                            <b>getTop(</b> <b>)</b>
-                                        </a>
-                                    </small>
-                                    &nbsp;&nbsp;
-                                    <small style="white-space: nowrap;">
-                                        <a href="zebkit.layout.Layoutable.html#methods_getVerPadding">
-                                            <b>getVerPadding(</b> <b>)</b>
-                                        </a>
-                                    </small>
-                                    &nbsp;&nbsp;
-                                    <small style="white-space: nowrap;">
-                                        <a href="zebkit.ui.Panel.html#methods_hasFocus">
-                                            <b>hasFocus(</b> <b>)</b>
-                                        </a>
-                                    </small>
-                                    &nbsp;&nbsp;
-                                    <small style="white-space: nowrap;">
-                                        <a href="zebkit.layout.Layoutable.html#methods_indexOf">
-                                            <b>indexOf(</b>c<b>)</b>
-                                        </a>
-                                    </small>
-                                    &nbsp;&nbsp;
-                                    <small style="white-space: nowrap;">
-                                        <a href="zebkit.layout.Layoutable.html#methods_insert">
-                                            <b>insert(</b>i, constr, d<b>)</b>
-                                        </a>
-                                    </small>
-                                    &nbsp;&nbsp;
-                                    <small style="white-space: nowrap;">
-                                        <a href="zebkit.layout.Layoutable.html#methods_invalidate">
-                                            <b>invalidate(</b> <b>)</b>
-                                        </a>
-                                    </small>
-                                    &nbsp;&nbsp;
-                                    <small style="white-space: nowrap;">
-                                        <a href="zebkit.layout.Layoutable.html#methods_invalidateLayout">
-                                            <b>invalidateLayout(</b> <b>)</b>
-                                        </a>
-                                    </small>
-                                    &nbsp;&nbsp;
-                                    <small style="white-space: nowrap;">
-                                        <a href="zebkit.ui.EvStatePan.html#methods_keyPressed">
+                                        <a href="zebkit.ui.event.InputEventState.html#methods_keyPressed">
                                             <b>keyPressed(</b>e<b>)</b>
                                         </a>
                                     </small>
                                     &nbsp;&nbsp;
                                     <small style="white-space: nowrap;">
-                                        <a href="zebkit.ui.EvStatePan.html#methods_keyReleased">
+                                        <a href="zebkit.ui.event.InputEventState.html#methods_keyReleased">
                                             <b>keyReleased(</b>e<b>)</b>
                                         </a>
                                     </small>
                                     &nbsp;&nbsp;
                                     <small style="white-space: nowrap;">
-                                        <a href="zebkit.ui.Panel.html#methods_kidAdded">
-                                            <b>kidAdded(</b>index, constr, l<b>)</b>
-                                        </a>
-                                    </small>
-                                    &nbsp;&nbsp;
-                                    <small style="white-space: nowrap;">
-                                        <a href="zebkit.ui.Panel.html#methods_kidRemoved">
-                                            <b>kidRemoved(</b>i, l<b>)</b>
-                                        </a>
-                                    </small>
-                                    &nbsp;&nbsp;
-                                    <small style="white-space: nowrap;">
-                                        <a href="zebkit.layout.Layoutable.html#methods_laidout">
-                                            <b>laidout(</b> <b>)</b>
-                                        </a>
-                                    </small>
-                                    &nbsp;&nbsp;
-                                    <small style="white-space: nowrap;">
-                                        <a href="zebkit.ui.Panel.html#methods_load">
-                                            <b>load(</b>JSON<b>)</b>
-                                        </a>
-                                    </small>
-                                    &nbsp;&nbsp;
-                                    <small style="white-space: nowrap;">
-                                        <a href="zebkit.EventProducer.html#methods_off">
-                                            <b>off(</b>[eventName], [path], [cb]<b>)</b>
-                                        </a>
-                                    </small>
-                                    &nbsp;&nbsp;
-                                    <small style="white-space: nowrap;">
-                                        <a href="zebkit.EventProducer.html#methods_on">
-                                            <b>on(</b>[eventName], [path], cb<b>)</b>
-                                        </a>
-                                    </small>
-                                    &nbsp;&nbsp;
-                                    <small style="white-space: nowrap;">
-                                        <a href="zebkit.ui.Panel.html#methods_paintComponent">
-                                            <b>paintComponent(</b>g<b>)</b>
-                                        </a>
-                                    </small>
-                                    &nbsp;&nbsp;
-                                    <small style="white-space: nowrap;">
-                                        <a href="zebkit.ui.EvStatePan.html#methods_pointerDragged">
+                                        <a href="zebkit.ui.event.InputEventState.html#methods_pointerDragged">
                                             <b>pointerDragged(</b>e<b>)</b>
                                         </a>
                                     </small>
                                     &nbsp;&nbsp;
                                     <small style="white-space: nowrap;">
-                                        <a href="zebkit.ui.EvStatePan.html#methods_pointerEntered">
+                                        <a href="zebkit.ui.event.InputEventState.html#methods_pointerEntered">
                                             <b>pointerEntered(</b>e<b>)</b>
                                         </a>
                                     </small>
                                     &nbsp;&nbsp;
                                     <small style="white-space: nowrap;">
-                                        <a href="zebkit.ui.EvStatePan.html#methods_pointerExited">
+                                        <a href="zebkit.ui.event.InputEventState.html#methods_pointerExited">
                                             <b>pointerExited(</b>e<b>)</b>
                                         </a>
                                     </small>
                                     &nbsp;&nbsp;
                                     <small style="white-space: nowrap;">
-                                        <a href="zebkit.ui.EvStatePan.html#methods_pointerPressed">
+                                        <a href="zebkit.ui.event.InputEventState.html#methods_pointerPressed">
                                             <b>pointerPressed(</b>e<b>)</b>
                                         </a>
                                     </small>
                                     &nbsp;&nbsp;
                                     <small style="white-space: nowrap;">
-                                        <a href="zebkit.ui.EvStatePan.html#methods_pointerReleased">
+                                        <a href="zebkit.ui.event.InputEventState.html#methods_pointerReleased">
                                             <b>pointerReleased(</b>e<b>)</b>
                                         </a>
                                     </small>
                                     &nbsp;&nbsp;
                                     <small style="white-space: nowrap;">
-                                        <a href="zebkit.layout.Layoutable.html#methods_properties">
-                                            <b>properties(</b>[path], props<b>)</b>
-                                        </a>
-                                    </small>
-                                    &nbsp;&nbsp;
-                                    <small style="white-space: nowrap;">
-                                        <a href="zebkit.layout.Layoutable.html#methods_property">
-                                            <b>property(</b>[path], name, value<b>)</b>
-                                        </a>
-                                    </small>
-                                    &nbsp;&nbsp;
-                                    <small style="white-space: nowrap;">
-                                        <a href="zebkit.layout.Layoutable.html#methods_recalc">
-                                            <b>recalc(</b> <b>)</b>
-                                        </a>
-                                    </small>
-                                    &nbsp;&nbsp;
-                                    <small style="white-space: nowrap;">
-                                        <a href="zebkit.ui.Panel.html#methods_relocated">
-                                            <b>relocated(</b>px, py<b>)</b>
-                                        </a>
-                                    </small>
-                                    &nbsp;&nbsp;
-                                    <small style="white-space: nowrap;">
-                                        <a href="zebkit.layout.Layoutable.html#methods_remove">
-                                            <b>remove(</b>c<b>)</b>
-                                        </a>
-                                    </small>
-                                    &nbsp;&nbsp;
-                                    <small style="white-space: nowrap;">
-                                        <a href="zebkit.ui.Panel.html#methods_removeAll">
-                                            <b>removeAll(</b> <b>)</b>
-                                        </a>
-                                    </small>
-                                    &nbsp;&nbsp;
-                                    <small style="white-space: nowrap;">
-                                        <a href="zebkit.layout.Layoutable.html#methods_removeAt">
-                                            <b>removeAt(</b>i<b>)</b>
-                                        </a>
-                                    </small>
-                                    &nbsp;&nbsp;
-                                    <small style="white-space: nowrap;">
-                                        <a href="zebkit.layout.Layoutable.html#methods_removeMe">
-                                            <b>removeMe(</b>[after]<b>)</b>
-                                        </a>
-                                    </small>
-                                    &nbsp;&nbsp;
-                                    <small style="white-space: nowrap;">
-                                        <a href="zebkit.ui.Panel.html#methods_repaint">
-                                            <b>repaint(</b>[x], [y], [w], [h]<b>)</b>
-                                        </a>
-                                    </small>
-                                    &nbsp;&nbsp;
-                                    <small style="white-space: nowrap;">
-                                        <a href="zebkit.ui.Panel.html#methods_requestFocus">
-                                            <b>requestFocus(</b> <b>)</b>
-                                        </a>
-                                    </small>
-                                    &nbsp;&nbsp;
-                                    <small style="white-space: nowrap;">
-                                        <a href="zebkit.ui.Panel.html#methods_requestFocusIn">
-                                            <b>requestFocusIn(</b>[timeout]<b>)</b>
-                                        </a>
-                                    </small>
-                                    &nbsp;&nbsp;
-                                    <small style="white-space: nowrap;">
-                                        <a href="zebkit.ui.Panel.html#methods_resized">
-                                            <b>resized(</b>pw, ph<b>)</b>
-                                        </a>
-                                    </small>
-                                    &nbsp;&nbsp;
-                                    <small style="white-space: nowrap;">
-                                        <a href="zebkit.layout.Layoutable.html#methods_setAt">
-                                            <b>setAt(</b>i, d<b>)</b>
-                                        </a>
-                                    </small>
-                                    &nbsp;&nbsp;
-                                    <small style="white-space: nowrap;">
-                                        <a href="zebkit.ui.Panel.html#methods_setBackground">
-                                            <b>setBackground(</b>v<b>)</b>
-                                        </a>
-                                    </small>
-                                    &nbsp;&nbsp;
-                                    <small style="white-space: nowrap;">
-                                        <a href="zebkit.ui.Panel.html#methods_setBorder">
-                                            <b>setBorder(</b>v<b>)</b>
-                                        </a>
-                                    </small>
-                                    &nbsp;&nbsp;
-                                    <small style="white-space: nowrap;">
-                                        <a href="zebkit.ui.Panel.html#methods_setBottomPadding">
-                                            <b>setBottomPadding(</b>bottom<b>)</b>
-                                        </a>
-                                    </small>
-                                    &nbsp;&nbsp;
-                                    <small style="white-space: nowrap;">
-                                        <a href="zebkit.layout.Layoutable.html#methods_setBounds">
-                                            <b>setBounds(</b>x, y, w, h<b>)</b>
-                                        </a>
-                                    </small>
-                                    &nbsp;&nbsp;
-                                    <small style="white-space: nowrap;">
-                                        <a href="zebkit.layout.Layoutable.html#methods_setByConstraints">
-                                            <b>setByConstraints(</b>constr, c<b>)</b>
-                                        </a>
-                                    </small>
-                                    &nbsp;&nbsp;
-                                    <small style="white-space: nowrap;">
-                                        <a href="zebkit.ui.CompositeEvStatePan.html#methods_setCanHaveFocus">
+                                        <a href="zebkit.ui.FocusableComposite.html#methods_setCanHaveFocus">
                                             <b>setCanHaveFocus(</b>b<b>)</b>
                                         </a>
                                     </small>
                                     &nbsp;&nbsp;
                                     <small style="white-space: nowrap;">
-                                        <a href="zebkit.ui.Panel.html#methods_setConstraints">
-                                            <b>setConstraints(</b>ctr<b>)</b>
-                                        </a>
-                                    </small>
-                                    &nbsp;&nbsp;
-                                    <small style="white-space: nowrap;">
-                                        <a href="zebkit.ui.Panel.html#methods_setEnabled">
-                                            <b>setEnabled(</b>b<b>)</b>
-                                        </a>
-                                    </small>
-                                    &nbsp;&nbsp;
-                                    <small style="white-space: nowrap;">
-                                        <a href="zebkit.ui.CompositeEvStatePan.html#methods_setFocusAnchorComponent">
+                                        <a href="zebkit.ui.FocusableComposite.html#methods_setFocusAnchorComponent">
                                             <b>setFocusAnchorComponent(</b>c<b>)</b>
                                         </a>
                                     </small>
                                     &nbsp;&nbsp;
                                     <small style="white-space: nowrap;">
-                                        <a href="zebkit.ui.CompositeEvStatePan.html#methods_setFocusMarkerView">
+                                        <a href="zebkit.ui.FocusableComposite.html#methods_setFocusMarkerView">
                                             <b>setFocusMarkerView(</b>c<b>)</b>
                                         </a>
                                     </small>
                                     &nbsp;&nbsp;
                                     <small style="white-space: nowrap;">
-                                        <a href="zebkit.layout.Layoutable.html#methods_setId">
-                                            <b>setId(</b>id<b>)</b>
-                                        </a>
-                                    </small>
-                                    &nbsp;&nbsp;
-                                    <small style="white-space: nowrap;">
-                                        <a href="zebkit.ui.Panel.html#methods_setKids">
-                                            <b>setKids(</b>a<b>)</b>
-                                        </a>
-                                    </small>
-                                    &nbsp;&nbsp;
-                                    <small style="white-space: nowrap;">
-                                        <a href="zebkit.layout.Layoutable.html#methods_setLayout">
-                                            <b>setLayout(</b>m<b>)</b>
-                                        </a>
-                                    </small>
-                                    &nbsp;&nbsp;
-                                    <small style="white-space: nowrap;">
-                                        <a href="zebkit.ui.Panel.html#methods_setLeftPadding">
-                                            <b>setLeftPadding(</b>left<b>)</b>
-                                        </a>
-                                    </small>
-                                    &nbsp;&nbsp;
-                                    <small style="white-space: nowrap;">
-                                        <a href="zebkit.layout.Layoutable.html#methods_setLocation">
-                                            <b>setLocation(</b>xx, yy<b>)</b>
-                                        </a>
-                                    </small>
-                                    &nbsp;&nbsp;
-                                    <small style="white-space: nowrap;">
-                                        <a href="zebkit.ui.Panel.html#methods_setPadding">
-                                            <b>setPadding(</b>v<b>)</b>
-                                        </a>
-                                    </small>
-                                    &nbsp;&nbsp;
-                                    <small style="white-space: nowrap;">
-                                        <a href="zebkit.layout.Layoutable.html#methods_setParent">
-                                            <b>setParent(</b>o<b>)</b>
-                                        </a>
-                                    </small>
-                                    &nbsp;&nbsp;
-                                    <small style="white-space: nowrap;">
-                                        <a href="zebkit.layout.Layoutable.html#methods_setPreferredSize">
-                                            <b>setPreferredSize(</b>w, h<b>)</b>
-                                        </a>
-                                    </small>
-                                    &nbsp;&nbsp;
-                                    <small style="white-space: nowrap;">
-                                        <a href="zebkit.layout.Layoutable.html#methods_setProperties">
-                                            <b>setProperties(</b>[path], props<b>)</b>
-                                        </a>
-                                    </small>
-                                    &nbsp;&nbsp;
-                                    <small style="white-space: nowrap;">
-                                        <a href="zebkit.ui.Panel.html#methods_setRightPadding">
-                                            <b>setRightPadding(</b>right<b>)</b>
-                                        </a>
-                                    </small>
-                                    &nbsp;&nbsp;
-                                    <small style="white-space: nowrap;">
-                                        <a href="zebkit.layout.Layoutable.html#methods_setSize">
-                                            <b>setSize(</b>w, h<b>)</b>
-                                        </a>
-                                    </small>
-                                    &nbsp;&nbsp;
-                                    <small style="white-space: nowrap;">
-                                        <a href="zebkit.ui.StatePan.html#methods_setState">
+                                        <a href="zebkit.ui.event.InputEventState.html#methods_setState">
                                             <b>setState(</b>s<b>)</b>
-                                        </a>
-                                    </small>
-                                    &nbsp;&nbsp;
-                                    <small style="white-space: nowrap;">
-                                        <a href="zebkit.ui.Panel.html#methods_setTopPadding">
-                                            <b>setTopPadding(</b>top<b>)</b>
-                                        </a>
-                                    </small>
-                                    &nbsp;&nbsp;
-                                    <small style="white-space: nowrap;">
-                                        <a href="zebkit.ui.ViewPan.html#methods_setView">
-                                            <b>setView(</b>v<b>)</b>
-                                        </a>
-                                    </small>
-                                    &nbsp;&nbsp;
-                                    <small style="white-space: nowrap;">
-                                        <a href="zebkit.ui.Panel.html#methods_setVisible">
-                                            <b>setVisible(</b>b<b>)</b>
-                                        </a>
-                                    </small>
-                                    &nbsp;&nbsp;
-                                    <small style="white-space: nowrap;">
-                                        <a href="zebkit.ui.StatePan.html#methods_stateUpdated">
-                                            <b>stateUpdated(</b>o, n<b>)</b>
-                                        </a>
-                                    </small>
-                                    &nbsp;&nbsp;
-                                    <small style="white-space: nowrap;">
-                                        <a href="zebkit.ui.StatePan.html#methods_syncState">
-                                            <b>syncState(</b> <b>)</b>
-                                        </a>
-                                    </small>
-                                    &nbsp;&nbsp;
-                                    <small style="white-space: nowrap;">
-                                        <a href="zebkit.ui.Panel.html#methods_toBack">
-                                            <b>toBack(</b> <b>)</b>
-                                        </a>
-                                    </small>
-                                    &nbsp;&nbsp;
-                                    <small style="white-space: nowrap;">
-                                        <a href="zebkit.ui.Panel.html#methods_toFront">
-                                            <b>toFront(</b> <b>)</b>
-                                        </a>
-                                    </small>
-                                    &nbsp;&nbsp;
-                                    <small style="white-space: nowrap;">
-                                        <a href="zebkit.ui.Panel.html#methods_toPreferredHeight">
-                                            <b>toPreferredHeight(</b> <b>)</b>
-                                        </a>
-                                    </small>
-                                    &nbsp;&nbsp;
-                                    <small style="white-space: nowrap;">
-                                        <a href="zebkit.ui.Panel.html#methods_toPreferredSize">
-                                            <b>toPreferredSize(</b> <b>)</b>
-                                        </a>
-                                    </small>
-                                    &nbsp;&nbsp;
-                                    <small style="white-space: nowrap;">
-                                        <a href="zebkit.ui.Panel.html#methods_toPreferredWidth">
-                                            <b>toPreferredWidth(</b> <b>)</b>
-                                        </a>
-                                    </small>
-                                    &nbsp;&nbsp;
-                                    <small style="white-space: nowrap;">
-                                        <a href="zebkit.ui.Panel.html#methods_toView">
-                                            <b>toView(</b>target<b>)</b>
-                                        </a>
-                                    </small>
-                                    &nbsp;&nbsp;
-                                    <small style="white-space: nowrap;">
-                                        <a href="zebkit.layout.Layoutable.html#methods_validate">
-                                            <b>validate(</b> <b>)</b>
-                                        </a>
-                                    </small>
-                                    &nbsp;&nbsp;
-                                    <small style="white-space: nowrap;">
-                                        <a href="zebkit.layout.Layoutable.html#methods_validateMetric">
-                                            <b>validateMetric(</b> <b>)</b>
-                                        </a>
-                                    </small>
-                                    &nbsp;&nbsp;
-                                    <small style="white-space: nowrap;">
-                                        <a href="zebkit.ui.Panel.html#methods_vrp">
-                                            <b>vrp(</b> <b>)</b>
                                         </a>
                                     </small>
                                     &nbsp;&nbsp;
@@ -1995,6 +1574,46 @@ as follow:</p>
                                 </td>
                             </tr>
                             <tr>
+                                <td><a name="methods_switched"></a>
+
+<div class="method item">
+    <span class="foundat">
+    </span>
+
+
+            <strong> public </strong>
+
+
+                <span class="type">
+                    void
+                </span>
+
+    <strong class="name"><code>switched</code> (<code>ch</code>)</strong>
+
+    <br/>
+
+    <p>Called every time the check box state has been updated</p>
+
+
+        <br/>
+        <strong>Parameters:</strong>
+        <ul class="params">
+                <li>
+                        <span class="name"><code>ch</code></span>
+                        <strong class="type">
+                            &lt;<a href="../classes/zebkit.ui.Checkbox.html" class="crosslink">zebkit.ui.Checkbox</a>&gt;
+                        </strong>
+                    <p>a check box that has triggered the swicth</p>
+
+                </li>
+        </ul>
+
+
+
+</div>
+                                </td>
+                            </tr>
+                            <tr>
                                 <td><a name="methods_toggle"></a>
 
 <div class="method item">
@@ -2025,11 +1644,6 @@ as follow:</p>
 
 <div class="method item protected">
     <span class="foundat">
-            <span>@Override</span>
-            <a href="zebkit.ui.StatePan.html#methods_toViewId">
-                zebkit.ui.StatePan
-            </a>
-            <br/>
     </span>
 
         <strong> <code>protected</code> </strong>
@@ -2084,60 +1698,6 @@ as follow:</p>
                 <br/>
                 <table>
                         <tr>
-                            <td><a name="attrs_bg"></a>
-<div class="attrs item">
-
-        <strong> public </strong>
-
-        <img title="readonly" width="18" height="18" src="../assets/css/lock.png" />
-
-        <strong class="type">
-            &lt;<a href="../classes/zebkit.draw.View.html" class="crosslink">zebkit.draw.View</a>&gt;
-        </strong>
-
-    <strong class="name" style="color:orange;">
-        <code>bg</code>
-    </strong>
-
-    <em><code>&#x2F;* Extended from zebkit.ui.Panel *&#x2F;</code></em>
-    
-
-    <br>
-
-    <p>UI component background view</p>
-
-
-</div>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td><a name="attrs_border"></a>
-<div class="attrs item">
-
-        <strong> public </strong>
-
-        <img title="readonly" width="18" height="18" src="../assets/css/lock.png" />
-
-        <strong class="type">
-            &lt;<a href="../classes/zebkit.draw.View.html" class="crosslink">zebkit.draw.View</a>&gt;
-        </strong>
-
-    <strong class="name" style="color:orange;">
-        <code>border</code>
-    </strong>
-
-    <em><code>&#x2F;* Extended from zebkit.ui.Panel *&#x2F;</code></em>
-    
-
-    <br>
-
-    <p>UI component border view</p>
-
-
-</div>
-                            </td>
-                        </tr>
-                        <tr>
                             <td><a name="attrs_box"></a>
 <div class="attrs item">
 
@@ -2180,8 +1740,8 @@ as follow:</p>
         <code>canHaveFocus</code>
     </strong>
 
-    <em><code>&#x2F;* Extended from zebkit.ui.CompositeEvStatePan *&#x2F;</code></em>
-    <em><code>&#x2F;* Overwritten from canHaveFocus *&#x2F;</code></em>
+    <em><code>&#x2F;* Extended from zebkit.ui.FocusableComposite *&#x2F;</code></em>
+    
 
     <br>
 
@@ -2207,41 +1767,13 @@ as follow:</p>
         <code>catchInput</code>
     </strong>
 
-    <em><code>&#x2F;* Extended from zebkit.ui.CompositeEvStatePan *&#x2F;</code></em>
+    <em><code>&#x2F;* Extended from zebkit.ui.FocusableComposite *&#x2F;</code></em>
     
 
     <br>
 
     <p>Indicates this composite component can make its children components
 event transparent.</p>
-
-
-</div>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td><a name="attrs_constraints"></a>
-<div class="attrs item">
-
-        <strong> public </strong>
-
-
-        <strong class="type">
-            &lt;<a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object" class="crosslink external" target="_blank">Object</a>&gt;
-        </strong>
-
-    <strong class="name" style="color:orange;">
-        <code>constraints</code>
-    </strong>
-
-    <em><code>&#x2F;* Extended from zebkit.layout.Layoutable *&#x2F;</code></em>
-    
-
-    <br>
-
-    <p>The component layout constraints. The constraints is specific to
-the parent component layout manager value that customizes the
-children component layouting on the parent component.</p>
 
 
 </div>
@@ -2263,7 +1795,7 @@ children component layouting on the parent component.</p>
         <code>focusComponent</code>
     </strong>
 
-    <em><code>&#x2F;* Extended from zebkit.ui.CompositeEvStatePan *&#x2F;</code></em>
+    <em><code>&#x2F;* Extended from zebkit.ui.FocusableComposite *&#x2F;</code></em>
     
 
     <br>
@@ -2289,7 +1821,7 @@ children component layouting on the parent component.</p>
         <code>focusMarkerGaps</code>
     </strong>
 
-    <em><code>&#x2F;* Extended from zebkit.ui.CompositeEvStatePan *&#x2F;</code></em>
+    <em><code>&#x2F;* Extended from zebkit.ui.FocusableComposite *&#x2F;</code></em>
     
 
     <br>
@@ -2316,228 +1848,12 @@ children component layouting on the parent component.</p>
         <code>focusMarkerView</code>
     </strong>
 
-    <em><code>&#x2F;* Extended from zebkit.ui.CompositeEvStatePan *&#x2F;</code></em>
+    <em><code>&#x2F;* Extended from zebkit.ui.FocusableComposite *&#x2F;</code></em>
     
 
     <br>
 
     <p>Reference to an anchor focus marker component</p>
-
-
-</div>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td><a name="attrs_height"></a>
-<div class="attrs item">
-
-        <strong> public </strong>
-
-        <img title="readonly" width="18" height="18" src="../assets/css/lock.png" />
-
-        <strong class="type">
-            &lt;Integer&gt;
-        </strong>
-
-    <strong class="name" style="color:orange;">
-        <code>height</code>
-    </strong>
-
-    <em><code>&#x2F;* Extended from zebkit.layout.Layoutable *&#x2F;</code></em>
-    
-
-    <br>
-
-    <p>Height of rectangular area</p>
-
-
-</div>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td><a name="attrs_isEnabled"></a>
-<div class="attrs item">
-
-        <strong> public </strong>
-
-        <img title="readonly" width="18" height="18" src="../assets/css/lock.png" />
-
-        <strong class="type">
-            &lt;<a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Boolean" class="crosslink external" target="_blank">Boolean</a>&gt;
-        </strong>
-
-    <strong class="name" style="color:orange;">
-        <code>isEnabled</code>
-    </strong>
-
-    <em><code>&#x2F;* Extended from zebkit.ui.Panel *&#x2F;</code></em>
-    
-
-    <br>
-
-    <p>UI component enabled state</p>
-
-
-</div>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td><a name="attrs_isValid"></a>
-<div class="attrs item">
-
-        <strong> public </strong>
-
-        <img title="readonly" width="18" height="18" src="../assets/css/lock.png" />
-
-        <strong class="type">
-            &lt;<a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Boolean" class="crosslink external" target="_blank">Boolean</a>&gt;
-        </strong>
-
-    <strong class="name" style="color:orange;">
-        <code>isValid</code>
-    </strong>
-
-    <em><code>&#x2F;* Extended from zebkit.layout.Layoutable *&#x2F;</code></em>
-    
-
-    <br>
-
-    <p>Indicate a layoutable component validity</p>
-
-
-</div>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td><a name="attrs_isVisible"></a>
-<div class="attrs item">
-
-        <strong> public </strong>
-
-        <img title="readonly" width="18" height="18" src="../assets/css/lock.png" />
-
-        <strong class="type">
-            &lt;<a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Boolean" class="crosslink external" target="_blank">Boolean</a>&gt;
-        </strong>
-
-    <strong class="name" style="color:orange;">
-        <code>isVisible</code>
-    </strong>
-
-    <em><code>&#x2F;* Extended from zebkit.layout.Layoutable *&#x2F;</code></em>
-    
-
-    <br>
-
-    <p>Indicate a layoutable component visibility</p>
-
-
-</div>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td><a name="attrs_kids"></a>
-<div class="attrs item">
-
-        <strong> public </strong>
-
-        <img title="readonly" width="18" height="18" src="../assets/css/lock.png" />
-
-        <strong class="type">
-            &lt;<a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array" class="crosslink external" target="_blank">Array</a>&gt;
-        </strong>
-
-    <strong class="name" style="color:orange;">
-        <code>kids</code>
-    </strong>
-
-    <em><code>&#x2F;* Extended from zebkit.layout.Layoutable *&#x2F;</code></em>
-    
-
-    <br>
-
-    <p>Reference to children components</p>
-
-
-</div>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td><a name="attrs_layout"></a>
-<div class="attrs item">
-
-        <strong> public </strong>
-
-        <img title="readonly" width="18" height="18" src="../assets/css/lock.png" />
-
-        <strong class="type">
-            &lt;<a href="../classes/zebkit.layout.Layout.html" class="crosslink">zebkit.layout.Layout</a>&gt;
-        </strong>
-
-    <strong class="name" style="color:orange;">
-        <code>layout</code>
-    </strong>
-
-    <em><code>&#x2F;* Extended from zebkit.layout.Layoutable *&#x2F;</code></em>
-    
-
-    <br>
-
-    <p>Layout manager that is used to order children layoutable components</p>
-
-
-</div>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td><a name="attrs_parent"></a>
-<div class="attrs item">
-
-        <strong> public </strong>
-
-        <img title="readonly" width="18" height="18" src="../assets/css/lock.png" />
-
-        <strong class="type">
-            &lt;<a href="../classes/zebkit.layout.Layoutable.html" class="crosslink">zebkit.layout.Layoutable</a>&gt;
-        </strong>
-
-    <strong class="name" style="color:orange;">
-        <code>parent</code>
-    </strong>
-
-    <em><code>&#x2F;* Extended from zebkit.layout.Layoutable *&#x2F;</code></em>
-    
-
-    <br>
-
-    <p>Reference to a parent layoutable component</p>
-
-
-</div>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td><a name="attrs_state"></a>
-<div class="attrs item">
-
-        <strong> public </strong>
-
-        <img title="readonly" width="18" height="18" src="../assets/css/lock.png" />
-
-        <strong class="type">
-            &lt;<a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object" class="crosslink external" target="_blank">Object</a>&gt;
-        </strong>
-
-    <strong class="name" style="color:orange;">
-        <code>state</code>
-    </strong>
-
-    <em><code>&#x2F;* Extended from zebkit.ui.StatePan *&#x2F;</code></em>
-    
-
-    <br>
-
-    <p>Current component state</p>
 
 
 </div>
@@ -2570,1117 +1886,10 @@ children component layouting on the parent component.</p>
 </div>
                             </td>
                         </tr>
-                        <tr>
-                            <td><a name="attrs_view"></a>
-<div class="attrs item">
-
-        <strong> public </strong>
-
-        <img title="readonly" width="18" height="18" src="../assets/css/lock.png" />
-
-        <strong class="type">
-            &lt;<a href="../classes/zebkit.draw.View.html" class="crosslink">zebkit.draw.View</a>&gt;
-        </strong>
-
-    <strong class="name" style="color:orange;">
-        <code>view</code>
-    </strong>
-
-    <em><code>&#x2F;* Extended from zebkit.ui.ViewPan *&#x2F;</code></em>
-    
-
-    <br>
-
-    <p>Reference to a view that the component visualize</p>
-
-
-</div>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td><a name="attrs_width"></a>
-<div class="attrs item">
-
-        <strong> public </strong>
-
-        <img title="readonly" width="18" height="18" src="../assets/css/lock.png" />
-
-        <strong class="type">
-            &lt;Integer&gt;
-        </strong>
-
-    <strong class="name" style="color:orange;">
-        <code>width</code>
-    </strong>
-
-    <em><code>&#x2F;* Extended from zebkit.layout.Layoutable *&#x2F;</code></em>
-    
-
-    <br>
-
-    <p>Width of rectangular area</p>
-
-
-</div>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td><a name="attrs_x"></a>
-<div class="attrs item">
-
-        <strong> public </strong>
-
-        <img title="readonly" width="18" height="18" src="../assets/css/lock.png" />
-
-        <strong class="type">
-            &lt;Integer&gt;
-        </strong>
-
-    <strong class="name" style="color:orange;">
-        <code>x</code>
-    </strong>
-
-    <em><code>&#x2F;* Extended from zebkit.layout.Layoutable *&#x2F;</code></em>
-    
-
-    <br>
-
-    <p>x coordinate</p>
-
-
-</div>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td><a name="attrs_y"></a>
-<div class="attrs item">
-
-        <strong> public </strong>
-
-        <img title="readonly" width="18" height="18" src="../assets/css/lock.png" />
-
-        <strong class="type">
-            &lt;Integer&gt;
-        </strong>
-
-    <strong class="name" style="color:orange;">
-        <code>y</code>
-    </strong>
-
-    <em><code>&#x2F;* Extended from zebkit.layout.Layoutable *&#x2F;</code></em>
-    
-
-    <br>
-
-    <p>y coordinate</p>
-
-
-</div>
-                            </td>
-                        </tr>
                 </table>
             </div>
 
 
-            <div id="events">
-                    <ul style="list-style:none;">
-                            <li>
-                                <a class="name" href="#events_child&lt;EventName&gt;"><b>child&lt;EventName&gt;</b>
-                                    (
-                                        id, src, e
-an
-                                    )
-                                </a>
-                            </li>
-                            <li>
-                                <a class="name" href="#events_clipCopy"><b>clipCopy</b>
-                                    (
-                                        
-                                    )
-                                </a>
-                            </li>
-                            <li>
-                                <a class="name" href="#events_clipPaste"><b>clipPaste</b>
-                                    (
-                                        s
-                                    )
-                                </a>
-                            </li>
-                            <li>
-                                <a class="name" href="#events_compAdded"><b>compAdded</b>
-                                    (
-                                        e
-                                    )
-                                </a>
-                            </li>
-                            <li>
-                                <a class="name" href="#events_compEnabled"><b>compEnabled</b>
-                                    (
-                                        e
-                                    )
-                                </a>
-                            </li>
-                            <li>
-                                <a class="name" href="#events_compMoved"><b>compMoved</b>
-                                    (
-                                        c, px, py, e
-                                    )
-                                </a>
-                            </li>
-                            <li>
-                                <a class="name" href="#events_compRemoved"><b>compRemoved</b>
-                                    (
-                                        e
-                                    )
-                                </a>
-                            </li>
-                            <li>
-                                <a class="name" href="#events_compShown"><b>compShown</b>
-                                    (
-                                        e
-                                    )
-                                </a>
-                            </li>
-                            <li>
-                                <a class="name" href="#events_compSized"><b>compSized</b>
-                                    (
-                                        e
-                                    )
-                                </a>
-                            </li>
-                            <li>
-                                <a class="name" href="#events_focusGained"><b>focusGained</b>
-                                    (
-                                        e
-                                    )
-                                </a>
-                            </li>
-                            <li>
-                                <a class="name" href="#events_focusLost"><b>focusLost</b>
-                                    (
-                                        e
-                                    )
-                                </a>
-                            </li>
-                            <li>
-                                <a class="name" href="#events_keyPressed"><b>keyPressed</b>
-                                    (
-                                        e
-                                    )
-                                </a>
-                            </li>
-                            <li>
-                                <a class="name" href="#events_keyReleased"><b>keyReleased</b>
-                                    (
-                                        e
-                                    )
-                                </a>
-                            </li>
-                            <li>
-                                <a class="name" href="#events_keyTyped"><b>keyTyped</b>
-                                    (
-                                        e
-                                    )
-                                </a>
-                            </li>
-                            <li>
-                                <a class="name" href="#events_pointerClicked"><b>pointerClicked</b>
-                                    (
-                                        e
-                                    )
-                                </a>
-                            </li>
-                            <li>
-                                <a class="name" href="#events_pointerDragEnded"><b>pointerDragEnded</b>
-                                    (
-                                        e
-                                    )
-                                </a>
-                            </li>
-                            <li>
-                                <a class="name" href="#events_pointerDragged"><b>pointerDragged</b>
-                                    (
-                                        e
-                                    )
-                                </a>
-                            </li>
-                            <li>
-                                <a class="name" href="#events_pointerDragStarted"><b>pointerDragStarted</b>
-                                    (
-                                        e
-                                    )
-                                </a>
-                            </li>
-                            <li>
-                                <a class="name" href="#events_pointerEntered"><b>pointerEntered</b>
-                                    (
-                                        e
-                                    )
-                                </a>
-                            </li>
-                            <li>
-                                <a class="name" href="#events_pointerExited"><b>pointerExited</b>
-                                    (
-                                        e
-                                    )
-                                </a>
-                            </li>
-                            <li>
-                                <a class="name" href="#events_pointerMoved"><b>pointerMoved</b>
-                                    (
-                                        e
-                                    )
-                                </a>
-                            </li>
-                            <li>
-                                <a class="name" href="#events_pointerPressed"><b>pointerPressed</b>
-                                    (
-                                        e
-                                    )
-                                </a>
-                            </li>
-                            <li>
-                                <a class="name" href="#events_pointerReleased"><b>pointerReleased</b>
-                                    (
-                                        e
-                                    )
-                                </a>
-                            </li>
-                    </ul>
-                <br/>
-                <table>
-                        <tr>
-                            <td><a name="events_child&lt;EventName&gt;"></a>
-<div class="events item">
-    <strong>
-        <code>child&amp;lt;EventName&amp;gt;</code>
-    </strong>
-
-
-    <em><code>&#x2F;* Extended from zebkit.ui.Panel *&#x2F;&lt;&#x2F;em&gt;</code>
-    
-
-    <p>It is also possible to listen all the listed above event for children component. To handle
-the event register listener method following the pattern below:</p>
-<pre class="code prettyprint"><code>    var p = new zebkit.ui.Panel();
-    p.child&lt;EventName&gt; = function(e) { ... }; // add event handler</code></pre>
-
-
-        <br/>
-        <strong>Parameters:</strong>
-        <ul>
-                <li>
-                        <span class="name"><code>id</code></span>
-                        <strong class="type">
-                            &lt;Integer&gt;
-                        </strong>
-                    <p>a component event ID. The id can have one of the following value:</p>
-
-
-                </li>
-                <li>
-                        <span class="name"><code>src</code></span>
-                        <strong class="type">
-                            &lt;<a href="../classes/zebkit.ui.Panel.html" class="crosslink">zebkit.ui.Panel</a>&gt;
-                        </strong>
-                    <p>a component that triggers the event</p>
-
-
-                </li>
-                <li>
-                        <span class="name">`e
-an`</span>
-                        <strong class="type">
-                            &lt;<a href="../classes/zebkit.ui.event.KeyEvent.html" class="crosslink">zebkit.ui.event.KeyEvent</a> | <a href="../classes/zebkit.ui.event.PointerEvent.html" class="crosslink">zebkit.ui.event.PointerEvent</a> | <a href="../classes/zebkit.ui.event.CompEvent.html" class="crosslink">zebkit.ui.event.CompEvent</a> | <a href="../classes/zebkit.ui.event.FocusEvent.html" class="crosslink">zebkit.ui.event.FocusEvent</a>&gt;
-                        </strong>
-                    <p>UI event fired by a child component.</p>
-
-
-                </li>
-        </ul>
-</div>
-
-                            </td>
-                        </tr>
-                        <tr>
-                            <td><a name="events_clipCopy"></a>
-<div class="events item">
-    <strong>
-        <code>clipCopy</code>
-    </strong>
-
-
-    <em><code>&#x2F;* Extended from zebkit.ui.Panel *&#x2F;&lt;&#x2F;em&gt;</code>
-    
-
-    <p>The method is called for focusable UI components (components that can hold input focus) to ask
-a string to be saved in native clipboard</p>
-
-
-</div>
-
-                            </td>
-                        </tr>
-                        <tr>
-                            <td><a name="events_clipPaste"></a>
-<div class="events item">
-    <strong>
-        <code>clipPaste</code>
-    </strong>
-
-
-    <em><code>&#x2F;* Extended from zebkit.ui.Panel *&#x2F;&lt;&#x2F;em&gt;</code>
-    
-
-    <p>The method is called to pass string from clipboard to a focusable (a component that can hold
-input focus) UI component</p>
-
-
-        <br/>
-        <strong>Parameters:</strong>
-        <ul>
-                <li>
-                        <span class="name"><code>s</code></span>
-                        <strong class="type">
-                            &lt;<a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String" class="crosslink external" target="_blank">String</a>&gt;
-                        </strong>
-                    <p>a string from native clipboard</p>
-
-
-                </li>
-        </ul>
-</div>
-
-                            </td>
-                        </tr>
-                        <tr>
-                            <td><a name="events_compAdded"></a>
-<div class="events item">
-    <strong>
-        <code>compAdded</code>
-    </strong>
-
-
-    <em><code>&#x2F;* Extended from zebkit.ui.Panel *&#x2F;&lt;&#x2F;em&gt;</code>
-    
-
-    <p>Implement the event handler method to catch component added event
-The event is triggered every time the component has been inserted into
-another one.</p>
-<pre class="code prettyprint"><code>    var p = new zebkit.ui.Panel();
-    p.compAdded = function(e) { ... }; // add event handler</code></pre>
-
-
-        <br/>
-        <strong>Parameters:</strong>
-        <ul>
-                <li>
-                        <span class="name"><code>e</code></span>
-                        <strong class="type">
-                            &lt;<a href="../classes/zebkit.ui.event.CompEvent.html" class="crosslink">zebkit.ui.event.CompEvent</a>&gt;
-                        </strong>
-                    <p>a component event. The source of the passed event
-is set to a container component, "kid" field is set to a component that has been
-added to the container, "constraints" holds a constraints the child component has been
-added.</p>
-
-
-                </li>
-        </ul>
-</div>
-
-                            </td>
-                        </tr>
-                        <tr>
-                            <td><a name="events_compEnabled"></a>
-<div class="events item">
-    <strong>
-        <code>compEnabled</code>
-    </strong>
-
-
-    <em><code>&#x2F;* Extended from zebkit.ui.Panel *&#x2F;&lt;&#x2F;em&gt;</code>
-    
-
-    <p>Implement the event handler method to catch component enabled event
-The event is triggered every time a component enabled state has been
-updated.</p>
-<pre class="code prettyprint"><code>    var p = new zebkit.ui.Panel();
-    p.compEnabled = function(e) { ... }; // add event handler</code></pre>
-
-
-        <br/>
-        <strong>Parameters:</strong>
-        <ul>
-                <li>
-                        <span class="name"><code>e</code></span>
-                        <strong class="type">
-                            &lt;<a href="../classes/zebkit.ui.event.CompEvent.html" class="crosslink">zebkit.ui.event.CompEvent</a>&gt;
-                        </strong>
-                    <p>a component event.</p>
-
-
-                </li>
-        </ul>
-</div>
-
-                            </td>
-                        </tr>
-                        <tr>
-                            <td><a name="events_compMoved"></a>
-<div class="events item">
-    <strong>
-        <code>compMoved</code>
-    </strong>
-
-
-    <em><code>&#x2F;* Extended from zebkit.ui.Panel *&#x2F;&lt;&#x2F;em&gt;</code>
-    
-
-    <p>Implement the event handler method to catch component moved event
-The event is triggered every time the component location has been
-updated.</p>
-<pre class="code prettyprint"><code>    var p = new zebkit.ui.Panel();
-    p.compMoved = function(e) { ... }; // add event handler</code></pre>
-
-
-        <br/>
-        <strong>Parameters:</strong>
-        <ul>
-                <li>
-                        <span class="name"><code>c</code></span>
-                        <strong class="type">
-                            &lt;<a href="../classes/zebkit.ui.Panel.html" class="crosslink">zebkit.ui.Panel</a>&gt;
-                        </strong>
-                    <p>a component that has been moved</p>
-
-
-                </li>
-                <li>
-                        <span class="name"><code>px</code></span>
-                        <strong class="type">
-                            &lt;Integer&gt;
-                        </strong>
-                    <p>a previous x coordinate the moved component had</p>
-
-
-                </li>
-                <li>
-                        <span class="name"><code>py</code></span>
-                        <strong class="type">
-                            &lt;Integer&gt;
-                        </strong>
-                    <p>a previous y coordinate the moved component had</p>
-
-
-                </li>
-                <li>
-                        <span class="name"><code>e</code></span>
-                        <strong class="type">
-                            &lt;<a href="../classes/zebkit.ui.event.CompEvent.html" class="crosslink">zebkit.ui.event.CompEvent</a>&gt;
-                        </strong>
-                    <p>a component event. Source of the event
-is a component that has been moved. "prevX" and "prevY" fields hold
-a previous location the component had.</p>
-
-
-                </li>
-        </ul>
-</div>
-
-                            </td>
-                        </tr>
-                        <tr>
-                            <td><a name="events_compRemoved"></a>
-<div class="events item">
-    <strong>
-        <code>compRemoved</code>
-    </strong>
-
-
-    <em><code>&#x2F;* Extended from zebkit.ui.Panel *&#x2F;&lt;&#x2F;em&gt;</code>
-    
-
-    <p>Implement the event handler method to catch component removed event
-The event is triggered every time the component has been removed from
-its parent UI component.</p>
-<pre class="code prettyprint"><code>    var p = new zebkit.ui.Panel();
-    p.compRemoved = function(e) { ... }; // add event handler</code></pre>
-
-
-        <br/>
-        <strong>Parameters:</strong>
-        <ul>
-                <li>
-                        <span class="name"><code>e</code></span>
-                        <strong class="type">
-                            &lt;<a href="../classes/zebkit.ui.event.CompEvent.html" class="crosslink">zebkit.ui.event.CompEvent</a>&gt;
-                        </strong>
-                    <p>a component event. The source of the passed event
-is set to the container component. "kid" field is set to a child component that has
-been removed from the container and "index" field is set to the index the kid component
-was added before it had been removed from the container.</p>
-
-
-                </li>
-        </ul>
-</div>
-
-                            </td>
-                        </tr>
-                        <tr>
-                            <td><a name="events_compShown"></a>
-<div class="events item">
-    <strong>
-        <code>compShown</code>
-    </strong>
-
-
-    <em><code>&#x2F;* Extended from zebkit.ui.Panel *&#x2F;&lt;&#x2F;em&gt;</code>
-    
-
-    <p>Implement the event handler method to catch component shown event
-The event is triggered every time a component visibility state has
-been updated.</p>
-<pre class="code prettyprint"><code>    var p = new zebkit.ui.Panel();
-    p.compShown = function(e) { ... }; // add event handler</code></pre>
-
-
-        <br/>
-        <strong>Parameters:</strong>
-        <ul>
-                <li>
-                        <span class="name"><code>e</code></span>
-                        <strong class="type">
-                            &lt;<a href="../classes/zebkit.ui.event.CompEvent.html" class="crosslink">zebkit.ui.event.CompEvent</a>&gt;
-                        </strong>
-                    <p>a component event.</p>
-
-
-                </li>
-        </ul>
-</div>
-
-                            </td>
-                        </tr>
-                        <tr>
-                            <td><a name="events_compSized"></a>
-<div class="events item">
-    <strong>
-        <code>compSized</code>
-    </strong>
-
-
-    <em><code>&#x2F;* Extended from zebkit.ui.Panel *&#x2F;&lt;&#x2F;em&gt;</code>
-    
-
-    <p>Implement the event handler method to catch the component sized event
-The event is triggered every time the component has been re-sized.</p>
-<pre class="code prettyprint"><code>    var p = new zebkit.ui.Panel();
-    p.compSized = function(e) { ... }; // add event handler</code></pre>
-
-
-        <br/>
-        <strong>Parameters:</strong>
-        <ul>
-                <li>
-                        <span class="name"><code>e</code></span>
-                        <strong class="type">
-                            &lt;<a href="../classes/zebkit.ui.event.CompEvent.html" class="crosslink">zebkit.ui.event.CompEvent</a>&gt;
-                        </strong>
-                    <p>a component event. Source of the event
-is a component that has been sized, "prevWidth" and "prevHeight" fields
-keep a previous size the component had.</p>
-
-
-                </li>
-        </ul>
-</div>
-
-                            </td>
-                        </tr>
-                        <tr>
-                            <td><a name="events_focusGained"></a>
-<div class="events item">
-    <strong>
-        <code>focusGained</code>
-    </strong>
-
-
-    <em><code>&#x2F;* Extended from zebkit.ui.Panel *&#x2F;&lt;&#x2F;em&gt;</code>
-    
-
-    <p>Implement the event handler method to catch component focus gained event
-The event is triggered every time a component has gained focus.</p>
-<pre class="code prettyprint"><code>    var p = new zebkit.ui.Panel();
-    p.focusGained = function(e) { ... }; // add event handler</code></pre>
-
-
-        <br/>
-        <strong>Parameters:</strong>
-        <ul>
-                <li>
-                        <span class="name"><code>e</code></span>
-                        <strong class="type">
-                            &lt;<a href="../classes/zebkit.ui.event.FocusEvent.html" class="crosslink">zebkit.ui.event.FocusEvent</a>&gt;
-                        </strong>
-                    <p>an input event</p>
-
-
-                </li>
-        </ul>
-</div>
-
-                            </td>
-                        </tr>
-                        <tr>
-                            <td><a name="events_focusLost"></a>
-<div class="events item">
-    <strong>
-        <code>focusLost</code>
-    </strong>
-
-
-    <em><code>&#x2F;* Extended from zebkit.ui.Panel *&#x2F;&lt;&#x2F;em&gt;</code>
-    
-
-    <p>Implement the event handler method to catch component focus lost event
-The event is triggered every time a component has lost focus</p>
-<pre class="code prettyprint"><code>    var p = new zebkit.ui.Panel();
-    p.focusLost = function(e) { ... }; // add event handler</code></pre>
-
-
-        <br/>
-        <strong>Parameters:</strong>
-        <ul>
-                <li>
-                        <span class="name"><code>e</code></span>
-                        <strong class="type">
-                            &lt;<a href="../classes/zebkit.ui.event.FocusEvent.html" class="crosslink">zebkit.ui.event.FocusEvent</a>&gt;
-                        </strong>
-                    <p>an input event</p>
-
-
-                </li>
-        </ul>
-</div>
-
-                            </td>
-                        </tr>
-                        <tr>
-                            <td><a name="events_keyPressed"></a>
-<div class="events item">
-    <strong>
-        <code>keyPressed</code>
-    </strong>
-
-
-    <em><code>&#x2F;* Extended from zebkit.ui.Panel *&#x2F;&lt;&#x2F;em&gt;</code>
-    
-
-    <p>Implement the event handler method to catch key pressed event The event is triggered every
-time a key has been pressed.</p>
-<pre class="code prettyprint"><code>    var p = new zebkit.ui.Panel();
-    p.keyPressed = function(e) { ... }; // add event handler</code></pre>
-
-
-        <br/>
-        <strong>Parameters:</strong>
-        <ul>
-                <li>
-                        <span class="name"><code>e</code></span>
-                        <strong class="type">
-                            &lt;<a href="../classes/zebkit.ui.event.KeyEvent.html" class="crosslink">zebkit.ui.event.KeyEvent</a>&gt;
-                        </strong>
-                    <p>a key event</p>
-
-
-                </li>
-        </ul>
-</div>
-
-                            </td>
-                        </tr>
-                        <tr>
-                            <td><a name="events_keyReleased"></a>
-<div class="events item">
-    <strong>
-        <code>keyReleased</code>
-    </strong>
-
-
-    <em><code>&#x2F;* Extended from zebkit.ui.Panel *&#x2F;&lt;&#x2F;em&gt;</code>
-    
-
-    <p>Implement the event handler method to catch key released event
-The event is triggered every time a key has been released.</p>
-<pre class="code prettyprint"><code>    var p = new zebkit.ui.Panel();
-    p.keyReleased = function(e) { ... }; // add event handler</code></pre>
-
-
-        <br/>
-        <strong>Parameters:</strong>
-        <ul>
-                <li>
-                        <span class="name"><code>e</code></span>
-                        <strong class="type">
-                            &lt;<a href="../classes/zebkit.ui.event.KeyEvent.html" class="crosslink">zebkit.ui.event.KeyEvent</a>&gt;
-                        </strong>
-                    <p>a key event</p>
-
-
-                </li>
-        </ul>
-</div>
-
-                            </td>
-                        </tr>
-                        <tr>
-                            <td><a name="events_keyTyped"></a>
-<div class="events item">
-    <strong>
-        <code>keyTyped</code>
-    </strong>
-
-
-    <em><code>&#x2F;* Extended from zebkit.ui.Panel *&#x2F;&lt;&#x2F;em&gt;</code>
-    
-
-    <p>Implement the event handler method to catch key types event The event is triggered every
-time a key has been typed.</p>
-<pre class="code prettyprint"><code>    var p = new zebkit.ui.Panel();
-    p.keyTyped = function(e) { ... }; // add event handler</code></pre>
-
-
-        <br/>
-        <strong>Parameters:</strong>
-        <ul>
-                <li>
-                        <span class="name"><code>e</code></span>
-                        <strong class="type">
-                            &lt;<a href="../classes/zebkit.ui.event.KeyEvent.html" class="crosslink">zebkit.ui.event.KeyEvent</a>&gt;
-                        </strong>
-                    <p>a key event</p>
-
-
-                </li>
-        </ul>
-</div>
-
-                            </td>
-                        </tr>
-                        <tr>
-                            <td><a name="events_pointerClicked"></a>
-<div class="events item">
-    <strong>
-        <code>pointerClicked</code>
-    </strong>
-
-
-    <em><code>&#x2F;* Extended from zebkit.ui.Panel *&#x2F;&lt;&#x2F;em&gt;</code>
-    
-
-    <p>Implement the event handler method to catch pointer clicked event. The event is triggered every
-time a pointer button has been clicked. Click events are generated only if no one pointer moved
-or drag events has been generated in between pointer pressed -&gt; pointer released events sequence.</p>
-<pre class="code prettyprint"><code>    var p = new zebkit.ui.Panel();
-    p.pointerClicked = function(e) { ... }; // add event handler</code></pre>
-
-
-        <br/>
-        <strong>Parameters:</strong>
-        <ul>
-                <li>
-                        <span class="name"><code>e</code></span>
-                        <strong class="type">
-                            &lt;<a href="../classes/zebkit.ui.event.PointerEvent.html" class="crosslink">zebkit.ui.event.PointerEvent</a>&gt;
-                        </strong>
-                    <p>a pointer event</p>
-
-
-                </li>
-        </ul>
-</div>
-
-                            </td>
-                        </tr>
-                        <tr>
-                            <td><a name="events_pointerDragEnded"></a>
-<div class="events item">
-    <strong>
-        <code>pointerDragEnded</code>
-    </strong>
-
-
-    <em><code>&#x2F;* Extended from zebkit.ui.Panel *&#x2F;&lt;&#x2F;em&gt;</code>
-    
-
-    <p>Implement the event handler method to catch pointer drag ended event. The event is triggered
-every time a pointer cursor has been moved last time when a pointer button has been pressed.
-Or when a finger has been moved last time over a touch screen.</p>
-<pre class="code prettyprint"><code>    var p = new zebkit.ui.Panel();
-    p.pointerDragEnded = function(e) { ... }; // add event handler</code></pre>
-
-
-        <br/>
-        <strong>Parameters:</strong>
-        <ul>
-                <li>
-                        <span class="name"><code>e</code></span>
-                        <strong class="type">
-                            &lt;<a href="../classes/zebkit.ui.event.PointerEvent.html" class="crosslink">zebkit.ui.event.PointerEvent</a>&gt;
-                        </strong>
-                    <p>a pointer event</p>
-
-
-                </li>
-        </ul>
-</div>
-
-                            </td>
-                        </tr>
-                        <tr>
-                            <td><a name="events_pointerDragged"></a>
-<div class="events item">
-    <strong>
-        <code>pointerDragged</code>
-    </strong>
-
-
-    <em><code>&#x2F;* Extended from zebkit.ui.Panel *&#x2F;&lt;&#x2F;em&gt;</code>
-    
-
-    <p>Implement the event handler method to catch pointer dragged event. The event is triggered every
-time a pointer cursor has been moved when a pointer button has been pressed. Or when a finger
-has been moved over a touch screen.</p>
-<pre class="code prettyprint"><code>    var p = new zebkit.ui.Panel();
-    p.pointerDragged = function(e) { ... }; // add event handler</code></pre>
-
-
-        <br/>
-        <strong>Parameters:</strong>
-        <ul>
-                <li>
-                        <span class="name"><code>e</code></span>
-                        <strong class="type">
-                            &lt;<a href="../classes/zebkit.ui.event.PointerEvent.html" class="crosslink">zebkit.ui.event.PointerEvent</a>&gt;
-                        </strong>
-                    <p>a pointer event</p>
-
-
-                </li>
-        </ul>
-</div>
-
-                            </td>
-                        </tr>
-                        <tr>
-                            <td><a name="events_pointerDragStarted"></a>
-<div class="events item">
-    <strong>
-        <code>pointerDragStarted</code>
-    </strong>
-
-
-    <em><code>&#x2F;* Extended from zebkit.ui.Panel *&#x2F;&lt;&#x2F;em&gt;</code>
-    
-
-    <p>Implement the event handler method to catch pointer drag started event. The event is triggered
-every time a pointer cursor has been moved first time when a pointer button has been pressed.
-Or when a finger has been moved first time over a touch screen.</p>
-<pre class="code prettyprint"><code>    var p = new zebkit.ui.Panel();
-    p.pointerDragStarted = function(e) { ... }; // add event handler</code></pre>
-
-
-        <br/>
-        <strong>Parameters:</strong>
-        <ul>
-                <li>
-                        <span class="name"><code>e</code></span>
-                        <strong class="type">
-                            &lt;<a href="../classes/zebkit.ui.event.PointerEvent.html" class="crosslink">zebkit.ui.event.PointerEvent</a>&gt;
-                        </strong>
-                    <p>a pointer event</p>
-
-
-                </li>
-        </ul>
-</div>
-
-                            </td>
-                        </tr>
-                        <tr>
-                            <td><a name="events_pointerEntered"></a>
-<div class="events item">
-    <strong>
-        <code>pointerEntered</code>
-    </strong>
-
-
-    <em><code>&#x2F;* Extended from zebkit.ui.Panel *&#x2F;&lt;&#x2F;em&gt;</code>
-    
-
-    <p>Implement the event handler method to catch pointer entered event. The event is triggered every
-time a pointer cursor entered the given component.</p>
-<pre class="code prettyprint"><code>    var p = new zebkit.ui.Panel();
-    p.pointerEntered = function(e) { ... }; // add event handler</code></pre>
-
-
-        <br/>
-        <strong>Parameters:</strong>
-        <ul>
-                <li>
-                        <span class="name"><code>e</code></span>
-                        <strong class="type">
-                            &lt;<a href="../classes/zebkit.ui.event.PointerEvent.html" class="crosslink">zebkit.ui.event.PointerEvent</a>&gt;
-                        </strong>
-                    <p>a pointer event</p>
-
-
-                </li>
-        </ul>
-</div>
-
-                            </td>
-                        </tr>
-                        <tr>
-                            <td><a name="events_pointerExited"></a>
-<div class="events item">
-    <strong>
-        <code>pointerExited</code>
-    </strong>
-
-
-    <em><code>&#x2F;* Extended from zebkit.ui.Panel *&#x2F;&lt;&#x2F;em&gt;</code>
-    
-
-    <p>Implement the event handler method to catch pointer exited event. The event is triggered every
-time a pointer cursor exited the given component.</p>
-<pre class="code prettyprint"><code>    var p = new zebkit.ui.Panel();
-    p.pointerExited = function(e) { ... }; // add event handler</code></pre>
-
-
-        <br/>
-        <strong>Parameters:</strong>
-        <ul>
-                <li>
-                        <span class="name"><code>e</code></span>
-                        <strong class="type">
-                            &lt;<a href="../classes/zebkit.ui.event.PointerEvent.html" class="crosslink">zebkit.ui.event.PointerEvent</a>&gt;
-                        </strong>
-                    <p>a pointer event</p>
-
-
-                </li>
-        </ul>
-</div>
-
-                            </td>
-                        </tr>
-                        <tr>
-                            <td><a name="events_pointerMoved"></a>
-<div class="events item">
-    <strong>
-        <code>pointerMoved</code>
-    </strong>
-
-
-    <em><code>&#x2F;* Extended from zebkit.ui.Panel *&#x2F;&lt;&#x2F;em&gt;</code>
-    
-
-    <p>Implement the event handler method  to catch pointer moved event. The event is triggered every time
-a pointer cursor has been moved with no a pointer button pressed.</p>
-<pre class="code prettyprint"><code>    var p = new zebkit.ui.Panel();
-    p.pointerMoved = function(e) { ... }; // add event handler</code></pre>
-
-
-        <br/>
-        <strong>Parameters:</strong>
-        <ul>
-                <li>
-                        <span class="name"><code>e</code></span>
-                        <strong class="type">
-                            &lt;<a href="../classes/zebkit.ui.event.PointerEvent.html" class="crosslink">zebkit.ui.event.PointerEvent</a>&gt;
-                        </strong>
-                    <p>a pointer event</p>
-
-
-                </li>
-        </ul>
-</div>
-
-                            </td>
-                        </tr>
-                        <tr>
-                            <td><a name="events_pointerPressed"></a>
-<div class="events item">
-    <strong>
-        <code>pointerPressed</code>
-    </strong>
-
-
-    <em><code>&#x2F;* Extended from zebkit.ui.Panel *&#x2F;&lt;&#x2F;em&gt;</code>
-    
-
-    <p>Implement the event handler method to catch pointer pressed event. The event is triggered every time
-a pointer button has been pressed or a finger has touched a touch screen.</p>
-<pre class="code prettyprint"><code>    var p = new zebkit.ui.Panel();
-    p.pointerPressed = function(e) { ... }; // add event handler</code></pre>
-
-
-        <br/>
-        <strong>Parameters:</strong>
-        <ul>
-                <li>
-                        <span class="name"><code>e</code></span>
-                        <strong class="type">
-                            &lt;<a href="../classes/zebkit.ui.event.PointerEvent.html" class="crosslink">zebkit.ui.event.PointerEvent</a>&gt;
-                        </strong>
-                    <p>a pointer event</p>
-
-
-                </li>
-        </ul>
-</div>
-
-                            </td>
-                        </tr>
-                        <tr>
-                            <td><a name="events_pointerReleased"></a>
-<div class="events item">
-    <strong>
-        <code>pointerReleased</code>
-    </strong>
-
-
-    <em><code>&#x2F;* Extended from zebkit.ui.Panel *&#x2F;&lt;&#x2F;em&gt;</code>
-    
-
-    <p>Implement the event handler method to catch pointer released event. The event is triggered every time
-a pointer button has been released or a finger has untouched a touch screen.</p>
-<pre class="code prettyprint"><code>    var p = new zebkit.ui.Panel();
-    p.pointerReleased = function(e) { ... }; // add event handler</code></pre>
-
-
-        <br/>
-        <strong>Parameters:</strong>
-        <ul>
-                <li>
-                        <span class="name"><code>e</code></span>
-                        <strong class="type">
-                            &lt;<a href="../classes/zebkit.ui.event.PointerEvent.html" class="crosslink">zebkit.ui.event.PointerEvent</a>&gt;
-                        </strong>
-                    <p>a pointer event</p>
-
-
-                </li>
-        </ul>
-</div>
-
-                            </td>
-                        </tr>
-                </table>
-            </div>
 
             <div id="implementations">
                 <br/>

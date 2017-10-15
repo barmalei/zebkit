@@ -499,11 +499,6 @@
                                         </tr>
                                         <tr>
                                             <td>
-                                               <a href="../classes/zebkit.ui.CompositeEvStatePan.html">zebkit.ui.CompositeEvStatePan</a>
-                                            </td>
-                                        </tr>
-                                        <tr>
-                                            <td>
                                                <a href="../classes/zebkit.ui.CompRender.html">zebkit.ui.CompRender</a>
                                             </td>
                                         </tr>
@@ -569,6 +564,11 @@
                                         </tr>
                                         <tr>
                                             <td>
+                                               <a href="../classes/zebkit.ui.event.InputEventState.html">zebkit.ui.event.InputEventState</a>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td>
                                                <a href="../classes/zebkit.ui.event.KeyEvent.html">zebkit.ui.event.KeyEvent</a>
                                             </td>
                                         </tr>
@@ -605,6 +605,11 @@
                                         <tr>
                                             <td>
                                                <a href="../classes/zebkit.ui.EvStatePan.html">zebkit.ui.EvStatePan</a>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td>
+                                               <a href="../classes/zebkit.ui.FocusableComposite.html">zebkit.ui.FocusableComposite</a>
                                             </td>
                                         </tr>
                                         <tr>
@@ -974,7 +979,7 @@
                                         </tr>
                                         <tr>
                                             <td>
-                                               <a href="../classes/zebkit.ui.web.HtmlWinCanvas.html">zebkit.ui.web.HtmlWinCanvas</a>
+                                               <a href="../classes/zebkit.ui.web.HtmlWindow.html">zebkit.ui.web.HtmlWindow</a>
                                             </td>
                                         </tr>
                                         <tr>
@@ -2156,13 +2161,14 @@ if (typeof Map === &#x27;undefined&#x27; &amp;&amp; (typeof $global !== &#x27;un
 function GET(url) {
     var req = $zenv.getHttpRequest();
     req.open(&quot;GET&quot;, url, true);
+
     return new DoIt(function() {
         var jn    = this.join(),
             $this = this;
 
         req.onreadystatechange = function() {
             if (req.readyState === 4) {
-                // evaluate http response
+                // evaluate HTTP response
                 if (req.status &gt;= 400 || req.status &lt; 100) {
                     var e = new Error(&quot;HTTP error &#x27;&quot; + req.statusText + &quot;&#x27;, code = &quot; + req.status + &quot; &#x27;&quot; + url + &quot;&#x27;&quot;);
                     e.status     = req.status;
@@ -2182,6 +2188,57 @@ function GET(url) {
         }
     });
 }
+
+// Micro file system
+var ZFS = {
+    catalogs : {},
+
+    load: function(pkg, files) {
+        var catalog = this.catalogs[pkg];
+        if (typeof catalog === &#x27;undefined&#x27;) {
+            catalog = {};
+            this.catalogs[pkg] = catalog;
+        }
+
+        for(var file in files) {
+            catalog[file] = files[file];
+        }
+    },
+
+    read : function(uri) {
+        var p = null;
+        for(var catalog in this.catalogs) {
+            var pkg   = zebkit.byName(catalog),
+                files = this.catalogs[catalog];
+
+            if (pkg === null) {
+                throw new ReferenceError(&quot;&#x27;&quot; + catalog + &quot;&#x27;&quot;);
+            }
+
+            p = new URI(uri).relative(pkg.$url);
+            if (p !== null &amp;&amp; typeof files[p] !== &#x27;undefined&#x27; &amp;&amp; files[p] !== null) {
+                return files[p];
+            }
+        }
+        return null;
+    },
+
+    GET: function(uri) {
+        var f = ZFS.read(uri);
+        if (f !== null) {
+            return new DoIt(function() {
+                return {
+                    status      : 200,
+                    statusText  : &quot;&quot;,
+                    extension   : f.ext,
+                    responseText: f.data
+                };
+            });
+        } else {
+            return GET(uri);
+        }
+    }
+};
 
 /**
  * Dump the given error to output.
@@ -2221,9 +2278,22 @@ function image(ph, fireErr) {
     if (arguments.length &lt; 2) {
         fireErr = false;
     }
+    var doit   = new DoIt(),
+        jn     = doit.join(),
+        marker = &quot;data:image&quot;;
 
-    var d  = new DoIt(),
-        jn = d.join();
+    if (isString(ph) &amp;&amp; ph.length &gt; marker.length) {
+        // use &quot;for&quot; instead of &quot;indexOf === 0&quot;
+        var i = 0;
+        for(; i &lt; marker.length &amp;&amp; marker[i] === ph[i]; i++);
+
+        if (i &lt; marker.length) {
+            var file = ZFS.read(ph);
+            if (file !== null) {
+                ph = &quot;data:image/&quot; + file.ext +  &quot;;base64,&quot; + file.data;
+            }
+        }
+    }
 
     $zenv.loadImage(ph,
         function(img) {
@@ -2231,13 +2301,13 @@ function image(ph, fireErr) {
         },
         function(img, e) {
             if (fireErr === true) {
-                d.error(e);
+                doit.error(e);
             } else {
                 jn(img);
             }
         }
     );
-    return d;
+    return doit;
 }
 
 //  Faster match operation analogues:
@@ -2489,6 +2559,10 @@ function URI(uri) {
         this.port   = uri.port;
         this.scheme = uri.scheme;
     } else {
+        if (uri === null || uri.trim().length === 0) {
+            throw new Error(&quot;Invalid empty URI&quot;);
+        }
+
         var m = uri.match($uriRE);
         if (m === null) {
             throw new Error(&quot;Invalid URI &#x27;&quot; + uri + &quot;&#x27;&quot;);
@@ -2524,16 +2598,19 @@ function URI(uri) {
     }
 
     if (this.path !== null) {
-        this.path = this.path.replace(/\/\/*/g, &#x27;/&#x27;);
-
-        var l = this.path.length;
-        if (l &gt; 1 &amp;&amp; this.path[l - 1] === &#x27;/&#x27;) {
-            this.path = this.path.substring(0, l - 1);
-        }
+        this.path = URI.normalizePath(this.path);
 
         if ((this.host !== null || this.scheme !== null) &amp;&amp; this.path[0] !== &#x27;/&#x27;) {
             this.path = &quot;/&quot; + this.path;
         }
+    }
+
+    if (this.scheme !== null) {
+        this.scheme = this.scheme.toLowerCase();
+    }
+
+    if (this.host !== null) {
+        this.host = this.host.toLowerCase();
     }
 
     /**
@@ -2649,7 +2726,43 @@ URI.prototype = {
     join : function() {
         var args = Array.prototype.slice.call(arguments);
         args.splice(0, 0, this.toString());
-        return URI.apply(URI, args);
+        return URI.join.apply(URI, args);
+    },
+
+    /**
+     * Test if the given URL is file path.
+     * @return {Boolean} true if the URL is file path
+     * @method isFilePath
+     */
+    isFilePath : function() {
+        return this.scheme === null || this.scheme === &#x27;file&#x27;;
+    },
+
+    /**
+     * Get an URI relative to the given URI.
+     * @param  {String|zebkit.URI} to an URI to that the relative URI has to be detected.
+     * @return {String} a relative URI
+     * @method relative
+     */
+    relative : function(to) {
+        if ((to instanceof URI) === false) {
+            to = new URI(to);
+        }
+
+        if (this.isAbsolute()                                                      &amp;&amp;
+            to.isAbsolute()                                                        &amp;&amp;
+            this.host === to.host                                                  &amp;&amp;
+            this.port === to.port                                                  &amp;&amp;
+            (this.scheme === to.scheme || (this.isFilePath() &amp;&amp; to.isFilePath()) ) &amp;&amp;
+            (this.path.indexOf(to.path) === 0 &amp;&amp; (to.path.length === this.path.length ||
+                                                  (to.path.length === 1 &amp;&amp; to.path[0] === &#x27;/&#x27;) ||
+                                                  this.path[to.path.length] ===  &#x27;/&#x27;     )))
+        {
+            return (to.path.length === 1 &amp;&amp; to.path[0] === &#x27;/&#x27;) ? this.path.substring(to.path.length)
+                                                                : this.path.substring(to.path.length + 1);
+        } else {
+            return null;
+        }
     }
 };
 
@@ -2673,6 +2786,21 @@ URI.isAbsolute = function(u) {
  */
 URI.isURL = function(u) {
     return /^[a-zA-Z]+\:\/\//i.test(u);
+};
+
+/**
+ * Get a relative path.
+ * @param  {String|zebkit.URI} base a base path
+ * @param  {String|zebkit.URI} path a path
+ * @return {String} a relative path
+ * @method relative
+ * @static
+ */
+URI.relative = function(base, path) {
+    if ((path instanceof URI) === false) {
+        path = new URI(path);
+    }
+    return path.relative(base);
 };
 
 /**
@@ -2746,6 +2874,26 @@ URI.decodeQSValue = function(value) {
     }
 };
 
+URI.normalizePath = function(p) {
+    if (p !== null &amp;&amp; p.length &gt; 0) {
+        p = p.trim().replace(/[\\]+/g, &#x27;/&#x27;);
+        for (; ; ) {
+            var len = p.length;
+            p = p.replace(/[^./]+[/]+\.\.[/]+/g, &#x27;&#x27;);
+            p = p.replace(/[\/]+/g, &#x27;/&#x27;);
+            if (p.length == len) {
+                break;
+            }
+        }
+
+        var l = p.length;
+        if (l &gt; 1 &amp;&amp; p[l - 1] === &#x27;/&#x27;) {
+            p = p.substring(0, l - 1);
+        }
+    }
+
+    return p;
+};
 
 /**
  * Convert the given dictionary of parameters to a query string.
@@ -2773,36 +2921,43 @@ URI.toQS = function(obj, encode) {
 
 /**
  * Join the given  paths
- * @param  {String} p* relative paths
- * @return {String} an absolute URI
+ * @param  {String|zebkit.URI} p* relative paths
+ * @return {String} a joined path as string
  * @method join
  * @static
  */
 URI.join = function() {
-    var pu = new URI(arguments[0]);
+    if (arguments.length === 0) {
+        throw new Error(&quot;No paths to join&quot;);
+    }
 
+    var uri = new URI(arguments[0]);
     for(var i = 1; i &lt; arguments.length; i++) {
-        var p = arguments[i].toString().trim();
-        if (p.length === 0 || URI.isAbsolute(p)) {
+        var p = arguments[i];
+
+        if (p === null || p.length === 0) {
+            throw new Error(&quot;Empty sub-path is not allowed&quot;);
+        }
+
+        if (URI.isAbsolute(p)) {
             throw new Error(&quot;Absolute path &#x27;&quot; + p + &quot;&#x27; cannot be joined&quot;);
         }
 
-        p = p.replace(/\/\/*/g, &#x27;/&#x27;);
-        if (p[p.length - 1] === &#x27;/&#x27; ) {
-            p = p.substring(0, p.length - 1);
+        if (p instanceof URI) {
+            p = arguments[i].path;
+        } else {
+            p = new URI(p).path;
         }
 
-        if (pu.path === null) {
-            pu.path = p;
-            if ((pu.host !== null || pu.scheme !== null) &amp;&amp; pu.path[0] !== &#x27;/&#x27;) {
-                pu.path = &quot;/&quot; + pu.path;
-            }
-        } else {
-            pu.path = pu.path + &quot;/&quot; + p;
+        if (p.length === 0) {
+            throw new Error(&quot;Empty path cannot be joined&quot;);
         }
+
+        uri.path = uri.path + (uri.path === &#x27;/&#x27; ? &#x27;&#x27; : &quot;/&quot;) + p;
     }
 
-    return pu.toString();
+    uri.path = URI.normalizePath(uri.path);
+    return uri.toString();
 };
 
 $export(
@@ -2812,6 +2967,7 @@ $export(
     properties, GET,      isBoolean, DoIt,
     { &quot;$global&quot;    : $global,
       &quot;$FN&quot;        : $FN,
+      &quot;ZFS&quot;        : ZFS,
       &quot;environment&quot;: $zenv,
       &quot;isIE&quot;       : isIE,
       &quot;isFF&quot;       : isFF,
@@ -3578,7 +3734,7 @@ var classTemplateFields = {
     }
 };
 
-
+// methods are populated in all instances of zebkit classes
 var classTemplateProto = {
     /**
      * Extend existent class instance with the given methods and interfaces
@@ -4260,11 +4416,11 @@ var Zson = Class([
     function $prototype() {
         /**
          * URL the JSON has been loaded from
-         * @attribute  url
+         * @attribute  uri
          * @type {zebkit.URI}
          * @default null
          */
-        this.url = null;
+        this.uri = null;
 
         /**
          * Object that keeps loaded and resolved content of a JSON
@@ -4315,6 +4471,9 @@ var Zson = Class([
          * @type {Object}
          */
         this.$variables = null;
+
+
+        this.baseUri = null;
 
         /**
          * Get a property value by the given key. The property name can point to embedded fields:
@@ -4617,10 +4776,14 @@ var Zson = Class([
                     return this.expr(path);
                 }
 
-                if (this.url !== null &amp;&amp; URI.isAbsolute(path) === false) {
-                    var pURL = new URI(this.url).getParent();
-                    if (pURL !== null) {
-                        path = URI.join(pURL, path);
+                if (URI.isAbsolute(path) === false) {
+                    if (this.baseUri !== null) {
+                        path = URI.join(this.baseUri, path);
+                    } else if (this.uri !== null) {
+                        var pURL = new URI(this.uri).getParent();
+                        if (pURL !== null) {
+                            path = URI.join(pURL, path);
+                        }
                     }
                 }
 
@@ -4636,12 +4799,12 @@ var Zson = Class([
                     }));
                     return bg;
                 } else if (type === &#x27;img&#x27;) {
-                    if (this.url !== null &amp;&amp; URI.isAbsolute(path) === false) {
-                        path = URI.join(new URI(this.url).getParent(), path);
+                    if (this.uri !== null &amp;&amp; URI.isAbsolute(path) === false) {
+                        path = URI.join(new URI(this.uri).getParent(), path);
                     }
                     return image(path, false);
                 } else if (type === &#x27;txt&#x27;) {
-                    return new GET(path).then(function(r) {
+                    return new ZFS.GET(path).then(function(r) {
                         return r.responseText;
                     }).catch(function(e) {
                         $this.$runner.error(e);
@@ -4897,14 +5060,14 @@ var Zson = Class([
                     {
                         $this.$variables = $this.$qsToVars(json);
 
-                        $this.url = json;
+                        $this.uri = json;
 
                         if ($this.cacheBusting === false) {
-                            $this.url = $this.url + (json.lastIndexOf(&quot;?&quot;) &gt; 0 ? &quot;&amp;&quot; : &quot;?&quot;) + (new Date()).getTime().toString();
+                            $this.uri = $this.uri + (json.lastIndexOf(&quot;?&quot;) &gt; 0 ? &quot;&amp;&quot; : &quot;?&quot;) + (new Date()).getTime().toString();
                         }
 
                         var join = this.join();
-                        GET($this.url).then(function(r) {
+                        ZFS.GET($this.uri).then(function(r) {
                             join.call($this, r.responseText);
                         }).catch(function(e) {
                             $this.$runner.error(e);
@@ -5659,6 +5822,10 @@ var EventProducer = Interface([
                 }
             }
 
+            if (instanceOf(this, PathSearch) === false) {
+                throw new Error(&quot;Path search is not supported&quot;);
+            }
+
             this.byPath(pt, function(node) {
                 // try to initiate
                 if (typeof node._ === &#x27;undefined&#x27; &amp;&amp; typeof node.clazz.Listeners !== &#x27;undefined&#x27;) {
@@ -5800,6 +5967,27 @@ var EventProducer = Interface([
     }
 ]);
 
+classTemplateProto.isEventFired = function(name) {
+    if (typeof this.clazz.Listeners === &#x27;undefined&#x27;) {
+        return false;
+    }
+
+    if (arguments.length === 0) {
+        name = &quot;fired&quot;;
+    }
+
+    var names = this.clazz.Listeners.eventNames;
+    if (names.length === 1) {
+        return names[0] === name;
+    }
+
+    for(var i = 0; i &lt; names.length; i++) {
+        if (names[i] === name) {
+            return true;
+        }
+    }
+    return false;
+};
 
 /**
  * Extends zebkit.Class with the given events support.
@@ -5837,13 +6025,8 @@ classTemplateFields.events = function() {
 };
 
 
-
-// TODO: should be at least re-named to better name
-var Fireable = Interface();
-
 $export({
     &quot;Event&quot;          : Event,
-    &quot;Fireable&quot;       : Fireable,
     &quot;Listeners&quot;      : Listeners,
     &quot;ListenersClass&quot; : $NewListener,
     &quot;EventProducer&quot;  : EventProducer
@@ -6307,6 +6490,33 @@ Package.prototype.packages = function(callback, recursively) {
 };
 
 /**
+ * Get a package by the specified name.
+ * @param  {String} name a package name
+ * @return {zebkit.Package} a package
+ * @method byName
+ */
+Package.prototype.byName = function(name) {
+    if (this.fullname() === name) {
+        return this;
+    }
+
+    var i = name.indexOf(&#x27;.&#x27;);
+    if (i &gt; 0) {
+        try {
+            return getPropertyValue(this, name.substring(i + 1), false);
+        } catch(e) {
+            if (e instanceof ReferenceError) {
+                return null;
+            } else {
+                throw e;
+            }
+        }
+    } else {
+        return null;
+    }
+};
+
+/**
  * List classes, variables and interfaces defined in the given package.
  * If second parameter &quot;all&quot; passed to the method is false, the method
  * will skip package entities whose name starts from &quot;$&quot; or &quot;_&quot; character.
@@ -6407,6 +6617,19 @@ Package.prototype.require = function() {
     });
 };
 
+/**
+ * Detect root package.
+ * @return {zebkit.Package} a root package
+ * @method getRootPackage
+ */
+Package.prototype.getRootPackage = function() {
+    var rootPkg = this;
+    while (rootPkg.$parent !== null) {
+        rootPkg = rootPkg.$parent;
+    }
+    return rootPkg;
+};
+
 var $textualFileExtensions = [
     &quot;txt&quot;, &quot;json&quot;, &quot;htm&quot;, &quot;html&quot;, &quot;md&quot;, &quot;properties&quot;, &quot;conf&quot;, &quot;xml&quot;
 ];
@@ -6465,7 +6688,7 @@ Package.prototype.resources = function() {
                         jn(img);
                     });
                 } else if (type === &quot;txt&quot;) {
-                    GET(p).then(function(req) {
+                    ZFS.GET(p).then(function(req) {
                         jn(req.responseText);
                     }).catch(function(e) {
                         jn(null);
@@ -6546,58 +6769,69 @@ Package.prototype.package = function(name, callback, path) {
     // no arguments than return the package itself
     if (arguments.length === 0) {
         return this;
-    }
-
-    var target = this;
-
-    if (typeof name !== &#x27;function&#x27;) {
-        if (typeof name === &#x27;undefined&#x27; || name === null) {
-            throw new Error(&quot;Null package name&quot;);
-        }
-
-        name = name.trim();
-        if (name.match(/^[a-zA-Z_][a-zA-Z0-9_]+(\.[a-zA-Z_][a-zA-Z0-9_]+)*$/) === null) {
-            throw new Error(&quot;Invalid package name &#x27;&quot; + name + &quot;&#x27;&quot;);
-        }
-
-        var names = name.split(&#x27;.&#x27;);
-        for(var i = 0, k = names[0]; i &lt; names.length; i++, k = k + &#x27;.&#x27; + names[i]) {
-            var n = names[i], p = target[n];
-            if (typeof p === &quot;undefined&quot;) {
-                p = new Package(n, target);
-                target[n] = p;
-            } else if ((p instanceof Package) === false) {
-                throw new Error(&quot;Requested package &#x27;&quot; + name +  &quot;&#x27; conflicts with variable &#x27;&quot; + n + &quot;&#x27;&quot;);
-            }
-            target = p;
-        }
     } else {
-        path    = callback;
-        callback = name;
-    }
+        var target = this;
 
-    // detect url later then sooner since
-    if (target.$url === null) {
-        target.$detectLocation();
-    }
-
-    if (typeof callback === &#x27;function&#x27;) {
-        this.then(function() {
-            callback.call(target, target, typeof Class !== &#x27;undefined&#x27; ? Class : null);
-
-            if (typeof path !== &#x27;undefined&#x27; &amp;&amp; path !== null) {
-                if (path === true) {
-                    target.configWith();
-                } else {
-                    target.configWith(path);
-                }
+        if (typeof name !== &#x27;function&#x27;) {
+            if (typeof name === &#x27;undefined&#x27; || name === null) {
+                throw new Error(&quot;Null package name&quot;);
             }
 
-            $lsall.call(target, target.fullname() + &quot;.&quot;); // resolve &quot;clazz.$name&quot; properties of the package classes
-        });
-    }
+            name = name.trim();
+            if (name.match(/^[a-zA-Z_][a-zA-Z0-9_]+(\.[a-zA-Z_][a-zA-Z0-9_]+)*$/) === null) {
+                throw new Error(&quot;Invalid package name &#x27;&quot; + name + &quot;&#x27;&quot;);
+            }
 
-    return target;
+            var names = name.split(&#x27;.&#x27;);
+            for(var i = 0, k = names[0]; i &lt; names.length; i++, k = k + &#x27;.&#x27; + names[i]) {
+                var n = names[i],
+                    p = target[n];
+
+                if (typeof p === &quot;undefined&quot;) {
+                    p = new Package(n, target);
+                    target[n] = p;
+                } else if ((p instanceof Package) === false) {
+                    throw new Error(&quot;Requested package &#x27;&quot; + name +  &quot;&#x27; conflicts with variable &#x27;&quot; + n + &quot;&#x27;&quot;);
+                }
+                target = p;
+            }
+        } else {
+            path    = callback;
+            callback = name;
+        }
+
+        // detect url later then sooner since
+        if (target.$url === null) {
+            target.$detectLocation();
+        }
+
+        if (typeof callback === &#x27;function&#x27;) {
+            this.then(function() {
+                callback.call(target, target, typeof Class !== &#x27;undefined&#x27; ? Class : null);
+            }).then(function() {
+                // initiate configuration loading if it has been requested
+                if (typeof path !== &#x27;undefined&#x27; &amp;&amp; path !== null) {
+                    var jn = this.join();
+                    if (path === true) {
+                        var fn = target.fullname();
+                        path = fn.substring(fn.indexOf(&#x27;.&#x27;) + 1) + &quot;.json&quot;;
+                        target.configWithRs(path, jn);
+                    } else {
+                        target.configWith(path, jn);
+                    }
+                }
+            }).then(function(r) {
+                if (r instanceof Error) {
+                    this.error(r);
+                } else {
+                    // initiate &quot;clazz.$name&quot; resolving
+                    $lsall.call(target, target.fullname() + &quot;.&quot;);
+                }
+            });
+        }
+
+        return target;
+    }
 };
 
 
@@ -6606,7 +6840,9 @@ function resolvePlaceholders(path, env) {
     var ph = path.match(/\%\{[a-zA-Z$][a-zA-Z0-9_$.]*\}/g);
     if (ph !== null) {
         for (var i = 0; i &lt; ph.length; i++) {
-            var p = ph[i], v = env[p.substring(2, p.length - 1)];
+            var p = ph[i],
+                v = env[p.substring(2, p.length - 1)];
+
             if (v !== null &amp;&amp; typeof v !== &#x27;undefined&#x27;) {
                 path = path.replace(p, v);
             }
@@ -6617,43 +6853,68 @@ function resolvePlaceholders(path, env) {
 
 /**
  * Configure the given package with the JSON.
- * @param  {String | Object} [path] a path to JSON or JSON object
+ * @param  {String | Object} path a path to JSON or JSON object
+ * @param  {Function} [cb] a callback method
  * @method configWith
  */
-Package.prototype.configWith = function(path) {
-    // use full package name as configuration name
-    if (arguments.length &lt; 1) {
-        var fn = this.fullname();
-        path = fn.substring(fn.indexOf(&#x27;.&#x27;) + 1) + &quot;.json&quot;;
-    }
-
-    var rootPkg   = this,
-        rsPathPkg = this,
-        $this     = this;
-
-    // detect root package (common sync point) and package that
-    // defines path to resources
-    while (rootPkg.$parent !== null) {
-        rootPkg = rootPkg.$parent;
-        if (typeof rsPathPkg.$config.basedir === &#x27;undefined&#x27;) {
-            rsPathPkg = rootPkg;
-        }
-    }
-
-    if (URI.isAbsolute(path[0]) === false) {
-        var rsPath = rsPathPkg.$config.basedir;
-        if (typeof rsPath !== &#x27;undefined&#x27;) {
-            rsPath = resolvePlaceholders(rsPath, rsPathPkg.$config);
-            path = URI.join(rsPath, path);
-        } else {
+Package.prototype.configWith = function(path, cb) {
+    // catch error to keep passed callback notified
+    try {
+        if ((path instanceof URI || isString(path)) &amp;&amp; URI.isAbsolute(path) === false) {
             path = URI.join(this.$url, path);
         }
+    } catch(e) {
+        if (arguments.length &gt; 1 &amp;&amp; cb !== null) {
+            cb.call(this, e);
+            return;
+        } else {
+            throw e;
+        }
     }
 
-    rootPkg.then(function() { // calling the guarantees it will be called when previous actions are completed
-        this.till(new Zson($this).then(path)); // now we can trigger other loading action
-    });
+    var $this = this;
+    if (arguments.length &gt; 1 &amp;&amp; cb !== null) {
+        new Zson($this).then(path, function() {
+            cb.call(this, path);
+        }).catch(function(e) {
+            cb.call(this, e);
+        });
+    } else {
+        this.getRootPackage().then(function() { // calling the guarantees it will be called when previous actions are completed
+            this.till(new Zson($this).then(path)); // now we can trigger other loading action
+        });
+    }
 };
+
+/**
+ * Configure the given package with the JSON.
+ * @param  {String | Object} path a path to JSON or JSON object
+ * @param  {Function} [cb] a callback
+ * @method configWithRs
+ */
+Package.prototype.configWithRs = function(path, cb) {
+    if (URI.isAbsolute(path)) {
+        throw new Error(&quot;Absulute path cannot be used&quot;);
+    }
+
+    var pkg = this;
+    // detect root package (common sync point) and package that
+    // defines path to resources
+    while (pkg !== null &amp;&amp; (typeof pkg.$config.basedir === &#x27;undefined&#x27; || pkg.$config.basedir === null)) {
+        pkg = pkg.$parent;
+    }
+
+    if (pkg === null) {
+        path = URI.join(this.$url, &quot;rs&quot;, path);
+    } else {
+        // TODO: where config placeholders have to be specified
+        path = URI.join(resolvePlaceholders(pkg.$config.basedir, pkg.$config), path);
+    }
+
+    return arguments.length &gt; 1 ? this.configWith(path, cb)
+                                : this.configWith(path);
+};
+
 
 $export(Package);
 /**
@@ -7758,741 +8019,6 @@ zebkit.package(&quot;util&quot;, function(pkg, Class) {
      */
     pkg.tasksSet = new pkg.TasksSet(7);
 });
-zebkit.package(&quot;io&quot;, function(pkg, Class) {
-    /**
-     * The module provides number of classes to help to communicate with remote services and servers by HTTP,
-     * JSON-RPC, XML-RPC protocols.
-     *
-     *       // shortcut method to perform HTTP GET request
-     *       zebkit.io.GET(&quot;http://test.com&quot;).then(function(req) {
-     *           // handle request
-     *           req.responseText
-     *           ...
-     *       }).catch(function(exception) {
-     *           // handle error
-     *       });
-     *
-     * @class zebkit.io
-     * @access package
-     */
-
-    // TODO: Web dependencies:
-    //    -- Uint8Array
-    //    -- ArrayBuffer
-
-    // !!!
-    // b64 is supposed to be used with binary stuff, applying it to utf-8 encoded data can bring to error
-    // !!!
-
-    var HEX    = &quot;0123456789ABCDEF&quot;,
-        b64str = &quot;ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/=&quot;;
-
-    /**
-     * Generate UUID of the given length
-     * @param {Integer} [size] the generated UUID length. The default size is 16 characters.
-     * @return {String} an UUID
-     * @method  UID
-     * @for  zebkit.io
-     */
-    pkg.UID = function(size) {
-        if (arguments.length === 0) {
-            size = 16;
-        }
-        var id = &quot;&quot;;
-        for (var i = 0; i &lt; size; i++) {
-            id = id + HEX[~~(Math.random() * 16)];
-        }
-        return id;
-    };
-
-    /**
-     * Encode the given string into base64
-     * @param  {String} input a string to be encoded
-     * @method  b64encode
-     * @for zebkit.io
-     */
-    pkg.b64encode = function(input) {
-        var out = [], i = 0, len = input.length, c1, c2, c3;
-        if (typeof ArrayBuffer !== &quot;undefined&quot;) {
-            if (input instanceof ArrayBuffer) {
-                input = new Uint8Array(input);
-            }
-            input.charCodeAt = function(i) { return this[i]; };
-        }
-
-        if (Array.isArray(input)) {
-            input.charCodeAt = function(i) { return this[i]; };
-        }
-
-        while(i &lt; len) {
-            c1 = input.charCodeAt(i++) &amp; 0xff;
-            out.push(b64str.charAt(c1 &gt;&gt; 2));
-            if (i === len) {
-                out.push(b64str.charAt((c1 &amp; 0x3) &lt;&lt; 4), &quot;==&quot;);
-                break;
-            }
-
-            c2 = input.charCodeAt(i++);
-            out.push(b64str.charAt(((c1 &amp; 0x3) &lt;&lt; 4) | ((c2 &amp; 0xF0) &gt;&gt; 4)));
-            if (i === len) {
-                out.push(b64str.charAt((c2 &amp; 0xF) &lt;&lt; 2), &quot;=&quot;);
-                break;
-            }
-
-            c3 = input.charCodeAt(i++);
-            out.push(b64str.charAt(((c2 &amp; 0xF) &lt;&lt; 2) | ((c3 &amp; 0xC0) &gt;&gt; 6)), b64str.charAt(c3 &amp; 0x3F));
-        }
-
-        return out.join(&#x27;&#x27;);
-    };
-
-    /**
-     * Decode the base64 encoded string
-     * @param {String} input base64 encoded string
-     * @return {String} a string
-     * @for zebkit.io
-     * @method b64decode
-     */
-    pkg.b64decode = function(input) {
-        var output = [], chr1, chr2, chr3, enc1, enc2, enc3, enc4;
-        input = input.replace(/[^A-Za-z0-9\+\/\=]/g, &quot;&quot;);
-
-        while ((input.length % 4) !== 0) {
-            input += &quot;=&quot;;
-        }
-
-        for(var i=0; i &lt; input.length;) {
-            enc1 = b64str.indexOf(input.charAt(i++));
-            enc2 = b64str.indexOf(input.charAt(i++));
-            enc3 = b64str.indexOf(input.charAt(i++));
-            enc4 = b64str.indexOf(input.charAt(i++));
-
-            chr1 = (enc1 &lt;&lt; 2) | (enc2 &gt;&gt; 4);
-            chr2 = ((enc2 &amp; 15) &lt;&lt; 4) | (enc3 &gt;&gt; 2);
-            chr3 = ((enc3 &amp; 3) &lt;&lt; 6) | enc4;
-            output.push(String.fromCharCode(chr1));
-            if (enc3 !== 64) {
-                output.push(String.fromCharCode(chr2));
-            }
-            if (enc4 !== 64) {
-                output.push(String.fromCharCode(chr3));
-            }
-        }
-        return output.join(&#x27;&#x27;);
-    };
-
-    pkg.dateToISO8601 = function(d) {
-        function pad(n) { return n &lt; 10 ? &#x27;0&#x27;+ n : n; }
-        return [ d.getUTCFullYear(), &#x27;-&#x27;, pad(d.getUTCMonth()+1), &#x27;-&#x27;, pad(d.getUTCDate()), &#x27;T&#x27;, pad(d.getUTCHours()), &#x27;:&#x27;,
-                 pad(d.getUTCMinutes()), &#x27;:&#x27;, pad(d.getUTCSeconds()), &#x27;Z&#x27;].join(&#x27;&#x27;);
-    };
-
-    // http://webcloud.se/log/JavaScript-and-ISO-8601/
-    pkg.ISO8601toDate = function(v) {
-        var regexp = [&quot;([0-9]{4})(-([0-9]{2})(-([0-9]{2})&quot;, &quot;(T([0-9]{2}):([0-9]{2})(:([0-9]{2})(\.([0-9]+))?)?&quot;,
-                      &quot;(Z|(([-+])([0-9]{2}):([0-9]{2})))?)?)?)?&quot;].join(&#x27;&#x27;), d = v.match(new RegExp(regexp)),
-                      offset = 0, date = new Date(d[1], 0, 1);
-
-        if (d[3]) {
-            date.setMonth(d[3] - 1);
-        }
-
-        if (d[5]) {
-            date.setDate(d[5]);
-        }
-
-        if (d[7])  {
-            date.setHours(d[7]);
-        }
-
-        if (d[8])  {
-            date.setMinutes(d[8]);
-        }
-
-        if (d[10]) {
-            date.setSeconds(d[10]);
-        }
-
-        if (d[12]) {
-            date.setMilliseconds(Number(&quot;0.&quot; + d[12]) * 1000);
-        }
-
-        if (d[14]) {
-            offset = (Number(d[16]) * 60) + Number(d[17]);
-            offset *= ((d[15] === &#x27;-&#x27;) ? 1 : -1);
-        }
-
-        offset -= date.getTimezoneOffset();
-        date.setTime(Number(date) + (offset * 60 * 1000));
-        return date;
-    };
-
-    /**
-     * HTTP request class. This class provides API to generate different
-     * (GET, POST, etc) HTTP requests
-     * @class zebkit.io.HTTP
-     * @constructor
-     * @param {String} url an URL to a HTTP resource
-     */
-    pkg.HTTP = Class([
-        function(url) {
-            this.url = url;
-            this.header = {};
-        },
-
-        function $prototype() {
-            /**
-             * Perform HTTP GET request with the given query parameters.
-             * @param {Object} [q] a dictionary of query parameters
-             * @return {zebkit.DoIt} an object to get response
-             * @example
-             *
-             *     // GET request with the number of query parameters
-             *     var result = zebkit.io.HTTP(&quot;google.com&quot;).GET({
-             *         param1: &quot;var1&quot;,
-             *         param3: &quot;var2&quot;,
-             *         param3: &quot;var3&quot;
-             *     }).then(function(req) {
-             *         // handle response
-             *         req.responseText;
-             *     }).catch(function(e)  {
-             *         // handle error
-             *         ...
-             *     });
-             *
-             * @method GET
-             */
-            this.GET = function(q) {
-                var u = this.url + ((arguments.length === 0 || q === null) ? &#x27;&#x27;
-                                                                           : ((this.url.indexOf(&quot;?&quot;) &gt; 0) ? &#x27;&amp;&#x27;
-                                                                                                          : &#x27;?&#x27;) + zebkit.URI.toQS(q, true));
-                return this.SEND(&quot;GET&quot;, u);
-            };
-
-            /**
-             * Perform HTTP POST request with the give data to be sent.
-             * @param {String|Object} d a data to be sent by HTTP POST request.  It can be
-             * either a parameters set or a string.
-             * @return {zebkit.DoIt} an object to get response
-             * @example
-             *
-             *     // asynchronously send POST
-             *     zebkit.io.HTTP(&quot;google.com&quot;).POST(&quot;Hello&quot;).then(function(req) {
-             *         // handle HTTP GET response ...
-             *     }).catch(function(e) {
-             *         // handle error ...
-             *     });
-             *
-             * Or you can pass a number of parameters to be sent:
-             *
-             *     // send parameters synchronously by HTTP POST request
-             *     zebkit.io.HTTP(&quot;google.com&quot;).POST({
-             *         param1: &quot;val1&quot;,
-             *         param2: &quot;val3&quot;,
-             *         param3: &quot;val3&quot;
-             *     }).then(function(req) {
-             *          // handle HTTP GET response ...
-             *     }).catch(function(e) {
-             *          // handle error ...
-             *    });
-             *
-             * @method POST
-             */
-            this.POST = function(d) {
-                // if the passed data is simple dictionary object encode it as POST
-                // parameters
-                //
-                // TODO: think also about changing content type
-                // &quot;application/x-www-form-urlencoded; charset=UTF-8&quot;
-                if (d !== null &amp;&amp; zebkit.isString(d) === false &amp;&amp; d.constructor === Object) {
-                    d = zebkit.URI.toQS(d, false);
-                }
-
-                return this.SEND(&quot;POST&quot;, this.url, d);
-            };
-
-            /**
-             * Universal HTTP request method that can be used to generate a HTTP request with
-             * any HTTP method to the given URL with the given data to be sent asynchronously.
-             * @param {String}   method   an HTTP method (GET, POST, DELETE, PUT, etc)
-             * @param {String}   url      an URL
-             * @param {String}   [data]   a data to be sent to the given URL
-             * @return {zebkit.DoIt} an object to handle result
-             * @method SEND
-             */
-            this.SEND = function(method, url, data) {
-                var req = zebkit.environment.getHttpRequest();
-
-                req.open(method, url, true);
-                for (var k in this.header) {
-                    req.setRequestHeader(k, this.header[k]);
-                }
-
-                return new zebkit.DoIt(function() {
-                    var jn    = this.join(),
-                        $this = this;
-
-                    req.onreadystatechange = function() {
-                        if (req.readyState === 4) {
-                            // evaluate http response
-                            if (req.status &gt;= 400 || req.status &lt; 100) {
-                                var e = new Error(&quot;HTTP error &#x27;&quot; + req.statusText + &quot;&#x27;, code = &quot; + req.status + &quot; &#x27;&quot; + url + &quot;&#x27;&quot;);
-                                e.status     = req.status;
-                                e.statusText = req.statusText;
-                                e.readyState = req.readyState;
-                                $this.error(e);
-                            } else {
-                                jn(req);
-                            }
-                        }
-                    };
-
-                    try {
-                        req.send(arguments.length &gt; 2 ? data : null);
-                    } catch(e) {
-                        this.error(e);
-                    }
-                });
-            };
-        }
-    ]);
-
-    /**
-     * Shortcut method to perform HTTP GET requests.
-
-        zebkit.io.GET(&quot;http://test.com&quot;).then(function(request) {
-            // handle result ...
-        }).catch(function(e) {
-            // handle error ...
-        });
-
-        var res = zebkit.io.GET(&quot;http://test.com&quot;, {
-            param1 : &quot;var1&quot;,
-            param1 : &quot;var2&quot;,
-            param1 : &quot;var3&quot;
-        }).then(function(req) {
-            // handle result ...
-        });
-
-     * @param {String|Object} url an URL
-     * @param {Object} [parameters] a dictionary of query parameters
-     * @return  {zebkit.DoIt} an object to handle result
-     * @method GET
-     * @for zebkit.io
-     */
-    pkg.GET = function(url) {
-        var http = new pkg.HTTP(url);
-        return http.GET.apply(http, Array.prototype.slice.call(arguments, 1));
-    };
-
-    /**
-     * Shortcut method to perform HTTP POST requests.
-
-        zebkit.io.POST(&quot;http://test.com&quot;, null).then(function(request) {
-            // handle result
-            ...
-        }).catch(function(e) {
-            // handle error ...
-        });
-
-        var res = zebkit.io.POST(&quot;http://test.com&quot;, {
-            param1 : &quot;var1&quot;,
-            param1 : &quot;var2&quot;,
-            param1 : &quot;var3&quot;
-        }).then(function(request) {
-            // handle result
-            ...
-        });
-
-        zebkit.io.POST(&quot;http://test.com&quot;, &quot;request&quot;).then(function(request) {
-            // handle error
-            ...
-        });
-
-     * @param {String} url an URL
-     * @param {Object} [data] a data or form data parameters
-     * @return  {zebkit.DoIt} an object to handle result
-     * @method  POST
-     * @for zebkit.io
-     */
-    pkg.POST = function(url) {
-        var http = new pkg.HTTP(url);
-        return http.POST.apply(http, Array.prototype.slice.call(arguments, 1));
-    };
-
-    /**
-     * A remote service connector class. It is supposed the class has to be extended with
-     * different protocols like RPC, JSON etc. The typical pattern of connecting to
-     * a remote service is shown below:
-
-        // create service connector that has two methods &quot;a()&quot; and &quot;b(param1)&quot;
-        var service = new zebkit.io.Service(&quot;http://myservice.com&quot;, [
-            &quot;a&quot;, &quot;b&quot;
-        ]);
-
-        // call the methods of the remote service
-        service.a();
-        service.b(10);
-
-     * Also the methods of a remote service can be called asynchronously. In this case
-     * a callback method has to be passed as the last argument of called remote methods:
-
-        // create service connector that has two methods &quot;a()&quot; and &quot;b(param1)&quot;
-        var service = new zebkit.io.Service(&quot;http://myservice.com&quot;, [
-            &quot;a&quot;, &quot;b&quot;
-        ]);
-
-        // call &quot;b&quot; method from the remote service asynchronously
-        service.b(10, function(res) {
-            // handle a result of the remote method execution here
-            ...
-        });
-     *
-     * Ideally any specific remote service extension of &quot;zebkit.io.Service&quot;
-     * class has to implement two methods:
-
-        - **encode** to say how the given remote method with passed parameters have
-        to be transformed into a concrete service side protocol (JSON, XML, etc)
-        - **decode** to say how the specific service response has to be converted into
-        JavaScript object
-
-     * @class zebkit.io.Service
-     * @constructor
-     * @param {String} url an URL of remote service
-     * @param {Array} methods a list of methods names the remote service provides
-     */
-    pkg.Service = Class([
-        function(url, methods) {
-            var $this = this;
-            /**
-             * Remote service url
-             * @attribute url
-             * @readOnly
-             * @type {String}
-             */
-            this.url = url;
-
-            /**
-             * Remote service methods names
-             * @attribute methods
-             * @readOnly
-             * @type {Array}
-             */
-            if (Array.isArray(methods) === false) {
-                methods = [ methods ];
-            }
-
-            for(var i = 0; i &lt; methods.length; i++) {
-                (function() {
-                    var name = methods[i];
-                    $this[name] = function() {
-                        var args = Array.prototype.slice.call(arguments);
-                        return this.send(url, this.encode(name, args)).then(function(req) {
-                            if (req.status === 200) {
-                                return $this.decode(req.responseText);
-                            } else {
-                                this.error(new Error(&quot;Status: &quot; + req.status + &quot;, &#x27;&quot; + req.statusText + &quot;&#x27;&quot;));
-                            }
-                        });
-                    };
-                })();
-            }
-        },
-
-        function $prototype() {
-            this.contentType = null;
-
-             /**
-              * Send the given data to the given url and return a response. Callback
-              * function can be passed for asynchronous result handling.
-              * @protected
-              * @param  {String}   url an URL
-              * @param  {String}   data  a data to be send
-              * @return {zebkit.DoIt}  a result
-              * @method  send
-              */
-            this.send = function(url, data) {
-                var http = new pkg.HTTP(url);
-                if (this.contentType !== null) {
-                    http.header[&#x27;Content-Type&#x27;] = this.contentType;
-                }
-                return http.POST(data);
-            };
-        }
-
-        /**
-         * Transforms the given remote method execution with the specified parameters
-         * to service specific protocol.
-         * @param {String} name a remote method name
-         * @param {Array} args an passed to the remote method arguments
-         * @return {String} a remote service specific encoded string
-         * @protected
-         * @method encode
-         */
-
-        /**
-         * Transforms the given remote method response to a JavaScript
-         * object.
-         * @param {String} name a remote method name
-         * @return {Object} a result of the remote method calling as a JavaScript
-         * object
-         * @protected
-         * @method decode
-         */
-    ]);
-
-    /**
-     * Build invoke method that calls a service method.
-     * @param  {zebkit.Class} clazz a class
-     * @param  {String} url an URL
-     * @param  {String} a service method name
-     * @return {Function} a wrapped method to call RPC method with
-     * @private
-     * @method  invoke
-     * @static
-     */
-    pkg.Service.invoke = function(clazz, url, method) {
-        var rpc = new clazz(url, method);
-        return function() {
-            return rpc[method].apply(rpc, arguments);
-        };
-    };
-
-    /**
-     * The class is implementation of JSON-RPC remote service connector.
-
-        // create JSON-RPC connector to a remote service that
-        // has three remote methods
-        var service = new zebkit.io.JRPC(&quot;json-rpc.com&quot;, [
-            &quot;method1&quot;, &quot;method2&quot;, &quot;method3&quot;
-        ]);
-
-        // synchronously call remote method &quot;method1&quot;
-        service.method1();
-
-        // asynchronously call remote method &quot;method1&quot;
-        service.method1(function(res) {
-            ...
-        });
-
-     * @class zebkit.io.JRPC
-     * @constructor
-     * @param {String} url an URL of remote service
-     * @param {Array} methods a list of methods names the remote service provides
-     * @extends zebkit.io.Service
-     */
-    pkg.JRPC = Class(pkg.Service, [
-        function $prototype() {
-            this.version     = &quot;2.0&quot;;
-            this.contentType = &quot;application/json; charset=ISO-8859-1;&quot;;
-
-            this.encode = function(name, args) {
-                return zebkit.environment.stringifyJSON({
-                    jsonrpc : this.version,
-                    method  : name,
-                    params  : args,
-                    id      : pkg.UID() });
-            };
-
-            this.decode = function(r) {
-                if (r === null || r.length === 0) {
-                    throw new Error(&quot;Empty JSON result string&quot;);
-                }
-
-                r = zebkit.environment.parseJSON(r);
-                if (typeof(r.error) !== &quot;undefined&quot;) {
-                    throw new Error(r.error.message);
-                }
-
-                if (typeof r.result === &quot;undefined&quot; || typeof r.id === &quot;undefined&quot;) {
-                    throw new Error(&quot;Wrong JSON response format&quot;);
-                }
-                return r.result;
-            };
-        }
-    ]);
-
-    /**
-     * Shortcut to call the specified method of a JSON-RPC service.
-     * @param  {String} url an URL
-     * @param  {String} method a method name
-     * @for zebkit.io.JRPC
-     * @static
-     * @method invoke
-     */
-    pkg.JRPC.invoke = function(url, method) {
-        return pkg.Service.invoke(pkg.JRPC, url, method);
-    };
-
-    pkg.Base64 = function(s) {
-        if (arguments.length &gt; 0) {
-            this.encoded = pkg.b64encode(s);
-        }
-    };
-
-    pkg.Base64.prototype.toString = function() { return this.encoded; };
-    pkg.Base64.prototype.decode   = function() { return pkg.b64decode(this.encoded); };
-
-    /**
-     * The class is implementation of XML-RPC remote service connector.
-
-        // create XML-RPC connector to a remote service that
-        // has three remote methods
-        var service = new zebkit.io.XRPC(&quot;xmlrpc.com&quot;, [
-            &quot;method1&quot;, &quot;method2&quot;, &quot;method3&quot;
-        ]);
-
-        // synchronously call remote method &quot;method1&quot;
-        service.method1();
-
-        // asynchronously call remote method &quot;method1&quot;
-        service.method1(function(res) {
-            ...
-        });
-
-     * @class zebkit.io.XRPC
-     * @constructor
-     * @extends zebkit.io.Service
-     * @param {String} url an URL of remote service
-     * @param {Array} methods a list of methods names the remote service provides
-     */
-    pkg.XRPC = Class(pkg.Service, [
-        function $prototype() {
-            this.contentType = &quot;text/xml&quot;;
-
-            this.encode = function(name, args) {
-                var p = [&quot;&lt;?xml version=\&quot;1.0\&quot;?&gt;\n&lt;methodCall&gt;&lt;methodName&gt;&quot;, name, &quot;&lt;/methodName&gt;&lt;params&gt;&quot;];
-                for(var i=0; i &lt; args.length;i++) {
-                    p.push(&quot;&lt;param&gt;&quot;);
-                    this.encodeValue(args[i], p);
-                    p.push(&quot;&lt;/param&gt;&quot;);
-                }
-                p.push(&quot;&lt;/params&gt;&lt;/methodCall&gt;&quot;);
-                return p.join(&#x27;&#x27;);
-            };
-
-            this.encodeValue = function(v, p)  {
-                if (v === null) {
-                    throw new Error(&quot;Null is not allowed&quot;);
-                }
-
-                if (zebkit.isString(v)) {
-                    v = v.replace(&quot;&lt;&quot;, &quot;&amp;lt;&quot;);
-                    v = v.replace(&quot;&amp;&quot;, &quot;&amp;amp;&quot;);
-                    p.push(&quot;&lt;string&gt;&quot;, v, &quot;&lt;/string&gt;&quot;);
-                } else {
-                    if (zebkit.isNumber(v)) {
-                        if (Math.round(v) === v) {
-                            p.push(&quot;&lt;i4&gt;&quot;, v.toString(), &quot;&lt;/i4&gt;&quot;);
-                        } else {
-                            p.push(&quot;&lt;double&gt;&quot;, v.toString(), &quot;&lt;/double&gt;&quot;);
-                        }
-                    } else {
-                        if (zebkit.isBoolean(v)) {
-                            p.push(&quot;&lt;boolean&gt;&quot;, v?&quot;1&quot;:&quot;0&quot;, &quot;&lt;/boolean&gt;&quot;);
-                        } else {
-                            if (v instanceof Date)  {
-                                p.push(&quot;&lt;dateTime.iso8601&gt;&quot;, pkg.dateToISO8601(v), &quot;&lt;/dateTime.iso8601&gt;&quot;);
-                            } else {
-                                if (Array.isArray(v))  {
-                                    p.push(&quot;&lt;array&gt;&lt;data&gt;&quot;);
-                                    for(var i=0;i&lt;v.length;i++) {
-                                        p.push(&quot;&lt;value&gt;&quot;);
-                                        this.encodeValue(v[i], p);
-                                        p.push(&quot;&lt;/value&gt;&quot;);
-                                    }
-                                    p.push(&quot;&lt;/data&gt;&lt;/array&gt;&quot;);
-                                } else {
-                                    if (v instanceof pkg.Base64) {
-                                        p.push(&quot;&lt;base64&gt;&quot;, v.toString(), &quot;&lt;/base64&gt;&quot;);
-                                    } else {
-                                        p.push(&quot;&lt;struct&gt;&quot;);
-                                        for (var k in v) {
-                                            if (v.hasOwnProperty(k)) {
-                                                p.push(&quot;&lt;member&gt;&lt;name&gt;&quot;, k, &quot;&lt;/name&gt;&lt;value&gt;&quot;);
-                                                this.encodeValue(v[k], p);
-                                                p.push(&quot;&lt;/value&gt;&lt;/member&gt;&quot;);
-                                            }
-                                        }
-                                        p.push(&quot;&lt;/struct&gt;&quot;);
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
-            };
-
-            this.decodeValue = function (node) {
-                var tag = node.tagName.toLowerCase(), i = 0;
-
-                if (tag === &quot;struct&quot;) {
-                     var p = {};
-                     for(i = 0; i &lt; node.childNodes.length; i++) {
-                        var member = node.childNodes[i],  // &lt;member&gt;
-                            key    = member.childNodes[0].childNodes[0].nodeValue.trim(); // &lt;name&gt;/text()
-                        p[key] = this.decodeValue(member.childNodes[1].childNodes[0]);   // &lt;value&gt;/&lt;xxx&gt;
-                    }
-                    return p;
-                }
-
-                if (tag === &quot;array&quot;) {
-                    var a = [];
-                    node = node.childNodes[0]; // &lt;data&gt;
-                    for(i = 0; i &lt; node.childNodes.length; i++) {
-                        a[i] = this.decodeValue(node.childNodes[i].childNodes[0]); // &lt;value&gt;
-                    }
-                    return a;
-                }
-
-                var v = node.childNodes[0].nodeValue.trim();
-                switch (tag) {
-                    case &quot;datetime.iso8601&quot;: return pkg.ISO8601toDate(v);
-                    case &quot;boolean&quot;: return v === &quot;1&quot;;
-                    case &quot;int&quot;:
-                    case &quot;i4&quot;:     return parseInt(v, 10);
-                    case &quot;double&quot;: return Number(v);
-                    case &quot;base64&quot;:
-                        var b64 = new pkg.Base64();
-                        b64.encoded = v;
-                        return b64;
-                    case &quot;string&quot;: return v;
-                }
-                throw new Error(&quot;Unknown tag &quot; + tag);
-            };
-
-            this.decode = function(r) {
-                var p = zebkit.environment.parseXML(r),
-                    c = p.getElementsByTagName(&quot;fault&quot;);
-
-                if (c.length &gt; 0) {
-                    var err = this.decodeValue(c[0].getElementsByTagName(&quot;struct&quot;)[0]);
-                    throw new Error(err.faultString);
-                }
-
-                c = p.getElementsByTagName(&quot;methodResponse&quot;)[0];
-                c = c.childNodes[0].childNodes[0]; // &lt;params&gt;/&lt;param&gt;
-                if (c.tagName.toLowerCase() === &quot;param&quot;) {
-                    return this.decodeValue(c.childNodes[0].childNodes[0]); // &lt;value&gt;/&lt;xxx&gt;
-                }
-                throw new Error(&quot;Incorrect XML-RPC response&quot;);
-            };
-        }
-    ]);
-
-    /**
-     * Shortcut to call the specified method of a XML-RPC service.
-     * @param  {String} url an URL
-     * @param  {String} method a method name
-     * @for zebkit.io.XRPC
-     * @method invoke
-     * @static
-     */
-    pkg.XRPC.invoke = function(url, method) {
-        return pkg.Service.invoke(pkg.XRPC, url, method);
-    };
-});
-
 zebkit.package(&quot;data&quot;, function(pkg, Class) {
     /**
      * Collection of various data models. The models are widely used by zebkit UI
@@ -10226,6 +9752,741 @@ zebkit.package(&quot;data&quot;, function(pkg, Class) {
         }
     ]);
 });
+zebkit.package(&quot;io&quot;, function(pkg, Class) {
+    /**
+     * The module provides number of classes to help to communicate with remote services and servers by HTTP,
+     * JSON-RPC, XML-RPC protocols.
+     *
+     *       // shortcut method to perform HTTP GET request
+     *       zebkit.io.GET(&quot;http://test.com&quot;).then(function(req) {
+     *           // handle request
+     *           req.responseText
+     *           ...
+     *       }).catch(function(exception) {
+     *           // handle error
+     *       });
+     *
+     * @class zebkit.io
+     * @access package
+     */
+
+    // TODO: Web dependencies:
+    //    -- Uint8Array
+    //    -- ArrayBuffer
+
+    // !!!
+    // b64 is supposed to be used with binary stuff, applying it to utf-8 encoded data can bring to error
+    // !!!
+
+    var HEX    = &quot;0123456789ABCDEF&quot;,
+        b64str = &quot;ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/=&quot;;
+
+    /**
+     * Generate UUID of the given length
+     * @param {Integer} [size] the generated UUID length. The default size is 16 characters.
+     * @return {String} an UUID
+     * @method  UID
+     * @for  zebkit.io
+     */
+    pkg.UID = function(size) {
+        if (arguments.length === 0) {
+            size = 16;
+        }
+        var id = &quot;&quot;;
+        for (var i = 0; i &lt; size; i++) {
+            id = id + HEX[~~(Math.random() * 16)];
+        }
+        return id;
+    };
+
+    /**
+     * Encode the given string into base64
+     * @param  {String} input a string to be encoded
+     * @method  b64encode
+     * @for zebkit.io
+     */
+    pkg.b64encode = function(input) {
+        var out = [], i = 0, len = input.length, c1, c2, c3;
+        if (typeof ArrayBuffer !== &quot;undefined&quot;) {
+            if (input instanceof ArrayBuffer) {
+                input = new Uint8Array(input);
+            }
+            input.charCodeAt = function(i) { return this[i]; };
+        }
+
+        if (Array.isArray(input)) {
+            input.charCodeAt = function(i) { return this[i]; };
+        }
+
+        while(i &lt; len) {
+            c1 = input.charCodeAt(i++) &amp; 0xff;
+            out.push(b64str.charAt(c1 &gt;&gt; 2));
+            if (i === len) {
+                out.push(b64str.charAt((c1 &amp; 0x3) &lt;&lt; 4), &quot;==&quot;);
+                break;
+            }
+
+            c2 = input.charCodeAt(i++);
+            out.push(b64str.charAt(((c1 &amp; 0x3) &lt;&lt; 4) | ((c2 &amp; 0xF0) &gt;&gt; 4)));
+            if (i === len) {
+                out.push(b64str.charAt((c2 &amp; 0xF) &lt;&lt; 2), &quot;=&quot;);
+                break;
+            }
+
+            c3 = input.charCodeAt(i++);
+            out.push(b64str.charAt(((c2 &amp; 0xF) &lt;&lt; 2) | ((c3 &amp; 0xC0) &gt;&gt; 6)), b64str.charAt(c3 &amp; 0x3F));
+        }
+
+        return out.join(&#x27;&#x27;);
+    };
+
+    /**
+     * Decode the base64 encoded string
+     * @param {String} input base64 encoded string
+     * @return {String} a string
+     * @for zebkit.io
+     * @method b64decode
+     */
+    pkg.b64decode = function(input) {
+        var output = [], chr1, chr2, chr3, enc1, enc2, enc3, enc4;
+        input = input.replace(/[^A-Za-z0-9\+\/\=]/g, &quot;&quot;);
+
+        while ((input.length % 4) !== 0) {
+            input += &quot;=&quot;;
+        }
+
+        for(var i=0; i &lt; input.length;) {
+            enc1 = b64str.indexOf(input.charAt(i++));
+            enc2 = b64str.indexOf(input.charAt(i++));
+            enc3 = b64str.indexOf(input.charAt(i++));
+            enc4 = b64str.indexOf(input.charAt(i++));
+
+            chr1 = (enc1 &lt;&lt; 2) | (enc2 &gt;&gt; 4);
+            chr2 = ((enc2 &amp; 15) &lt;&lt; 4) | (enc3 &gt;&gt; 2);
+            chr3 = ((enc3 &amp; 3) &lt;&lt; 6) | enc4;
+            output.push(String.fromCharCode(chr1));
+            if (enc3 !== 64) {
+                output.push(String.fromCharCode(chr2));
+            }
+            if (enc4 !== 64) {
+                output.push(String.fromCharCode(chr3));
+            }
+        }
+        return output.join(&#x27;&#x27;);
+    };
+
+    pkg.dateToISO8601 = function(d) {
+        function pad(n) { return n &lt; 10 ? &#x27;0&#x27;+ n : n; }
+        return [ d.getUTCFullYear(), &#x27;-&#x27;, pad(d.getUTCMonth()+1), &#x27;-&#x27;, pad(d.getUTCDate()), &#x27;T&#x27;, pad(d.getUTCHours()), &#x27;:&#x27;,
+                 pad(d.getUTCMinutes()), &#x27;:&#x27;, pad(d.getUTCSeconds()), &#x27;Z&#x27;].join(&#x27;&#x27;);
+    };
+
+    // http://webcloud.se/log/JavaScript-and-ISO-8601/
+    pkg.ISO8601toDate = function(v) {
+        var regexp = [&quot;([0-9]{4})(-([0-9]{2})(-([0-9]{2})&quot;, &quot;(T([0-9]{2}):([0-9]{2})(:([0-9]{2})(\.([0-9]+))?)?&quot;,
+                      &quot;(Z|(([-+])([0-9]{2}):([0-9]{2})))?)?)?)?&quot;].join(&#x27;&#x27;), d = v.match(new RegExp(regexp)),
+                      offset = 0, date = new Date(d[1], 0, 1);
+
+        if (d[3]) {
+            date.setMonth(d[3] - 1);
+        }
+
+        if (d[5]) {
+            date.setDate(d[5]);
+        }
+
+        if (d[7])  {
+            date.setHours(d[7]);
+        }
+
+        if (d[8])  {
+            date.setMinutes(d[8]);
+        }
+
+        if (d[10]) {
+            date.setSeconds(d[10]);
+        }
+
+        if (d[12]) {
+            date.setMilliseconds(Number(&quot;0.&quot; + d[12]) * 1000);
+        }
+
+        if (d[14]) {
+            offset = (Number(d[16]) * 60) + Number(d[17]);
+            offset *= ((d[15] === &#x27;-&#x27;) ? 1 : -1);
+        }
+
+        offset -= date.getTimezoneOffset();
+        date.setTime(Number(date) + (offset * 60 * 1000));
+        return date;
+    };
+
+    /**
+     * HTTP request class. This class provides API to generate different
+     * (GET, POST, etc) HTTP requests
+     * @class zebkit.io.HTTP
+     * @constructor
+     * @param {String} url an URL to a HTTP resource
+     */
+    pkg.HTTP = Class([
+        function(url) {
+            this.url = url;
+            this.header = {};
+        },
+
+        function $prototype() {
+            /**
+             * Perform HTTP GET request with the given query parameters.
+             * @param {Object} [q] a dictionary of query parameters
+             * @return {zebkit.DoIt} an object to get response
+             * @example
+             *
+             *     // GET request with the number of query parameters
+             *     var result = zebkit.io.HTTP(&quot;google.com&quot;).GET({
+             *         param1: &quot;var1&quot;,
+             *         param3: &quot;var2&quot;,
+             *         param3: &quot;var3&quot;
+             *     }).then(function(req) {
+             *         // handle response
+             *         req.responseText;
+             *     }).catch(function(e)  {
+             *         // handle error
+             *         ...
+             *     });
+             *
+             * @method GET
+             */
+            this.GET = function(q) {
+                var u = this.url + ((arguments.length === 0 || q === null) ? &#x27;&#x27;
+                                                                           : ((this.url.indexOf(&quot;?&quot;) &gt; 0) ? &#x27;&amp;&#x27;
+                                                                                                          : &#x27;?&#x27;) + zebkit.URI.toQS(q, true));
+                return this.SEND(&quot;GET&quot;, u);
+            };
+
+            /**
+             * Perform HTTP POST request with the give data to be sent.
+             * @param {String|Object} d a data to be sent by HTTP POST request.  It can be
+             * either a parameters set or a string.
+             * @return {zebkit.DoIt} an object to get response
+             * @example
+             *
+             *     // asynchronously send POST
+             *     zebkit.io.HTTP(&quot;google.com&quot;).POST(&quot;Hello&quot;).then(function(req) {
+             *         // handle HTTP GET response ...
+             *     }).catch(function(e) {
+             *         // handle error ...
+             *     });
+             *
+             * Or you can pass a number of parameters to be sent:
+             *
+             *     // send parameters synchronously by HTTP POST request
+             *     zebkit.io.HTTP(&quot;google.com&quot;).POST({
+             *         param1: &quot;val1&quot;,
+             *         param2: &quot;val3&quot;,
+             *         param3: &quot;val3&quot;
+             *     }).then(function(req) {
+             *          // handle HTTP GET response ...
+             *     }).catch(function(e) {
+             *          // handle error ...
+             *    });
+             *
+             * @method POST
+             */
+            this.POST = function(d) {
+                // if the passed data is simple dictionary object encode it as POST
+                // parameters
+                //
+                // TODO: think also about changing content type
+                // &quot;application/x-www-form-urlencoded; charset=UTF-8&quot;
+                if (d !== null &amp;&amp; zebkit.isString(d) === false &amp;&amp; d.constructor === Object) {
+                    d = zebkit.URI.toQS(d, false);
+                }
+
+                return this.SEND(&quot;POST&quot;, this.url, d);
+            };
+
+            /**
+             * Universal HTTP request method that can be used to generate a HTTP request with
+             * any HTTP method to the given URL with the given data to be sent asynchronously.
+             * @param {String}   method   an HTTP method (GET, POST, DELETE, PUT, etc)
+             * @param {String}   url      an URL
+             * @param {String}   [data]   a data to be sent to the given URL
+             * @return {zebkit.DoIt} an object to handle result
+             * @method SEND
+             */
+            this.SEND = function(method, url, data) {
+                var req = zebkit.environment.getHttpRequest();
+
+                req.open(method, url, true);
+                for (var k in this.header) {
+                    req.setRequestHeader(k, this.header[k]);
+                }
+
+                return new zebkit.DoIt(function() {
+                    var jn    = this.join(),
+                        $this = this;
+
+                    req.onreadystatechange = function() {
+                        if (req.readyState === 4) {
+                            // evaluate http response
+                            if (req.status &gt;= 400 || req.status &lt; 100) {
+                                var e = new Error(&quot;HTTP error &#x27;&quot; + req.statusText + &quot;&#x27;, code = &quot; + req.status + &quot; &#x27;&quot; + url + &quot;&#x27;&quot;);
+                                e.status     = req.status;
+                                e.statusText = req.statusText;
+                                e.readyState = req.readyState;
+                                $this.error(e);
+                            } else {
+                                jn(req);
+                            }
+                        }
+                    };
+
+                    try {
+                        req.send(arguments.length &gt; 2 ? data : null);
+                    } catch(e) {
+                        this.error(e);
+                    }
+                });
+            };
+        }
+    ]);
+
+    /**
+     * Shortcut method to perform HTTP GET requests.
+
+        zebkit.io.GET(&quot;http://test.com&quot;).then(function(request) {
+            // handle result ...
+        }).catch(function(e) {
+            // handle error ...
+        });
+
+        var res = zebkit.io.GET(&quot;http://test.com&quot;, {
+            param1 : &quot;var1&quot;,
+            param1 : &quot;var2&quot;,
+            param1 : &quot;var3&quot;
+        }).then(function(req) {
+            // handle result ...
+        });
+
+     * @param {String|Object} url an URL
+     * @param {Object} [parameters] a dictionary of query parameters
+     * @return  {zebkit.DoIt} an object to handle result
+     * @method GET
+     * @for zebkit.io
+     */
+    pkg.GET = function(url) {
+        var http = new pkg.HTTP(url);
+        return http.GET.apply(http, Array.prototype.slice.call(arguments, 1));
+    };
+
+    /**
+     * Shortcut method to perform HTTP POST requests.
+
+        zebkit.io.POST(&quot;http://test.com&quot;, null).then(function(request) {
+            // handle result
+            ...
+        }).catch(function(e) {
+            // handle error ...
+        });
+
+        var res = zebkit.io.POST(&quot;http://test.com&quot;, {
+            param1 : &quot;var1&quot;,
+            param1 : &quot;var2&quot;,
+            param1 : &quot;var3&quot;
+        }).then(function(request) {
+            // handle result
+            ...
+        });
+
+        zebkit.io.POST(&quot;http://test.com&quot;, &quot;request&quot;).then(function(request) {
+            // handle error
+            ...
+        });
+
+     * @param {String} url an URL
+     * @param {Object} [data] a data or form data parameters
+     * @return  {zebkit.DoIt} an object to handle result
+     * @method  POST
+     * @for zebkit.io
+     */
+    pkg.POST = function(url) {
+        var http = new pkg.HTTP(url);
+        return http.POST.apply(http, Array.prototype.slice.call(arguments, 1));
+    };
+
+    /**
+     * A remote service connector class. It is supposed the class has to be extended with
+     * different protocols like RPC, JSON etc. The typical pattern of connecting to
+     * a remote service is shown below:
+
+        // create service connector that has two methods &quot;a()&quot; and &quot;b(param1)&quot;
+        var service = new zebkit.io.Service(&quot;http://myservice.com&quot;, [
+            &quot;a&quot;, &quot;b&quot;
+        ]);
+
+        // call the methods of the remote service
+        service.a();
+        service.b(10);
+
+     * Also the methods of a remote service can be called asynchronously. In this case
+     * a callback method has to be passed as the last argument of called remote methods:
+
+        // create service connector that has two methods &quot;a()&quot; and &quot;b(param1)&quot;
+        var service = new zebkit.io.Service(&quot;http://myservice.com&quot;, [
+            &quot;a&quot;, &quot;b&quot;
+        ]);
+
+        // call &quot;b&quot; method from the remote service asynchronously
+        service.b(10, function(res) {
+            // handle a result of the remote method execution here
+            ...
+        });
+     *
+     * Ideally any specific remote service extension of &quot;zebkit.io.Service&quot;
+     * class has to implement two methods:
+
+        - **encode** to say how the given remote method with passed parameters have
+        to be transformed into a concrete service side protocol (JSON, XML, etc)
+        - **decode** to say how the specific service response has to be converted into
+        JavaScript object
+
+     * @class zebkit.io.Service
+     * @constructor
+     * @param {String} url an URL of remote service
+     * @param {Array} methods a list of methods names the remote service provides
+     */
+    pkg.Service = Class([
+        function(url, methods) {
+            var $this = this;
+            /**
+             * Remote service url
+             * @attribute url
+             * @readOnly
+             * @type {String}
+             */
+            this.url = url;
+
+            /**
+             * Remote service methods names
+             * @attribute methods
+             * @readOnly
+             * @type {Array}
+             */
+            if (Array.isArray(methods) === false) {
+                methods = [ methods ];
+            }
+
+            for(var i = 0; i &lt; methods.length; i++) {
+                (function() {
+                    var name = methods[i];
+                    $this[name] = function() {
+                        var args = Array.prototype.slice.call(arguments);
+                        return this.send(url, this.encode(name, args)).then(function(req) {
+                            if (req.status === 200) {
+                                return $this.decode(req.responseText);
+                            } else {
+                                this.error(new Error(&quot;Status: &quot; + req.status + &quot;, &#x27;&quot; + req.statusText + &quot;&#x27;&quot;));
+                            }
+                        });
+                    };
+                })();
+            }
+        },
+
+        function $prototype() {
+            this.contentType = null;
+
+             /**
+              * Send the given data to the given url and return a response. Callback
+              * function can be passed for asynchronous result handling.
+              * @protected
+              * @param  {String}   url an URL
+              * @param  {String}   data  a data to be send
+              * @return {zebkit.DoIt}  a result
+              * @method  send
+              */
+            this.send = function(url, data) {
+                var http = new pkg.HTTP(url);
+                if (this.contentType !== null) {
+                    http.header[&#x27;Content-Type&#x27;] = this.contentType;
+                }
+                return http.POST(data);
+            };
+        }
+
+        /**
+         * Transforms the given remote method execution with the specified parameters
+         * to service specific protocol.
+         * @param {String} name a remote method name
+         * @param {Array} args an passed to the remote method arguments
+         * @return {String} a remote service specific encoded string
+         * @protected
+         * @method encode
+         */
+
+        /**
+         * Transforms the given remote method response to a JavaScript
+         * object.
+         * @param {String} name a remote method name
+         * @return {Object} a result of the remote method calling as a JavaScript
+         * object
+         * @protected
+         * @method decode
+         */
+    ]);
+
+    /**
+     * Build invoke method that calls a service method.
+     * @param  {zebkit.Class} clazz a class
+     * @param  {String} url an URL
+     * @param  {String} a service method name
+     * @return {Function} a wrapped method to call RPC method with
+     * @private
+     * @method  invoke
+     * @static
+     */
+    pkg.Service.invoke = function(clazz, url, method) {
+        var rpc = new clazz(url, method);
+        return function() {
+            return rpc[method].apply(rpc, arguments);
+        };
+    };
+
+    /**
+     * The class is implementation of JSON-RPC remote service connector.
+
+        // create JSON-RPC connector to a remote service that
+        // has three remote methods
+        var service = new zebkit.io.JRPC(&quot;json-rpc.com&quot;, [
+            &quot;method1&quot;, &quot;method2&quot;, &quot;method3&quot;
+        ]);
+
+        // synchronously call remote method &quot;method1&quot;
+        service.method1();
+
+        // asynchronously call remote method &quot;method1&quot;
+        service.method1(function(res) {
+            ...
+        });
+
+     * @class zebkit.io.JRPC
+     * @constructor
+     * @param {String} url an URL of remote service
+     * @param {Array} methods a list of methods names the remote service provides
+     * @extends zebkit.io.Service
+     */
+    pkg.JRPC = Class(pkg.Service, [
+        function $prototype() {
+            this.version     = &quot;2.0&quot;;
+            this.contentType = &quot;application/json; charset=ISO-8859-1;&quot;;
+
+            this.encode = function(name, args) {
+                return zebkit.environment.stringifyJSON({
+                    jsonrpc : this.version,
+                    method  : name,
+                    params  : args,
+                    id      : pkg.UID() });
+            };
+
+            this.decode = function(r) {
+                if (r === null || r.length === 0) {
+                    throw new Error(&quot;Empty JSON result string&quot;);
+                }
+
+                r = zebkit.environment.parseJSON(r);
+                if (typeof(r.error) !== &quot;undefined&quot;) {
+                    throw new Error(r.error.message);
+                }
+
+                if (typeof r.result === &quot;undefined&quot; || typeof r.id === &quot;undefined&quot;) {
+                    throw new Error(&quot;Wrong JSON response format&quot;);
+                }
+                return r.result;
+            };
+        }
+    ]);
+
+    /**
+     * Shortcut to call the specified method of a JSON-RPC service.
+     * @param  {String} url an URL
+     * @param  {String} method a method name
+     * @for zebkit.io.JRPC
+     * @static
+     * @method invoke
+     */
+    pkg.JRPC.invoke = function(url, method) {
+        return pkg.Service.invoke(pkg.JRPC, url, method);
+    };
+
+    pkg.Base64 = function(s) {
+        if (arguments.length &gt; 0) {
+            this.encoded = pkg.b64encode(s);
+        }
+    };
+
+    pkg.Base64.prototype.toString = function() { return this.encoded; };
+    pkg.Base64.prototype.decode   = function() { return pkg.b64decode(this.encoded); };
+
+    /**
+     * The class is implementation of XML-RPC remote service connector.
+
+        // create XML-RPC connector to a remote service that
+        // has three remote methods
+        var service = new zebkit.io.XRPC(&quot;xmlrpc.com&quot;, [
+            &quot;method1&quot;, &quot;method2&quot;, &quot;method3&quot;
+        ]);
+
+        // synchronously call remote method &quot;method1&quot;
+        service.method1();
+
+        // asynchronously call remote method &quot;method1&quot;
+        service.method1(function(res) {
+            ...
+        });
+
+     * @class zebkit.io.XRPC
+     * @constructor
+     * @extends zebkit.io.Service
+     * @param {String} url an URL of remote service
+     * @param {Array} methods a list of methods names the remote service provides
+     */
+    pkg.XRPC = Class(pkg.Service, [
+        function $prototype() {
+            this.contentType = &quot;text/xml&quot;;
+
+            this.encode = function(name, args) {
+                var p = [&quot;&lt;?xml version=\&quot;1.0\&quot;?&gt;\n&lt;methodCall&gt;&lt;methodName&gt;&quot;, name, &quot;&lt;/methodName&gt;&lt;params&gt;&quot;];
+                for(var i=0; i &lt; args.length;i++) {
+                    p.push(&quot;&lt;param&gt;&quot;);
+                    this.encodeValue(args[i], p);
+                    p.push(&quot;&lt;/param&gt;&quot;);
+                }
+                p.push(&quot;&lt;/params&gt;&lt;/methodCall&gt;&quot;);
+                return p.join(&#x27;&#x27;);
+            };
+
+            this.encodeValue = function(v, p)  {
+                if (v === null) {
+                    throw new Error(&quot;Null is not allowed&quot;);
+                }
+
+                if (zebkit.isString(v)) {
+                    v = v.replace(&quot;&lt;&quot;, &quot;&amp;lt;&quot;);
+                    v = v.replace(&quot;&amp;&quot;, &quot;&amp;amp;&quot;);
+                    p.push(&quot;&lt;string&gt;&quot;, v, &quot;&lt;/string&gt;&quot;);
+                } else {
+                    if (zebkit.isNumber(v)) {
+                        if (Math.round(v) === v) {
+                            p.push(&quot;&lt;i4&gt;&quot;, v.toString(), &quot;&lt;/i4&gt;&quot;);
+                        } else {
+                            p.push(&quot;&lt;double&gt;&quot;, v.toString(), &quot;&lt;/double&gt;&quot;);
+                        }
+                    } else {
+                        if (zebkit.isBoolean(v)) {
+                            p.push(&quot;&lt;boolean&gt;&quot;, v?&quot;1&quot;:&quot;0&quot;, &quot;&lt;/boolean&gt;&quot;);
+                        } else {
+                            if (v instanceof Date)  {
+                                p.push(&quot;&lt;dateTime.iso8601&gt;&quot;, pkg.dateToISO8601(v), &quot;&lt;/dateTime.iso8601&gt;&quot;);
+                            } else {
+                                if (Array.isArray(v))  {
+                                    p.push(&quot;&lt;array&gt;&lt;data&gt;&quot;);
+                                    for(var i=0;i&lt;v.length;i++) {
+                                        p.push(&quot;&lt;value&gt;&quot;);
+                                        this.encodeValue(v[i], p);
+                                        p.push(&quot;&lt;/value&gt;&quot;);
+                                    }
+                                    p.push(&quot;&lt;/data&gt;&lt;/array&gt;&quot;);
+                                } else {
+                                    if (v instanceof pkg.Base64) {
+                                        p.push(&quot;&lt;base64&gt;&quot;, v.toString(), &quot;&lt;/base64&gt;&quot;);
+                                    } else {
+                                        p.push(&quot;&lt;struct&gt;&quot;);
+                                        for (var k in v) {
+                                            if (v.hasOwnProperty(k)) {
+                                                p.push(&quot;&lt;member&gt;&lt;name&gt;&quot;, k, &quot;&lt;/name&gt;&lt;value&gt;&quot;);
+                                                this.encodeValue(v[k], p);
+                                                p.push(&quot;&lt;/value&gt;&lt;/member&gt;&quot;);
+                                            }
+                                        }
+                                        p.push(&quot;&lt;/struct&gt;&quot;);
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            };
+
+            this.decodeValue = function (node) {
+                var tag = node.tagName.toLowerCase(), i = 0;
+
+                if (tag === &quot;struct&quot;) {
+                     var p = {};
+                     for(i = 0; i &lt; node.childNodes.length; i++) {
+                        var member = node.childNodes[i],  // &lt;member&gt;
+                            key    = member.childNodes[0].childNodes[0].nodeValue.trim(); // &lt;name&gt;/text()
+                        p[key] = this.decodeValue(member.childNodes[1].childNodes[0]);   // &lt;value&gt;/&lt;xxx&gt;
+                    }
+                    return p;
+                }
+
+                if (tag === &quot;array&quot;) {
+                    var a = [];
+                    node = node.childNodes[0]; // &lt;data&gt;
+                    for(i = 0; i &lt; node.childNodes.length; i++) {
+                        a[i] = this.decodeValue(node.childNodes[i].childNodes[0]); // &lt;value&gt;
+                    }
+                    return a;
+                }
+
+                var v = node.childNodes[0].nodeValue.trim();
+                switch (tag) {
+                    case &quot;datetime.iso8601&quot;: return pkg.ISO8601toDate(v);
+                    case &quot;boolean&quot;: return v === &quot;1&quot;;
+                    case &quot;int&quot;:
+                    case &quot;i4&quot;:     return parseInt(v, 10);
+                    case &quot;double&quot;: return Number(v);
+                    case &quot;base64&quot;:
+                        var b64 = new pkg.Base64();
+                        b64.encoded = v;
+                        return b64;
+                    case &quot;string&quot;: return v;
+                }
+                throw new Error(&quot;Unknown tag &quot; + tag);
+            };
+
+            this.decode = function(r) {
+                var p = zebkit.environment.parseXML(r),
+                    c = p.getElementsByTagName(&quot;fault&quot;);
+
+                if (c.length &gt; 0) {
+                    var err = this.decodeValue(c[0].getElementsByTagName(&quot;struct&quot;)[0]);
+                    throw new Error(err.faultString);
+                }
+
+                c = p.getElementsByTagName(&quot;methodResponse&quot;)[0];
+                c = c.childNodes[0].childNodes[0]; // &lt;params&gt;/&lt;param&gt;
+                if (c.tagName.toLowerCase() === &quot;param&quot;) {
+                    return this.decodeValue(c.childNodes[0].childNodes[0]); // &lt;value&gt;/&lt;xxx&gt;
+                }
+                throw new Error(&quot;Incorrect XML-RPC response&quot;);
+            };
+        }
+    ]);
+
+    /**
+     * Shortcut to call the specified method of a XML-RPC service.
+     * @param  {String} url an URL
+     * @param  {String} method a method name
+     * @for zebkit.io.XRPC
+     * @method invoke
+     * @static
+     */
+    pkg.XRPC.invoke = function(url, method) {
+        return pkg.Service.invoke(pkg.XRPC, url, method);
+    };
+});
+
 zebkit.package(&quot;layout&quot;, function(pkg, Class) {
     /**
      * Layout package provides number of classes, interfaces, methods and variables that allows
@@ -11040,6 +11301,21 @@ zebkit.package(&quot;layout&quot;, function(pkg, Class) {
                     } else {
                         this.parent.removeAt(i);
                     }
+                }
+            };
+
+            /**
+             * Remove a component by the given constraints.
+             * @param {Object} ctr a constraints
+             * @return {zebkit.layout.Layoutable} a removed component
+             * @method removeByConstraints
+             */
+            this.removeByConstraints = function(ctr) {
+                var c = this.byConstraints(ctr);
+                if (c !== null) {
+                    return this.remove(c);
+                } else {
+                    return null;
                 }
             };
 
@@ -14631,7 +14907,7 @@ zebkit.package(&quot;draw&quot;, function(pkg, Class) {
              * @chainable
              */
             this.setValue = function(s) {
-                if (typeof s === &quot;string&quot; || s.constructor === String) {
+                if (s !== null &amp;&amp; (typeof s === &quot;string&quot; || s.constructor === String)) {
                     if (this.target !== null) {
                         this.target.setValue(s);
                         return this;
@@ -16477,7 +16753,7 @@ zebkit.package(&quot;draw&quot;, function(pkg, Class) {
             };
         }
     ]);
-});
+},false);
 zebkit.package(&quot;ui.event&quot;, function(pkg, Class) {
     &#x27;use strict&#x27;;
 
@@ -16826,6 +17102,25 @@ zebkit.package(&quot;ui.event&quot;, function(pkg, Class) {
                 return this;
             };
 
+            this.setLocation = function(x, y) {
+                if (this.source === null) {
+                    throw new Error(&quot;Unknown source component&quot;);
+                }
+
+                if (this.x !== x || this.y !== y) {
+                    this.absX = this.x = x;
+                    this.absY = this.y = y;
+
+                    // convert relative coordinates to absolute
+                    var source = this.source;
+                    while (source.parent !== null) {
+                        this.absX += source.x;
+                        this.absY += source.y;
+                        source = source.parent;
+                    }
+                }
+            };
+
             this.isAction = function() {
                 // TODO: actually this is abstract method
                 throw new Error(&quot;Not implemented&quot;);
@@ -17020,7 +17315,7 @@ zebkit.package(&quot;ui.event&quot;, function(pkg, Class) {
 
      // TODO: correct to event package
      //this.events = new pkg.EventManager();
-     zebkit.ui.events = new pkg.EventManager();
+    zebkit.ui.events = new pkg.EventManager();
 
      /**
       * Base class to implement clipboard manager.
@@ -17028,20 +17323,20 @@ zebkit.package(&quot;ui.event&quot;, function(pkg, Class) {
       * @constructor
       * @extends zebkit.ui.event.Manager
       */
-     pkg.Clipboard = Class(pkg.Manager, [
-         function $prototype() {
-             /**
-              * Get destination component. Destination component is a component that
-              * is currently should participate in clipboard data exchange.
-              * @return {zebkit.ui.Panel} a destination component.
-              * @method getDestination
-              */
-             this.getDestination = function() {
-                 //TODO: may be focusManager has to be moved to &quot;ui.event&quot; package
-                 return zebkit.ui.focusManager.focusOwner;
-             };
-         }
-     ]);
+    pkg.Clipboard = Class(pkg.Manager, [
+        function $prototype() {
+           /**
+            * Get destination component. Destination component is a component that
+            * is currently should participate in clipboard data exchange.
+            * @return {zebkit.ui.Panel} a destination component.
+            * @method getDestination
+            */
+            this.getDestination = function() {
+                //TODO: may be focusManager has to be moved to &quot;ui.event&quot; package
+                return zebkit.ui.focusManager.focusOwner;
+            };
+        }
+    ]);
 
      /**
       * Base class to implement cursor manager.
@@ -17049,7 +17344,7 @@ zebkit.package(&quot;ui.event&quot;, function(pkg, Class) {
       * @constructor
       * @extends zebkit.ui.event.Manager
       */
-     pkg.CursorManager = Class(pkg.Manager, [
+    pkg.CursorManager = Class(pkg.Manager, [
         function $prototype() {
             /**
              * Current cursor type
@@ -17060,6 +17355,225 @@ zebkit.package(&quot;ui.event&quot;, function(pkg, Class) {
              */
             this.cursorType = &quot;default&quot;;
         }
+    ]);
+
+    /**
+     * Input events state handler interface. The interface implements pointer and key
+     * events handler to track the current state where State can have one of the following
+     * value:
+     *
+     *   - **over** the pointer cursor is inside the component
+     *   - **out** the pointer cursor is outside the component
+     *   - **pressed.over** the pointer cursor is inside the component and an action pointer
+     *     button or key is pressed
+     *   - **pressed.out** the pointer cursor is outside the component and an action pointer
+     *     button or key is pressed
+     *
+     * Every time a state has been updated &quot;stateUpdated&quot; method is called (if it implemented).
+     * The interface can be handy way to track typical states. For instance to implement a
+     * component that changes its view depending its state the following code can be used:
+     *
+     *     // create  panel
+     *     var pan = new zebkit.u.Panel();
+     *
+     *     // let&#x27;s track the panel input events state and update
+     *     // the component background view depending the state
+     *     pan.extend(zebkit.ui.event.InputEventState, [
+     *         function stateUpdate(o, n) {
+     *             if (n === &quot;over&quot;) {
+     *                 this.setBackround(&quot;orange&quot;);
+     *             } else if (n === &quot;out&quot;) {
+     *                 this.setBackround(&quot;red&quot;);
+     *             } else {
+     *                 this.setBackround(null);
+     *             }
+     *         }
+     *     ]);
+     *
+     *
+     * @class zebkit.ui.event.InputEventState
+     * @interface zebkit.ui.event.InputEventState
+     */
+
+    var OVER         = &quot;over&quot;,
+        PRESSED_OVER = &quot;pressed.over&quot;,
+        OUT          = &quot;out&quot;,
+        PRESSED_OUT  = &quot;pressed.out&quot;;
+
+    pkg.InputEventState = zebkit.Interface([
+        function $prototype() {
+            this.state = OUT;
+            this.$isIn = false;
+
+            this._keyPressed = function(e) {
+                if (this.state !== PRESSED_OVER &amp;&amp;
+                    this.state !== PRESSED_OUT  &amp;&amp;
+                    (e.code === &quot;Enter&quot; || e.code === &quot;Space&quot;))
+                {
+                     this.setState(PRESSED_OVER);
+                }
+            };
+
+            this._keyReleased = function(e) {
+                if (this.state === PRESSED_OVER || this.state === PRESSED_OUT){
+                    this.setState(OVER);
+                    if (this.$isIn === false) {
+                        this.setState(OUT);
+                    }
+                }
+            };
+
+            this._pointerEntered = function(e) {
+                if (this.isEnabled === true) {
+                    this.setState(this.state === PRESSED_OUT ? PRESSED_OVER : OVER);
+                    this.$isIn = true;
+                }
+            };
+
+            this._pointerPressed = function(e) {
+                if (this.state !== PRESSED_OVER &amp;&amp; this.state !== PRESSED_OUT &amp;&amp; e.isAction()){
+                     this.setState(PRESSED_OVER);
+                }
+            };
+
+            this._pointerReleased = function(e) {
+                if ((this.state === PRESSED_OVER || this.state === PRESSED_OUT) &amp;&amp; e.isAction()){
+                    if (e.source === this) {
+                        this.setState(e.x &gt;= 0 &amp;&amp; e.y &gt;= 0 &amp;&amp; e.x &lt; this.width &amp;&amp; e.y &lt; this.height ? OVER
+                                                                                                    : OUT);
+                    } else {
+                        var p = zebkit.layout.toParentOrigin(e.x, e.y, e.source, this);
+                        this.$isIn = p.x &gt;= 0 &amp;&amp; p.y &gt;= 0 &amp;&amp; p.x &lt; this.width &amp;&amp; p.y &lt; this.height;
+                        this.setState(this.$isIn ? OVER : OUT);
+                    }
+                }
+            };
+
+            this.childKeyPressed = function(e) {
+                this._keyPressed(e);
+            };
+
+            this.childKeyReleased = function(e) {
+                this._keyReleased(e);
+            };
+
+            this.childPointerEntered = function(e) {
+                this._pointerEntered(e);
+            };
+
+            this.childPointerPressed = function(e) {
+                this._pointerPressed(e);
+            };
+
+            this.childPointerReleased = function(e) {
+                this._pointerReleased(e);
+            };
+
+            this.childPointerExited = function(e) {
+                // check if the pointer cursor is in of the source component
+                // that means another layer has grabbed control
+                if (e.x &gt;= 0 &amp;&amp; e.y &gt;= 0 &amp;&amp; e.x &lt; e.source.width &amp;&amp; e.y &lt; e.source.height) {
+                    this.$isIn = false;
+                } else {
+                    var p = zebkit.layout.toParentOrigin(e.x, e.y, e.source, this);
+                    this.$isIn = p.x &gt;= 0 &amp;&amp; p.y &gt;= 0 &amp;&amp; p.x &lt; this.width &amp;&amp; p.y &lt; this.height;
+                }
+
+                if (this.$isIn === false) {
+                    this.setState(this.state === PRESSED_OVER ? PRESSED_OUT : OUT);
+                }
+            };
+
+            /**
+              * Define key pressed events handler
+              * @param  {zebkit.ui.event.KeyEvent} e a key event
+              * @method keyPressed
+              */
+            this.keyPressed = function(e){
+                this._keyPressed(e);
+            };
+
+             /**
+              * Define key released events handler
+              * @param  {zebkit.ui.event.KeyEvent} e a key event
+              * @method keyReleased
+              */
+             this.keyReleased = function(e){
+                 this._keyReleased(e);
+             };
+
+             /**
+              * Define pointer entered events handler
+              * @param  {zebkit.ui.event.PointerEvent} e a key event
+              * @method pointerEntered
+              */
+            this.pointerEntered = function (e){
+                this._pointerEntered();
+            };
+
+             /**
+              * Define pointer exited events handler
+              * @param  {zebkit.ui.event.PointerEvent} e a key event
+              * @method pointerExited
+              */
+            this.pointerExited = function(e){
+                if (this.isEnabled === true) {
+                    this.setState(this.state === PRESSED_OVER ? PRESSED_OUT : OUT);
+                    this.$isIn = false;
+                }
+            };
+
+             /**
+              * Define pointer pressed events handler
+              * @param  {zebkit.ui.event.PointerEvent} e a key event
+              * @method pointerPressed
+              */
+            this.pointerPressed = function(e){
+                this._pointerPressed(e);
+            };
+
+             /**
+              * Define pointer released events handler
+              * @param  {zebkit.ui.event.PointerEvent} e a key event
+              * @method pointerReleased
+              */
+            this.pointerReleased = function(e){
+                this._pointerReleased(e);
+            };
+
+            /**
+             * Define pointer dragged events handler
+             * @param  {zebkit.ui.event.PointerEvent} e a key event
+             * @method pointerDragged
+             */
+            this.pointerDragged = function(e){
+                if (e.isAction()) {
+                    var pressed = (this.state === PRESSED_OUT || this.state === PRESSED_OVER);
+                    if (e.x &gt; 0 &amp;&amp; e.y &gt; 0 &amp;&amp; e.x &lt; this.width &amp;&amp; e.y &lt; this.height) {
+                        this.setState(pressed ? PRESSED_OVER : OVER);
+                    } else {
+                        this.setState(pressed ? PRESSED_OUT : OUT);
+                    }
+                }
+            };
+
+             /**
+              * Set the component state
+              * @param {Object} s a state
+              * @method  setState
+              * @chainable
+              */
+            this.setState = function(s) {
+                if (s !== this.state){
+                    var prev = this.state;
+                    this.state = s;
+                    if (typeof this.stateUpdated !== &#x27;undefined&#x27;) {
+                        this.stateUpdated(prev, s);
+                    }
+                }
+                return this;
+            };
+         }
      ]);
 
 
@@ -17564,24 +18078,17 @@ zebkit.package(&quot;ui.event&quot;, function(pkg, Class) {
             };
         }
     ]);
-});
+},false);
 zebkit.package(&quot;ui&quot;, function(pkg, Class) {
     &#x27;use strict&#x27;;
-
     var   basedir      = zebkit.config(&quot;ui.basedir&quot;),
           theme        = zebkit.config(&quot;ui.theme&quot;);
-
-
-    if (theme === &quot;auto&quot;) {
-      //  getComputedStyle
-    }
 
     this.config( { &quot;basedir&quot; : basedir ? basedir
                                        : zebkit.URI.join(this.$url, &quot;rs/themes/%{theme}&quot;),
                    &quot;theme&quot;   : theme   ? theme
                                        : &quot;dark&quot; },
                    false);
-
 
     // Panel WEB specific dependencies:
     //   -  getCanvas() -&gt; zCanvas
@@ -17662,7 +18169,6 @@ zebkit.package(&quot;ui&quot;, function(pkg, Class) {
                 return false;
             }
         }
-
         return true;
     }
 
@@ -17745,7 +18251,7 @@ zebkit.package(&quot;ui&quot;, function(pkg, Class) {
      * @param  {zebkit.ui.Panel} c  a component
      * @param  {Object} r a variable to store visible area
 
-            { x: {Integer}, y: {Integer}, width: {integer}, height: {Integer} }
+            { x: {Integer}, y: {Integer}, width: {Integer}, height: {Integer} }
 
      * @method $cvp
      * @for zebkit.ui
@@ -17897,6 +18403,7 @@ zebkit.package(&quot;ui&quot;, function(pkg, Class) {
                         canvas.$context.clearRect(canvas.$da.x, canvas.$da.y,
                                                   canvas.$da.width, canvas.$da.height);
                     }
+
                     // !!!
                     // call clipping area later than possible
                     // clearRect since it can bring to error in IE
@@ -17951,78 +18458,78 @@ zebkit.package(&quot;ui&quot;, function(pkg, Class) {
 
     /**
      *  This the core UI component class. All other UI components has to be successor of panel class.
-
-          // instantiate panel with no arguments
-          var p = new zebkit.ui.Panel();
-
-          // instantiate panel with border layout set as its layout manager
-          var p = new zebkit.ui.Panel(new zebkit.layout.BorderLayout());
-
-          // instantiate panel with the given properties (border
-          // layout manager, blue background and plain border)
-          var p = new zebkit.ui.Panel({
-             layout: new zebkit.ui.BorderLayout(),
-             background : &quot;blue&quot;,
-             border     : &quot;plain&quot;
-          });
-
+     *
+     *      // instantiate panel with no arguments
+     *      var p = new zebkit.ui.Panel();
+     *
+     *      // instantiate panel with border layout set as its layout manager
+     *      var p = new zebkit.ui.Panel(new zebkit.layout.BorderLayout());
+     *
+     *      // instantiate panel with the given properties (border
+     *      // layout manager, blue background and plain border)
+     *      var p = new zebkit.ui.Panel({
+     *         layout: new zebkit.ui.BorderLayout(),
+     *         background : &quot;blue&quot;,
+     *         border     : &quot;plain&quot;
+     *      });
+     *
      *  **Container**
      * Panel can contains number of other UI components as its children where the children components
      * are placed with a defined by the panel layout manager:
-
-          // add few children component to panel top, center and bottom parts
-          // with help of border layout manager
-          var p = new zebkit.ui.Panel();
-          p.setLayout(new zebkit.layout.BorderLayout(4)); // set layout manager to
-                                                         // order children components
-
-          p.add(&quot;top&quot;, new zebkit.ui.Label(&quot;Top label&quot;));
-          p.add(&quot;center&quot;, new zebkit.ui.TextArea(&quot;Text area&quot;));
-          p.add(&quot;bottom&quot;, new zebkit.ui.Button(&quot;Button&quot;));
-
+     *
+     *      // add few children component to panel top, center and bottom parts
+     *      // with help of border layout manager
+     *      var p = new zebkit.ui.Panel();
+     *      p.setLayout(new zebkit.layout.BorderLayout(4)); // set layout manager to
+     *                                                     // order children components
+     *
+     *      p.add(&quot;top&quot;, new zebkit.ui.Label(&quot;Top label&quot;));
+     *      p.add(&quot;center&quot;, new zebkit.ui.TextArea(&quot;Text area&quot;));
+     *      p.add(&quot;bottom&quot;, new zebkit.ui.Button(&quot;Button&quot;));
+     *
      * **Input and component events**
      * The class provides possibility to catch various component and input events by declaring an
      * appropriate event method handler. The most simple case you just define a method:
-
-          var p = new zebkit.ui.Panel();
-          p.pointerPressed = function(e) {
-              // handle event here
-          };
-
-    * If you prefer to create an anonymous class instance you can do it as follow:
-
-          var p = new zebkit.ui.Panel([
-              function pointerPressed(e) {
-                  // handle event here
-              }
-          ]);
-
-    * One more way to add the event handler is dynamic extending of an instance class demonstrated
-    * below:
-
-          var p = new zebkit.ui.Panel(&quot;Test&quot;);
-          p.extend([
-              function pointerPressed(e) {
-                  // handle event here
-              }
-          ]);
-
+     *
+     *      var p = new zebkit.ui.Panel();
+     *      p.pointerPressed = function(e) {
+     *          // handle event here
+     *      };
+     *
+     * If you prefer to create an anonymous class instance you can do it as follow:
+     *
+     *      var p = new zebkit.ui.Panel([
+     *          function pointerPressed(e) {
+     *              // handle event here
+     *          }
+     *      ]);
+     *
+     * One more way to add the event handler is dynamic extending of an instance class demonstrated
+     * below:
+     *
+     *      var p = new zebkit.ui.Panel(&quot;Test&quot;);
+     *      p.extend([
+     *          function pointerPressed(e) {
+     *              // handle event here
+     *          }
+     *      ]);
+     *
      * Pay attention Zebkit UI components often declare own event handlers and in this case you can
      * overwrite the default event handler with a new one. Preventing the basic event handler execution
      * can cause the component will work improperly. You should care about the base event handler
      * execution as follow:
-
-          // button component declares own pointer pressed event handler
-          // we have to call the original handler to keep the button component
-          // properly working
-          var p = new zebkit.ui.Button(&quot;Test&quot;);
-          p.extend([
-              function pointerPressed(e) {
-                  this.$super(e); // call parent class event handler implementation
-                  // handle event here
-              }
-          ]);
-
+     *
+     *      // button component declares own pointer pressed event handler
+     *      // we have to call the original handler to keep the button component
+     *      // properly working
+     *      var p = new zebkit.ui.Button(&quot;Test&quot;);
+     *      p.extend([
+     *          function pointerPressed(e) {
+     *              this.$super(e); // call parent class event handler implementation
+     *              // handle event here
+     *          }
+     *      ]);
+     *
      *  @class zebkit.ui.Panel
      *  @param {Object|zebkit.layout.Layout} [l] pass a layout manager or number of properties that have
      *  to be applied to the instance of the panel class.
@@ -18033,10 +18540,10 @@ zebkit.package(&quot;ui&quot;, function(pkg, Class) {
     /**
      * Implement the event handler method to catch pointer pressed event. The event is triggered every time
      * a pointer button has been pressed or a finger has touched a touch screen.
-
-         var p = new zebkit.ui.Panel();
-         p.pointerPressed = function(e) { ... }; // add event handler
-
+     *
+     *     var p = new zebkit.ui.Panel();
+     *     p.pointerPressed = function(e) { ... }; // add event handler
+     *
      * @event pointerPressed
      * @param {zebkit.ui.event.PointerEvent} e a pointer event
     */
@@ -18044,10 +18551,10 @@ zebkit.package(&quot;ui&quot;, function(pkg, Class) {
     /**
      * Implement the event handler method to catch pointer released event. The event is triggered every time
      * a pointer button has been released or a finger has untouched a touch screen.
-
-         var p = new zebkit.ui.Panel();
-         p.pointerReleased = function(e) { ... }; // add event handler
-
+     *
+     *     var p = new zebkit.ui.Panel();
+     *     p.pointerReleased = function(e) { ... }; // add event handler
+     *
      * @event pointerReleased
      * @param {zebkit.ui.event.PointerEvent} e a pointer event
      */
@@ -18055,10 +18562,10 @@ zebkit.package(&quot;ui&quot;, function(pkg, Class) {
     /**
      * Implement the event handler method  to catch pointer moved event. The event is triggered every time
      * a pointer cursor has been moved with no a pointer button pressed.
-
-         var p = new zebkit.ui.Panel();
-         p.pointerMoved = function(e) { ... }; // add event handler
-
+     *
+     *     var p = new zebkit.ui.Panel();
+     *     p.pointerMoved = function(e) { ... }; // add event handler
+     *
      * @param {zebkit.ui.event.PointerEvent} e a pointer event
      * @event  pointerMoved
      */
@@ -18066,10 +18573,10 @@ zebkit.package(&quot;ui&quot;, function(pkg, Class) {
     /**
      * Implement the event handler method to catch pointer entered event. The event is triggered every
      * time a pointer cursor entered the given component.
-
-         var p = new zebkit.ui.Panel();
-         p.pointerEntered = function(e) { ... }; // add event handler
-
+     *
+     *     var p = new zebkit.ui.Panel();
+     *     p.pointerEntered = function(e) { ... }; // add event handler
+     *
      * @param {zebkit.ui.event.PointerEvent} e a pointer event
      * @event  pointerEntered
      */
@@ -18077,10 +18584,10 @@ zebkit.package(&quot;ui&quot;, function(pkg, Class) {
     /**
      * Implement the event handler method to catch pointer exited event. The event is triggered every
      * time a pointer cursor exited the given component.
-
-         var p = new zebkit.ui.Panel();
-         p.pointerExited = function(e) { ... }; // add event handler
-
+     *
+     *     var p = new zebkit.ui.Panel();
+     *     p.pointerExited = function(e) { ... }; // add event handler
+     *
      * @param {zebkit.ui.event.PointerEvent} e a pointer event
      * @event  pointerExited
      */
@@ -18089,10 +18596,10 @@ zebkit.package(&quot;ui&quot;, function(pkg, Class) {
      * Implement the event handler method to catch pointer clicked event. The event is triggered every
      * time a pointer button has been clicked. Click events are generated only if no one pointer moved
      * or drag events has been generated in between pointer pressed -&gt; pointer released events sequence.
-
-         var p = new zebkit.ui.Panel();
-         p.pointerClicked = function(e) { ... }; // add event handler
-
+     *
+     *     var p = new zebkit.ui.Panel();
+     *     p.pointerClicked = function(e) { ... }; // add event handler
+     *
      * @param {zebkit.ui.event.PointerEvent} e a pointer event
      * @event  pointerClicked
      */
@@ -18101,10 +18608,10 @@ zebkit.package(&quot;ui&quot;, function(pkg, Class) {
      * Implement the event handler method to catch pointer dragged event. The event is triggered every
      * time a pointer cursor has been moved when a pointer button has been pressed. Or when a finger
      * has been moved over a touch screen.
-
-         var p = new zebkit.ui.Panel();
-         p.pointerDragged = function(e) { ... }; // add event handler
-
+     *
+     *     var p = new zebkit.ui.Panel();
+     *     p.pointerDragged = function(e) { ... }; // add event handler
+     *
      * @param {zebkit.ui.event.PointerEvent} e a pointer event
      * @event  pointerDragged
      */
@@ -18113,10 +18620,10 @@ zebkit.package(&quot;ui&quot;, function(pkg, Class) {
      * Implement the event handler method to catch pointer drag started event. The event is triggered
      * every time a pointer cursor has been moved first time when a pointer button has been pressed.
      * Or when a finger has been moved first time over a touch screen.
-
-         var p = new zebkit.ui.Panel();
-         p.pointerDragStarted = function(e) { ... }; // add event handler
-
+     *
+     *     var p = new zebkit.ui.Panel();
+     *     p.pointerDragStarted = function(e) { ... }; // add event handler
+     *
      * @param {zebkit.ui.event.PointerEvent} e a pointer event
      * @event  pointerDragStarted
     */
@@ -18125,10 +18632,10 @@ zebkit.package(&quot;ui&quot;, function(pkg, Class) {
      * Implement the event handler method to catch pointer drag ended event. The event is triggered
      * every time a pointer cursor has been moved last time when a pointer button has been pressed.
      * Or when a finger has been moved last time over a touch screen.
-
-         var p = new zebkit.ui.Panel();
-         p.pointerDragEnded = function(e) { ... }; // add event handler
-
+     *
+     *     var p = new zebkit.ui.Panel();
+     *     p.pointerDragEnded = function(e) { ... }; // add event handler
+     *
      * @param {zebkit.ui.event.PointerEvent} e a pointer event
      * @event  pointerDragEnded
     */
@@ -18136,21 +18643,21 @@ zebkit.package(&quot;ui&quot;, function(pkg, Class) {
     /**
      * Implement the event handler method to catch key pressed event The event is triggered every
      * time a key has been pressed.
-
-         var p = new zebkit.ui.Panel();
-         p.keyPressed = function(e) { ... }; // add event handler
-
+     *
+     *    var p = new zebkit.ui.Panel();
+     *    p.keyPressed = function(e) { ... }; // add event handler
+     *
      * @param {zebkit.ui.event.KeyEvent} e a key event
      * @event  keyPressed
      */
 
     /**
      * Implement the event handler method to catch key types event The event is triggered every
-     *     time a key has been typed.
-
-         var p = new zebkit.ui.Panel();
-         p.keyTyped = function(e) { ... }; // add event handler
-
+     * time a key has been typed.
+     *
+     *     var p = new zebkit.ui.Panel();
+     *     p.keyTyped = function(e) { ... }; // add event handler
+     *
      * @param {zebkit.ui.event.KeyEvent} e a key event
      * @event  keyTyped
      */
@@ -18158,10 +18665,10 @@ zebkit.package(&quot;ui&quot;, function(pkg, Class) {
     /**
      * Implement the event handler method to catch key released event
      * The event is triggered every time a key has been released.
-
-         var p = new zebkit.ui.Panel();
-         p.keyReleased = function(e) { ... }; // add event handler
-
+     *
+     *     var p = new zebkit.ui.Panel();
+     *     p.keyReleased = function(e) { ... }; // add event handler
+     *
      * @param {zebkit.ui.event.KeyEvent} e a key event
      * @event  keyReleased
      */
@@ -18169,10 +18676,10 @@ zebkit.package(&quot;ui&quot;, function(pkg, Class) {
     /**
      * Implement the event handler method to catch the component sized event
      * The event is triggered every time the component has been re-sized.
-
-         var p = new zebkit.ui.Panel();
-         p.compSized = function(e) { ... }; // add event handler
-
+     *
+     *     var p = new zebkit.ui.Panel();
+     *     p.compSized = function(e) { ... }; // add event handler
+     *
      * @param {zebkit.ui.event.CompEvent} e a component event. Source of the event
      * is a component that has been sized, &quot;prevWidth&quot; and &quot;prevHeight&quot; fields
      * keep a previous size the component had.
@@ -18183,16 +18690,12 @@ zebkit.package(&quot;ui&quot;, function(pkg, Class) {
      * Implement the event handler method to catch component moved event
      * The event is triggered every time the component location has been
      * updated.
-
-         var p = new zebkit.ui.Panel();
-         p.compMoved = function(e) { ... }; // add event handler
-
-     * @param {zebkit.ui.Panel} c a component that has been moved
-     * @param {Integer} px a previous x coordinate the moved component had
-     * @param {Integer} py a previous y coordinate the moved component had
+     *
+     *      var p = new zebkit.ui.Panel();
+     *      p.compMoved = function(e) { ... }; // add event handler
+     *
      * @param {zebkit.ui.event.CompEvent} e a component event. Source of the event
-     * is a component that has been moved. &quot;prevX&quot; and &quot;prevY&quot; fields hold
-     * a previous location the component had.
+     * is a component that has been moved.
      * @event compMoved
      */
 
@@ -18200,10 +18703,10 @@ zebkit.package(&quot;ui&quot;, function(pkg, Class) {
      * Implement the event handler method to catch component enabled event
      * The event is triggered every time a component enabled state has been
      * updated.
-
-         var p = new zebkit.ui.Panel();
-         p.compEnabled = function(e) { ... }; // add event handler
-
+     *
+     *     var p = new zebkit.ui.Panel();
+     *     p.compEnabled = function(e) { ... }; // add event handler
+     *
      * @param {zebkit.ui.event.CompEvent} e a component event.
      * @event compEnabled
      */
@@ -18212,10 +18715,10 @@ zebkit.package(&quot;ui&quot;, function(pkg, Class) {
      * Implement the event handler method to catch component shown event
      * The event is triggered every time a component visibility state has
      * been updated.
-
-         var p = new zebkit.ui.Panel();
-         p.compShown = function(e) { ... }; // add event handler
-
+     *
+     *     var p = new zebkit.ui.Panel();
+     *     p.compShown = function(e) { ... }; // add event handler
+     *
      * @param {zebkit.ui.event.CompEvent} e a component event.
      * @event compShown
      */
@@ -18224,14 +18727,12 @@ zebkit.package(&quot;ui&quot;, function(pkg, Class) {
      * Implement the event handler method to catch component added event
      * The event is triggered every time the component has been inserted into
      * another one.
-
-         var p = new zebkit.ui.Panel();
-         p.compAdded = function(e) { ... }; // add event handler
-
+     *
+     *     var p = new zebkit.ui.Panel();
+     *     p.compAdded = function(e) { ... }; // add event handler
+     *
      * @param {zebkit.ui.event.CompEvent} e a component event. The source of the passed event
-     * is set to a container component, &quot;kid&quot; field is set to a component that has been
-     * added to the container, &quot;constraints&quot; holds a constraints the child component has been
-     * added.
+     * is set to a container component.
      * @event compAdded
      */
 
@@ -18239,24 +18740,22 @@ zebkit.package(&quot;ui&quot;, function(pkg, Class) {
      * Implement the event handler method to catch component removed event
      * The event is triggered every time the component has been removed from
      * its parent UI component.
-
-         var p = new zebkit.ui.Panel();
-         p.compRemoved = function(e) { ... }; // add event handler
-
+     *
+     *     var p = new zebkit.ui.Panel();
+     *     p.compRemoved = function(e) { ... }; // add event handler
+     *
      * @param {zebkit.ui.event.CompEvent} e a component event. The source of the passed event
-     * is set to the container component. &quot;kid&quot; field is set to a child component that has
-     * been removed from the container and &quot;index&quot; field is set to the index the kid component
-     * was added before it had been removed from the container.
+     * is set to the container component.
      * @event compRemoved
      */
 
     /**
      * Implement the event handler method to catch component focus gained event
      * The event is triggered every time a component has gained focus.
-
-         var p = new zebkit.ui.Panel();
-         p.focusGained = function(e) { ... }; // add event handler
-
+     *
+     *     var p = new zebkit.ui.Panel();
+     *     p.focusGained = function(e) { ... }; // add event handler
+     *
      * @param {zebkit.ui.event.FocusEvent} e an input event
      * @event  focusGained
      */
@@ -18264,10 +18763,10 @@ zebkit.package(&quot;ui&quot;, function(pkg, Class) {
     /**
      * Implement the event handler method to catch component focus lost event
      * The event is triggered every time a component has lost focus
-
-         var p = new zebkit.ui.Panel();
-         p.focusLost = function(e) { ... }; // add event handler
-
+     *
+     *     var p = new zebkit.ui.Panel();
+     *     p.focusLost = function(e) { ... }; // add event handler
+     *
      * @param {zebkit.ui.event.FocusEvent} e an input event
      * @event  focusLost
      */
@@ -18276,16 +18775,14 @@ zebkit.package(&quot;ui&quot;, function(pkg, Class) {
      * It is also possible to listen all the listed above event for children component. To handle
      * the event register listener method following the pattern below:
      *
-         var p = new zebkit.ui.Panel();
-         p.child&lt;EventName&gt; = function(e) { ... }; // add event handler
-
-     * @param {Integer} id a component event ID. The id can have one of the following value:
-
-
-     * @param {zebkit.ui.Panel} src a component that triggers the event
-     * @param {zebkit.ui.event.KeyEvent | zebkit.ui.event.PointerEvent | zebkit.ui.event.CompEvent| zebkit.ui.event.FocusEvent} e
-     * an UI event fired by a child component.
-     * @event  child&lt;EventName&gt;
+     *
+     *     var p = new zebkit.ui.Panel();
+     *     p.childPointerPressed = function(e) { ... }; // add event handler
+     *
+     *
+     * @param {zebkit.ui.event.KeyEvent | zebkit.ui.event.PointerEvent | zebkit.ui.event.CompEvent | zebkit.ui.event.FocusEvent}
+     * e an UI event fired by a child component.
+     * @event  childEventName
      */
 
      /**
@@ -18545,6 +19042,7 @@ zebkit.package(&quot;ui&quot;, function(pkg, Class) {
                     var count = this.kids.length;
                     for(var i = 0; i &lt; count; i++) {
                         var kid = this.kids[i];
+                        // ignore invisible components and components that declare own 2D context
                         if (kid.isVisible === true &amp;&amp; typeof kid.$context === &#x27;undefined&#x27;) {
                             // calculate if the given component area has intersection
                             // with current clipping area
@@ -18689,7 +19187,7 @@ zebkit.package(&quot;ui&quot;, function(pkg, Class) {
                     return null;
                 }
 
-                if (this.kids.length &gt; 0){
+                if (this.kids.length &gt; 0) {
                     for(var i = this.kids.length; --i &gt;= 0; ){
                         var kid = this.kids[i];
                         kid = kid.getComponentAt(x - kid.x,
@@ -19035,8 +19533,9 @@ zebkit.package(&quot;ui&quot;, function(pkg, Class) {
 
             /**
              * Set the border view
-             * @param  {zebkit.draw.View|Function|String} v a border view or border &quot;paint(g,x,y,w,h,c)&quot;
-             * rendering function or one of predefined border name: &quot;plain&quot;, &quot;sunken&quot;, &quot;raised&quot;, &quot;etched&quot;
+             * @param  {zebkit.draw.View|Function|String} [v] a border view or border &quot;paint(g,x,y,w,h,c)&quot;
+             * rendering function or one of predefined border name: &quot;plain&quot;, &quot;sunken&quot;, &quot;raised&quot;, &quot;etched&quot;.
+             * If no argument has been passed the method tries to set &quot;plain&quot; as the component border.
              * @method setBorder
              * @example
              *
@@ -19052,6 +19551,10 @@ zebkit.package(&quot;ui&quot;, function(pkg, Class) {
              * @chainable
              */
             this.setBorder = function (v) {
+                if (arguments.length === 0) {
+                    v = &quot;plain&quot;;
+                }
+
                 var old = this.border;
                 v = zebkit.draw.$view(v);
                 if (v != old){
@@ -19101,7 +19604,7 @@ zebkit.package(&quot;ui&quot;, function(pkg, Class) {
              * @method setBackground
              * @chainable
              */
-            this.setBackground = function (v){
+            this.setBackground = function(v) {
                 var old = this.bg;
                 v = zebkit.draw.$view(v);
                 if (v !== old) {
@@ -20566,26 +21069,25 @@ zebkit.package(&quot;ui&quot;, function(pkg, Class) {
      * by developers. To bind a view to the specified state use zebkit.draw.ViewSet
      * class. For instance if a component has to support two states : &quot;state1&quot; and
      * &quot;state2&quot; you can do it as following:
-
-            // create state component
-            var p = new zebkit.ui.StatePan();
-
-            // define border view that contains views for &quot;state1&quot; and &quot;state2&quot;
-            p.setBorder({
-                &quot;state1&quot;: new zebkit.draw.Border(&quot;red&quot;, 1),
-                &quot;state1&quot;: new zebkit.draw.Border(&quot;blue&quot;, 2)
-
-            });
-
-            // define background view that contains views for &quot;state1&quot; and &quot;state2&quot;
-            p.setBackground({
-                &quot;state1&quot;: &quot;yellow&quot;,
-                &quot;state1&quot;: &quot;green&quot;
-            });
-
-            // set component state
-            p.setState(&quot;state1&quot;);
-
+     *
+     *     // create state component
+     *     var p = new zebkit.ui.StatePan();
+     *
+     *     // define border view that contains views for &quot;state1&quot; and &quot;state2&quot;
+     *     p.setBorder({
+     *         &quot;state1&quot;: new zebkit.draw.Border(&quot;red&quot;, 1),
+     *         &quot;state1&quot;: new zebkit.draw.Border(&quot;blue&quot;, 2)
+     *     });
+     *
+     *     // define background view that contains views for &quot;state1&quot; and &quot;state2&quot;
+     *     p.setBackground({
+     *         &quot;state1&quot;: &quot;yellow&quot;,
+     *         &quot;state1&quot;: &quot;green&quot;
+     *     });
+     *
+     *     // set component state
+     *     p.setState(&quot;state1&quot;);
+     *
      * State component children components can listening when the state of the component
      * has been updated by implementing &quot;parentStateUpdated(o,n,id)&quot; method. It gets old
      * state, new state and a view id that is mapped to the new state.  The feature is
@@ -20629,6 +21131,9 @@ zebkit.package(&quot;ui&quot;, function(pkg, Class) {
              * @return {String} a view ID
              * @method toViewId
              */
+            this.toViewId = function(st) {
+                return st;
+            };
 
             /**
              * Called every time the component state has been updated
@@ -20638,7 +21143,7 @@ zebkit.package(&quot;ui&quot;, function(pkg, Class) {
              */
             this.stateUpdated = function(o, n) {
                 var b  = false,
-                    id = (typeof this.toViewId !== &#x27;undefined&#x27; ? this.toViewId(n) : n);
+                    id = this.toViewId(n);
 
                 if (id !== null) {
                     for(var i = 0; i &lt; this.kids.length; i++) {
@@ -20688,7 +21193,7 @@ zebkit.package(&quot;ui&quot;, function(pkg, Class) {
             return this;
         },
 
-        function setBorder(v){
+        function setBorder(v) {
             if (v != this.border){
                 this.$super(v);
                 this.syncState(this.state, this.state);
@@ -20702,250 +21207,32 @@ zebkit.package(&quot;ui&quot;, function(pkg, Class) {
                 this.syncState(this.state, this.state);
             }
             return this;
-        }
-    ]);
-
-    /**
-     * Event state panel class. The class implements UI component whose face, border and
-     * background view depends on its input events state. The component is good basis
-     * for creation  dynamic view UI components.The state the component can be is:
-     *
-     *   - **over** the pointer cursor is inside the component
-     *   - **out** the pointer cursor is outside the component
-     *   - **pressed over** the pointer cursor is inside the component and an action pointer
-     *     button or key is pressed
-     *   - **pressed out** the pointer cursor is outside the component and an action pointer
-     *     button or key is pressed
-     *   - **disabled** the component is disabled
-     *
-     * The view border, background or face should be set as &quot;zebkit.draw.ViewSet&quot; where an required
-     * for the given component state view is identified by an id. By default corresponding to
-     * component states views IDs are the following: &quot;over&quot;, &quot;pressed.over&quot;, &quot;out&quot;, &quot;pressed.out&quot;,
-     * &quot;disabled&quot;.  Imagine for example we have two colors and we need to change between the colors
-     * every time pointer cursor is over/out of the component:
-
-         // create state panel
-         var statePan = new zebkit.ui.EvStatePan();
-
-         // add dynamically updated background
-         statePan.setBackground(new zebkit.draw.ViewSet({
-            &quot;over&quot;: &quot;red&quot;,
-            &quot;out&quot;: &quot;blue&quot;
-         }));
-
-     * Alone with background border view can be done also dynamic
-
-         // add dynamically updated border
-         statePan.setBorder(new zebkit.draw.ViewSet({
-            &quot;over&quot;: new zebkit.draw.Border(&quot;green&quot;, 4, 8),
-            &quot;out&quot;: null
-         }));
-
-     * Additionally the UI component allows developer to specify whether the component can hold
-     * input focus and which UI component has to be considered as the focus marker. The focus marker
-     * component is used as anchor to paint focus marker view. In simple case the view can be just
-     * a border. So border will be rendered around the focus marker component:
-
-         // create state panel that contains one label component
-         var statePan = new zebkit.ui.EvStatePan();
-         var lab      = new zebkit.ui.Label(&quot;Focus marker label&quot;);
-         lab.setPadding(6);
-         statePan.setPadding(6);
-         statePan.setLayout(new zebkit.layout.BorderLayout());
-         statePan.add(&quot;center&quot;, lab);
-
-         // set label as an anchor for focus border indicator
-         statePan.setFocusAnchorComponent(lab);
-         statePan.setFocusMarkerView(&quot;plain&quot;);
-
-     * @class zebkit.ui.EvStatePan
-     * @constructor
-     * @extends zebkit.ui.StatePan
-     */
-    var OVER         = &quot;over&quot;,
-        PRESSED_OVER = &quot;pressed.over&quot;,
-        OUT          = &quot;out&quot;,
-        PRESSED_OUT  = &quot;pressed.out&quot;,
-        DISABLED     = &quot;disabled&quot;;
-
-    pkg.EvStatePan = Class(pkg.StatePan,  [
-        function $prototype() {
-            this.state = OUT;
-            this.$isIn = false;
-
-            this.toViewId = function(state) {
-                return state;
-            };
-
-            this._keyPressed = function(e) {
-                if (this.state !== PRESSED_OVER &amp;&amp;
-                    this.state !== PRESSED_OUT  &amp;&amp;
-                    (e.code === &quot;Enter&quot; || e.code === &quot;Space&quot;))
-                {
-                    this.setState(PRESSED_OVER);
-                }
-            };
-
-            this._keyReleased = function(e) {
-                if (this.state === PRESSED_OVER || this.state === PRESSED_OUT){
-                    this.setState(OVER);
-                    if (this.$isIn === false) {
-                        this.setState(OUT);
-                    }
-                }
-            };
-
-            this._pointerEntered = function(e) {
-                if (this.isEnabled === true) {
-                    this.setState(this.state === PRESSED_OUT ? PRESSED_OVER : OVER);
-                    this.$isIn = true;
-                }
-            };
-
-            this._pointerPressed = function(e) {
-                if (this.state !== PRESSED_OVER &amp;&amp; this.state !== PRESSED_OUT &amp;&amp; e.isAction()){
-                    this.setState(PRESSED_OVER);
-                }
-            };
-
-            this._pointerReleased = function(e) {
-                if ((this.state === PRESSED_OVER || this.state === PRESSED_OUT) &amp;&amp; e.isAction()){
-                    if (e.source === this) {
-                        this.setState(e.x &gt;= 0 &amp;&amp; e.y &gt;= 0 &amp;&amp; e.x &lt; this.width &amp;&amp; e.y &lt; this.height ? OVER
-                                                                                                    : OUT);
-                    }
-                    else {
-                        var p = zebkit.layout.toParentOrigin(e.x, e.y, e.source, this);
-                        this.$isIn = p.x &gt;= 0 &amp;&amp; p.y &gt;= 0 &amp;&amp; p.x &lt; this.width &amp;&amp; p.y &lt; this.height;
-                        this.setState(this.$isIn ? OVER : OUT);
-                    }
-                }
-            };
-
-            this.childKeyPressed = function(e) {
-                this._keyPressed(e);
-            };
-
-            this.childKeyReleased = function(e) {
-                this._keyReleased(e);
-            };
-
-            this.childPointerEntered = function(e) {
-                this._pointerEntered(e);
-            };
-
-            this.childPointerPressed = function(e) {
-                this._pointerPressed(e);
-            };
-
-            this.childPointerReleased = function(e) {
-                this._pointerReleased(e);
-            };
-
-            this.childPointerExited = function(e) {
-                // check if the pointer cursor is in of the source component
-                // that means another layer has grabbed control
-                if (e.x &gt;= 0 &amp;&amp; e.y &gt;= 0 &amp;&amp; e.x &lt; e.source.width &amp;&amp; e.y &lt; e.source.height) {
-                    this.$isIn = false;
-                }
-                else {
-                    var p = zebkit.layout.toParentOrigin(e.x, e.y, e.source, this);
-                    this.$isIn = p.x &gt;= 0 &amp;&amp; p.y &gt;= 0 &amp;&amp; p.x &lt; this.width &amp;&amp; p.y &lt; this.height;
-                }
-
-                if (this.$isIn === false) {
-                    this.setState(this.state === PRESSED_OVER ? PRESSED_OUT : OUT);
-                }
-            };
-
-            /**
-             * Define key pressed events handler
-             * @param  {zebkit.ui.event.KeyEvent} e a key event
-             * @method keyPressed
-             */
-            this.keyPressed = function(e){
-                this._keyPressed(e);
-            };
-
-            /**
-             * Define key released events handler
-             * @param  {zebkit.ui.event.KeyEvent} e a key event
-             * @method keyReleased
-             */
-            this.keyReleased = function(e){
-                this._keyReleased(e);
-            };
-
-            /**
-             * Define pointer entered events handler
-             * @param  {zebkit.ui.event.PointerEvent} e a key event
-             * @method pointerEntered
-             */
-            this.pointerEntered = function (e){
-                this._pointerEntered();
-            };
-
-            /**
-             * Define pointer exited events handler
-             * @param  {zebkit.ui.event.PointerEvent} e a key event
-             * @method pointerExited
-             */
-            this.pointerExited = function(e){
-                if (this.isEnabled === true) {
-                    this.setState(this.state === PRESSED_OVER ? PRESSED_OUT : OUT);
-                    this.$isIn = false;
-                }
-            };
-
-            /**
-             * Define pointer pressed events handler
-             * @param  {zebkit.ui.event.PointerEvent} e a key event
-             * @method pointerPressed
-             */
-            this.pointerPressed = function(e){
-                this._pointerPressed(e);
-            };
-
-            /**
-             * Define pointer released events handler
-             * @param  {zebkit.ui.event.PointerEvent} e a key event
-             * @method pointerReleased
-             */
-            this.pointerReleased = function(e){
-                this._pointerReleased(e);
-            };
-
-            /**
-             * Define pointer dragged events handler
-             * @param  {zebkit.ui.event.PointerEvent} e a key event
-             * @method pointerDragged
-             */
-            this.pointerDragged = function(e){
-                if (e.isAction()) {
-                    var pressed = (this.state === PRESSED_OUT || this.state === PRESSED_OVER);
-                    if (e.x &gt; 0 &amp;&amp; e.y &gt; 0 &amp;&amp; e.x &lt; this.width &amp;&amp; e.y &lt; this.height) {
-                        this.setState(pressed ? PRESSED_OVER : OVER);
-                    } else {
-                        this.setState(pressed ? PRESSED_OUT : OUT);
-                    }
-                }
-            };
         },
 
         function setEnabled(b) {
             this.$super(b);
-            this.setState(b ? OUT : DISABLED);
+            this.setState(b ? &quot;out&quot; : &quot;disabled&quot;);
             return this;
         }
     ]);
 
+    // TODO: probably should be removed
     /**
-     * Composite event state panel
+     * Input events state panel.
+     * @class zebkit.ui.EvStatePan
+     * @extends {zebkit.ui.StatePan}
+     * @uses zebkit.ui.event.InputEventState
      * @constructor
-     * @extends zebkit.ui.EvStatePan
-     * @class  zebkit.ui.CompositeEvStatePan
      */
-    pkg.CompositeEvStatePan = Class(pkg.EvStatePan, [
+    pkg.EvStatePan = Class(pkg.StatePan, pkg.event.InputEventState, []);
+
+    /**
+     * Composite focusable interface. the interface adds support for focus marker
+     * view and anchor focus component.
+     * @class  zebkit.ui.FocusableComposite
+     * @interface  zebkit.ui.FocusableComposite
+     */
+    pkg.FocusableComposite = zebkit.Interface([
         function $prototype() {
             /**
              * Indicates if the component can have focus
@@ -20991,7 +21278,7 @@ zebkit.package(&quot;ui&quot;, function(pkg, Class) {
              */
             this.focusMarkerGaps = 2;
 
-            this.paintOnTop = function(g){
+            this.paintOnTop = function(g) {
                 var fc = this.focusComponent;
                 if (this.focusMarkerView !== null &amp;&amp; fc !== null &amp;&amp; this.hasFocus()) {
                     this.focusMarkerView.paint(g, fc.x - this.focusMarkerGaps,
@@ -21010,7 +21297,7 @@ zebkit.package(&quot;ui&quot;, function(pkg, Class) {
              * @method setFocusMarkerView
              * @chainable
              */
-            this.setFocusMarkerView = function (c){
+            this.setFocusMarkerView = function(c) {
                 if (c != this.focusMarkerView){
                     this.focusMarkerView = zebkit.draw.$view(c);
                     this.repaint();
@@ -21196,7 +21483,7 @@ zebkit.package(&quot;ui&quot;, function(pkg, Class) {
       * @event fired
       * @param {zebkit.ui.ArrowButton} src a button that has been pressed
       */
-    pkg.ArrowButton = Class(pkg.EvStatePan, zebkit.Fireable, pkg.ButtonRepeatMix, [
+    pkg.ArrowButton = Class(pkg.EvStatePan, pkg.ButtonRepeatMix, [
         function(direction) {
             this.cursorType = pkg.Cursor.HAND;
 
@@ -21339,8 +21626,9 @@ zebkit.package(&quot;ui&quot;, function(pkg, Class) {
      *  @constructor
      *  @param {String|zebkit.ui.Panel|zebkit.draw.View} [t] a button label.
      *  The label can be a simple text or an UI component.
-     *  @extends zebkit.ui.CompositeEvStatePan
+     *  @extends zebkit.ui.EvStatePan
      *  @uses  zebkit.ui.ButtonRepeatMix
+     *  @uses  zebkit.ui.FocusableComposite
      */
 
     /**
@@ -21358,7 +21646,7 @@ zebkit.package(&quot;ui&quot;, function(pkg, Class) {
      * @param {zebkit.ui.Button} src a button that has been pressed
      *
      */
-    pkg.Button = Class(pkg.CompositeEvStatePan, zebkit.Fireable, pkg.ButtonRepeatMix, [
+    pkg.Button = Class(pkg.EvStatePan, pkg.FocusableComposite, pkg.ButtonRepeatMix, [
         function(t) {
             this.$super();
 
@@ -21573,11 +21861,12 @@ zebkit.package(&quot;ui&quot;, function(pkg, Class) {
      *       });
      *
      * @class  zebkit.ui.Checkbox
-     * @extends zebkit.ui.CompositeEvStatePan
+     * @extends zebkit.ui.EvStatePan
+     * @uses zebkit.ui.FocusableComposite
      * @constructor
      * @param {String|zebkit.ui.Panel} [label] a label
      */
-    pkg.Checkbox = Class(pkg.CompositeEvStatePan, [
+    pkg.Checkbox = Class(pkg.EvStatePan, pkg.FocusableComposite, [
         function (c) {
             if (arguments.length &gt; 0 &amp;&amp; c !== null &amp;&amp; zebkit.isString(c)) {
                 c = new this.clazz.Label(c);
@@ -21628,6 +21917,12 @@ zebkit.package(&quot;ui&quot;, function(pkg, Class) {
             this.value = false;
 
             this.$group = null;
+
+            /**
+             *  Called every time the check box state has been updated
+             *  @param {zebkit.ui.Checkbox} ch a check box that has triggered the swicth
+             *  @method  switched
+             */
 
             /**
              * Set the check box state.
@@ -21969,7 +22264,7 @@ zebkit.package(&quot;ui&quot;, function(pkg, Class) {
              * @protected
              */
             this.isDecorative = function(c){
-                return zebkit.instanceOf(c, pkg.EvStatePan) === false;
+                return zebkit.instanceOf(c, pkg.StatePan) === false;
             };
 
             /**
@@ -22280,6 +22575,10 @@ zebkit.package(&quot;ui&quot;, function(pkg, Class) {
         },
 
         function setBorder(br) {
+            if (arguments.length === 0) {
+                br = &quot;plain&quot;;
+            }
+
             br = zebkit.draw.$view(br);
             if (zebkit.instanceOf(br, zebkit.draw.TitledBorder) === false) {
                 br = new zebkit.draw.TitledBorder(br, &quot;center&quot;);
@@ -22747,7 +23046,7 @@ zebkit.package(&quot;ui&quot;, function(pkg, Class) {
 
             this.ImageLabel = Class(pkg.ImageLabel, []);
 
-            this.Header = Class(pkg.CompositeEvStatePan, []);
+            this.Header = Class(pkg.EvStatePan, []);
 
             this.Toogle = Class(pkg.Checkbox, [
                 function $prototype() {
@@ -25678,6 +25977,16 @@ zebkit.package(&quot;ui&quot;, function(pkg, Class) {
                 return this;
             };
 
+            this.showPercentage = function() {
+                this.ruler.showPercentage();
+                return this;
+            };
+
+            this.showNumbers = function() {
+                this.ruler.showNumbers();
+                return this;
+            };
+
             /**
              * Set the gap between the slider handle and the ruler.
              * @param {Integer} g a gap
@@ -26328,6 +26637,8 @@ zebkit.package(&quot;ui&quot;, function(pkg, Class) {
                 for(i = 0;i &lt; count; i++){
                     var l = this.kids[i];
                     if (i === this.selectedIndex) {
+                        // TODO: temporary
+                        l.setVisible(true);
                         if (b) {
                             l.setBounds(left + this.hgap,
                                         ((this.orient === &quot;top&quot;) ? top + this.repaintHeight : top) + this.vgap,
@@ -26340,7 +26651,11 @@ zebkit.package(&quot;ui&quot;, function(pkg, Class) {
                                         this.height - top - bottom - 2 * this.vgap);
                         }
                     } else {
-                        l.setSize(0, 0);
+                        // TODO: bring back
+                        //l.setSize(0, 0);
+
+                        // TODO: temporary
+                        l.setVisible(false);
                     }
                 }
             };
@@ -29962,7 +30277,7 @@ zebkit.package(&quot;ui&quot;, function(pkg, Class) {
                 this.button = c;
             }
 
-            if (zebkit.instanceOf(c, zebkit.Fireable)) {
+            if (c.isEventFired()) {
                 c.on(this);
             }
 
@@ -29970,7 +30285,7 @@ zebkit.package(&quot;ui&quot;, function(pkg, Class) {
         },
 
         function kidRemoved(index,l) {
-            if (zebkit.instanceOf(l, zebkit.Fireable)) {
+            if (l.isEventFired()) {
                 l.off(this);
             }
 
@@ -31540,15 +31855,6 @@ zebkit.package(&quot;ui&quot;, function(pkg, Class) {
             this.prevW = this.action = -1;
 
             /**
-             * Root window panel. The root panel has to be used to
-             * add any UI components
-             * @attribute root
-             * @type {zebkit.ui.Panel}
-             * @readOnly
-             */
-            this.root = (c === null || arguments.length &lt; 2 ? this.createContentPan() : c);
-
-            /**
              * Window caption panel. The panel contains window
              * icons, button and title label
              * @attribute caption
@@ -31564,7 +31870,27 @@ zebkit.package(&quot;ui&quot;, function(pkg, Class) {
              * @readOnly
              */
             this.title = this.createTitle();
-            this.title.setValue((s === null || arguments.length === 0 ? &quot;&quot; : s));
+
+            /**
+             * Root window panel. The root panel has to be used to
+             * add any UI components
+             * @attribute root
+             * @type {zebkit.ui.Panel}
+             * @readOnly
+             */
+             if (arguments.length === 0) {
+                c = s = null;
+             } else if (arguments.length === 1) {
+                if (zebkit.instanceOf(s, pkg.Panel)) {
+                    c = s;
+                    s = null;
+                } else {
+                    c = null;
+                }
+             }
+
+            this.root = c === null ? this.createContentPan() : c;
+            this.title.setValue(s === null ? &quot;&quot; : s);
 
             /**
              * Icons panel. The panel can contain number of icons.
@@ -31584,8 +31910,8 @@ zebkit.package(&quot;ui&quot;, function(pkg, Class) {
             this.buttons = new pkg.Panel(new zebkit.layout.FlowLayout(&quot;center&quot;, &quot;center&quot;));
 
             this.caption.add(&quot;center&quot;, this.title);
-            this.caption.add(&quot;left&quot;, this.icons);
-            this.caption.add(&quot;right&quot;, this.buttons);
+            this.caption.add(&quot;left&quot;,   this.icons);
+            this.caption.add(&quot;right&quot;,  this.buttons);
 
             /**
              * Window status panel.
@@ -31603,7 +31929,7 @@ zebkit.package(&quot;ui&quot;, function(pkg, Class) {
             this.setLayout(new zebkit.layout.BorderLayout(2,2));
 
             this.add(&quot;center&quot;, this.root);
-            this.add(&quot;top&quot;, this.caption);
+            this.add(&quot;top&quot;,    this.caption);
             this.add(&quot;bottom&quot;, this.status);
         },
 
@@ -31884,7 +32210,7 @@ zebkit.package(&quot;ui&quot;, function(pkg, Class) {
                 // remove previously added buttons
                 for(var i = 0; i &lt; this.buttons.length; i++) {
                     var kid = this.buttons.kids[i];
-                    if (zebkit.instanceOf(kid, zebkit.Fireable)) {
+                    if (kid.isEventFired()) {
                         kid.off();
                     }
                 }
@@ -32495,7 +32821,7 @@ zebkit.package(&quot;ui&quot;, function(pkg, Class) {
         },
 
         function $install(child) {
-            if (zebkit.instanceOf(child, zebkit.Fireable)) {
+            if (child.isEventFired()) {
                 child.on(this);
             } else if (zebkit.instanceOf(child, pkg.TextField)) {
                 this.editor = child;
@@ -32503,7 +32829,7 @@ zebkit.package(&quot;ui&quot;, function(pkg, Class) {
         },
 
         function $uninstall(child) {
-            if (zebkit.instanceOf(child, zebkit.Fireable)) {
+            if (child.isEventFired()) {
                 child.off(this);
             } else if (zebkit.instanceOf(child, pkg.TextField)) {
                 this.editor = null;
@@ -34812,7 +35138,7 @@ zebkit.package(&quot;ui.grid&quot;, function(pkg, Class) {
         function $clazz() {
             this.TextField = Class(ui.TextField, []);
             this.Checkbox  = Class(ui.Checkbox,  []);
-            this.Combo     = Class(ui.Combo,     [
+            this.Combo     = Class(ui.Combo, [
                 function padShown(src, b) {
                     if (b === false) {
                         this.parent.stopEditing(true);
@@ -35806,15 +36132,14 @@ zebkit.package(&quot;ui.grid&quot;, function(pkg, Class) {
                 },
 
                 function kidRemoved(index, kid) {
-                    if (zebkit.instanceOf(kid, zebkit.Fireable)) {
+                    if (kid.isEventFired()) {
                         kid.off(this);
                     }
                     this.$super(index, kid);
                 },
 
                 function kidAdded(index, constr, kid) {
-                    // TODO: not very perfect check
-                    if (zebkit.instanceOf(kid, zebkit.Fireable)) {
+                    if (kid.isEventFired()) {
                         kid.on(this);
                     }
                     this.$super(index, constr, kid);
@@ -35827,7 +36152,7 @@ zebkit.package(&quot;ui.grid&quot;, function(pkg, Class) {
          */
         function $prototype() {
             this.catchInput = function(t) {
-                return zebkit.instanceOf(t, zebkit.Fireable) === false;
+                return t.isEventFired() === false;
             };
 
             this.scrolled = function() {
@@ -35976,7 +36301,6 @@ zebkit.package(&quot;ui.grid&quot;, function(pkg, Class) {
     //
     //
     //
-
 
     // TODO: this is the future thoughts regarding
     // grid cell selection customization
@@ -40942,7 +41266,7 @@ zebkit.package(&quot;web&quot;, function(pkg, Class) {
             };
         }
     ]);
-});
+},false);
 zebkit.package(&quot;ui.web&quot;, function(pkg, Class) {
     &#x27;use strict&#x27;;
     /**
@@ -41054,7 +41378,6 @@ zebkit.package(&quot;ui.web&quot;, function(pkg, Class) {
      * @class zebkit.ui.web
      * @access package
      */
-
 
     /**
      * HTML element UI component wrapper class. The class represents an HTML element as if it is standard
@@ -41220,7 +41543,6 @@ zebkit.package(&quot;ui.web&quot;, function(pkg, Class) {
                                         // and manage its visibility
 
             this.$sizeAdjusted = false;
-
 
             this.wrap = function(c) {
                 this.setLayout(new zebkit.layout.StackLayout());
@@ -41555,6 +41877,10 @@ zebkit.package(&quot;ui.web&quot;, function(pkg, Class) {
         },
 
         function setBorder(b) {
+            if (arguments.length === 0) {
+                b = &quot;plain&quot;;
+            }
+
             b = zebkit.draw.$view(b);
 
             if (b === null) {
@@ -41814,11 +42140,11 @@ zebkit.package(&quot;ui.web&quot;, function(pkg, Class) {
                 //          -- the kid component is in visible area
                 var c = e.source;
                 if (c.isDOMElement === true) {
-                    c.$container.style.visibility = c.isVisible === false || $isInInvisibleState(c) ? &quot;hidden&quot;
-                                                                                                    : &quot;visible&quot;;
+                    c.$container.style.visibility = (c.isVisible === false || $isInInvisibleState(c) ? &quot;hidden&quot;
+                                                                                                     : &quot;visible&quot;);
                 } else if (typeof c.$domKids !== &#x27;undefined&#x27;) {
                     $domElements(c, function(e) {
-                        e.$container.style.visibility = e.isVisible === false || $isInInvisibleState(e) ? &quot;hidden&quot; : &quot;visible&quot;;
+                        e.$container.style.visibility = (e.isVisible === false || $isInInvisibleState(e) ? &quot;hidden&quot; : &quot;visible&quot;);
                     });
                 }
             };
@@ -41905,8 +42231,13 @@ zebkit.package(&quot;ui.web&quot;, function(pkg, Class) {
                 // if detached element is DOM element we have to
                 // remove it from DOM tree
                 if (c.isDOMElement === true) {
-                    c.$container.parentNode.removeChild(c.$container);
-                    c.$container.parentNode = null;
+                    // DOM component can be detached from document
+                    // with a parent component removal so let&#x27;s
+                    // check if it has a DOM parent
+                    if (c.$container.parentNode !== null) {
+                        c.$container.parentNode.removeChild(c.$container);
+                        c.$container.parentNode = null;
+                    }
                 } else {
                     removeDOMChildren(c);
                 }
@@ -42160,8 +42491,11 @@ zebkit.package(&quot;ui.web&quot;, function(pkg, Class) {
 
         function $prototype(clazz) {
             this.$rotateValue = 0;
+            this.$crotate = false;
             this.$scaleX = 1;
             this.$scaleY = 1;
+            this.$translateX = 0;
+            this.$translateY = 0;
 
             /**
              *  Canvas context
@@ -42176,7 +42510,7 @@ zebkit.package(&quot;ui.web&quot;, function(pkg, Class) {
             // is DOM component designed for rendering, so setting DOM border
             // doesn&#x27;t allow us to render zebkit border
             this.setBorder = function(b) {
-                return ui.Panel.prototype.setBorder.call(this, b);
+                return ui.Panel.prototype.setBorder.apply(this, arguments);
             };
 
             this.rotate = function(r) {
@@ -42188,6 +42522,43 @@ zebkit.package(&quot;ui.web&quot;, function(pkg, Class) {
                 this.vrp();
                 return this;
             };
+
+            this.translate = function(dx, dy) {
+                this.$translateX += dx;
+                this.$translateY += dy;
+
+                if (this.$context !== null) {
+                    this.$context.translate(this.$translateX,
+                                            this.$translateY);
+                }
+
+                this.vrp();
+                return this;
+            };
+
+            /**
+             * Rotate the component coordinate system around the component center.
+             * @param  {Number} r a rotation value
+             * @chainable
+             * @method crotate
+             */
+            this.crotate = function(r) {
+                this.$rotateValue += r;
+                this.$crotate = true;
+
+                if (this.$context !== null) {
+                    var cx = Math.floor(this.width  / 2),
+                        cy = Math.floor(this.height / 2);
+
+                    this.$context.translate(cx, cy);
+                    this.$context.rotate(r);
+                    this.$context.translate(-cx, -cy);
+                }
+
+                this.vrp();
+                return this;
+            };
+
 
             this.scale = function(sx, sy) {
                 if (this.$context !== null) {
@@ -42203,6 +42574,9 @@ zebkit.package(&quot;ui.web&quot;, function(pkg, Class) {
                 this.$scaleX = 1;
                 this.$scaleY = 1;
                 this.$rotateValue = 0;
+                this.$crotate = false;
+                this.$translateX = 0;
+                this.$translateY = 0;
                 if (this.$context !== null) {
                     this.$context = zebkit.web.$canvas(this.element, this.width, this.height, true);
                     this.$context.reset(this.width, this.height);
@@ -42237,12 +42611,28 @@ zebkit.package(&quot;ui.web&quot;, function(pkg, Class) {
 
                     // if canvas has been rotated apply the rotation to the context
                     if (this.$rotateValue !== 0) {
+                        var cx = Math.floor(w / 2),
+                            cy = Math.floor(h / 2);
+
+                        if (this.$crotate) {
+                            this.$context.translate(cx, cy);
+                        }
+
                         this.$context.rotate(this.$rotateValue);
+
+                        if (this.$crotate) {
+                            this.$context.translate(-cx, -cy);
+                        }
                     }
 
                     // if canvas has been scaled apply it to it
                     if (this.$scaleX !== 1 || this.$scaleY !== 1) {
                         this.$context.scale(this.$scaleX, this.$scaleY);
+                    }
+
+                    // if canvas has been scaled apply it to it
+                    if (this.$translateX !== 0 || this.$translateY !== 0) {
+                        this.$context.translate(this.$translateX, this.$translateY);
                     }
 
                     this.width  = w;
@@ -42269,49 +42659,125 @@ zebkit.package(&quot;ui.web&quot;, function(pkg, Class) {
                 }
                 return this;
             };
+
+            /**
+             * Convert (x, y) location in
+             * @param  {Integer} x a x coordinate
+             * @param  {Integer} y an y coordinate
+             * @return {Array} two elements array where first
+             * element is converted x coordinate and the second element
+             * is converted y coordinate.
+             * @protected
+             * @method project
+             */
+            this.project = function(x, y) {
+                var c = this.$context.$states[this.$context.$curState],
+                    xx = x,
+                    yy = y;
+
+                if (c.sx !== 1 || c.sy !== 1 || c.rotateVal !== 0) {
+                    xx = Math.round((c.crot * x + y * c.srot) / c.sx);
+                    yy = Math.round((y * c.crot - c.srot * x) / c.sy);
+                }
+
+                xx -= c.dx;
+                yy -= c.dy;
+
+                if (this.$crotate) {
+                    // rotation relatively rect center should add correction basing
+                    // on idea the center coordinate in new coordinate system has
+                    // to have the same coordinate like it has in initial coordinate
+                    // system
+                    var cx = Math.floor(this.width / 2),
+                        cy = Math.floor(this.height / 2),
+                        dx = Math.round((c.crot * cx + cy * c.srot) / c.sx),
+                        dy = Math.round((c.crot * cy - cx * c.srot) / c.sy);
+                    xx -= (dx - cx);
+                    yy -= (dy - cy);
+                }
+
+                return [ xx, yy ];
+            };
+        },
+
+        // TODO: make sure it is workable solution
+        function getComponentAt(x, y) {
+            if (this.$translateX !== 0 || this.$translateY !== 0 || this.$rotateValue !== 0 || this.$scaleX !== 1 || this.$scaleY !== 1) {
+                var xy = this.project(x, y);
+                return this.$super(xy[0], xy[1]);
+            } else {
+                return this.$super(x, y);
+            }
         }
     ]);
 
     /**
      * Class that wrapped window component with own HTML Canvas.
-     * @param  {zebkit.ui.Window} [target] a window component. If target is not defined
-     * it will be instantiated automatically. If the component is not passed the new
-     * window component (zebkit.ui.Window) will be created.
+     * @param  {zebkit.ui.Window} [content] a window component or window root. If
+     * content is not defined it will be instantiated automatically. If the component
+     * is not passed the new window component (zebkit.ui.Window) will be created.
      * @constructor
      * @extends zebkit.ui.web.HtmlCanvas
-     * @class zebkit.ui.web.HtmlWinCanvas
+     * @class zebkit.ui.web.HtmlWindow
      */
-    pkg.HtmlWinCanvas = Class(pkg.HtmlCanvas, [
-        function $prototype() {
-            this.winOpened = function(e) {
-                this.target.winOpened(e);
-            };
-
-            this.winActivated = function(e){
-                this.target.winActivated(e);
-            };
-        },
-
-        function(target) {
+    pkg.HtmlWindow = Class(pkg.HtmlCanvas, [
+        function(content) {
             this.$super();
 
-            /**
-             * Target window
-             * @attribute target
-             * @type {zebkit.ui.Window}
-             * @readOnly
-             */
-            this.target = (arguments.length === 0 ? new ui.Window() : target);
+            if (arguments.length === 0) {
+                this.win = new ui.Window();
+            } else if (zebkit.instanceOf(content, ui.Window)) {
+                this.win = content;
+            } else {
+                this.win = new ui.Window(content);
+            }
 
             var $this = this;
-            target.getWinContainer = function() {
+            this.win.getWinContainer = function() {
                 return $this;
             };
 
-            this.setLayout(new zebkit.layout.BorderLayout());
-            this.add(&quot;center&quot;, target);
+            /**
+             * Root window panel
+             * @attribute root
+             * @type {zebkit.ui.Panel}
+             */
+            this.root = this.win.root;
+            this.setBorderLayout();
+            this.add(&quot;center&quot;, this.win);
+        },
+
+        function $prototype() {
+            /**
+             * Target window
+             * @attribute win
+             * @type {zebkit.ui.Window}
+             * @readOnly
+             */
+            this.win = null;
+
+            this.winOpened = function(e) {
+                this.win.winOpened(e);
+            };
+
+            this.winActivated = function(e){
+                this.win.winActivated(e);
+            };
         }
     ]);
+
+    pkg.HtmlButton = Class(pkg.HtmlElement, [
+        function(c) {
+            this.$super(&quot;button&quot;);
+            this.setAttribute(&quot;type&quot;, &quot;button&quot;);
+            this.setContent(c);
+
+            var $this = this;
+            this.element.onclick = function() {
+                $this.fire(&quot;fired&quot;, $this);
+            }
+        }
+    ]).events(&quot;fired&quot;);
 
     /**
      * WEB based HTML components wrapped with as zebkit components.
@@ -42579,32 +43045,32 @@ zebkit.package(&quot;ui.web&quot;, function(pkg, Class) {
      *  It happens if developer doesn&#x27;t pass an HTML Canvas element reference or an ID of existing HTML
      *  Canvas element. To re-use an existent in DOM tree HTML5 canvas element pass an id of the canvas
      *  element:
-
-            // a new HTML canvas element is created and added into HTML DOM tree
-            var canvas = zebkit.ui.zCanvas();
-
-            // a new HTML canvas element is created into HTML DOM tree
-            var canvas = zebkit.ui.zCanvas(400,500);  // pass canvas size
-
-            // stick to existent HTML canvas element
-            var canvas = zebkit.ui.zCanvas(&quot;ExistentCanvasID&quot;);
-
+     *
+     *       // a new HTML canvas element is created and added into HTML DOM tree
+     *       var canvas = zebkit.ui.zCanvas();
+     *
+     *       // a new HTML canvas element is created into HTML DOM tree
+     *       var canvas = zebkit.ui.zCanvas(400,500);  // pass canvas size
+     *
+     *       // stick to existent HTML canvas element
+     *       var canvas = zebkit.ui.zCanvas(&quot;ExistentCanvasID&quot;);
+     *
      *  zCanvas has layered structure. Every layer is responsible for showing and controlling a dedicated
      *  type of UI elements like windows pop-up menus, tool tips and so on. To start building UI use root layer.
      *  The layer is standard zebkit UI panel that is accessible via &quot;root&quot; zCanvas field:
-
-            // create canvas
-            var canvas = zebkit.ui.zCanvas(400,500);
-
-            // save reference to canvas root layer where
-            // hierarchy of UI components have to be hosted
-            var root = canvas.root;
-
-            // fill root with UI components
-            var label = new zebkit.ui.Label(&quot;Label&quot;);
-            label.setBounds(10,10,100,50);
-            root.add(label);
-
+     *
+     *       // create canvas
+     *       var canvas = zebkit.ui.zCanvas(400,500);
+     *
+     *       // save reference to canvas root layer where
+     *       // hierarchy of UI components have to be hosted
+     *       var root = canvas.root;
+     *
+     *       // fill root with UI components
+     *       var label = new zebkit.ui.Label(&quot;Label&quot;);
+     *       label.setBounds(10,10,100,50);
+     *       root.add(label);
+     *
      *  @class zebkit.ui.zCanvas
      *  @extends zebkit.ui.web.HtmlCanvas
      *  @constructor
@@ -42617,13 +43083,13 @@ zebkit.package(&quot;ui.web&quot;, function(pkg, Class) {
      * Implement the event handler method  to catch canvas initialized event. The event is triggered once the
      * canvas has been initiated and all properties listeners of the canvas are set upped. The event can be
      * used to load saved data.
-
-         var p = new zebkit.ui.zCanvas(300, 300, [
-              function canvasInitialized() {
-                  // do something
-              }
-         ]);
-
+     *
+     *     var p = new zebkit.ui.zCanvas(300, 300, [
+     *          function canvasInitialized() {
+     *              // do something
+     *          }
+     *     ]);
+     *
      * @event  canvasInitialized
      */
     ui.zCanvas = pkg.zCanvas = Class(pkg.HtmlCanvas, [
@@ -43134,7 +43600,7 @@ zebkit.package(&quot;ui.web&quot;, function(pkg, Class) {
                 var x  = this.$toElementX(e.pageX, e.pageY),
                     y  = this.$toElementY(e.pageX, e.pageY);
 
-                // free pointer prev pressed if any
+                // free pointer previous pressed if any
                 if (pkg.$pointerPressedOwner.hasOwnProperty(e.identifier)) {
                     try {
                         ui.events.fire(&quot;pointerReleased&quot;, e.update(pkg.$pointerPressedOwner[e.identifier], x, y));
@@ -43170,11 +43636,16 @@ zebkit.package(&quot;ui.web&quot;, function(pkg, Class) {
             };
 
             this.getComponentAt = function(x, y) {
+                // goes through the layers from top to bottom
                 for(var i = this.kids.length; --i &gt;= 0; ){
                     var c = this.kids[i].getComponentAt(x, y);
                     if (c !== null) {
+                        // detect a composite parent component that catches
+                        // input and return the found composite
                         var p = c;
                         while ((p = p.parent) !== null) {
+                            // test if the parent catches input events (what means the parent is a composite component)
+                            // and store the composite as result
                             if (typeof p.catchInput !== &#x27;undefined&#x27; &amp;&amp; (p.catchInput === true || (p.catchInput !== false &amp;&amp; p.catchInput(c)))) {
                                 c = p;
                             }
@@ -43426,21 +43897,21 @@ zebkit.package(&quot;ui.web&quot;, function(pkg, Class) {
     /**
      * Simple video panel that can be used to play a video:
      *
-
-            // create canvas, add video panel to the center and
-            // play video
-            var canvas = zebkit.ui.zCanvas(500,500).root.properties({
-                layout: new zebkit.layout.BorderLayout(),
-                center: new zebkit.ui.web.VideoPan(&quot;trailer.mpg&quot;)
-            });
-
+     *
+     *       // create canvas, add video panel to the center and
+     *       // play video
+     *       var canvas = zebkit.ui.zCanvas(500,500).root.properties({
+     *           layout: new zebkit.layout.BorderLayout(),
+     *           center: new zebkit.ui.web.VideoPan(&quot;trailer.mpg&quot;)
+     *       });
+     *
      *
      * @param {String} url an URL to a video
      * @class zebkit.ui.web.VideoPan
      * @extends zebkit.ui.Panel
      * @constructor
      */
-    pkg.VideoPan = Class(ui.Panel,  [
+    pkg.VideoPan = Class(ui.Panel, [
         function(src) {
             var $this = this;
 

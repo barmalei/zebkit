@@ -410,15 +410,6 @@ zebkit.package("ui", function(pkg, Class) {
             this.prevW = this.action = -1;
 
             /**
-             * Root window panel. The root panel has to be used to
-             * add any UI components
-             * @attribute root
-             * @type {zebkit.ui.Panel}
-             * @readOnly
-             */
-            this.root = (c === null || arguments.length < 2 ? this.createContentPan() : c);
-
-            /**
              * Window caption panel. The panel contains window
              * icons, button and title label
              * @attribute caption
@@ -434,7 +425,27 @@ zebkit.package("ui", function(pkg, Class) {
              * @readOnly
              */
             this.title = this.createTitle();
-            this.title.setValue((s === null || arguments.length === 0 ? "" : s));
+
+            /**
+             * Root window panel. The root panel has to be used to
+             * add any UI components
+             * @attribute root
+             * @type {zebkit.ui.Panel}
+             * @readOnly
+             */
+             if (arguments.length === 0) {
+                c = s = null;
+             } else if (arguments.length === 1) {
+                if (zebkit.instanceOf(s, pkg.Panel)) {
+                    c = s;
+                    s = null;
+                } else {
+                    c = null;
+                }
+             }
+
+            this.root = c === null ? this.createContentPan() : c;
+            this.title.setValue(s === null ? "" : s);
 
             /**
              * Icons panel. The panel can contain number of icons.
@@ -454,8 +465,8 @@ zebkit.package("ui", function(pkg, Class) {
             this.buttons = new pkg.Panel(new zebkit.layout.FlowLayout("center", "center"));
 
             this.caption.add("center", this.title);
-            this.caption.add("left", this.icons);
-            this.caption.add("right", this.buttons);
+            this.caption.add("left",   this.icons);
+            this.caption.add("right",  this.buttons);
 
             /**
              * Window status panel.
@@ -473,7 +484,7 @@ zebkit.package("ui", function(pkg, Class) {
             this.setLayout(new zebkit.layout.BorderLayout(2,2));
 
             this.add("center", this.root);
-            this.add("top", this.caption);
+            this.add("top",    this.caption);
             this.add("bottom", this.status);
         },
 
@@ -754,7 +765,7 @@ zebkit.package("ui", function(pkg, Class) {
                 // remove previously added buttons
                 for(var i = 0; i < this.buttons.length; i++) {
                     var kid = this.buttons.kids[i];
-                    if (zebkit.instanceOf(kid, zebkit.Fireable)) {
+                    if (kid.isEventFired()) {
                         kid.off();
                     }
                 }

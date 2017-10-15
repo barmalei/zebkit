@@ -1606,6 +1606,16 @@ zebkit.package("ui", function(pkg, Class) {
                 return this;
             };
 
+            this.showPercentage = function() {
+                this.ruler.showPercentage();
+                return this;
+            };
+
+            this.showNumbers = function() {
+                this.ruler.showNumbers();
+                return this;
+            };
+
             /**
              * Set the gap between the slider handle and the ruler.
              * @param {Integer} g a gap

@@ -627,6 +627,8 @@ zebkit.package("ui", function(pkg, Class) {
                 for(i = 0;i < count; i++){
                     var l = this.kids[i];
                     if (i === this.selectedIndex) {
+                        // TODO: temporary
+                        l.setVisible(true);
                         if (b) {
                             l.setBounds(left + this.hgap,
                                         ((this.orient === "top") ? top + this.repaintHeight : top) + this.vgap,
@@ -639,7 +641,11 @@ zebkit.package("ui", function(pkg, Class) {
                                         this.height - top - bottom - 2 * this.vgap);
                         }
                     } else {
-                        l.setSize(0, 0);
+                        // TODO: bring back
+                        //l.setSize(0, 0);
+
+                        // TODO: temporary
+                        l.setVisible(false);
                     }
                 }
             };

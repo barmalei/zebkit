@@ -1,9 +1,7 @@
 {
-    "version"   : "08.2017",
     "themeName" : "dark",
 
     "%{../ui.common.json}": null,
-
 
     "font"          : { "@zebkit.Font" : ["Arial", 16] },
     "boldFont"      : { "@zebkit.Font" : ["Arial", "bold", 14] },
@@ -22,11 +20,6 @@
         "etched" : { "@zebkit.draw.Etched":[] },
         "plain"  : { "@zebkit.draw.Border": [ "red", 1, 6 ] },
         "dot"    : { "@zebkit.draw.Dotted" : []  }
-    },
-
-    "CompositeEvStatePan": {
-        "layout"     : { "@zebkit.layout.FlowLayout": [ "center", "center", "horizontal", 2 ] },
-        "focusMarker": "dot"
     },
 
     "BoldLabel": {

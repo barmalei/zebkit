@@ -231,6 +231,10 @@ zebkit.package("ui", function(pkg, Class) {
         },
 
         function setBorder(br) {
+            if (arguments.length === 0) {
+                br = "plain";
+            }
+
             br = zebkit.draw.$view(br);
             if (zebkit.instanceOf(br, zebkit.draw.TitledBorder) === false) {
                 br = new zebkit.draw.TitledBorder(br, "center");
@@ -698,7 +702,7 @@ zebkit.package("ui", function(pkg, Class) {
 
             this.ImageLabel = Class(pkg.ImageLabel, []);
 
-            this.Header = Class(pkg.CompositeEvStatePan, []);
+            this.Header = Class(pkg.EvStatePan, []);
 
             this.Toogle = Class(pkg.Checkbox, [
                 function $prototype() {

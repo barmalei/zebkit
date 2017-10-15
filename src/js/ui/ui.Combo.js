@@ -727,7 +727,7 @@ zebkit.package("ui", function(pkg, Class) {
                 this.button = c;
             }
 
-            if (zebkit.instanceOf(c, zebkit.Fireable)) {
+            if (c.isEventFired()) {
                 c.on(this);
             }
 
@@ -735,7 +735,7 @@ zebkit.package("ui", function(pkg, Class) {
         },
 
         function kidRemoved(index,l) {
-            if (zebkit.instanceOf(l, zebkit.Fireable)) {
+            if (l.isEventFired()) {
                 l.off(this);
             }
 

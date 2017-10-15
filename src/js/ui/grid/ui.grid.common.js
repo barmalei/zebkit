@@ -351,7 +351,7 @@ zebkit.package("ui.grid", function(pkg, Class) {
         function $clazz() {
             this.TextField = Class(ui.TextField, []);
             this.Checkbox  = Class(ui.Checkbox,  []);
-            this.Combo     = Class(ui.Combo,     [
+            this.Combo     = Class(ui.Combo, [
                 function padShown(src, b) {
                     if (b === false) {
                         this.parent.stopEditing(true);

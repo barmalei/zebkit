@@ -118,7 +118,7 @@ zebkit.package("ui", function(pkg, Class) {
         },
 
         function $install(child) {
-            if (zebkit.instanceOf(child, zebkit.Fireable)) {
+            if (child.isEventFired()) {
                 child.on(this);
             } else if (zebkit.instanceOf(child, pkg.TextField)) {
                 this.editor = child;
@@ -126,7 +126,7 @@ zebkit.package("ui", function(pkg, Class) {
         },
 
         function $uninstall(child) {
-            if (zebkit.instanceOf(child, zebkit.Fireable)) {
+            if (child.isEventFired()) {
                 child.off(this);
             } else if (zebkit.instanceOf(child, pkg.TextField)) {
                 this.editor = null;

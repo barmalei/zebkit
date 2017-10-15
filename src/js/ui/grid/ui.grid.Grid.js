@@ -34,7 +34,6 @@ zebkit.package("ui.grid", function(pkg, Class) {
     //
     //
 
-
     // TODO: this is the future thoughts regarding
     // grid cell selection customization
     pkg.RowSelMode = Class([

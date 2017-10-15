@@ -555,7 +555,7 @@ zebkit.package("draw", function(pkg, Class) {
              * @chainable
              */
             this.setValue = function(s) {
-                if (typeof s === "string" || s.constructor === String) {
+                if (s !== null && (typeof s === "string" || s.constructor === String)) {
                     if (this.target !== null) {
                         this.target.setValue(s);
                         return this;

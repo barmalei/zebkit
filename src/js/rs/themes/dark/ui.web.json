@@ -47,6 +47,19 @@
         ]
     },
 
+    "HtmlButton" : {
+        "inheritProperties" : false,
+        "styles" : {
+            "background" : "transparent",
+            "color" : "red",
+            "font-weight": "bold"
+        },
+        "padding" : 6,
+        "border" : {
+            "@zebkit.draw.Border" : [ "orange", 2, 6 ]
+        }
+    },
+
     "HtmlTextInput": {
         "inheritProperties" : true,
         "color"   : "white",

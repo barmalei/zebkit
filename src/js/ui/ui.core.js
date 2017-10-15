@@ -1,19 +1,12 @@
 zebkit.package("ui", function(pkg, Class) {
-
     var   basedir      = zebkit.config("ui.basedir"),
           theme        = zebkit.config("ui.theme");
-
-
-    if (theme === "auto") {
-      //  getComputedStyle
-    }
 
     this.config( { "basedir" : basedir ? basedir
                                        : zebkit.URI.join(this.$url, "rs/themes/%{theme}"),
                    "theme"   : theme   ? theme
                                        : "dark" },
                    false);
-
 
     // Panel WEB specific dependencies:
     //   -  getCanvas() -> zCanvas
@@ -94,7 +87,6 @@ zebkit.package("ui", function(pkg, Class) {
                 return false;
             }
         }
-
         return true;
     }
 
@@ -177,7 +169,7 @@ zebkit.package("ui", function(pkg, Class) {
      * @param  {zebkit.ui.Panel} c  a component
      * @param  {Object} r a variable to store visible area
 
-            { x: {Integer}, y: {Integer}, width: {integer}, height: {Integer} }
+            { x: {Integer}, y: {Integer}, width: {Integer}, height: {Integer} }
 
      * @method $cvp
      * @for zebkit.ui
@@ -329,6 +321,7 @@ zebkit.package("ui", function(pkg, Class) {
                         canvas.$context.clearRect(canvas.$da.x, canvas.$da.y,
                                                   canvas.$da.width, canvas.$da.height);
                     }
+
                     // !!!
                     // call clipping area later than possible
                     // clearRect since it can bring to error in IE
@@ -977,6 +970,7 @@ zebkit.package("ui", function(pkg, Class) {
                     var count = this.kids.length;
                     for(var i = 0; i < count; i++) {
                         var kid = this.kids[i];
+                        // ignore invisible components and components that declare own 2D context
                         if (kid.isVisible === true && typeof kid.$context === 'undefined') {
                             // calculate if the given component area has intersection
                             // with current clipping area
@@ -1121,7 +1115,7 @@ zebkit.package("ui", function(pkg, Class) {
                     return null;
                 }
 
-                if (this.kids.length > 0){
+                if (this.kids.length > 0) {
                     for(var i = this.kids.length; --i >= 0; ){
                         var kid = this.kids[i];
                         kid = kid.getComponentAt(x - kid.x,
@@ -1467,8 +1461,9 @@ zebkit.package("ui", function(pkg, Class) {
 
             /**
              * Set the border view
-             * @param  {zebkit.draw.View|Function|String} v a border view or border "paint(g,x,y,w,h,c)"
-             * rendering function or one of predefined border name: "plain", "sunken", "raised", "etched"
+             * @param  {zebkit.draw.View|Function|String} [v] a border view or border "paint(g,x,y,w,h,c)"
+             * rendering function or one of predefined border name: "plain", "sunken", "raised", "etched".
+             * If no argument has been passed the method tries to set "plain" as the component border.
              * @method setBorder
              * @example
              *
@@ -1484,6 +1479,10 @@ zebkit.package("ui", function(pkg, Class) {
              * @chainable
              */
             this.setBorder = function (v) {
+                if (arguments.length === 0) {
+                    v = "plain";
+                }
+
                 var old = this.border;
                 v = zebkit.draw.$view(v);
                 if (v != old){
@@ -1533,7 +1532,7 @@ zebkit.package("ui", function(pkg, Class) {
              * @method setBackground
              * @chainable
              */
-            this.setBackground = function (v){
+            this.setBackground = function(v) {
                 var old = this.bg;
                 v = zebkit.draw.$view(v);
                 if (v !== old) {

@@ -1,8 +1,7 @@
 {
-    "version"  : "8.2017",
     "themeName": "light",
 
-    "%{../ui.common.json}": null,
+    "%{../ui.common.json}" : null,
 
     "font"          : { "@zebkit.Font" : ["Arial", 14] },
     "boldFont"      : { "@zebkit.Font" : ["Arial", "bold", 12] },
@@ -25,11 +24,6 @@
 
     "pictures" : {
         "zebkit" : "%{<img> zebkit.png}"
-    },
-
-    "CompositeEvStatePan": {
-        "layout"     : { "@zebkit.layout.FlowLayout": [ "center", "center", "horizontal", 2 ] },
-        "focusMarker": "dot"
     },
 
     "BoldLabel": {
@@ -109,8 +103,8 @@
 
         "layout" : { "@zebkit.layout.FlowLayout": [ "left", "center", "horizontal", 6 ] },
         "border" : {
-             "focuson" :  { "@zebkit.draw.Border": [ "#66CCFF", 1, 4 ] },
-             "focusoff":  { "@zebkit.draw.View" : [ ] }
+            "focuson" :  { "@zebkit.draw.Border": [ "#66CCFF", 1, 4 ] },
+            "focusoff":  { "@zebkit.draw.View" : [ ] }
         },
         "padding": 2
     },

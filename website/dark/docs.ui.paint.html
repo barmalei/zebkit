@@ -32,7 +32,7 @@
     <!-- RSS -->
     <link rel="alternate" type="application/rss+xml" title="RSS" href="/atom.xml">
 
-    <script type="text/javascript" src="/build/zebkit.min.js?12092017">  </script>
+    <script type="text/javascript" src="/build/zebkit.js?16092017">  </script>
 
     <script type="text/javascript">
         zebkit.ui.config("theme", "dark");
@@ -563,12 +563,12 @@ Painting procedure starts traversing UI hierarchy (where every UI component is i
            <span class="nx">g</span><span class="p">.</span><span class="nx">setColor</span><span class="p">(</span><span class="s2">"lightGray"</span><span class="p">);</span>
            <span class="nx">g</span><span class="p">.</span><span class="nx">fillRect</span><span class="p">(</span><span class="mi">8</span><span class="p">,</span><span class="k">this</span><span class="p">.</span><span class="nx">height</span><span class="o">/</span><span class="mi">3</span><span class="p">,</span>
                       <span class="k">this</span><span class="p">.</span><span class="nx">width</span><span class="o">-</span><span class="mi">16</span><span class="p">,</span><span class="k">this</span><span class="p">.</span><span class="nx">height</span><span class="o">/</span><span class="mi">4</span><span class="p">);</span>
-           <span class="nx">g</span><span class="p">.</span><span class="nx">fillRect</span><span class="p">(</span><span class="k">this</span><span class="p">.</span><span class="nx">width</span><span class="o">/</span><span class="mi">3</span><span class="p">,</span><span class="mi">8</span><span class="p">,</span>
+           <span class="nx">g</span><span class="p">.</span><span class="nx">fillRect</span><span class="p">(</span><span class="k">this</span><span class="p">.</span><span class="nx">width</span><span class="o">/</span><span class="mi">3</span><span class="p">,</span> <span class="mi">8</span><span class="p">,</span>
                       <span class="k">this</span><span class="p">.</span><span class="nx">width</span><span class="o">/</span><span class="mi">4</span><span class="p">,</span><span class="k">this</span><span class="p">.</span><span class="nx">height</span><span class="o">-</span><span class="mi">16</span><span class="p">);</span>
         <span class="p">}</span>
     <span class="p">]);</span>
     <span class="c1">// create canvas and add just developed component</span>
-    <span class="kd">var</span> <span class="nx">c</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">ui</span><span class="p">.</span><span class="nx">zCanvas</span><span class="p">(</span><span class="mi">150</span><span class="p">,</span><span class="mi">150</span><span class="p">);</span>
+    <span class="kd">var</span> <span class="nx">c</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">ui</span><span class="p">.</span><span class="nx">zCanvas</span><span class="p">(</span><span class="mi">150</span><span class="p">,</span> <span class="mi">150</span><span class="p">);</span>
     <span class="nx">c</span><span class="p">.</span><span class="nx">root</span><span class="p">.</span><span class="nx">setLayout</span><span class="p">(</span><span class="k">new</span> <span class="nx">layout</span><span class="p">.</span><span class="nx">BorderLayout</span><span class="p">());</span>
     <span class="nx">c</span><span class="p">.</span><span class="nx">root</span><span class="p">.</span><span class="nx">add</span><span class="p">(</span><span class="s2">"center"</span><span class="p">,</span> <span class="k">new</span> <span class="nx">ui</span><span class="p">.</span><span class="nx">PaintComponent</span><span class="p">());</span>
 <span class="p">});</span>
@@ -624,11 +624,11 @@ zebkit.require("ui", "layout", function(ui, layout) {
     <span class="nx">ui</span><span class="p">.</span><span class="nx">UpdateComponent</span><span class="o">=</span><span class="nx">zebra</span><span class="p">.</span><span class="nx">Class</span><span class="p">(</span><span class="nx">ui</span><span class="p">.</span><span class="nx">PaintComponent</span><span class="p">,[</span>
         <span class="kd">function</span> <span class="nx">update</span><span class="p">(</span><span class="nx">g</span><span class="p">)</span> <span class="p">{</span>
            <span class="nx">g</span><span class="p">.</span><span class="nx">setColor</span><span class="p">(</span><span class="s2">"red"</span><span class="p">);</span>
-           <span class="nx">g</span><span class="p">.</span><span class="nx">fillRect</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="k">this</span><span class="p">.</span><span class="nx">width</span><span class="p">,</span> <span class="k">this</span><span class="p">.</span><span class="nx">height</span><span class="p">);</span>
+           <span class="nx">g</span><span class="p">.</span><span class="nx">fillRect</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span><span class="k">this</span><span class="p">.</span><span class="nx">width</span><span class="p">,</span> <span class="k">this</span><span class="p">.</span><span class="nx">height</span><span class="p">);</span>
         <span class="p">}</span>
     <span class="p">]);</span>
     <span class="c1">// create canvas and add just developed component</span>
-    <span class="kd">var</span> <span class="nx">c</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">ui</span><span class="p">.</span><span class="nx">zCanvas</span><span class="p">(</span><span class="mi">150</span><span class="p">,</span><span class="mi">150</span><span class="p">);</span>
+    <span class="kd">var</span> <span class="nx">c</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">ui</span><span class="p">.</span><span class="nx">zCanvas</span><span class="p">(</span><span class="mi">150</span><span class="p">,</span> <span class="mi">150</span><span class="p">);</span>
     <span class="nx">c</span><span class="p">.</span><span class="nx">root</span><span class="p">.</span><span class="nx">setLayout</span><span class="p">(</span><span class="k">new</span> <span class="nx">layout</span><span class="p">.</span><span class="nx">BorderLayout</span><span class="p">());</span>
     <span class="nx">c</span><span class="p">.</span><span class="nx">root</span><span class="p">.</span><span class="nx">add</span><span class="p">(</span><span class="s2">"center"</span><span class="p">,</span> <span class="k">new</span> <span class="nx">ui</span><span class="p">.</span><span class="nx">UpdateComponent</span><span class="p">());</span>
 <span class="p">});</span>
@@ -646,12 +646,12 @@ zebkit.require("ui", "layout", function(ui, layout) {
         <span class="kd">function</span> <span class="nx">paintOnTop</span><span class="p">(</span><span class="nx">g</span><span class="p">)</span> <span class="p">{</span>
            <span class="nx">g</span><span class="p">.</span><span class="nx">setColor</span><span class="p">(</span><span class="s2">"white"</span><span class="p">);</span>
            <span class="nx">g</span><span class="p">.</span><span class="nx">lineWidth</span> <span class="o">=</span> <span class="mi">3</span><span class="p">;</span>
-           <span class="nx">g</span><span class="p">.</span><span class="nx">rect</span><span class="p">(</span><span class="mi">3</span><span class="p">,</span><span class="mi">3</span><span class="p">,</span><span class="k">this</span><span class="p">.</span><span class="nx">width</span><span class="o">-</span><span class="mi">6</span><span class="p">,</span> <span class="k">this</span><span class="p">.</span><span class="nx">height</span><span class="o">-</span><span class="mi">6</span><span class="p">);</span>
+           <span class="nx">g</span><span class="p">.</span><span class="nx">rect</span><span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span><span class="k">this</span><span class="p">.</span><span class="nx">width</span> <span class="o">-</span> <span class="mi">6</span><span class="p">,</span> <span class="k">this</span><span class="p">.</span><span class="nx">height</span> <span class="o">-</span> <span class="mi">6</span><span class="p">);</span>
            <span class="nx">g</span><span class="p">.</span><span class="nx">stroke</span><span class="p">();</span>
         <span class="p">}</span>
     <span class="p">]);</span>
     <span class="c1">// create canvas and add just developed component</span>
-    <span class="kd">var</span> <span class="nx">c</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">ui</span><span class="p">.</span><span class="nx">zCanvas</span><span class="p">(</span><span class="mi">150</span><span class="p">,</span><span class="mi">150</span><span class="p">);</span>
+    <span class="kd">var</span> <span class="nx">c</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">ui</span><span class="p">.</span><span class="nx">zCanvas</span><span class="p">(</span><span class="mi">150</span><span class="p">,</span> <span class="mi">150</span><span class="p">);</span>
     <span class="nx">c</span><span class="p">.</span><span class="nx">root</span><span class="p">.</span><span class="nx">setLayout</span><span class="p">(</span><span class="k">new</span> <span class="nx">layout</span><span class="p">.</span><span class="nx">BorderLayout</span><span class="p">());</span>
     <span class="nx">c</span><span class="p">.</span><span class="nx">root</span><span class="p">.</span><span class="nx">add</span><span class="p">(</span><span class="s2">"center"</span><span class="p">,</span> <span class="k">new</span> <span class="nx">ui</span><span class="p">.</span><span class="nx">PaintOnTopComponent</span><span class="p">());</span>
 <span class="p">});</span>

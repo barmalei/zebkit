@@ -32,7 +32,7 @@
     <!-- RSS -->
     <link rel="alternate" type="application/rss+xml" title="RSS" href="/atom.xml">
 
-    <script type="text/javascript" src="/build/zebkit.min.js?12092017">  </script>
+    <script type="text/javascript" src="/build/zebkit.js?16092017">  </script>
 
     <script type="text/javascript">
         zebkit.ui.config("theme", "dark");
@@ -704,6 +704,87 @@ zebkit.require("ui", "ui.web", function(ui, web) {
 <span class="p">});</span>
 </code></pre>
 </div>
+
+<h3 id="goodle-map-in-zebkit-layout">Goodle map in zebkit layout</h3>
+
+<table class="zsample" style="margin:0px;" cellpadding="0" cellspacing="0">
+    <tr style="padding: 0px;margin: 0px;">
+        <td align="center" valign="center" style="padding: 0px; margin: 0px;">
+            <canvas id="sampleGoogleMap1" style="padding: 0px; margin: 0px;"></canvas>
+        </td>
+        <td valign="top" rowspan="2" style="left-padding: 8px; margin: 0px;">
+            
+        </td>
+    </tr>
+    <tr>
+        <td align="center" style="padding:0px; margin:0px;">
+            <span style="color:red;font-size:14px;">DOM elements integrated in zebkit layout </span>
+        </td>
+    </tr>
+</table>
+
+<table class="zsample" style="margin:0px;" cellpadding="0" cellspacing="0">
+    <tr style="padding: 0px;margin: 0px;">
+        <td align="center" valign="center" style="padding: 0px; margin: 0px;">
+            <canvas id="sampleGoogleMap2" style="padding: 0px; margin: 0px;"></canvas>
+        </td>
+        <td valign="top" rowspan="2" style="left-padding: 8px; margin: 0px;">
+            
+        </td>
+    </tr>
+    <tr>
+        <td align="center" style="padding:0px; margin:0px;">
+            <span style="color:red;font-size:14px;">DOM elements integrated in zebkit layout </span>
+        </td>
+    </tr>
+</table>
+
+<script>
+    function initMap() {
+        zebkit.require("ui", "draw", "layout", function(ui, draw, layout) {
+            var c   = new ui.zCanvas("sampleGoogleMap2", 600, 600),
+                map = new zebkit.ui.web.HtmlElement(),
+                map2 = new zebkit.ui.web.HtmlElement();
+            map.setAttribute("id", "map");
+            map.tooltip = new ui.Tooltip("Zebkit Tooltip");
+                                                       
+            map.popup = new ui.Menu(["Zebkit", "Context", "Menu"]);
+            var gmap = new google.maps.Map(map.element, {
+                center: {lat: -34.397, lng: 150.644},
+                scrollwheel: false,
+                zoom: 8
+            });
+
+            var win = new zebkit.ui.web.HtmlWindow(map);
+            win.setBounds(30, 30, 300, 300);
+            ui.showWindow(c, "mdi", win);
+
+            var gmap = new google.maps.Map(map2.element, {
+                center: {lat: -34.497, lng: 150.944},
+                scrollwheel: false,
+                zoom: 8
+            });
+            var win = new zebkit.ui.web.HtmlWindow(map2);
+            win.setBounds(40, 40, 300, 300);
+            ui.showWindow(c, "mdi", win);
+
+            //win.$container.setStyle("pointer-events", "none");
+
+            //win.setStyle("z-index", "10000000000");
+
+            // var combo = c.byPath("//~zebkit.ui.Combo"); 
+            // combo.select(1);
+            // combo.on(function(src) {
+            //     gmap.setMapTypeId(google.maps.MapTypeId[src.getValue()]);    
+            // });
+
+            c.setSize(400, 401);
+           // map.setSize(400, 401);
+        });
+    }
+</script>
+
+<script async="" defer="" src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDHbhEB-ZtVg7-eXE1yLioDSR2MIafnsIs&amp;callback=initMap"> </script>
 
 
 </div>

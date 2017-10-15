@@ -241,3 +241,58 @@ zebkit.require("ui", "ui.web", "draw", function(ui, web, dr) {
 });
 ```
 
+
+### Goodle map in zebkit layout
+
+{% include zsample.html canvas_id='sampleGoogleMap1' title="DOM elements integrated in zebkit layout" description=description %}
+
+
+
+{% include zsample.html canvas_id='sampleGoogleMap2' title="DOM elements integrated in zebkit layout" description=description %}
+
+<script>
+    function initMap() {
+        zebkit.require("ui", "draw", "layout", function(ui, draw, layout) {
+            var c   = new ui.zCanvas("sampleGoogleMap2", 600, 600),
+                map = new zebkit.ui.web.HtmlElement(),
+                map2 = new zebkit.ui.web.HtmlElement();
+            map.setAttribute("id", "map");
+            map.tooltip = new ui.Tooltip("Zebkit Tooltip");
+                                                       
+            map.popup = new ui.Menu(["Zebkit", "Context", "Menu"]);
+            var gmap = new google.maps.Map(map.element, {
+                center: {lat: -34.397, lng: 150.644},
+                scrollwheel: false,
+                zoom: 8
+            });
+
+            var win = new zebkit.ui.web.HtmlWindow(map);
+            win.setBounds(30, 30, 300, 300);
+            ui.showWindow(c, "mdi", win);
+
+            var gmap = new google.maps.Map(map2.element, {
+                center: {lat: -34.497, lng: 150.944},
+                scrollwheel: false,
+                zoom: 8
+            });
+            var win = new zebkit.ui.web.HtmlWindow(map2);
+            win.setBounds(40, 40, 300, 300);
+            ui.showWindow(c, "mdi", win);
+
+            //win.$container.setStyle("pointer-events", "none");
+
+            //win.setStyle("z-index", "10000000000");
+
+            // var combo = c.byPath("//~zebkit.ui.Combo"); 
+            // combo.select(1);
+            // combo.on(function(src) {
+            //     gmap.setMapTypeId(google.maps.MapTypeId[src.getValue()]);    
+            // });
+
+            c.setSize(400, 401);
+           // map.setSize(400, 401);
+        });
+    }
+</script>
+
+<script async defer src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDHbhEB-ZtVg7-eXE1yLioDSR2MIafnsIs&callback=initMap"> </script>

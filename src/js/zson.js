@@ -165,11 +165,11 @@ var Zson = Class([
     function $prototype() {
         /**
          * URL the JSON has been loaded from
-         * @attribute  url
+         * @attribute  uri
          * @type {zebkit.URI}
          * @default null
          */
-        this.url = null;
+        this.uri = null;
 
         /**
          * Object that keeps loaded and resolved content of a JSON
@@ -220,6 +220,9 @@ var Zson = Class([
          * @type {Object}
          */
         this.$variables = null;
+
+
+        this.baseUri = null;
 
         /**
          * Get a property value by the given key. The property name can point to embedded fields:
@@ -522,10 +525,14 @@ var Zson = Class([
                     return this.expr(path);
                 }
 
-                if (this.url !== null && URI.isAbsolute(path) === false) {
-                    var pURL = new URI(this.url).getParent();
-                    if (pURL !== null) {
-                        path = URI.join(pURL, path);
+                if (URI.isAbsolute(path) === false) {
+                    if (this.baseUri !== null) {
+                        path = URI.join(this.baseUri, path);
+                    } else if (this.uri !== null) {
+                        var pURL = new URI(this.uri).getParent();
+                        if (pURL !== null) {
+                            path = URI.join(pURL, path);
+                        }
                     }
                 }
 
@@ -541,12 +548,12 @@ var Zson = Class([
                     }));
                     return bg;
                 } else if (type === 'img') {
-                    if (this.url !== null && URI.isAbsolute(path) === false) {
-                        path = URI.join(new URI(this.url).getParent(), path);
+                    if (this.uri !== null && URI.isAbsolute(path) === false) {
+                        path = URI.join(new URI(this.uri).getParent(), path);
                     }
                     return image(path, false);
                 } else if (type === 'txt') {
-                    return new GET(path).then(function(r) {
+                    return new ZFS.GET(path).then(function(r) {
                         return r.responseText;
                     }).catch(function(e) {
                         $this.$runner.error(e);
@@ -802,14 +809,14 @@ var Zson = Class([
                     {
                         $this.$variables = $this.$qsToVars(json);
 
-                        $this.url = json;
+                        $this.uri = json;
 
                         if ($this.cacheBusting === false) {
-                            $this.url = $this.url + (json.lastIndexOf("?") > 0 ? "&" : "?") + (new Date()).getTime().toString();
+                            $this.uri = $this.uri + (json.lastIndexOf("?") > 0 ? "&" : "?") + (new Date()).getTime().toString();
                         }
 
                         var join = this.join();
-                        GET($this.url).then(function(r) {
+                        ZFS.GET($this.uri).then(function(r) {
                             join.call($this, r.responseText);
                         }).catch(function(e) {
                             $this.$runner.error(e);

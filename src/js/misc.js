@@ -128,13 +128,14 @@ if (typeof Map === 'undefined' && (typeof $global !== 'undefined' || typeof $glo
 function GET(url) {
     var req = $zenv.getHttpRequest();
     req.open("GET", url, true);
+
     return new DoIt(function() {
         var jn    = this.join(),
             $this = this;
 
         req.onreadystatechange = function() {
             if (req.readyState === 4) {
-                // evaluate http response
+                // evaluate HTTP response
                 if (req.status >= 400 || req.status < 100) {
                     var e = new Error("HTTP error '" + req.statusText + "', code = " + req.status + " '" + url + "'");
                     e.status     = req.status;
@@ -154,6 +155,57 @@ function GET(url) {
         }
     });
 }
+
+// Micro file system
+var ZFS = {
+    catalogs : {},
+
+    load: function(pkg, files) {
+        var catalog = this.catalogs[pkg];
+        if (typeof catalog === 'undefined') {
+            catalog = {};
+            this.catalogs[pkg] = catalog;
+        }
+
+        for(var file in files) {
+            catalog[file] = files[file];
+        }
+    },
+
+    read : function(uri) {
+        var p = null;
+        for(var catalog in this.catalogs) {
+            var pkg   = zebkit.byName(catalog),
+                files = this.catalogs[catalog];
+
+            if (pkg === null) {
+                throw new ReferenceError("'" + catalog + "'");
+            }
+
+            p = new URI(uri).relative(pkg.$url);
+            if (p !== null && typeof files[p] !== 'undefined' && files[p] !== null) {
+                return files[p];
+            }
+        }
+        return null;
+    },
+
+    GET: function(uri) {
+        var f = ZFS.read(uri);
+        if (f !== null) {
+            return new DoIt(function() {
+                return {
+                    status      : 200,
+                    statusText  : "",
+                    extension   : f.ext,
+                    responseText: f.data
+                };
+            });
+        } else {
+            return GET(uri);
+        }
+    }
+};
 
 /**
  * Dump the given error to output.
@@ -193,9 +245,22 @@ function image(ph, fireErr) {
     if (arguments.length < 2) {
         fireErr = false;
     }
+    var doit   = new DoIt(),
+        jn     = doit.join(),
+        marker = "data:image";
 
-    var d  = new DoIt(),
-        jn = d.join();
+    if (isString(ph) && ph.length > marker.length) {
+        // use "for" instead of "indexOf === 0"
+        var i = 0;
+        for(; i < marker.length && marker[i] === ph[i]; i++);
+
+        if (i < marker.length) {
+            var file = ZFS.read(ph);
+            if (file !== null) {
+                ph = "data:image/" + file.ext +  ";base64," + file.data;
+            }
+        }
+    }
 
     $zenv.loadImage(ph,
         function(img) {
@@ -203,13 +268,13 @@ function image(ph, fireErr) {
         },
         function(img, e) {
             if (fireErr === true) {
-                d.error(e);
+                doit.error(e);
             } else {
                 jn(img);
             }
         }
     );
-    return d;
+    return doit;
 }
 
 //  Faster match operation analogues:
@@ -461,6 +526,10 @@ function URI(uri) {
         this.port   = uri.port;
         this.scheme = uri.scheme;
     } else {
+        if (uri === null || uri.trim().length === 0) {
+            throw new Error("Invalid empty URI");
+        }
+
         var m = uri.match($uriRE);
         if (m === null) {
             throw new Error("Invalid URI '" + uri + "'");
@@ -496,16 +565,19 @@ function URI(uri) {
     }
 
     if (this.path !== null) {
-        this.path = this.path.replace(/\/\/*/g, '/');
-
-        var l = this.path.length;
-        if (l > 1 && this.path[l - 1] === '/') {
-            this.path = this.path.substring(0, l - 1);
-        }
+        this.path = URI.normalizePath(this.path);
 
         if ((this.host !== null || this.scheme !== null) && this.path[0] !== '/') {
             this.path = "/" + this.path;
         }
+    }
+
+    if (this.scheme !== null) {
+        this.scheme = this.scheme.toLowerCase();
+    }
+
+    if (this.host !== null) {
+        this.host = this.host.toLowerCase();
     }
 
     /**
@@ -621,7 +693,43 @@ URI.prototype = {
     join : function() {
         var args = Array.prototype.slice.call(arguments);
         args.splice(0, 0, this.toString());
-        return URI.apply(URI, args);
+        return URI.join.apply(URI, args);
+    },
+
+    /**
+     * Test if the given URL is file path.
+     * @return {Boolean} true if the URL is file path
+     * @method isFilePath
+     */
+    isFilePath : function() {
+        return this.scheme === null || this.scheme === 'file';
+    },
+
+    /**
+     * Get an URI relative to the given URI.
+     * @param  {String|zebkit.URI} to an URI to that the relative URI has to be detected.
+     * @return {String} a relative URI
+     * @method relative
+     */
+    relative : function(to) {
+        if ((to instanceof URI) === false) {
+            to = new URI(to);
+        }
+
+        if (this.isAbsolute()                                                      &&
+            to.isAbsolute()                                                        &&
+            this.host === to.host                                                  &&
+            this.port === to.port                                                  &&
+            (this.scheme === to.scheme || (this.isFilePath() && to.isFilePath()) ) &&
+            (this.path.indexOf(to.path) === 0 && (to.path.length === this.path.length ||
+                                                  (to.path.length === 1 && to.path[0] === '/') ||
+                                                  this.path[to.path.length] ===  '/'     )))
+        {
+            return (to.path.length === 1 && to.path[0] === '/') ? this.path.substring(to.path.length)
+                                                                : this.path.substring(to.path.length + 1);
+        } else {
+            return null;
+        }
     }
 };
 
@@ -645,6 +753,21 @@ URI.isAbsolute = function(u) {
  */
 URI.isURL = function(u) {
     return /^[a-zA-Z]+\:\/\//i.test(u);
+};
+
+/**
+ * Get a relative path.
+ * @param  {String|zebkit.URI} base a base path
+ * @param  {String|zebkit.URI} path a path
+ * @return {String} a relative path
+ * @method relative
+ * @static
+ */
+URI.relative = function(base, path) {
+    if ((path instanceof URI) === false) {
+        path = new URI(path);
+    }
+    return path.relative(base);
 };
 
 /**
@@ -718,6 +841,26 @@ URI.decodeQSValue = function(value) {
     }
 };
 
+URI.normalizePath = function(p) {
+    if (p !== null && p.length > 0) {
+        p = p.trim().replace(/[\\]+/g, '/');
+        for (; ; ) {
+            var len = p.length;
+            p = p.replace(/[^./]+[/]+\.\.[/]+/g, '');
+            p = p.replace(/[\/]+/g, '/');
+            if (p.length == len) {
+                break;
+            }
+        }
+
+        var l = p.length;
+        if (l > 1 && p[l - 1] === '/') {
+            p = p.substring(0, l - 1);
+        }
+    }
+
+    return p;
+};
 
 /**
  * Convert the given dictionary of parameters to a query string.
@@ -745,36 +888,43 @@ URI.toQS = function(obj, encode) {
 
 /**
  * Join the given  paths
- * @param  {String} p* relative paths
- * @return {String} an absolute URI
+ * @param  {String|zebkit.URI} p* relative paths
+ * @return {String} a joined path as string
  * @method join
  * @static
  */
 URI.join = function() {
-    var pu = new URI(arguments[0]);
+    if (arguments.length === 0) {
+        throw new Error("No paths to join");
+    }
 
+    var uri = new URI(arguments[0]);
     for(var i = 1; i < arguments.length; i++) {
-        var p = arguments[i].toString().trim();
-        if (p.length === 0 || URI.isAbsolute(p)) {
+        var p = arguments[i];
+
+        if (p === null || p.length === 0) {
+            throw new Error("Empty sub-path is not allowed");
+        }
+
+        if (URI.isAbsolute(p)) {
             throw new Error("Absolute path '" + p + "' cannot be joined");
         }
 
-        p = p.replace(/\/\/*/g, '/');
-        if (p[p.length - 1] === '/' ) {
-            p = p.substring(0, p.length - 1);
+        if (p instanceof URI) {
+            p = arguments[i].path;
+        } else {
+            p = new URI(p).path;
         }
 
-        if (pu.path === null) {
-            pu.path = p;
-            if ((pu.host !== null || pu.scheme !== null) && pu.path[0] !== '/') {
-                pu.path = "/" + pu.path;
-            }
-        } else {
-            pu.path = pu.path + "/" + p;
+        if (p.length === 0) {
+            throw new Error("Empty path cannot be joined");
         }
+
+        uri.path = uri.path + (uri.path === '/' ? '' : "/") + p;
     }
 
-    return pu.toString();
+    uri.path = URI.normalizePath(uri.path);
+    return uri.toString();
 };
 
 $export(
@@ -784,6 +934,7 @@ $export(
     properties, GET,      isBoolean, DoIt,
     { "$global"    : $global,
       "$FN"        : $FN,
+      "ZFS"        : ZFS,
       "environment": $zenv,
       "isIE"       : isIE,
       "isFF"       : isFF,

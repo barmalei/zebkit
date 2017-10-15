@@ -3051,15 +3051,71 @@ if (typeof(zebkit) === "undefined") {
             assert(zebkit.instanceOf(naa, I1), false);
         },
 
-        function test_Path() {
+        function test_URI() {
+            var URI = zebkit.URI;
+
+            assert(URI.normalizePath(""), "", "URI.normalize() 1");
+            assert(URI.normalizePath("//dsd//"), "/dsd", "URI.normalizePath() 2");
+            assert(URI.normalizePath("b///"), "b", "URI.normalizePath() 3");
+            assert(URI.normalizePath("a\\bc/ds//dd"), "a/bc/ds/dd", "URI.normalize() 4");
+            assert(URI.normalizePath("\\a/..//\\bc/ds//dd"), "/bc/ds/dd", "URI.normalize() 5");
+            assert(URI.normalizePath("..\\bc/ds//dd/"), "../bc/ds/dd", "URI.normalize() 6");
+            assert(URI.normalizePath("..\\bc/..//\\ds//dd/"), "../ds/dd", "URI.normalize() 7");
+            assert(URI.normalizePath("m/../\\b/"), "b", "URI.normalize() 8");
+            assert(URI.normalizePath("m/..//b/"), "b", "URI.normalize() 9");
+
+
+            var u  = new URI("http://test.com/d");
+            assert(u.join("a", "b", "c"), "http://test.com/d/a/b/c", "URI.join() 1");
+            assert(u.join("a", "b/", "c"), "http://test.com/d/a/b/c", "URI.join() 2");
+            assert(u.join("a", "b///", "c"), "http://test.com/d/a/b/c", "URI.join() 3");
+            assert(u.join("a", "b///"), "http://test.com/d/a/b", "URI.join() 4");
+
+            var u  = new URI("http://test.com/d/");
+            assert(u.join("a", "b", "c"), "http://test.com/d/a/b/c", "URI.join() 6");
+            assert(u.join("a", "b/", "c"), "http://test.com/d/a/b/c", "URI.join() 7");
+            assert(u.join("a", "b///", "c"), "http://test.com/d/a/b/c", "URI.join() 8");
+            assert(u.join("a", "b///"), "http://test.com/d/a/b", "URI.join() 9");
+
+            var u  = new URI("http://test.com/");
+            assert(u.join("a", "b", "c"), "http://test.com/a/b/c", "URI.join() 10");
+            assert(u.join("a", "b/", "c"), "http://test.com/a/b/c", "URI.join() 11");
+            assert(u.join("a", "b///", "c"), "http://test.com/a/b/c", "URI.join() 12");
+            assert(u.join("a", "b///"), "http://test.com/a/b", "URI.join() 13");
+
+            var u  = new URI("http://test.com");
+            assert(u.join("a", "b", "c"), "http://test.com/a/b/c", "URI.join() 14");
+            assert(u.join("a", "b/", "c"), "http://test.com/a/b/c", "URI.join() 15");
+            assert(u.join("a", "b///", "c"), "http://test.com/a/b/c", "URI.join() 16");
+            assert(u.join("a", "b///"), "http://test.com/a/b", "URI.join() 17");
+
+            var u  = "/d";
+            assert(URI.join(u, "a", "b", "c"), "/d/a/b/c", "URI.join() 18");
+            assert(URI.join(u, "a", "m/..//\\//b///", "c"), "/d/a/b/c", "URI.join() 19");
+            assert(URI.join(u, "a", "b///", "c"), "/d/a/b/c", "URI.join() 20");
+            assert(URI.join(u, "a", "b///"), "/d/a/b", "URI.join() 21");
+
+
+            var u  = "d";
+            assert(URI.join(u, "a", "b", "c"), "d/a/b/c", "URI.join() 22");
+            assert(URI.join(u, "a", "m/../\\b/", "c"), "d/a/b/c", "URI.join() 23");
+            assert(URI.join(u, "a", "b///", "c"), "d/a/b/c", "URI.join() 24");
+            assert(URI.join(u, "a", "b///"), "d/a/b", "URI.join() 25");
+            assert(URI.join(u, "a", "../b///"), "d/b", "URI.join() 26");
+
             var paths = {
-                "" : {
+                "/" : {
                     host: null,
                     port: -1,
-                    path: null,
+                    path: "/",
                     scheme: null,
                     qs    : null,
-                    parent: null
+                    parent: null,
+                    relative: {
+                        "a" : null,
+                        "aa/bb" : null,
+                        "http://test.com": null
+                    }
                 },
 
                 "abcd": {
@@ -3068,7 +3124,14 @@ if (typeof(zebkit) === "undefined") {
                     path: "abcd",
                     scheme: null,
                     qs    : null,
-                    parent: null
+                    parent: null,
+                    relative: {
+                        "abcd" : null,
+                        "ab" : null,
+                        "cd" : null,
+                        "aa/bb" : null,
+                        "http://test.com": null
+                    }
                 },
 
                 "ftp://com.net/test": {
@@ -3077,7 +3140,18 @@ if (typeof(zebkit) === "undefined") {
                     path: "/test",
                     scheme: "ftp",
                     qs    : null,
-                    parent: "ftp://com.net/"
+                    parent: "ftp://com.net/",
+                    relative: {
+                        "abcd" : null,
+                        "ftp://com.net" : null,
+                        "ftp://com.net/" : "test",
+                        "ftp://com.net" : "test",
+                        "ftp://com.net/te" : null,
+                        "ftp://com.Net/test" : '',
+                        "ftp://Com.net/test/" : '',
+                        "ftp://Com.net/TEST/" : null,
+                        "FTP://Com.net/test/" : ''
+                    }
                 },
 
                 "http://com.net:9089/test/aaa/": {
@@ -3086,7 +3160,71 @@ if (typeof(zebkit) === "undefined") {
                     path: "/test/aaa",
                     scheme: "http",
                     qs    : null,
-                    parent: "http://com.net:9089/test"
+                    parent: "http://com.net:9089/test",
+                    relative: {
+                        "abcd" : null,
+                        "http://com.net" : null,
+                        "http://com.net:8080" : null,
+                        "http://com.net:9089" : "test/aaa",
+                        "http://com.net:9089/" : "test/aaa",
+                        "http://com.net:9089/test" : "aaa",
+                        "http://com.net:9089/test/" : "aaa",
+                        "http://com.net:9089/test/aaa" : "",
+                        "ftp://com.net:9089/test" : null,
+                        "http://com.net:9089/test/aa" : null
+                    }
+                },
+
+                "http://com.net:9089/": {
+                    host: "com.net",
+                    port: 9089,
+                    path: "/",
+                    scheme: "http",
+                    qs    : null,
+                    parent: null,
+                    relative: {
+                        "abcd" : null,
+                        "http://com.net" : null,
+                        "http://com.net:8080" : null,
+                        "http://com.net:9089" : "",
+                        "http://com.net:9089/" : "",
+                        "http://com.net:9089/aaa" : null
+                    }
+                },
+
+                "http://com.net:9089": {
+                    host: "com.net",
+                    port: 9089,
+                    path: "/",
+                    scheme: "http",
+                    qs    : null,
+                    parent: null
+                },
+
+                "http://com.net:9089?a=10": {
+                    host: "com.net",
+                    port: 9089,
+                    path: "/",
+                    scheme: "http",
+                    qs    : "a=10",
+                    parent: null,
+                    relative: {
+                        "abcd" : null,
+                        "http://com.net" : null,
+                        "http://com.net:8080" : null,
+                        "http://com.net:9089" : "",
+                        "http://com.net:9089/" : "",
+                        "http://com.net:9089/aaa" : null
+                    }
+                },
+
+                "http://com.net:9089/?a=10": {
+                    host: "com.net",
+                    port: 9089,
+                    path: "/",
+                    scheme: "http",
+                    qs    : "a=10",
+                    parent: null
                 },
 
                 "/com/test1": {
@@ -3095,7 +3233,16 @@ if (typeof(zebkit) === "undefined") {
                     path: "/com/test1",
                     scheme: null,
                     qs    : null,
-                    parent: "/com"
+                    parent: "/com",
+                    relative: {
+                        "abcd" : null,
+                        "/com" : "test1",
+                        "/com/" : "test1",
+                        "/com/test1" : '',
+                        "/com/test1/" : '',
+                        "/com/test" : null,
+                        "/" : "com/test1"
+                    }
                 },
 
                 "com/test1": {
@@ -3104,7 +3251,14 @@ if (typeof(zebkit) === "undefined") {
                     path: "com/test1",
                     scheme: null,
                     qs    : null,
-                    parent: "com"
+                    parent: "com",
+                    relative: {
+                        "abcd" : null,
+                        "com" : null,
+                        "com/" : null,
+                        "/com" : null,
+                        "/com/" : null
+                    }
                 },
 
                 "file:///com/test1": {
@@ -3113,15 +3267,32 @@ if (typeof(zebkit) === "undefined") {
                     path: "/com/test1",
                     scheme: "file",
                     qs    : null,
-                    parent: "file:///com"
+                    parent: "file:///com",
+                    relative: {
+                        "abcd" : null,
+                        "com" : null,
+                        "/com/" : "test1",
+                        "/com" : "test1",
+                        "/com/test1" : "",
+                        "/" : "com/test1"
+                    }
                 },
+
                 "file:///com/test1?a=10": {
                     host: null,
                     port: -1,
                     path: "/com/test1",
                     scheme: "file",
                     qs    : "a=10",
-                    parent: "file:///com?a=10"
+                    parent: "file:///com?a=10",
+                    relative: {
+                        "abcd" : null,
+                        "com" : null,
+                        "/com/" : "test1",
+                        "/com" : "test1",
+                        "/com/test1" : "",
+                        "/" : "com/test1"
+                    }
                 },
 
                 "file:///com/test1?aaa": {
@@ -3143,6 +3314,7 @@ if (typeof(zebkit) === "undefined") {
                 }
             };
 
+            var i = 0;
             for(var k in paths) {
                 var r = paths[k],
                     u = new zebkit.URI(k);
@@ -3152,7 +3324,22 @@ if (typeof(zebkit) === "undefined") {
                 assert(r.qs, u.qs, "URI assert 4 '" + k + "'");
                 assert(r.path, u.path, "URI assert 5 '" + k + "'");
                 assert(r.parent, u.getParent() === null ? null : u.getParent().toString(), "URI assert 6 '" + k + "'");
+
+                if (r.relative) {
+                    j = 0;
+                    for(var rel in r.relative) {
+                        assert(u.relative(rel), r.relative[rel], "URI assert target: '" + k +  "' rel : " + rel + "("+ j + "," + i + ") '" + k + "'");
+                        j++;
+                    }
+                }
+                i++;
             }
+
+            var r = zebkit.URI.parseQS("a=10");
+            assertObjEqual(r, { a: '10' });
+            var r = zebkit.URI.parseQS("a=10&test=2&a.b.cc=true");
+            assertObjEqual(r, { a: '10',  test: '2', "a.b.cc" : 'true'});
+
         },
 
         function test_events() {
@@ -3227,6 +3414,7 @@ if (typeof(zebkit) === "undefined") {
         },
 
         function _test_perf() {
+
             var NA = function(argument) {
             }
 
@@ -3326,6 +3514,3 @@ if (typeof(zebkit) === "undefined") {
         }
     );
 })();
-
-
-

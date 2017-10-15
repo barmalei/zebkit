@@ -1,0 +1,12 @@
+{
+    "valve": "%{./vars.json?testx=18}",
+
+    "myClassInstance" : {
+        "@A" : [],
+        "id" : "%{valve.id}"
+    },
+
+
+    "k1" : "%{test}",
+    "k2" : "{test2}"
+}

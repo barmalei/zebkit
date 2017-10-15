@@ -14,6 +14,7 @@ var assert = zebkit.assert,
     Class = zebkit.Class,
     Zson = zebkit.Zson,
     assertException = zebkit.assertException,
+    assertNoException = zebkit.assertNoException,
     assertObjEqual = zebkit.assertObjEqual;
 
 
@@ -69,6 +70,7 @@ zebkit.runTests("util objects bag",
         assert(Array.isArray(b.root), true);
 
         assertException(function() { b.get("ds"); }, "exception 1");
+        assertNoException(function() { b.get("?ds"); }, "exception 11");
         assertException(function() { b.then("").throw(); }, "exception 2");
         assertException(function() { b.get(null); }, "exception 3");
         assertException(function() { b.get(undefined); }, "exception 4");
@@ -483,7 +485,7 @@ zebkit.runTests("util objects bag",
     },
 
     function test_complex_refs() {
-        var bag = new Zson(), completed = false;
+        var bag = new Zson();
         bag.then("http://localhost:8090/tests/zson.test.json")
            .then(function(r) {
                 assert(arguments.length, 1, "assert complex refs 0");
@@ -525,6 +527,161 @@ zebkit.runTests("util objects bag",
             }).catch(function(e) {
                 zebkit.dumpError(e);
             });
+
+
+        var bag2 = new Zson(), json = {
+            "test1" : {
+                "a"  : "%{<json> http://localhost:8090/tests/zson.test.1.1.json}",
+                "b"  : "%{<json> http://localhost:8090/tests/zson.test.1.2.json}",
+                "c"  : "%{<json> http://localhost:8090/tests/zson.test.1.3.json}",
+                "d"  : "%{test1.b.test}"
+            },
+
+            "test2" : {
+                "a": "%{test1.a.test}",
+                "b": {
+                    "test": "%{test1.c.test}",
+                    "a"   : {
+                        "test": "%{test1.c.a.test}"
+                    }
+                },
+                "c" : "%{test1.d}",
+                "e" : "%{test1.a}"
+            },
+
+            "test3" : {
+                "a"    : "%{<json> http://localhost:8090/tests/zson.test.1.2.1.json}",
+                "clz"   : "%{test1.b.clz}",
+                "test2" : "Hello",
+                "test"  : 999
+            },
+
+            "test4" : {
+                "test" : "%{test1.a.test}",
+                "test2" : "hello2"
+            }
+        };
+
+        bag2.then(json)
+           .then(function(r) {
+                assert(arguments.length, 1, "assert complex refs 0");
+                assert(r === bag2, true, "assert complex refs 00");
+
+                r = r.root;
+                assert(r.test1.a.test, 100, "assert complex refs 1");
+                assert(r.test1.a.test2, "Hello", "assert complex refs 2");
+                assert(r.test1.b.test, 200, "assert complex refs 3");
+                assert(r.test1.b.a.test, 300, "assert complex refs 4");
+                assert(r.test1.b.a.a, "???", "assert complex refs 5");
+                assert(r.test1.b.clz instanceof Date, true, "assert complex refs 6");
+                assert(r.test1.c.test, 800, "assert complex refs 7");
+                assert(r.test1.c.a.test, 300, "assert complex refs 8");
+                assert(r.test1.c.a.a, "???", "assert complex refs 9");
+                assert(r.test1.d, 200, "assert complex refs 10");
+
+                assert(r.test2.a, 100, "assert complex refs 11");
+                assert(r.test2.b.test, 800, "assert complex refs 12");
+                assert(r.test2.b.a.test, 300, "assert complex refs 13");
+
+                assert(r.test2.c, 200, "assert complex refs 1");
+
+                zebkit.assertObjEqual(r.test3, {
+                    "test" : 999,
+                    "test2": "Hello",
+                    "a": {
+                        "test": 300,
+                        "a": "???"
+                    },
+                    "clz": r.test1.b.clz
+                }, "assert complex refs 14");
+
+                zebkit.assertObjEqual(r.test4, {
+                    "test" : 100,
+                    "test2": "hello2"
+                }, "assert complex refs 15");
+
+            }).catch(function(e) {
+                zebkit.dumpError(e);
+            });
+
+
+            json = {
+                "test1" : {
+                    "a"  : "%{<json> zson.test.1.1.json}",
+                    "b"  : "%{<json> zson.test.1.2.json}",
+                    "c"  : "%{<json> zson.test.1.3.json}",
+                    "d"  : "%{test1.b.test}"
+                },
+
+                "test2" : {
+                    "a": "%{test1.a.test}",
+                    "b": {
+                        "test": "%{test1.c.test}",
+                        "a"   : {
+                            "test": "%{test1.c.a.test}"
+                        }
+                    },
+                    "c" : "%{test1.d}",
+                    "e" : "%{test1.a}"
+                },
+
+                "test3" : {
+                    "a"    : "%{<json> zson.test.1.2.1.json}",
+                    "clz"   : "%{test1.b.clz}",
+                    "test2" : "Hello",
+                    "test"  : 999
+                },
+
+                "test4" : {
+                    "test" : "%{test1.a.test}",
+                    "test2" : "hello2"
+                }
+            };
+
+            var bag3 = new Zson();
+            bag3.baseUri = "http://localhost:8090/tests";
+            bag3.then(json)
+               .then(function(r) {
+                    assert(arguments.length, 1, "assert complex refs 0");
+                    assert(r === bag3, true, "assert complex refs 00");
+
+                    r = r.root;
+                    assert(r.test1.a.test, 100, "assert complex refs 1");
+                    assert(r.test1.a.test2, "Hello", "assert complex refs 2");
+                    assert(r.test1.b.test, 200, "assert complex refs 3");
+                    assert(r.test1.b.a.test, 300, "assert complex refs 4");
+                    assert(r.test1.b.a.a, "???", "assert complex refs 5");
+                    assert(r.test1.b.clz instanceof Date, true, "assert complex refs 6");
+                    assert(r.test1.c.test, 800, "assert complex refs 7");
+                    assert(r.test1.c.a.test, 300, "assert complex refs 8");
+                    assert(r.test1.c.a.a, "???", "assert complex refs 9");
+                    assert(r.test1.d, 200, "assert complex refs 10");
+
+                    assert(r.test2.a, 100, "assert complex refs 11");
+                    assert(r.test2.b.test, 800, "assert complex refs 12");
+                    assert(r.test2.b.a.test, 300, "assert complex refs 13");
+
+                    assert(r.test2.c, 200, "assert complex refs 1");
+
+                    zebkit.assertObjEqual(r.test3, {
+                        "test" : 999,
+                        "test2": "Hello",
+                        "a": {
+                            "test": 300,
+                            "a": "???"
+                        },
+                        "clz": r.test1.b.clz
+                    }, "assert complex refs 14");
+
+                    zebkit.assertObjEqual(r.test4, {
+                        "test" : 100,
+                        "test2": "hello2"
+                    }, "assert complex refs 15");
+
+                }).catch(function(e) {
+                    zebkit.dumpError(e);
+                });
+
     },
 
     function test_load_image() {
@@ -817,6 +974,48 @@ zebkit.runTests("util objects bag",
             assert(r.c.kids.clz instanceof Date, true, "test_class_asyncprops_and_constructor 20");
 
         }).catch();
+    },
+
+    function test_test() {
+        A = Class([
+            function setA(a) {
+                this.a = a;
+            }
+        ])
+
+        B = Class([
+            function setM(m) {
+                this.m = m;
+            }
+        ])
+
+        var z1 = `{
+                "variables" : {
+                    "id" : "MyID"
+                }
+            }
+        `;
+
+        var z2 = `{
+                "@A": [],
+                "id" : "%{id}"
+            }
+        `;
+
+        // Zson.then(z1, function(zson) {
+        //     var zs = new Zson(zson.root);
+        //     zs.usePropertySetters = false;
+        //     zs.then(z2, function(zson_) {
+        //         zson.root; // get result here
+        //     }).catch();
+        // }).catch();
+
+        var zs = new Zson();
+//        zs.$variables = { id2 : 333333 };
+        zs.then("http://localhost:8090/tests/defs.json?test=312323", function(zson) {
+
+        }).catch();
+
     },
 
     function test_prom() {

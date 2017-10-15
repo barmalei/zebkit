@@ -59,46 +59,53 @@ The latest version of previous generation of zebkit (zebra) can be found as "zeb
 
 Zebkit works in MS Internet Explorer 10+, MS Edge, FireFox 3+, Safari 5+, Google Chrome. It should support iOS 7+ and Android 4+ mobile browsers.
 
-Zebkit requires nodejs to be installed. If you plan to re-generate zebkit web site you have to install jekyll (https://jekyllrb.com/). If you plan to re-generate am API Doc you have to install "yuidoc" as follow:
+Zebkit requires nodejs to be installed. If you plan to re-generate zebkit web site you have to install jekyll (https://jekyllrb.com/). If you plan to re-generate an API Doc you have to install "yuidoc" as follow:
 
 ```bash
-  $npm install -g yuidocjs
+  npm install -g yuidocjs
 ```
+
+Zebkit uses "gulp" as building tools. To install it type the following in a terminal:
+
+```bash
+  npm install gulp-cli -g
+```
+
 
 # Installation 
 
 To install required nodejs packages run the following command from zebkit home folder: 
 ```bash
-    $ npm install
+    npm install
 ```
 
 # Building zebkit artifacts
 
 To build major zebkit artifacts (JS code) run the following command:
 ```bash
-   $ gulp
+   gulp
 ```
 
 To build runtime zip package (find it in "build" folder): 
 ```bash
-   $ gulp runtime
+   gulp runtime
 ```
 
 To generate API doc run the following command (find generated light and dark versions of API doc in "apidoc/light" and "apidoc/dark" folders correspondingly):
 ```bash
-   $ gulp apidoc
+   gulp apidoc
 ```
 
 If you have installed jekyll you can initiate zebkit WEB site re-generation with the following command (find generated light and dark website versions in "website/light" and "website/dark" folders correspondingly):
 ```bash
-   $ gulp website
+   gulp website
 ```
 
 
 # Run http server and view web site 
 
 ```bash
-   $ gulp http
+   gulp http
 ```
 
 Open zebkit WEB site "http://localhost:8090/index.html" in a browser.

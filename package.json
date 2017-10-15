@@ -33,6 +33,7 @@
     "gulp-insert": "latest",
     "xmlhttprequest": "latest",
     "jshint": "latest",
+    "cross-spawn": "latest",
     "minimatch" : "latest",
     "yuidoc-zebkit-theme": "https://github.com/barmalei/yuidoc-zebkit-theme"
   },

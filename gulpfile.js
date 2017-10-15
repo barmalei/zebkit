@@ -11,7 +11,7 @@
 //            ['apidoc']           ['runtime']          ['website']
 //
 
-var gulp   = require('gulp'), fs   = require('fs'), spawn = require('child_process').spawn,
+var gulp   = require('gulp'), fs   = require('fs'), spawn = require('cross-spawn'),
     path   = require('path'), argv = require('yargs').argv,
     jshint = require('gulp-jshint'), copy      = require('gulp-copy'),
     concat = require('gulp-concat'), wrap      = require("gulp-wrap"),

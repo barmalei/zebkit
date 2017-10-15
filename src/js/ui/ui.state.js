@@ -6,26 +6,25 @@ zebkit.package("ui", function(pkg, Class) {
      * by developers. To bind a view to the specified state use zebkit.draw.ViewSet
      * class. For instance if a component has to support two states : "state1" and
      * "state2" you can do it as following:
-
-            // create state component
-            var p = new zebkit.ui.StatePan();
-
-            // define border view that contains views for "state1" and "state2"
-            p.setBorder({
-                "state1": new zebkit.draw.Border("red", 1),
-                "state1": new zebkit.draw.Border("blue", 2)
-
-            });
-
-            // define background view that contains views for "state1" and "state2"
-            p.setBackground({
-                "state1": "yellow",
-                "state1": "green"
-            });
-
-            // set component state
-            p.setState("state1");
-
+     *
+     *     // create state component
+     *     var p = new zebkit.ui.StatePan();
+     *
+     *     // define border view that contains views for "state1" and "state2"
+     *     p.setBorder({
+     *         "state1": new zebkit.draw.Border("red", 1),
+     *         "state1": new zebkit.draw.Border("blue", 2)
+     *     });
+     *
+     *     // define background view that contains views for "state1" and "state2"
+     *     p.setBackground({
+     *         "state1": "yellow",
+     *         "state1": "green"
+     *     });
+     *
+     *     // set component state
+     *     p.setState("state1");
+     *
      * State component children components can listening when the state of the component
      * has been updated by implementing "parentStateUpdated(o,n,id)" method. It gets old
      * state, new state and a view id that is mapped to the new state.  The feature is
@@ -69,6 +68,9 @@ zebkit.package("ui", function(pkg, Class) {
              * @return {String} a view ID
              * @method toViewId
              */
+            this.toViewId = function(st) {
+                return st;
+            };
 
             /**
              * Called every time the component state has been updated
@@ -78,7 +80,7 @@ zebkit.package("ui", function(pkg, Class) {
              */
             this.stateUpdated = function(o, n) {
                 var b  = false,
-                    id = (typeof this.toViewId !== 'undefined' ? this.toViewId(n) : n);
+                    id = this.toViewId(n);
 
                 if (id !== null) {
                     for(var i = 0; i < this.kids.length; i++) {
@@ -128,7 +130,7 @@ zebkit.package("ui", function(pkg, Class) {
             return this;
         },
 
-        function setBorder(v){
+        function setBorder(v) {
             if (v != this.border){
                 this.$super(v);
                 this.syncState(this.state, this.state);
@@ -142,250 +144,32 @@ zebkit.package("ui", function(pkg, Class) {
                 this.syncState(this.state, this.state);
             }
             return this;
-        }
-    ]);
-
-    /**
-     * Event state panel class. The class implements UI component whose face, border and
-     * background view depends on its input events state. The component is good basis
-     * for creation  dynamic view UI components.The state the component can be is:
-     *
-     *   - **over** the pointer cursor is inside the component
-     *   - **out** the pointer cursor is outside the component
-     *   - **pressed over** the pointer cursor is inside the component and an action pointer
-     *     button or key is pressed
-     *   - **pressed out** the pointer cursor is outside the component and an action pointer
-     *     button or key is pressed
-     *   - **disabled** the component is disabled
-     *
-     * The view border, background or face should be set as "zebkit.draw.ViewSet" where an required
-     * for the given component state view is identified by an id. By default corresponding to
-     * component states views IDs are the following: "over", "pressed.over", "out", "pressed.out",
-     * "disabled".  Imagine for example we have two colors and we need to change between the colors
-     * every time pointer cursor is over/out of the component:
-
-         // create state panel
-         var statePan = new zebkit.ui.EvStatePan();
-
-         // add dynamically updated background
-         statePan.setBackground(new zebkit.draw.ViewSet({
-            "over": "red",
-            "out": "blue"
-         }));
-
-     * Alone with background border view can be done also dynamic
-
-         // add dynamically updated border
-         statePan.setBorder(new zebkit.draw.ViewSet({
-            "over": new zebkit.draw.Border("green", 4, 8),
-            "out": null
-         }));
-
-     * Additionally the UI component allows developer to specify whether the component can hold
-     * input focus and which UI component has to be considered as the focus marker. The focus marker
-     * component is used as anchor to paint focus marker view. In simple case the view can be just
-     * a border. So border will be rendered around the focus marker component:
-
-         // create state panel that contains one label component
-         var statePan = new zebkit.ui.EvStatePan();
-         var lab      = new zebkit.ui.Label("Focus marker label");
-         lab.setPadding(6);
-         statePan.setPadding(6);
-         statePan.setLayout(new zebkit.layout.BorderLayout());
-         statePan.add("center", lab);
-
-         // set label as an anchor for focus border indicator
-         statePan.setFocusAnchorComponent(lab);
-         statePan.setFocusMarkerView("plain");
-
-     * @class zebkit.ui.EvStatePan
-     * @constructor
-     * @extends zebkit.ui.StatePan
-     */
-    var OVER         = "over",
-        PRESSED_OVER = "pressed.over",
-        OUT          = "out",
-        PRESSED_OUT  = "pressed.out",
-        DISABLED     = "disabled";
-
-    pkg.EvStatePan = Class(pkg.StatePan,  [
-        function $prototype() {
-            this.state = OUT;
-            this.$isIn = false;
-
-            this.toViewId = function(state) {
-                return state;
-            };
-
-            this._keyPressed = function(e) {
-                if (this.state !== PRESSED_OVER &&
-                    this.state !== PRESSED_OUT  &&
-                    (e.code === "Enter" || e.code === "Space"))
-                {
-                    this.setState(PRESSED_OVER);
-                }
-            };
-
-            this._keyReleased = function(e) {
-                if (this.state === PRESSED_OVER || this.state === PRESSED_OUT){
-                    this.setState(OVER);
-                    if (this.$isIn === false) {
-                        this.setState(OUT);
-                    }
-                }
-            };
-
-            this._pointerEntered = function(e) {
-                if (this.isEnabled === true) {
-                    this.setState(this.state === PRESSED_OUT ? PRESSED_OVER : OVER);
-                    this.$isIn = true;
-                }
-            };
-
-            this._pointerPressed = function(e) {
-                if (this.state !== PRESSED_OVER && this.state !== PRESSED_OUT && e.isAction()){
-                    this.setState(PRESSED_OVER);
-                }
-            };
-
-            this._pointerReleased = function(e) {
-                if ((this.state === PRESSED_OVER || this.state === PRESSED_OUT) && e.isAction()){
-                    if (e.source === this) {
-                        this.setState(e.x >= 0 && e.y >= 0 && e.x < this.width && e.y < this.height ? OVER
-                                                                                                    : OUT);
-                    }
-                    else {
-                        var p = zebkit.layout.toParentOrigin(e.x, e.y, e.source, this);
-                        this.$isIn = p.x >= 0 && p.y >= 0 && p.x < this.width && p.y < this.height;
-                        this.setState(this.$isIn ? OVER : OUT);
-                    }
-                }
-            };
-
-            this.childKeyPressed = function(e) {
-                this._keyPressed(e);
-            };
-
-            this.childKeyReleased = function(e) {
-                this._keyReleased(e);
-            };
-
-            this.childPointerEntered = function(e) {
-                this._pointerEntered(e);
-            };
-
-            this.childPointerPressed = function(e) {
-                this._pointerPressed(e);
-            };
-
-            this.childPointerReleased = function(e) {
-                this._pointerReleased(e);
-            };
-
-            this.childPointerExited = function(e) {
-                // check if the pointer cursor is in of the source component
-                // that means another layer has grabbed control
-                if (e.x >= 0 && e.y >= 0 && e.x < e.source.width && e.y < e.source.height) {
-                    this.$isIn = false;
-                }
-                else {
-                    var p = zebkit.layout.toParentOrigin(e.x, e.y, e.source, this);
-                    this.$isIn = p.x >= 0 && p.y >= 0 && p.x < this.width && p.y < this.height;
-                }
-
-                if (this.$isIn === false) {
-                    this.setState(this.state === PRESSED_OVER ? PRESSED_OUT : OUT);
-                }
-            };
-
-            /**
-             * Define key pressed events handler
-             * @param  {zebkit.ui.event.KeyEvent} e a key event
-             * @method keyPressed
-             */
-            this.keyPressed = function(e){
-                this._keyPressed(e);
-            };
-
-            /**
-             * Define key released events handler
-             * @param  {zebkit.ui.event.KeyEvent} e a key event
-             * @method keyReleased
-             */
-            this.keyReleased = function(e){
-                this._keyReleased(e);
-            };
-
-            /**
-             * Define pointer entered events handler
-             * @param  {zebkit.ui.event.PointerEvent} e a key event
-             * @method pointerEntered
-             */
-            this.pointerEntered = function (e){
-                this._pointerEntered();
-            };
-
-            /**
-             * Define pointer exited events handler
-             * @param  {zebkit.ui.event.PointerEvent} e a key event
-             * @method pointerExited
-             */
-            this.pointerExited = function(e){
-                if (this.isEnabled === true) {
-                    this.setState(this.state === PRESSED_OVER ? PRESSED_OUT : OUT);
-                    this.$isIn = false;
-                }
-            };
-
-            /**
-             * Define pointer pressed events handler
-             * @param  {zebkit.ui.event.PointerEvent} e a key event
-             * @method pointerPressed
-             */
-            this.pointerPressed = function(e){
-                this._pointerPressed(e);
-            };
-
-            /**
-             * Define pointer released events handler
-             * @param  {zebkit.ui.event.PointerEvent} e a key event
-             * @method pointerReleased
-             */
-            this.pointerReleased = function(e){
-                this._pointerReleased(e);
-            };
-
-            /**
-             * Define pointer dragged events handler
-             * @param  {zebkit.ui.event.PointerEvent} e a key event
-             * @method pointerDragged
-             */
-            this.pointerDragged = function(e){
-                if (e.isAction()) {
-                    var pressed = (this.state === PRESSED_OUT || this.state === PRESSED_OVER);
-                    if (e.x > 0 && e.y > 0 && e.x < this.width && e.y < this.height) {
-                        this.setState(pressed ? PRESSED_OVER : OVER);
-                    } else {
-                        this.setState(pressed ? PRESSED_OUT : OUT);
-                    }
-                }
-            };
         },
 
         function setEnabled(b) {
             this.$super(b);
-            this.setState(b ? OUT : DISABLED);
+            this.setState(b ? "out" : "disabled");
             return this;
         }
     ]);
 
+    // TODO: probably should be removed
     /**
-     * Composite event state panel
+     * Input events state panel.
+     * @class zebkit.ui.EvStatePan
+     * @extends {zebkit.ui.StatePan}
+     * @uses zebkit.ui.event.InputEventState
      * @constructor
-     * @extends zebkit.ui.EvStatePan
-     * @class  zebkit.ui.CompositeEvStatePan
      */
-    pkg.CompositeEvStatePan = Class(pkg.EvStatePan, [
+    pkg.EvStatePan = Class(pkg.StatePan, pkg.event.InputEventState, []);
+
+    /**
+     * Composite focusable interface. the interface adds support for focus marker
+     * view and anchor focus component.
+     * @class  zebkit.ui.FocusableComposite
+     * @interface  zebkit.ui.FocusableComposite
+     */
+    pkg.FocusableComposite = zebkit.Interface([
         function $prototype() {
             /**
              * Indicates if the component can have focus
@@ -431,7 +215,7 @@ zebkit.package("ui", function(pkg, Class) {
              */
             this.focusMarkerGaps = 2;
 
-            this.paintOnTop = function(g){
+            this.paintOnTop = function(g) {
                 var fc = this.focusComponent;
                 if (this.focusMarkerView !== null && fc !== null && this.hasFocus()) {
                     this.focusMarkerView.paint(g, fc.x - this.focusMarkerGaps,
@@ -450,7 +234,7 @@ zebkit.package("ui", function(pkg, Class) {
              * @method setFocusMarkerView
              * @chainable
              */
-            this.setFocusMarkerView = function (c){
+            this.setFocusMarkerView = function(c) {
                 if (c != this.focusMarkerView){
                     this.focusMarkerView = zebkit.draw.$view(c);
                     this.repaint();

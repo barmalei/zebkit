@@ -345,6 +345,25 @@ zebkit.package("ui.event", function(pkg, Class) {
                 return this;
             };
 
+            this.setLocation = function(x, y) {
+                if (this.source === null) {
+                    throw new Error("Unknown source component");
+                }
+
+                if (this.x !== x || this.y !== y) {
+                    this.absX = this.x = x;
+                    this.absY = this.y = y;
+
+                    // convert relative coordinates to absolute
+                    var source = this.source;
+                    while (source.parent !== null) {
+                        this.absX += source.x;
+                        this.absY += source.y;
+                        source = source.parent;
+                    }
+                }
+            };
+
             this.isAction = function() {
                 // TODO: actually this is abstract method
                 throw new Error("Not implemented");
@@ -539,7 +558,7 @@ zebkit.package("ui.event", function(pkg, Class) {
 
      // TODO: correct to event package
      //this.events = new pkg.EventManager();
-     zebkit.ui.events = new pkg.EventManager();
+    zebkit.ui.events = new pkg.EventManager();
 
      /**
       * Base class to implement clipboard manager.
@@ -547,20 +566,20 @@ zebkit.package("ui.event", function(pkg, Class) {
       * @constructor
       * @extends zebkit.ui.event.Manager
       */
-     pkg.Clipboard = Class(pkg.Manager, [
-         function $prototype() {
-             /**
-              * Get destination component. Destination component is a component that
-              * is currently should participate in clipboard data exchange.
-              * @return {zebkit.ui.Panel} a destination component.
-              * @method getDestination
-              */
-             this.getDestination = function() {
-                 //TODO: may be focusManager has to be moved to "ui.event" package
-                 return zebkit.ui.focusManager.focusOwner;
-             };
-         }
-     ]);
+    pkg.Clipboard = Class(pkg.Manager, [
+        function $prototype() {
+           /**
+            * Get destination component. Destination component is a component that
+            * is currently should participate in clipboard data exchange.
+            * @return {zebkit.ui.Panel} a destination component.
+            * @method getDestination
+            */
+            this.getDestination = function() {
+                //TODO: may be focusManager has to be moved to "ui.event" package
+                return zebkit.ui.focusManager.focusOwner;
+            };
+        }
+    ]);
 
      /**
       * Base class to implement cursor manager.
@@ -568,7 +587,7 @@ zebkit.package("ui.event", function(pkg, Class) {
       * @constructor
       * @extends zebkit.ui.event.Manager
       */
-     pkg.CursorManager = Class(pkg.Manager, [
+    pkg.CursorManager = Class(pkg.Manager, [
         function $prototype() {
             /**
              * Current cursor type
@@ -579,5 +598,224 @@ zebkit.package("ui.event", function(pkg, Class) {
              */
             this.cursorType = "default";
         }
+    ]);
+
+    /**
+     * Input events state handler interface. The interface implements pointer and key
+     * events handler to track the current state where State can have one of the following
+     * value:
+     *
+     *   - **over** the pointer cursor is inside the component
+     *   - **out** the pointer cursor is outside the component
+     *   - **pressed.over** the pointer cursor is inside the component and an action pointer
+     *     button or key is pressed
+     *   - **pressed.out** the pointer cursor is outside the component and an action pointer
+     *     button or key is pressed
+     *
+     * Every time a state has been updated "stateUpdated" method is called (if it implemented).
+     * The interface can be handy way to track typical states. For instance to implement a
+     * component that changes its view depending its state the following code can be used:
+     *
+     *    // create  panel
+     *    var pan = new zebkit.u.Panel();
+     *
+     *    // let's track the panel input events state and update
+     *    // the component background view depending the state
+     *    pan.extend(zebkit.ui.event.InputEventState, [
+     *        function stateUpdate(o, n) {
+     *            if (n === "over") {
+     *                this.setBackround("orange");
+     *            } else if (n === "out") {
+     *                this.setBackround("red");
+     *            } else {
+     *                this.setBackround(null);
+     *            }
+     *        }
+     *    ]);
+     *
+     *
+     * @class zebkit.ui.event.InputEventState
+     * @interface zebkit.ui.event.InputEventState
+     */
+
+    var OVER         = "over",
+        PRESSED_OVER = "pressed.over",
+        OUT          = "out",
+        PRESSED_OUT  = "pressed.out";
+
+    pkg.InputEventState = zebkit.Interface([
+        function $prototype() {
+            this.state = OUT;
+            this.$isIn = false;
+
+            this._keyPressed = function(e) {
+                if (this.state !== PRESSED_OVER &&
+                    this.state !== PRESSED_OUT  &&
+                    (e.code === "Enter" || e.code === "Space"))
+                {
+                     this.setState(PRESSED_OVER);
+                }
+            };
+
+            this._keyReleased = function(e) {
+                if (this.state === PRESSED_OVER || this.state === PRESSED_OUT){
+                    this.setState(OVER);
+                    if (this.$isIn === false) {
+                        this.setState(OUT);
+                    }
+                }
+            };
+
+            this._pointerEntered = function(e) {
+                if (this.isEnabled === true) {
+                    this.setState(this.state === PRESSED_OUT ? PRESSED_OVER : OVER);
+                    this.$isIn = true;
+                }
+            };
+
+            this._pointerPressed = function(e) {
+                if (this.state !== PRESSED_OVER && this.state !== PRESSED_OUT && e.isAction()){
+                     this.setState(PRESSED_OVER);
+                }
+            };
+
+            this._pointerReleased = function(e) {
+                if ((this.state === PRESSED_OVER || this.state === PRESSED_OUT) && e.isAction()){
+                    if (e.source === this) {
+                        this.setState(e.x >= 0 && e.y >= 0 && e.x < this.width && e.y < this.height ? OVER
+                                                                                                    : OUT);
+                    } else {
+                        var p = zebkit.layout.toParentOrigin(e.x, e.y, e.source, this);
+                        this.$isIn = p.x >= 0 && p.y >= 0 && p.x < this.width && p.y < this.height;
+                        this.setState(this.$isIn ? OVER : OUT);
+                    }
+                }
+            };
+
+            this.childKeyPressed = function(e) {
+                this._keyPressed(e);
+            };
+
+            this.childKeyReleased = function(e) {
+                this._keyReleased(e);
+            };
+
+            this.childPointerEntered = function(e) {
+                this._pointerEntered(e);
+            };
+
+            this.childPointerPressed = function(e) {
+                this._pointerPressed(e);
+            };
+
+            this.childPointerReleased = function(e) {
+                this._pointerReleased(e);
+            };
+
+            this.childPointerExited = function(e) {
+                // check if the pointer cursor is in of the source component
+                // that means another layer has grabbed control
+                if (e.x >= 0 && e.y >= 0 && e.x < e.source.width && e.y < e.source.height) {
+                    this.$isIn = false;
+                } else {
+                    var p = zebkit.layout.toParentOrigin(e.x, e.y, e.source, this);
+                    this.$isIn = p.x >= 0 && p.y >= 0 && p.x < this.width && p.y < this.height;
+                }
+
+                if (this.$isIn === false) {
+                    this.setState(this.state === PRESSED_OVER ? PRESSED_OUT : OUT);
+                }
+            };
+
+            /**
+              * Define key pressed events handler
+              * @param  {zebkit.ui.event.KeyEvent} e a key event
+              * @method keyPressed
+              */
+            this.keyPressed = function(e){
+                this._keyPressed(e);
+            };
+
+             /**
+              * Define key released events handler
+              * @param  {zebkit.ui.event.KeyEvent} e a key event
+              * @method keyReleased
+              */
+             this.keyReleased = function(e){
+                 this._keyReleased(e);
+             };
+
+             /**
+              * Define pointer entered events handler
+              * @param  {zebkit.ui.event.PointerEvent} e a key event
+              * @method pointerEntered
+              */
+            this.pointerEntered = function (e){
+                this._pointerEntered();
+            };
+
+             /**
+              * Define pointer exited events handler
+              * @param  {zebkit.ui.event.PointerEvent} e a key event
+              * @method pointerExited
+              */
+            this.pointerExited = function(e){
+                if (this.isEnabled === true) {
+                    this.setState(this.state === PRESSED_OVER ? PRESSED_OUT : OUT);
+                    this.$isIn = false;
+                }
+            };
+
+             /**
+              * Define pointer pressed events handler
+              * @param  {zebkit.ui.event.PointerEvent} e a key event
+              * @method pointerPressed
+              */
+            this.pointerPressed = function(e){
+                this._pointerPressed(e);
+            };
+
+             /**
+              * Define pointer released events handler
+              * @param  {zebkit.ui.event.PointerEvent} e a key event
+              * @method pointerReleased
+              */
+            this.pointerReleased = function(e){
+                this._pointerReleased(e);
+            };
+
+            /**
+             * Define pointer dragged events handler
+             * @param  {zebkit.ui.event.PointerEvent} e a key event
+             * @method pointerDragged
+             */
+            this.pointerDragged = function(e){
+                if (e.isAction()) {
+                    var pressed = (this.state === PRESSED_OUT || this.state === PRESSED_OVER);
+                    if (e.x > 0 && e.y > 0 && e.x < this.width && e.y < this.height) {
+                        this.setState(pressed ? PRESSED_OVER : OVER);
+                    } else {
+                        this.setState(pressed ? PRESSED_OUT : OUT);
+                    }
+                }
+            };
+
+             /**
+              * Set the component state
+              * @param {Object} s a state
+              * @method  setState
+              * @chainable
+              */
+            this.setState = function(s) {
+                if (s !== this.state){
+                    var prev = this.state;
+                    this.state = s;
+                    if (typeof this.stateUpdated !== 'undefined') {
+                        this.stateUpdated(prev, s);
+                    }
+                }
+                return this;
+            };
+         }
      ]);
 });

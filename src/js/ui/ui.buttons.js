@@ -128,7 +128,7 @@ zebkit.package("ui", function(pkg, Class) {
       * @event fired
       * @param {zebkit.ui.ArrowButton} src a button that has been pressed
       */
-    pkg.ArrowButton = Class(pkg.EvStatePan, zebkit.Fireable, pkg.ButtonRepeatMix, [
+    pkg.ArrowButton = Class(pkg.EvStatePan, pkg.ButtonRepeatMix, [
         function(direction) {
             this.cursorType = pkg.Cursor.HAND;
 
@@ -271,8 +271,9 @@ zebkit.package("ui", function(pkg, Class) {
      *  @constructor
      *  @param {String|zebkit.ui.Panel|zebkit.draw.View} [t] a button label.
      *  The label can be a simple text or an UI component.
-     *  @extends zebkit.ui.CompositeEvStatePan
+     *  @extends zebkit.ui.EvStatePan
      *  @uses  zebkit.ui.ButtonRepeatMix
+     *  @uses  zebkit.ui.FocusableComposite
      */
 
     /**
@@ -290,7 +291,7 @@ zebkit.package("ui", function(pkg, Class) {
      * @param {zebkit.ui.Button} src a button that has been pressed
      *
      */
-    pkg.Button = Class(pkg.CompositeEvStatePan, zebkit.Fireable, pkg.ButtonRepeatMix, [
+    pkg.Button = Class(pkg.EvStatePan, pkg.FocusableComposite, pkg.ButtonRepeatMix, [
         function(t) {
             this.$super();
 
@@ -505,11 +506,12 @@ zebkit.package("ui", function(pkg, Class) {
      *       });
      *
      * @class  zebkit.ui.Checkbox
-     * @extends zebkit.ui.CompositeEvStatePan
+     * @extends zebkit.ui.EvStatePan
+     * @uses zebkit.ui.FocusableComposite
      * @constructor
      * @param {String|zebkit.ui.Panel} [label] a label
      */
-    pkg.Checkbox = Class(pkg.CompositeEvStatePan, [
+    pkg.Checkbox = Class(pkg.EvStatePan, pkg.FocusableComposite, [
         function (c) {
             if (arguments.length > 0 && c !== null && zebkit.isString(c)) {
                 c = new this.clazz.Label(c);
@@ -907,7 +909,7 @@ zebkit.package("ui", function(pkg, Class) {
              * @protected
              */
             this.isDecorative = function(c){
-                return zebkit.instanceOf(c, pkg.EvStatePan) === false;
+                return zebkit.instanceOf(c, pkg.StatePan) === false;
             };
 
             /**

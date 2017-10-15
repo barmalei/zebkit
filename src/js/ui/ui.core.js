@@ -376,78 +376,78 @@ zebkit.package("ui", function(pkg, Class) {
 
     /**
      *  This the core UI component class. All other UI components has to be successor of panel class.
-
-          // instantiate panel with no arguments
-          var p = new zebkit.ui.Panel();
-
-          // instantiate panel with border layout set as its layout manager
-          var p = new zebkit.ui.Panel(new zebkit.layout.BorderLayout());
-
-          // instantiate panel with the given properties (border
-          // layout manager, blue background and plain border)
-          var p = new zebkit.ui.Panel({
-             layout: new zebkit.ui.BorderLayout(),
-             background : "blue",
-             border     : "plain"
-          });
-
+     *
+     *      // instantiate panel with no arguments
+     *      var p = new zebkit.ui.Panel();
+     *
+     *      // instantiate panel with border layout set as its layout manager
+     *      var p = new zebkit.ui.Panel(new zebkit.layout.BorderLayout());
+     *
+     *      // instantiate panel with the given properties (border
+     *      // layout manager, blue background and plain border)
+     *      var p = new zebkit.ui.Panel({
+     *         layout: new zebkit.ui.BorderLayout(),
+     *         background : "blue",
+     *         border     : "plain"
+     *      });
+     *
      *  **Container**
      * Panel can contains number of other UI components as its children where the children components
      * are placed with a defined by the panel layout manager:
-
-          // add few children component to panel top, center and bottom parts
-          // with help of border layout manager
-          var p = new zebkit.ui.Panel();
-          p.setLayout(new zebkit.layout.BorderLayout(4)); // set layout manager to
-                                                         // order children components
-
-          p.add("top", new zebkit.ui.Label("Top label"));
-          p.add("center", new zebkit.ui.TextArea("Text area"));
-          p.add("bottom", new zebkit.ui.Button("Button"));
-
+     *
+     *      // add few children component to panel top, center and bottom parts
+     *      // with help of border layout manager
+     *      var p = new zebkit.ui.Panel();
+     *      p.setLayout(new zebkit.layout.BorderLayout(4)); // set layout manager to
+     *                                                     // order children components
+     *
+     *      p.add("top", new zebkit.ui.Label("Top label"));
+     *      p.add("center", new zebkit.ui.TextArea("Text area"));
+     *      p.add("bottom", new zebkit.ui.Button("Button"));
+     *
      * **Input and component events**
      * The class provides possibility to catch various component and input events by declaring an
      * appropriate event method handler. The most simple case you just define a method:
-
-          var p = new zebkit.ui.Panel();
-          p.pointerPressed = function(e) {
-              // handle event here
-          };
-
-    * If you prefer to create an anonymous class instance you can do it as follow:
-
-          var p = new zebkit.ui.Panel([
-              function pointerPressed(e) {
-                  // handle event here
-              }
-          ]);
-
-    * One more way to add the event handler is dynamic extending of an instance class demonstrated
-    * below:
-
-          var p = new zebkit.ui.Panel("Test");
-          p.extend([
-              function pointerPressed(e) {
-                  // handle event here
-              }
-          ]);
-
+     *
+     *      var p = new zebkit.ui.Panel();
+     *      p.pointerPressed = function(e) {
+     *          // handle event here
+     *      };
+     *
+     * If you prefer to create an anonymous class instance you can do it as follow:
+     *
+     *      var p = new zebkit.ui.Panel([
+     *          function pointerPressed(e) {
+     *              // handle event here
+     *          }
+     *      ]);
+     *
+     * One more way to add the event handler is dynamic extending of an instance class demonstrated
+     * below:
+     *
+     *      var p = new zebkit.ui.Panel("Test");
+     *      p.extend([
+     *          function pointerPressed(e) {
+     *              // handle event here
+     *          }
+     *      ]);
+     *
      * Pay attention Zebkit UI components often declare own event handlers and in this case you can
      * overwrite the default event handler with a new one. Preventing the basic event handler execution
      * can cause the component will work improperly. You should care about the base event handler
      * execution as follow:
-
-          // button component declares own pointer pressed event handler
-          // we have to call the original handler to keep the button component
-          // properly working
-          var p = new zebkit.ui.Button("Test");
-          p.extend([
-              function pointerPressed(e) {
-                  this.$super(e); // call parent class event handler implementation
-                  // handle event here
-              }
-          ]);
-
+     *
+     *      // button component declares own pointer pressed event handler
+     *      // we have to call the original handler to keep the button component
+     *      // properly working
+     *      var p = new zebkit.ui.Button("Test");
+     *      p.extend([
+     *          function pointerPressed(e) {
+     *              this.$super(e); // call parent class event handler implementation
+     *              // handle event here
+     *          }
+     *      ]);
+     *
      *  @class zebkit.ui.Panel
      *  @param {Object|zebkit.layout.Layout} [l] pass a layout manager or number of properties that have
      *  to be applied to the instance of the panel class.
@@ -458,10 +458,10 @@ zebkit.package("ui", function(pkg, Class) {
     /**
      * Implement the event handler method to catch pointer pressed event. The event is triggered every time
      * a pointer button has been pressed or a finger has touched a touch screen.
-
-         var p = new zebkit.ui.Panel();
-         p.pointerPressed = function(e) { ... }; // add event handler
-
+     *
+     *     var p = new zebkit.ui.Panel();
+     *     p.pointerPressed = function(e) { ... }; // add event handler
+     *
      * @event pointerPressed
      * @param {zebkit.ui.event.PointerEvent} e a pointer event
     */
@@ -469,10 +469,10 @@ zebkit.package("ui", function(pkg, Class) {
     /**
      * Implement the event handler method to catch pointer released event. The event is triggered every time
      * a pointer button has been released or a finger has untouched a touch screen.
-
-         var p = new zebkit.ui.Panel();
-         p.pointerReleased = function(e) { ... }; // add event handler
-
+     *
+     *     var p = new zebkit.ui.Panel();
+     *     p.pointerReleased = function(e) { ... }; // add event handler
+     *
      * @event pointerReleased
      * @param {zebkit.ui.event.PointerEvent} e a pointer event
      */
@@ -480,10 +480,10 @@ zebkit.package("ui", function(pkg, Class) {
     /**
      * Implement the event handler method  to catch pointer moved event. The event is triggered every time
      * a pointer cursor has been moved with no a pointer button pressed.
-
-         var p = new zebkit.ui.Panel();
-         p.pointerMoved = function(e) { ... }; // add event handler
-
+     *
+     *     var p = new zebkit.ui.Panel();
+     *     p.pointerMoved = function(e) { ... }; // add event handler
+     *
      * @param {zebkit.ui.event.PointerEvent} e a pointer event
      * @event  pointerMoved
      */
@@ -491,10 +491,10 @@ zebkit.package("ui", function(pkg, Class) {
     /**
      * Implement the event handler method to catch pointer entered event. The event is triggered every
      * time a pointer cursor entered the given component.
-
-         var p = new zebkit.ui.Panel();
-         p.pointerEntered = function(e) { ... }; // add event handler
-
+     *
+     *     var p = new zebkit.ui.Panel();
+     *     p.pointerEntered = function(e) { ... }; // add event handler
+     *
      * @param {zebkit.ui.event.PointerEvent} e a pointer event
      * @event  pointerEntered
      */
@@ -502,10 +502,10 @@ zebkit.package("ui", function(pkg, Class) {
     /**
      * Implement the event handler method to catch pointer exited event. The event is triggered every
      * time a pointer cursor exited the given component.
-
-         var p = new zebkit.ui.Panel();
-         p.pointerExited = function(e) { ... }; // add event handler
-
+     *
+     *     var p = new zebkit.ui.Panel();
+     *     p.pointerExited = function(e) { ... }; // add event handler
+     *
      * @param {zebkit.ui.event.PointerEvent} e a pointer event
      * @event  pointerExited
      */
@@ -514,10 +514,10 @@ zebkit.package("ui", function(pkg, Class) {
      * Implement the event handler method to catch pointer clicked event. The event is triggered every
      * time a pointer button has been clicked. Click events are generated only if no one pointer moved
      * or drag events has been generated in between pointer pressed -> pointer released events sequence.
-
-         var p = new zebkit.ui.Panel();
-         p.pointerClicked = function(e) { ... }; // add event handler
-
+     *
+     *     var p = new zebkit.ui.Panel();
+     *     p.pointerClicked = function(e) { ... }; // add event handler
+     *
      * @param {zebkit.ui.event.PointerEvent} e a pointer event
      * @event  pointerClicked
      */
@@ -526,10 +526,10 @@ zebkit.package("ui", function(pkg, Class) {
      * Implement the event handler method to catch pointer dragged event. The event is triggered every
      * time a pointer cursor has been moved when a pointer button has been pressed. Or when a finger
      * has been moved over a touch screen.
-
-         var p = new zebkit.ui.Panel();
-         p.pointerDragged = function(e) { ... }; // add event handler
-
+     *
+     *     var p = new zebkit.ui.Panel();
+     *     p.pointerDragged = function(e) { ... }; // add event handler
+     *
      * @param {zebkit.ui.event.PointerEvent} e a pointer event
      * @event  pointerDragged
      */
@@ -538,10 +538,10 @@ zebkit.package("ui", function(pkg, Class) {
      * Implement the event handler method to catch pointer drag started event. The event is triggered
      * every time a pointer cursor has been moved first time when a pointer button has been pressed.
      * Or when a finger has been moved first time over a touch screen.
-
-         var p = new zebkit.ui.Panel();
-         p.pointerDragStarted = function(e) { ... }; // add event handler
-
+     *
+     *     var p = new zebkit.ui.Panel();
+     *     p.pointerDragStarted = function(e) { ... }; // add event handler
+     *
      * @param {zebkit.ui.event.PointerEvent} e a pointer event
      * @event  pointerDragStarted
     */
@@ -550,10 +550,10 @@ zebkit.package("ui", function(pkg, Class) {
      * Implement the event handler method to catch pointer drag ended event. The event is triggered
      * every time a pointer cursor has been moved last time when a pointer button has been pressed.
      * Or when a finger has been moved last time over a touch screen.
-
-         var p = new zebkit.ui.Panel();
-         p.pointerDragEnded = function(e) { ... }; // add event handler
-
+     *
+     *     var p = new zebkit.ui.Panel();
+     *     p.pointerDragEnded = function(e) { ... }; // add event handler
+     *
      * @param {zebkit.ui.event.PointerEvent} e a pointer event
      * @event  pointerDragEnded
     */
@@ -561,21 +561,21 @@ zebkit.package("ui", function(pkg, Class) {
     /**
      * Implement the event handler method to catch key pressed event The event is triggered every
      * time a key has been pressed.
-
-         var p = new zebkit.ui.Panel();
-         p.keyPressed = function(e) { ... }; // add event handler
-
+     *
+     *    var p = new zebkit.ui.Panel();
+     *    p.keyPressed = function(e) { ... }; // add event handler
+     *
      * @param {zebkit.ui.event.KeyEvent} e a key event
      * @event  keyPressed
      */
 
     /**
      * Implement the event handler method to catch key types event The event is triggered every
-     *     time a key has been typed.
-
-         var p = new zebkit.ui.Panel();
-         p.keyTyped = function(e) { ... }; // add event handler
-
+     * time a key has been typed.
+     *
+     *     var p = new zebkit.ui.Panel();
+     *     p.keyTyped = function(e) { ... }; // add event handler
+     *
      * @param {zebkit.ui.event.KeyEvent} e a key event
      * @event  keyTyped
      */
@@ -583,10 +583,10 @@ zebkit.package("ui", function(pkg, Class) {
     /**
      * Implement the event handler method to catch key released event
      * The event is triggered every time a key has been released.
-
-         var p = new zebkit.ui.Panel();
-         p.keyReleased = function(e) { ... }; // add event handler
-
+     *
+     *     var p = new zebkit.ui.Panel();
+     *     p.keyReleased = function(e) { ... }; // add event handler
+     *
      * @param {zebkit.ui.event.KeyEvent} e a key event
      * @event  keyReleased
      */
@@ -594,10 +594,10 @@ zebkit.package("ui", function(pkg, Class) {
     /**
      * Implement the event handler method to catch the component sized event
      * The event is triggered every time the component has been re-sized.
-
-         var p = new zebkit.ui.Panel();
-         p.compSized = function(e) { ... }; // add event handler
-
+     *
+     *     var p = new zebkit.ui.Panel();
+     *     p.compSized = function(e) { ... }; // add event handler
+     *
      * @param {zebkit.ui.event.CompEvent} e a component event. Source of the event
      * is a component that has been sized, "prevWidth" and "prevHeight" fields
      * keep a previous size the component had.
@@ -608,16 +608,12 @@ zebkit.package("ui", function(pkg, Class) {
      * Implement the event handler method to catch component moved event
      * The event is triggered every time the component location has been
      * updated.
-
-         var p = new zebkit.ui.Panel();
-         p.compMoved = function(e) { ... }; // add event handler
-
-     * @param {zebkit.ui.Panel} c a component that has been moved
-     * @param {Integer} px a previous x coordinate the moved component had
-     * @param {Integer} py a previous y coordinate the moved component had
+     *
+     *      var p = new zebkit.ui.Panel();
+     *      p.compMoved = function(e) { ... }; // add event handler
+     *
      * @param {zebkit.ui.event.CompEvent} e a component event. Source of the event
-     * is a component that has been moved. "prevX" and "prevY" fields hold
-     * a previous location the component had.
+     * is a component that has been moved.
      * @event compMoved
      */
 
@@ -625,10 +621,10 @@ zebkit.package("ui", function(pkg, Class) {
      * Implement the event handler method to catch component enabled event
      * The event is triggered every time a component enabled state has been
      * updated.
-
-         var p = new zebkit.ui.Panel();
-         p.compEnabled = function(e) { ... }; // add event handler
-
+     *
+     *     var p = new zebkit.ui.Panel();
+     *     p.compEnabled = function(e) { ... }; // add event handler
+     *
      * @param {zebkit.ui.event.CompEvent} e a component event.
      * @event compEnabled
      */
@@ -637,10 +633,10 @@ zebkit.package("ui", function(pkg, Class) {
      * Implement the event handler method to catch component shown event
      * The event is triggered every time a component visibility state has
      * been updated.
-
-         var p = new zebkit.ui.Panel();
-         p.compShown = function(e) { ... }; // add event handler
-
+     *
+     *     var p = new zebkit.ui.Panel();
+     *     p.compShown = function(e) { ... }; // add event handler
+     *
      * @param {zebkit.ui.event.CompEvent} e a component event.
      * @event compShown
      */
@@ -649,14 +645,12 @@ zebkit.package("ui", function(pkg, Class) {
      * Implement the event handler method to catch component added event
      * The event is triggered every time the component has been inserted into
      * another one.
-
-         var p = new zebkit.ui.Panel();
-         p.compAdded = function(e) { ... }; // add event handler
-
+     *
+     *     var p = new zebkit.ui.Panel();
+     *     p.compAdded = function(e) { ... }; // add event handler
+     *
      * @param {zebkit.ui.event.CompEvent} e a component event. The source of the passed event
-     * is set to a container component, "kid" field is set to a component that has been
-     * added to the container, "constraints" holds a constraints the child component has been
-     * added.
+     * is set to a container component.
      * @event compAdded
      */
 
@@ -664,24 +658,22 @@ zebkit.package("ui", function(pkg, Class) {
      * Implement the event handler method to catch component removed event
      * The event is triggered every time the component has been removed from
      * its parent UI component.
-
-         var p = new zebkit.ui.Panel();
-         p.compRemoved = function(e) { ... }; // add event handler
-
+     *
+     *     var p = new zebkit.ui.Panel();
+     *     p.compRemoved = function(e) { ... }; // add event handler
+     *
      * @param {zebkit.ui.event.CompEvent} e a component event. The source of the passed event
-     * is set to the container component. "kid" field is set to a child component that has
-     * been removed from the container and "index" field is set to the index the kid component
-     * was added before it had been removed from the container.
+     * is set to the container component.
      * @event compRemoved
      */
 
     /**
      * Implement the event handler method to catch component focus gained event
      * The event is triggered every time a component has gained focus.
-
-         var p = new zebkit.ui.Panel();
-         p.focusGained = function(e) { ... }; // add event handler
-
+     *
+     *     var p = new zebkit.ui.Panel();
+     *     p.focusGained = function(e) { ... }; // add event handler
+     *
      * @param {zebkit.ui.event.FocusEvent} e an input event
      * @event  focusGained
      */
@@ -689,10 +681,10 @@ zebkit.package("ui", function(pkg, Class) {
     /**
      * Implement the event handler method to catch component focus lost event
      * The event is triggered every time a component has lost focus
-
-         var p = new zebkit.ui.Panel();
-         p.focusLost = function(e) { ... }; // add event handler
-
+     *
+     *     var p = new zebkit.ui.Panel();
+     *     p.focusLost = function(e) { ... }; // add event handler
+     *
      * @param {zebkit.ui.event.FocusEvent} e an input event
      * @event  focusLost
      */
@@ -701,16 +693,14 @@ zebkit.package("ui", function(pkg, Class) {
      * It is also possible to listen all the listed above event for children component. To handle
      * the event register listener method following the pattern below:
      *
-         var p = new zebkit.ui.Panel();
-         p.child<EventName> = function(e) { ... }; // add event handler
-
-     * @param {Integer} id a component event ID. The id can have one of the following value:
-
-
-     * @param {zebkit.ui.Panel} src a component that triggers the event
-     * @param {zebkit.ui.event.KeyEvent | zebkit.ui.event.PointerEvent | zebkit.ui.event.CompEvent| zebkit.ui.event.FocusEvent} e
-     * an UI event fired by a child component.
-     * @event  child<EventName>
+     *
+     *     var p = new zebkit.ui.Panel();
+     *     p.childPointerPressed = function(e) { ... }; // add event handler
+     *
+     *
+     * @param {zebkit.ui.event.KeyEvent | zebkit.ui.event.PointerEvent | zebkit.ui.event.CompEvent | zebkit.ui.event.FocusEvent}
+     * e an UI event fired by a child component.
+     * @event  childEventName
      */
 
      /**

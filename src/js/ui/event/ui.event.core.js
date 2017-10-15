@@ -616,22 +616,22 @@ zebkit.package("ui.event", function(pkg, Class) {
      * The interface can be handy way to track typical states. For instance to implement a
      * component that changes its view depending its state the following code can be used:
      *
-     *    // create  panel
-     *    var pan = new zebkit.u.Panel();
+     *     // create  panel
+     *     var pan = new zebkit.ui.Panel();
      *
-     *    // let's track the panel input events state and update
-     *    // the component background view depending the state
-     *    pan.extend(zebkit.ui.event.InputEventState, [
-     *        function stateUpdate(o, n) {
-     *            if (n === "over") {
-     *                this.setBackround("orange");
-     *            } else if (n === "out") {
-     *                this.setBackround("red");
-     *            } else {
-     *                this.setBackround(null);
-     *            }
-     *        }
-     *    ]);
+     *     // let's track the panel input events state and update
+     *     // the component background view depending the state
+     *     pan.extend(zebkit.ui.event.InputEventState, [
+     *         function stateUpdate(o, n) {
+     *             if (n === "over") {
+     *                 this.setBackround("orange");
+     *             } else if (n === "out") {
+     *                 this.setBackround("red");
+     *             } else {
+     *                 this.setBackround(null);
+     *             }
+     *         }
+     *     ]);
      *
      *
      * @class zebkit.ui.event.InputEventState

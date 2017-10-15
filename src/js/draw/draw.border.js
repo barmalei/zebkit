@@ -478,7 +478,7 @@ zebkit.package("draw", function(pkg, Class) {
      *      {
      *        x: {Integer}, y: {Integer},
      *        width: {Integer}, height: {Integer},
-     *        orient: {Integer}
+     *        orient: {String}
      *      }
      *
      *

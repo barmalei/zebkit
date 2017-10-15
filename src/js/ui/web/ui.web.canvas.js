@@ -20,32 +20,32 @@ zebkit.package("ui.web", function(pkg, Class) {
      *  It happens if developer doesn't pass an HTML Canvas element reference or an ID of existing HTML
      *  Canvas element. To re-use an existent in DOM tree HTML5 canvas element pass an id of the canvas
      *  element:
-
-            // a new HTML canvas element is created and added into HTML DOM tree
-            var canvas = zebkit.ui.zCanvas();
-
-            // a new HTML canvas element is created into HTML DOM tree
-            var canvas = zebkit.ui.zCanvas(400,500);  // pass canvas size
-
-            // stick to existent HTML canvas element
-            var canvas = zebkit.ui.zCanvas("ExistentCanvasID");
-
+     *
+     *       // a new HTML canvas element is created and added into HTML DOM tree
+     *       var canvas = zebkit.ui.zCanvas();
+     *
+     *       // a new HTML canvas element is created into HTML DOM tree
+     *       var canvas = zebkit.ui.zCanvas(400,500);  // pass canvas size
+     *
+     *       // stick to existent HTML canvas element
+     *       var canvas = zebkit.ui.zCanvas("ExistentCanvasID");
+     *
      *  zCanvas has layered structure. Every layer is responsible for showing and controlling a dedicated
      *  type of UI elements like windows pop-up menus, tool tips and so on. To start building UI use root layer.
      *  The layer is standard zebkit UI panel that is accessible via "root" zCanvas field:
-
-            // create canvas
-            var canvas = zebkit.ui.zCanvas(400,500);
-
-            // save reference to canvas root layer where
-            // hierarchy of UI components have to be hosted
-            var root = canvas.root;
-
-            // fill root with UI components
-            var label = new zebkit.ui.Label("Label");
-            label.setBounds(10,10,100,50);
-            root.add(label);
-
+     *
+     *       // create canvas
+     *       var canvas = zebkit.ui.zCanvas(400,500);
+     *
+     *       // save reference to canvas root layer where
+     *       // hierarchy of UI components have to be hosted
+     *       var root = canvas.root;
+     *
+     *       // fill root with UI components
+     *       var label = new zebkit.ui.Label("Label");
+     *       label.setBounds(10,10,100,50);
+     *       root.add(label);
+     *
      *  @class zebkit.ui.zCanvas
      *  @extends zebkit.ui.web.HtmlCanvas
      *  @constructor
@@ -58,13 +58,13 @@ zebkit.package("ui.web", function(pkg, Class) {
      * Implement the event handler method  to catch canvas initialized event. The event is triggered once the
      * canvas has been initiated and all properties listeners of the canvas are set upped. The event can be
      * used to load saved data.
-
-         var p = new zebkit.ui.zCanvas(300, 300, [
-              function canvasInitialized() {
-                  // do something
-              }
-         ]);
-
+     *
+     *     var p = new zebkit.ui.zCanvas(300, 300, [
+     *          function canvasInitialized() {
+     *              // do something
+     *          }
+     *     ]);
+     *
      * @event  canvasInitialized
      */
     ui.zCanvas = pkg.zCanvas = Class(pkg.HtmlCanvas, [
@@ -575,7 +575,7 @@ zebkit.package("ui.web", function(pkg, Class) {
                 var x  = this.$toElementX(e.pageX, e.pageY),
                     y  = this.$toElementY(e.pageX, e.pageY);
 
-                // free pointer prev pressed if any
+                // free pointer previous pressed if any
                 if (pkg.$pointerPressedOwner.hasOwnProperty(e.identifier)) {
                     try {
                         ui.events.fire("pointerReleased", e.update(pkg.$pointerPressedOwner[e.identifier], x, y));
@@ -611,11 +611,16 @@ zebkit.package("ui.web", function(pkg, Class) {
             };
 
             this.getComponentAt = function(x, y) {
+                // goes through the layers from top to bottom
                 for(var i = this.kids.length; --i >= 0; ){
                     var c = this.kids[i].getComponentAt(x, y);
                     if (c !== null) {
+                        // detect a composite parent component that catches
+                        // input and return the found composite
                         var p = c;
                         while ((p = p.parent) !== null) {
+                            // test if the parent catches input events (what means the parent is a composite component)
+                            // and store the composite as result
                             if (typeof p.catchInput !== 'undefined' && (p.catchInput === true || (p.catchInput !== false && p.catchInput(c)))) {
                                 c = p;
                             }

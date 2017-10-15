@@ -152,8 +152,11 @@ zebkit.package("ui.web", function(pkg, Class) {
 
         function $prototype(clazz) {
             this.$rotateValue = 0;
+            this.$crotate = false;
             this.$scaleX = 1;
             this.$scaleY = 1;
+            this.$translateX = 0;
+            this.$translateY = 0;
 
             /**
              *  Canvas context
@@ -168,7 +171,7 @@ zebkit.package("ui.web", function(pkg, Class) {
             // is DOM component designed for rendering, so setting DOM border
             // doesn't allow us to render zebkit border
             this.setBorder = function(b) {
-                return ui.Panel.prototype.setBorder.call(this, b);
+                return ui.Panel.prototype.setBorder.apply(this, arguments);
             };
 
             this.rotate = function(r) {
@@ -180,6 +183,43 @@ zebkit.package("ui.web", function(pkg, Class) {
                 this.vrp();
                 return this;
             };
+
+            this.translate = function(dx, dy) {
+                this.$translateX += dx;
+                this.$translateY += dy;
+
+                if (this.$context !== null) {
+                    this.$context.translate(this.$translateX,
+                                            this.$translateY);
+                }
+
+                this.vrp();
+                return this;
+            };
+
+            /**
+             * Rotate the component coordinate system around the component center.
+             * @param  {Number} r a rotation value
+             * @chainable
+             * @method crotate
+             */
+            this.crotate = function(r) {
+                this.$rotateValue += r;
+                this.$crotate = true;
+
+                if (this.$context !== null) {
+                    var cx = Math.floor(this.width  / 2),
+                        cy = Math.floor(this.height / 2);
+
+                    this.$context.translate(cx, cy);
+                    this.$context.rotate(r);
+                    this.$context.translate(-cx, -cy);
+                }
+
+                this.vrp();
+                return this;
+            };
+
 
             this.scale = function(sx, sy) {
                 if (this.$context !== null) {
@@ -195,6 +235,9 @@ zebkit.package("ui.web", function(pkg, Class) {
                 this.$scaleX = 1;
                 this.$scaleY = 1;
                 this.$rotateValue = 0;
+                this.$crotate = false;
+                this.$translateX = 0;
+                this.$translateY = 0;
                 if (this.$context !== null) {
                     this.$context = zebkit.web.$canvas(this.element, this.width, this.height, true);
                     this.$context.reset(this.width, this.height);
@@ -229,12 +272,28 @@ zebkit.package("ui.web", function(pkg, Class) {
 
                     // if canvas has been rotated apply the rotation to the context
                     if (this.$rotateValue !== 0) {
+                        var cx = Math.floor(w / 2),
+                            cy = Math.floor(h / 2);
+
+                        if (this.$crotate) {
+                            this.$context.translate(cx, cy);
+                        }
+
                         this.$context.rotate(this.$rotateValue);
+
+                        if (this.$crotate) {
+                            this.$context.translate(-cx, -cy);
+                        }
                     }
 
                     // if canvas has been scaled apply it to it
                     if (this.$scaleX !== 1 || this.$scaleY !== 1) {
                         this.$context.scale(this.$scaleX, this.$scaleY);
+                    }
+
+                    // if canvas has been scaled apply it to it
+                    if (this.$translateX !== 0 || this.$translateY !== 0) {
+                        this.$context.translate(this.$translateX, this.$translateY);
                     }
 
                     this.width  = w;
@@ -261,49 +320,125 @@ zebkit.package("ui.web", function(pkg, Class) {
                 }
                 return this;
             };
+
+            /**
+             * Convert (x, y) location in
+             * @param  {Integer} x a x coordinate
+             * @param  {Integer} y an y coordinate
+             * @return {Array} two elements array where first
+             * element is converted x coordinate and the second element
+             * is converted y coordinate.
+             * @protected
+             * @method project
+             */
+            this.project = function(x, y) {
+                var c = this.$context.$states[this.$context.$curState],
+                    xx = x,
+                    yy = y;
+
+                if (c.sx !== 1 || c.sy !== 1 || c.rotateVal !== 0) {
+                    xx = Math.round((c.crot * x + y * c.srot) / c.sx);
+                    yy = Math.round((y * c.crot - c.srot * x) / c.sy);
+                }
+
+                xx -= c.dx;
+                yy -= c.dy;
+
+                if (this.$crotate) {
+                    // rotation relatively rect center should add correction basing
+                    // on idea the center coordinate in new coordinate system has
+                    // to have the same coordinate like it has in initial coordinate
+                    // system
+                    var cx = Math.floor(this.width / 2),
+                        cy = Math.floor(this.height / 2),
+                        dx = Math.round((c.crot * cx + cy * c.srot) / c.sx),
+                        dy = Math.round((c.crot * cy - cx * c.srot) / c.sy);
+                    xx -= (dx - cx);
+                    yy -= (dy - cy);
+                }
+
+                return [ xx, yy ];
+            };
+        },
+
+        // TODO: make sure it is workable solution
+        function getComponentAt(x, y) {
+            if (this.$translateX !== 0 || this.$translateY !== 0 || this.$rotateValue !== 0 || this.$scaleX !== 1 || this.$scaleY !== 1) {
+                var xy = this.project(x, y);
+                return this.$super(xy[0], xy[1]);
+            } else {
+                return this.$super(x, y);
+            }
         }
     ]);
 
     /**
      * Class that wrapped window component with own HTML Canvas.
-     * @param  {zebkit.ui.Window} [target] a window component. If target is not defined
-     * it will be instantiated automatically. If the component is not passed the new
-     * window component (zebkit.ui.Window) will be created.
+     * @param  {zebkit.ui.Window} [content] a window component or window root. If
+     * content is not defined it will be instantiated automatically. If the component
+     * is not passed the new window component (zebkit.ui.Window) will be created.
      * @constructor
      * @extends zebkit.ui.web.HtmlCanvas
-     * @class zebkit.ui.web.HtmlWinCanvas
+     * @class zebkit.ui.web.HtmlWindow
      */
-    pkg.HtmlWinCanvas = Class(pkg.HtmlCanvas, [
-        function $prototype() {
-            this.winOpened = function(e) {
-                this.target.winOpened(e);
-            };
-
-            this.winActivated = function(e){
-                this.target.winActivated(e);
-            };
-        },
-
-        function(target) {
+    pkg.HtmlWindow = Class(pkg.HtmlCanvas, [
+        function(content) {
             this.$super();
 
-            /**
-             * Target window
-             * @attribute target
-             * @type {zebkit.ui.Window}
-             * @readOnly
-             */
-            this.target = (arguments.length === 0 ? new ui.Window() : target);
+            if (arguments.length === 0) {
+                this.win = new ui.Window();
+            } else if (zebkit.instanceOf(content, ui.Window)) {
+                this.win = content;
+            } else {
+                this.win = new ui.Window(content);
+            }
 
             var $this = this;
-            target.getWinContainer = function() {
+            this.win.getWinContainer = function() {
                 return $this;
             };
 
-            this.setLayout(new zebkit.layout.BorderLayout());
-            this.add("center", target);
+            /**
+             * Root window panel
+             * @attribute root
+             * @type {zebkit.ui.Panel}
+             */
+            this.root = this.win.root;
+            this.setBorderLayout();
+            this.add("center", this.win);
+        },
+
+        function $prototype() {
+            /**
+             * Target window
+             * @attribute win
+             * @type {zebkit.ui.Window}
+             * @readOnly
+             */
+            this.win = null;
+
+            this.winOpened = function(e) {
+                this.win.winOpened(e);
+            };
+
+            this.winActivated = function(e){
+                this.win.winActivated(e);
+            };
         }
     ]);
+
+    pkg.HtmlButton = Class(pkg.HtmlElement, [
+        function(c) {
+            this.$super("button");
+            this.setAttribute("type", "button");
+            this.setContent(c);
+
+            var $this = this;
+            this.element.onclick = function() {
+                $this.fire("fired", $this);
+            }
+        }
+    ]).events("fired");
 
     /**
      * WEB based HTML components wrapped with as zebkit components.

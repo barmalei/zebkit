@@ -4,21 +4,21 @@ zebkit.package("ui.web", function(pkg, Class) {
     /**
      * Simple video panel that can be used to play a video:
      *
-
-            // create canvas, add video panel to the center and
-            // play video
-            var canvas = zebkit.ui.zCanvas(500,500).root.properties({
-                layout: new zebkit.layout.BorderLayout(),
-                center: new zebkit.ui.web.VideoPan("trailer.mpg")
-            });
-
+     *
+     *       // create canvas, add video panel to the center and
+     *       // play video
+     *       var canvas = zebkit.ui.zCanvas(500,500).root.properties({
+     *           layout: new zebkit.layout.BorderLayout(),
+     *           center: new zebkit.ui.web.VideoPan("trailer.mpg")
+     *       });
+     *
      *
      * @param {String} url an URL to a video
      * @class zebkit.ui.web.VideoPan
      * @extends zebkit.ui.Panel
      * @constructor
      */
-    pkg.VideoPan = Class(ui.Panel,  [
+    pkg.VideoPan = Class(ui.Panel, [
         function(src) {
             var $this = this;
 

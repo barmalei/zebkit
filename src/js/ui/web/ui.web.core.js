@@ -506,6 +506,10 @@ zebkit.package("ui.web", function(pkg, Class) {
         },
 
         function setBorder(b) {
+            if (arguments.length === 0) {
+                b = "plain";
+            }
+
             b = zebkit.draw.$view(b);
 
             if (b === null) {

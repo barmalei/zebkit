@@ -226,6 +226,33 @@ Package.prototype.packages = function(callback, recursively) {
 };
 
 /**
+ * Get a package by the specified name.
+ * @param  {String} name a package name
+ * @return {zebkit.Package} a package
+ * @method byName
+ */
+Package.prototype.byName = function(name) {
+    if (this.fullname() === name) {
+        return this;
+    }
+
+    var i = name.indexOf('.');
+    if (i > 0) {
+        try {
+            return getPropertyValue(this, name.substring(i + 1), false);
+        } catch(e) {
+            if (e instanceof ReferenceError) {
+                return null;
+            } else {
+                throw e;
+            }
+        }
+    } else {
+        return null;
+    }
+};
+
+/**
  * List classes, variables and interfaces defined in the given package.
  * If second parameter "all" passed to the method is false, the method
  * will skip package entities whose name starts from "$" or "_" character.
@@ -326,6 +353,19 @@ Package.prototype.require = function() {
     });
 };
 
+/**
+ * Detect root package.
+ * @return {zebkit.Package} a root package
+ * @method getRootPackage
+ */
+Package.prototype.getRootPackage = function() {
+    var rootPkg = this;
+    while (rootPkg.$parent !== null) {
+        rootPkg = rootPkg.$parent;
+    }
+    return rootPkg;
+};
+
 var $textualFileExtensions = [
     "txt", "json", "htm", "html", "md", "properties", "conf", "xml"
 ];
@@ -384,7 +424,7 @@ Package.prototype.resources = function() {
                         jn(img);
                     });
                 } else if (type === "txt") {
-                    GET(p).then(function(req) {
+                    ZFS.GET(p).then(function(req) {
                         jn(req.responseText);
                     }).catch(function(e) {
                         jn(null);
@@ -465,58 +505,69 @@ Package.prototype.package = function(name, callback, path) {
     // no arguments than return the package itself
     if (arguments.length === 0) {
         return this;
-    }
-
-    var target = this;
-
-    if (typeof name !== 'function') {
-        if (typeof name === 'undefined' || name === null) {
-            throw new Error("Null package name");
-        }
-
-        name = name.trim();
-        if (name.match(/^[a-zA-Z_][a-zA-Z0-9_]+(\.[a-zA-Z_][a-zA-Z0-9_]+)*$/) === null) {
-            throw new Error("Invalid package name '" + name + "'");
-        }
-
-        var names = name.split('.');
-        for(var i = 0, k = names[0]; i < names.length; i++, k = k + '.' + names[i]) {
-            var n = names[i], p = target[n];
-            if (typeof p === "undefined") {
-                p = new Package(n, target);
-                target[n] = p;
-            } else if ((p instanceof Package) === false) {
-                throw new Error("Requested package '" + name +  "' conflicts with variable '" + n + "'");
-            }
-            target = p;
-        }
     } else {
-        path    = callback;
-        callback = name;
-    }
+        var target = this;
 
-    // detect url later then sooner since
-    if (target.$url === null) {
-        target.$detectLocation();
-    }
-
-    if (typeof callback === 'function') {
-        this.then(function() {
-            callback.call(target, target, typeof Class !== 'undefined' ? Class : null);
-
-            if (typeof path !== 'undefined' && path !== null) {
-                if (path === true) {
-                    target.configWith();
-                } else {
-                    target.configWith(path);
-                }
+        if (typeof name !== 'function') {
+            if (typeof name === 'undefined' || name === null) {
+                throw new Error("Null package name");
             }
 
-            $lsall.call(target, target.fullname() + "."); // resolve "clazz.$name" properties of the package classes
-        });
-    }
+            name = name.trim();
+            if (name.match(/^[a-zA-Z_][a-zA-Z0-9_]+(\.[a-zA-Z_][a-zA-Z0-9_]+)*$/) === null) {
+                throw new Error("Invalid package name '" + name + "'");
+            }
 
-    return target;
+            var names = name.split('.');
+            for(var i = 0, k = names[0]; i < names.length; i++, k = k + '.' + names[i]) {
+                var n = names[i],
+                    p = target[n];
+
+                if (typeof p === "undefined") {
+                    p = new Package(n, target);
+                    target[n] = p;
+                } else if ((p instanceof Package) === false) {
+                    throw new Error("Requested package '" + name +  "' conflicts with variable '" + n + "'");
+                }
+                target = p;
+            }
+        } else {
+            path    = callback;
+            callback = name;
+        }
+
+        // detect url later then sooner since
+        if (target.$url === null) {
+            target.$detectLocation();
+        }
+
+        if (typeof callback === 'function') {
+            this.then(function() {
+                callback.call(target, target, typeof Class !== 'undefined' ? Class : null);
+            }).then(function() {
+                // initiate configuration loading if it has been requested
+                if (typeof path !== 'undefined' && path !== null) {
+                    var jn = this.join();
+                    if (path === true) {
+                        var fn = target.fullname();
+                        path = fn.substring(fn.indexOf('.') + 1) + ".json";
+                        target.configWithRs(path, jn);
+                    } else {
+                        target.configWith(path, jn);
+                    }
+                }
+            }).then(function(r) {
+                if (r instanceof Error) {
+                    this.error(r);
+                } else {
+                    // initiate "clazz.$name" resolving
+                    $lsall.call(target, target.fullname() + ".");
+                }
+            });
+        }
+
+        return target;
+    }
 };
 
 
@@ -525,7 +576,9 @@ function resolvePlaceholders(path, env) {
     var ph = path.match(/\%\{[a-zA-Z$][a-zA-Z0-9_$.]*\}/g);
     if (ph !== null) {
         for (var i = 0; i < ph.length; i++) {
-            var p = ph[i], v = env[p.substring(2, p.length - 1)];
+            var p = ph[i],
+                v = env[p.substring(2, p.length - 1)];
+
             if (v !== null && typeof v !== 'undefined') {
                 path = path.replace(p, v);
             }
@@ -536,42 +589,67 @@ function resolvePlaceholders(path, env) {
 
 /**
  * Configure the given package with the JSON.
- * @param  {String | Object} [path] a path to JSON or JSON object
+ * @param  {String | Object} path a path to JSON or JSON object
+ * @param  {Function} [cb] a callback method
  * @method configWith
  */
-Package.prototype.configWith = function(path) {
-    // use full package name as configuration name
-    if (arguments.length < 1) {
-        var fn = this.fullname();
-        path = fn.substring(fn.indexOf('.') + 1) + ".json";
-    }
-
-    var rootPkg   = this,
-        rsPathPkg = this,
-        $this     = this;
-
-    // detect root package (common sync point) and package that
-    // defines path to resources
-    while (rootPkg.$parent !== null) {
-        rootPkg = rootPkg.$parent;
-        if (typeof rsPathPkg.$config.basedir === 'undefined') {
-            rsPathPkg = rootPkg;
-        }
-    }
-
-    if (URI.isAbsolute(path[0]) === false) {
-        var rsPath = rsPathPkg.$config.basedir;
-        if (typeof rsPath !== 'undefined') {
-            rsPath = resolvePlaceholders(rsPath, rsPathPkg.$config);
-            path = URI.join(rsPath, path);
-        } else {
+Package.prototype.configWith = function(path, cb) {
+    // catch error to keep passed callback notified
+    try {
+        if ((path instanceof URI || isString(path)) && URI.isAbsolute(path) === false) {
             path = URI.join(this.$url, path);
         }
+    } catch(e) {
+        if (arguments.length > 1 && cb !== null) {
+            cb.call(this, e);
+            return;
+        } else {
+            throw e;
+        }
     }
 
-    rootPkg.then(function() { // calling the guarantees it will be called when previous actions are completed
-        this.till(new Zson($this).then(path)); // now we can trigger other loading action
-    });
+    var $this = this;
+    if (arguments.length > 1 && cb !== null) {
+        new Zson($this).then(path, function() {
+            cb.call(this, path);
+        }).catch(function(e) {
+            cb.call(this, e);
+        });
+    } else {
+        this.getRootPackage().then(function() { // calling the guarantees it will be called when previous actions are completed
+            this.till(new Zson($this).then(path)); // now we can trigger other loading action
+        });
+    }
 };
+
+/**
+ * Configure the given package with the JSON.
+ * @param  {String | Object} path a path to JSON or JSON object
+ * @param  {Function} [cb] a callback
+ * @method configWithRs
+ */
+Package.prototype.configWithRs = function(path, cb) {
+    if (URI.isAbsolute(path)) {
+        throw new Error("Absulute path cannot be used");
+    }
+
+    var pkg = this;
+    // detect root package (common sync point) and package that
+    // defines path to resources
+    while (pkg !== null && (typeof pkg.$config.basedir === 'undefined' || pkg.$config.basedir === null)) {
+        pkg = pkg.$parent;
+    }
+
+    if (pkg === null) {
+        path = URI.join(this.$url, "rs", path);
+    } else {
+        // TODO: where config placeholders have to be specified
+        path = URI.join(resolvePlaceholders(pkg.$config.basedir, pkg.$config), path);
+    }
+
+    return arguments.length > 1 ? this.configWith(path, cb)
+                                : this.configWith(path);
+};
+
 
 $export(Package);

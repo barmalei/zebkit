@@ -1,4 +1,4 @@
-zebkit.package("ui.web", function(pkg, Class) {
+    zebkit.package("ui.web", function(pkg, Class) {
     var ui = pkg.cd("..");
 
     /**
@@ -844,7 +844,6 @@ zebkit.package("ui.web", function(pkg, Class) {
                             // DOM element
                             if (kid.isDOMElement === true) {
                                 kid.$container.parentNode.removeChild(kid.$container);
-                                kid.$container.parentNode = null;
                             } else {
                                 removeDOMChildren(kid);
                             }
@@ -865,7 +864,6 @@ zebkit.package("ui.web", function(pkg, Class) {
                     // check if it has a DOM parent
                     if (c.$container.parentNode !== null) {
                         c.$container.parentNode.removeChild(c.$container);
-                        c.$container.parentNode = null;
                     }
                 } else {
                     removeDOMChildren(c);

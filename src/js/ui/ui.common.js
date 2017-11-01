@@ -422,15 +422,17 @@ zebkit.package("ui", function(pkg, Class) {
                 var $this = this;
 
                 if (img !== null) {
-                    var isPic     = zebkit.instanceOf(img, zebkit.draw.Picture),
-                        imgToLoad = isPic ? img.target : img ;
+                    var isPic = zebkit.instanceOf(img, zebkit.draw.Picture);
+                    this.setView(isPic ? img : null);
 
-                    this.setView(isPic ? img
-                                       : new zebkit.draw.Picture(img));
-
-                    this.$runner = zebkit.image(imgToLoad);
+                    this.$runner = zebkit.image(isPic ? img.target : img);
                     this.$runner.then(function(img) {
                         $this.$runner = null;
+
+                        if (isPic === false) {
+                            $this.setView(new zebkit.draw.Picture(img));
+                        }
+
                         $this.vrp();
 
                         if (typeof $this.imageLoaded !== 'undefined') {
@@ -446,7 +448,6 @@ zebkit.package("ui", function(pkg, Class) {
                     }).catch(function(e) {
                         console.log(img);
                         zebkit.dumpError(e);
-
                         $this.$runner = null;
                         $this.setView(null);
                     });

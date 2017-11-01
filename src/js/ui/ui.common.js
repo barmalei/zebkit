@@ -357,7 +357,7 @@ zebkit.package("ui", function(pkg, Class) {
              * @method setView
              * @chainable
              */
-            this.setView = function(v){
+            this.setView = function(v) {
                 var old = this.view;
                 v = zebkit.draw.$view(v);
 
@@ -425,13 +425,12 @@ zebkit.package("ui", function(pkg, Class) {
                     var isPic     = zebkit.instanceOf(img, zebkit.draw.Picture),
                         imgToLoad = isPic ? img.target : img ;
 
-                    this.setView(isPic ? img : new zebkit.draw.Picture(img));
-
+                    this.setView(isPic ? img
+                                       : new zebkit.draw.Picture(img));
 
                     this.$runner = zebkit.image(imgToLoad);
                     this.$runner.then(function(img) {
                         $this.$runner = null;
-                        $this.setView(isPic ? img : new zebkit.draw.Picture(img));
                         $this.vrp();
 
                         if (typeof $this.imageLoaded !== 'undefined') {
@@ -1162,20 +1161,6 @@ zebkit.package("ui", function(pkg, Class) {
                     this.vrp();
                 }
                 return this;
-            };
-
-            // TODO: debug method
-            this.travel = function() {
-                var v     = 0,
-                    $this = this,
-                    tasks = new zebkit.util.TasksSet();
-
-                tasks.run(function(t) {
-                    $this.setValue(++v);
-                    if (v > 20) {
-                        t.shutdown();
-                    }
-                }, 1000, 500);
             };
         }
     ]);

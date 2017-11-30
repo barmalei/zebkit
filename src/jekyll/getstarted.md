@@ -45,7 +45,7 @@ In general is expected you are dealing with JS code following zebkit easy OOP co
 // wrap zebkit code with require method to make sure everything
 // has been initialized 
 zebkit.require("ui", "layout", function(ui, layout) {
-    var root = new ui.zCanvas("sample", 300, 300).root;
+    var root = new ui.zCanvas(300, 300).root;
     root.properties({
         border:  "plain", 
         padding: 8,

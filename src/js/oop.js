@@ -12,7 +12,7 @@ function $toString() {
 }
 
 function $ProxyMethod(name, f, clazz) {
-    if (typeof f.methodBody !== "undefined") {
+    if (f.methodBody !== undefined) {
         throw new Error("Proxy method '" + name + "' cannot be wrapped");
     }
 
@@ -67,7 +67,7 @@ function $cache(key) {
     }
 
     var ctx = $global, i = 0, j = 0;
-    for( ;ctx !== null && typeof ctx !== 'undefined'; ) {
+    for( ;ctx !== null && ctx !== undefined; ) {
         i = key.indexOf('.', j);
 
         if (i < 0) {
@@ -79,7 +79,7 @@ function $cache(key) {
         j = i + 1;
     }
 
-    if (ctx !== null && typeof ctx !== 'undefined') {
+    if (ctx !== null && ctx !== undefined) {
         if ($cachedE.length >= $cacheSize) {
             // cache is full, replace first element with the new one
             var n = $cachedE[0];
@@ -110,7 +110,7 @@ function $cpMethods(src, dest, clazz) {
                     method.call(dest, clazz);
                 } else {
                     // TODO analyze if we overwrite existent field
-                    if (typeof dest[name] !== 'undefined') {
+                    if (dest[name] !== undefined) {
                         // abstract method is overridden, let's skip abstract method
                         // stub implementation
                         if (method.$isAbstract === true) {
@@ -123,7 +123,7 @@ function $cpMethods(src, dest, clazz) {
                         }
                     }
 
-                    if (typeof method.methodBody !== "undefined") {
+                    if (method.methodBody !== undefined) {
                         dest[name] = $ProxyMethod(name, method.methodBody, clazz);
                     } else {
                         dest[name] = $ProxyMethod(name, method, clazz);
@@ -182,23 +182,33 @@ function $make_template(instanceOf, templateConstructor, inheritanceList) {
     if (arguments.length > 2 && inheritanceList.length > 0) {
         for(var i = 0; i < inheritanceList.length; i++) {
             var toInherit = inheritanceList[i];
-            if (typeof toInherit === 'undefined'        ||
-                toInherit === null                      ||
-                typeof toInherit        !== "function"  ||
-                typeof toInherit.$hash$ === "undefined"   )
+            if (toInherit === undefined         ||
+                toInherit === null              ||
+                typeof toInherit !== "function" ||
+                toInherit.$hash$ === undefined    )
             {
                 throw new ReferenceError("Invalid parent class or interface:" + toInherit);
             }
 
-            if (typeof templateConstructor.$parents[toInherit.$hash$] !== "undefined") {
-                throw Error("Duplicate toInherit class or interface: " + toInherit);
+            if (templateConstructor.$parents[toInherit.$hash$] !== undefined) {
+                var inh = '<unknown>';
+
+                // try to detect class or interface name
+                if (toInherit !== null && toInherit !== undefined) {
+                    if (toInherit.$name !== null && toInherit.$name !== undefined) {
+                        inh = toInherit.$name;
+                    } else {
+                        inh = toInherit;
+                    }
+                }
+                throw Error("Duplicated inheritance: " + toInherit );
             }
 
             templateConstructor.$parents[toInherit.$hash$] = toInherit;
 
             // if parent has own parents copy the parents references
             for(var k in toInherit.$parents) {
-                if (typeof templateConstructor.$parents[k] !== "undefined") {
+                if (templateConstructor.$parents[k] !== undefined) {
                     throw Error("Duplicate inherited class or interface: " + k);
                 }
 
@@ -225,22 +235,22 @@ function $make_template(instanceOf, templateConstructor, inheritanceList) {
 function clone(obj, map) {
     // clone atomic type
     // TODO: to speedup cloning we don't use isString, isNumber, isBoolean
-    if (obj === null || typeof obj === 'undefined' || obj.$notCloneable === true ||
-                                                      (typeof obj === "string"  || obj.constructor === String  ) ||
-                                                      (typeof obj === "boolean" || obj.constructor === Boolean ) ||
-                                                      (typeof obj === "number"  || obj.constructor === Number  )    )
+    if (obj === null || obj === undefined || obj.$notCloneable === true ||
+                                            (typeof obj === "string"  || obj.constructor === String  ) ||
+                                            (typeof obj === "boolean" || obj.constructor === Boolean ) ||
+                                            (typeof obj === "number"  || obj.constructor === Number  )    )
     {
         return obj;
     }
 
     map = map || new Map();
     var t = map.get(obj);
-    if (typeof t !== "undefined") {
+    if (t !== undefined) {
         return t;
     }
 
     // clone with provided custom "clone" method
-    if (typeof obj.$clone !== "undefined") {
+    if (obj.$clone !== undefined) {
         return obj.$clone(map);
     }
 
@@ -415,7 +425,7 @@ var Interface = $make_template(null, function() {
                     throw new Error("Constructor declaration is not allowed in interface");
                 }
 
-                if (typeof proto[name] !== 'undefined') {
+                if (proto[name] !== undefined) {
                     throw new Error("Duplicated interface method '" + name + "(...)'");
                 }
 
@@ -584,7 +594,7 @@ function $mixing(clazz, methods) {
             methodName = $FN(method);
 
         // detect if the passed method is proxy method
-        if (typeof method.methodBody !== 'undefined') {
+        if (method.methodBody !== undefined) {
             throw new Error("Proxy method '" + methodName + "' cannot be mixed in a class");
         }
 
@@ -614,13 +624,13 @@ function $mixing(clazz, methods) {
         }
 
         var existentMethod = clazz.prototype[methodName];
-        if (typeof existentMethod !== 'undefined' && typeof existentMethod !== 'function') {
+        if (existentMethod !== undefined && typeof existentMethod !== 'function') {
             throw new Error("'" + methodName + "(...)' method clash with a field");
         }
 
         // if constructor doesn't have super definition than let's avoid proxy method
         // overhead
-        if (typeof existentMethod === 'undefined' && methodName === CNAME) {
+        if (existentMethod === undefined && methodName === CNAME) {
             clazz.prototype[methodName] = method;
         } else {
             // Create and set proxy method that is bound to the given class
@@ -693,8 +703,8 @@ var classTemplateFields = {
                 if (name !== "clazz" && this.prototype.hasOwnProperty(name) ) {
                     var f = this.prototype[name];
                     if (typeof f === 'function') {
-                        A.prototype[name] = typeof f.methodBody !== 'undefined' ? $ProxyMethod(name, f.methodBody, f.boundTo)
-                                                                                : f;
+                        A.prototype[name] = f.methodBody !== undefined ? $ProxyMethod(name, f.methodBody, f.boundTo)
+                                                                       : f;
 
                         if (A.prototype[name].boundTo === this) {
                             A.prototype[name].boundTo = A;
@@ -717,11 +727,11 @@ var classTemplateFields = {
         // add passed interfaces
         for(var i = 0; i < arguments.length - (hasMethod ? 1 : 0); i++) {
             var I = arguments[i];
-            if (I === null || typeof I === 'undefined' || I.clazz !== Interface) {
+            if (I === null || I === undefined || I.clazz !== Interface) {
                 throw new Error("Interface is expected");
             }
 
-            if (typeof this.$parents[I.$hash$] !== 'undefined') {
+            if (this.$parents[I.$hash$] !== undefined) {
                 throw new Error("Interface has been already inherited");
             }
 
@@ -816,7 +826,7 @@ var classTemplateProto = {
                 if (n === CDNAME) {
                     init = f[i];  // postpone calling initializer before all methods will be defined
                 } else {
-                    if (typeof this[n] !== 'undefined' && typeof this[n] !== 'function') {
+                    if (this[n] !== undefined && typeof this[n] !== 'function') {
                         throw new Error("Method '" + n + "' clash with a property");
                     }
                     this[n] = $ProxyMethod(n, f[i], clazz);
@@ -836,7 +846,7 @@ var classTemplateProto = {
             }
 
             var I = arguments[i];
-            if (typeof clazz.$parents[I.$hash$] !== 'undefined') {
+            if (clazz.$parents[I.$hash$] !== undefined) {
                 throw new Error("Interface has been already inherited");
             }
 
@@ -874,7 +884,7 @@ var classTemplateProto = {
        if ($caller !== null) {
             for (var $s = $caller.boundTo.$parent; $s !== null; $s = $s.$parent) {
                 var m = $s.prototype[$caller.methodName];
-                if (typeof m !== 'undefined') {
+                if (m !== undefined) {
                     return m.apply(this, arguments);
                 }
             }
@@ -895,7 +905,7 @@ var classTemplateProto = {
        if ($caller !== null) {
             for (var $s = $caller.boundTo.$parent; $s !== null; $s = $s.$parent) {
                 var m = $s.prototype[$caller.methodName];
-                if (typeof m !== 'undefined') {
+                if (m !== undefined) {
                     return m.apply(this, args);
                 }
             }
@@ -916,7 +926,7 @@ var classTemplateProto = {
        if ($caller !== null) {
             for(var $s = $caller.boundTo.$parent; $s !== null; $s = $s.$parent) {
                 var m = $s.prototype[$caller.methodName];
-                if (typeof m !== 'undefined') {
+                if (m !== undefined) {
                     return m.apply(this, arguments);
                 }
             }
@@ -946,7 +956,7 @@ var classTemplateProto = {
     },
 
     $genHash : function() {
-        if (typeof this.$hash$ === 'undefined') {
+        if (this.$hash$ === undefined) {
             this.$hash$ = "$ZeInGen" + ($$$++);
         }
         return this.$hash$;
@@ -977,7 +987,7 @@ var classTemplateProto = {
 
         nobj.constructor = this.constructor;
 
-        if (typeof nobj.$hash$ !== 'undefined') {
+        if (nobj.$hash$ !== undefined) {
             nobj.$hash$ = "$zObj_" + ($$$++);
         }
 
@@ -1016,7 +1026,7 @@ var Class = $make_template(null, function() {
 
         // let's make sure we inherit interface
         if (parentClass === null || i > 0) {
-            if (typeof toInherit[i] === 'undefined' || toInherit[i] === null) {
+            if (toInherit[i] === undefined || toInherit[i] === null) {
                 throw new ReferenceError("Undefined inherited interface [" + i + "] " );
             } else if (toInherit[i].clazz !== Interface) {
                 throw new ReferenceError("Inherited interface is not an Interface ( [" + i + "] '" + toInherit[i] + "'')");
@@ -1076,7 +1086,7 @@ var Class = $make_template(null, function() {
         }
 
         // call class constructor
-        if (typeof this.$ !== 'undefined') { // TODO: hard-coded constructor name to speed up
+        if (this.$ !== undefined) { // TODO: hard-coded constructor name to speed up
             return this.$.apply(this, arguments);
         }
     }, toInherit);
@@ -1109,7 +1119,7 @@ var Class = $make_template(null, function() {
         for(var k in parentClass.prototype) {
             if (parentClass.prototype.hasOwnProperty(k)) {
                 var f = parentClass.prototype[k];
-                classTemplate.prototype[k] = (typeof f !== 'undefined' &&
+                classTemplate.prototype[k] = (f !== undefined &&
                                               f !== null &&
                                               f.hasOwnProperty("methodBody")) ? $ProxyMethod(f.methodName, f.methodBody, f.boundTo)
                                                                               : f;
@@ -1125,7 +1135,7 @@ var Class = $make_template(null, function() {
     classTemplate.prototype.clazz = classTemplate;
 
     // check if the method has been already defined in the class
-    if (typeof classTemplate.prototype.properties === 'undefined') {
+    if (classTemplate.prototype.properties === undefined) {
         classTemplate.prototype.properties = function(p) {
             return properties(this, p);
         };
@@ -1154,15 +1164,10 @@ var Class = $make_template(null, function() {
         }
     }
 
-    // add class declared methods
-    $mixing(classTemplate, classMethods);
-
-    // populate static fields
-    // TODO: exclude the basic static methods and static constant
-    // static inheritance
+    // initialize uniqueness field with false
     classTemplate.$uniqueness = false;
 
-
+    // inherit static fields from parent class
     if (parentClass !== null) {
         for (var key in parentClass) {
             if (key[0] !== '$' &&
@@ -1173,10 +1178,16 @@ var Class = $make_template(null, function() {
             }
         }
 
+        // inherit uni
         if (parentClass.$uniqueness === true) {
             classTemplate.hashable();
         }
     }
+
+    // add class declared methods after the previous step to get a chance to
+    // overwrite class level definitions
+    $mixing(classTemplate, classMethods);
+
 
     // populate class level methods and fields into class template
     for (var tf in classTemplateFields) {
@@ -1234,15 +1245,15 @@ Class.newInstance = function() {
  * @for  zebkit
  */
 function instanceOf(obj, clazz) {
-    if (clazz !== null && typeof clazz !== 'undefined') {
-        if (obj === null || typeof obj === 'undefined')  {
+    if (clazz !== null && clazz !== undefined) {
+        if (obj === null || obj === undefined)  {
             return false;
-        } else if (typeof obj.clazz === 'undefined') {
+        } else if (obj.clazz === undefined) {
             return (obj instanceof clazz);
         } else {
-            return typeof obj.clazz !== 'undefined' && obj.clazz !== null &&
+            return obj.clazz !== undefined && obj.clazz !== null &&
                    (obj.clazz === clazz ||
-                    obj.clazz.$parents.hasOwnProperty(clazz.$hash$));
+                    obj.clazz.$parents[clazz.$hash$] !== undefined);
         }
     }
 

@@ -15,12 +15,12 @@ function $ls(callback, all) {
 
 function $lsall(fn) {
     return $ls.call(this, function(k, v) {
-        if (typeof v === 'undefined') {
+        if (v === undefined) {
             throw new Error(fn + "," + k);
         }
         if (v !== null && v.clazz === Class) {
             // class is detected, set the class name and ref to the class package
-            if (typeof v.$name === "undefined") {
+            if (v.$name === undefined) {
                 v.$name = fn + k;
                 v.$pkg  = getPropertyValue($global, fn.substring(0, fn.length - 1));
             }
@@ -197,7 +197,7 @@ Package.prototype.cd = function(path) {
             pk = pk[pn];
         }
 
-        if (typeof pk === 'undefined' || pk === null) {
+        if (pk === undefined || pk === null) {
             throw new Error("Package path '" + path + "' cannot be resolved");
         }
     }
@@ -367,8 +367,11 @@ Package.prototype.getRootPackage = function() {
 };
 
 var $textualFileExtensions = [
-    "txt", "json", "htm", "html", "md", "properties", "conf", "xml"
-];
+        "txt", "json", "htm", "html", "md", "properties", "conf", "xml", "java", "js", "css", "scss", "log"
+    ],
+    $imageFileExtensions = [
+        "jpg", "jpeg", "png", "tiff", "gif", "ico", "exif", "bmp"
+    ];
 
 /**
  * This method loads resources (images, textual files, etc) and call callback
@@ -402,10 +405,10 @@ Package.prototype.resources = function() {
         for(var i = 0; i < args.length ; i++) {
             (function(path, jn) {
                 var m    = path.match(/^(\<[a-z]+\>\s*)?(.*)$/),
-                    type = "img",
+                    type = "txt",
                     p    = m[2].trim();
 
-                if (typeof m[1] !== 'undefined') {
+                if (m[1] !== undefined) {
                     type = m[1].trim().substring(1, m[1].length - 1).trim();
                 } else {
                     var li = p.lastIndexOf('.');
@@ -413,6 +416,8 @@ Package.prototype.resources = function() {
                         var ext = p.substring(li + 1).toLowerCase();
                         if ($textualFileExtensions.indexOf(ext) >= 0) {
                             type = "txt";
+                        } else if ($imageFileExtensions.indexOf(ext) >= 0) {
+                            type = "img";
                         }
                     }
                 }
@@ -421,7 +426,7 @@ Package.prototype.resources = function() {
                     $zenv.loadImage(p, function(img) {
                         jn(img);
                     }, function(img, e) {
-                        jn(img);
+                        jn(null);
                     });
                 } else if (type === "txt") {
                     ZFS.GET(p).then(function(req) {
@@ -509,7 +514,7 @@ Package.prototype.package = function(name, callback, path) {
         var target = this;
 
         if (typeof name !== 'function') {
-            if (typeof name === 'undefined' || name === null) {
+            if (name === undefined || name === null) {
                 throw new Error("Null package name");
             }
 
@@ -523,7 +528,7 @@ Package.prototype.package = function(name, callback, path) {
                 var n = names[i],
                     p = target[n];
 
-                if (typeof p === "undefined") {
+                if (p === undefined) {
                     p = new Package(n, target);
                     target[n] = p;
                 } else if ((p instanceof Package) === false) {
@@ -546,7 +551,7 @@ Package.prototype.package = function(name, callback, path) {
                 callback.call(target, target, typeof Class !== 'undefined' ? Class : null);
             }).then(function() {
                 // initiate configuration loading if it has been requested
-                if (typeof path !== 'undefined' && path !== null) {
+                if (path !== undefined && path !== null) {
                     var jn = this.join();
                     if (path === true) {
                         var fn = target.fullname();
@@ -579,7 +584,7 @@ function resolvePlaceholders(path, env) {
             var p = ph[i],
                 v = env[p.substring(2, p.length - 1)];
 
-            if (v !== null && typeof v !== 'undefined') {
+            if (v !== null && v !== undefined) {
                 path = path.replace(p, v);
             }
         }
@@ -636,7 +641,7 @@ Package.prototype.configWithRs = function(path, cb) {
     var pkg = this;
     // detect root package (common sync point) and package that
     // defines path to resources
-    while (pkg !== null && (typeof pkg.$config.basedir === 'undefined' || pkg.$config.basedir === null)) {
+    while (pkg !== null && (pkg.$config.basedir === undefined || pkg.$config.basedir === null)) {
         pkg = pkg.$parent;
     }
 

@@ -1,9 +1,10 @@
 //
-//              [ 'easyoop', 'misc', 'draw', 'ui.event', 'ui',  ['resources']
-//                 'ui.grid', 'ui.tree', 'ui.design', 'web',      /   |
-//                 'ui.web', 'ui.vk.js', 'ui.date.js' ]          /    |
-//                                      |                       /     |
-//                                      +----------------------+   ['zfs']
+//                   [ 'easyoop','misc','draw','ui.event','ui',    ['resources']
+//  ['demo.zfs']       'ui.grid','ui.tree','ui.design','web',        /   |
+//       |            'ui.web','ui.vk.js','ui.date.js' ]            /    |
+//       |                              |                          /     |
+//    ['demo']                          +-------------------------+   ['zfs']
+//                                      |
 //                                      |
 // ['apidoc-light','apidoc-dark']   ['zebkit']    ['apidoc-light','apidoc-dark']
 //                |                     |                    |
@@ -19,7 +20,8 @@ var gulp   = require('gulp'), fs   = require('fs'), spawn = require('cross-spawn
     rename = require('gulp-rename'), webserver = require('gulp-webserver'),
     rm     = require('gulp-rm'),     expect    = require('gulp-expect-file'),
     zip    = require('gulp-zip'),    insert    = require('gulp-insert'),
-    file   = require('gulp-file'),   jsonmin   = require('gulp-jsonminify');
+    file   = require('gulp-file'),   jsonmin   = require('gulp-jsonminify'),
+    morgan = require('morgan');
 
 var profile = {
     useStrictMode: true,
@@ -296,7 +298,6 @@ var profile = {
             files : [
                 'build/rs/themes/light/ui.json'
             ],
-
             type: "json"
         },
 
@@ -343,9 +344,11 @@ gulp.task('http', function() {
     gulp.src('.')
         .pipe(webserver({
             port: 8090,
+            host: "192.168.178.15",
             host: "localhost",
             directoryListing: true,
             open: false
+            //middleware: morgan(':method :url :status :req[opentunnel.party.alternateid] :req[Content-Type]')
         }));
 });
 

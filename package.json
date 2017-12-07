@@ -34,6 +34,7 @@
     "xmlhttprequest": "latest",
     "jshint": "latest",
     "cross-spawn": "latest",
+    "morgan": "latest",
     "minimatch" : "latest",
     "yuidoc-zebkit-theme": "https://github.com/barmalei/yuidoc-zebkit-theme"
   },

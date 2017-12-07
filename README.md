@@ -16,7 +16,7 @@ The latest version of previous generation of zebkit (zebra) can be found as "zeb
    ```js
       ...
       var c = new zebkit.ui.zCanvas();
-      c.root.setLayout(new zebkit.layout.BorderLayout());
+      c.root.setBorderLayout();
       c.root.add(new zebkit.ui.web.HtmlElement("<an ID of an HTML element>"));
       ...
    ```

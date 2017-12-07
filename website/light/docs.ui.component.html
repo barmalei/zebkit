@@ -32,7 +32,7 @@
     <!-- RSS -->
     <link rel="alternate" type="application/rss+xml" title="RSS" href="/atom.xml">
 
-    <script type="text/javascript" src="/build/zebkit.js?16092017">  </script>
+    <script type="text/javascript" src="/build/zebkit.js?11072017">  </script>
 
     <script type="text/javascript">
         zebkit.ui.config("theme", "light");
@@ -503,7 +503,7 @@ zebkit.ui.web.HTMLElement      zebkit.ui.Button    Many others
 
 <p>For example:</p>
 
-<div class="highlighter-rouge"><pre class="highlight"><code><span class="nx">zebkit</span><span class="p">.</span><span class="nx">require</span><span class="p">(</span><span class="s2">"ui"</span><span class="p">,</span> <span class="s2">"layout"</span><span class="p">,</span> <span class="kd">function</span><span class="p">(</span><span class="nx">ui</span><span class="p">,</span> <span class="nx">layout</span><span class="p">)</span> <span class="p">{</span>
+<div class="highlighter-rouge"><pre class="highlight"><code><span class="nx">zebkit</span><span class="p">.</span><span class="nx">require</span><span class="p">(</span><span class="s2">"ui"</span><span class="p">,</span> <span class="kd">function</span><span class="p">(</span><span class="nx">ui</span><span class="p">)</span> <span class="p">{</span>
     <span class="c1">// create HTML Canvas element where zebkit UI to host</span>
     <span class="c1">// zebkit UI components hierarchy </span>
     <span class="kd">var</span> <span class="nx">htmlCanvas</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">ui</span><span class="p">.</span><span class="nx">zCanvas</span><span class="p">(</span><span class="mi">500</span><span class="p">,</span> <span class="mi">400</span><span class="p">);</span>
@@ -514,7 +514,7 @@ zebkit.ui.web.HTMLElement      zebkit.ui.Button    Many others
 
     <span class="c1">// everything has to be ordered with rules</span>
     <span class="c1">// so specify layout manager </span>
-    <span class="nx">root</span><span class="p">.</span><span class="nx">setLayout</span><span class="p">(</span><span class="k">new</span> <span class="nx">layout</span><span class="p">.</span><span class="nx">BorderLayout</span><span class="p">(</span><span class="mi">8</span><span class="p">));</span>
+    <span class="nx">root</span><span class="p">.</span><span class="nx">setBorderLayout</span><span class="p">(</span><span class="mi">8</span><span class="p">);</span>
 
     <span class="c1">// add button zebkit component</span>
     <span class="nx">root</span><span class="p">.</span><span class="nx">add</span><span class="p">(</span><span class="s2">"bottom"</span><span class="p">,</span> <span class="k">new</span> <span class="nx">ui</span><span class="p">.</span><span class="nx">Button</span><span class="p">(</span><span class="s2">"Hello zebkit"</span><span class="p">));</span>    

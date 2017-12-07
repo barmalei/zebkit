@@ -32,7 +32,7 @@
     <!-- RSS -->
     <link rel="alternate" type="application/rss+xml" title="RSS" href="/atom.xml">
 
-    <script type="text/javascript" src="/build/zebkit.js?16092017">  </script>
+    <script type="text/javascript" src="/build/zebkit.js?11072017">  </script>
 
     <script type="text/javascript">
         zebkit.ui.config("theme", "dark");
@@ -423,11 +423,11 @@
 
 <p>Usage layout manager in zebkit looks something like the following:</p>
 
-<div class="highlighter-rouge"><pre class="highlight"><code><span class="nx">zebkit</span><span class="p">.</span><span class="nx">require</span><span class="p">(</span><span class="s2">"ui"</span><span class="p">,</span> <span class="s2">"layout"</span><span class="p">,</span> <span class="kd">function</span><span class="p">(</span><span class="nx">ui</span><span class="p">,</span> <span class="nx">layout</span><span class="p">)</span> <span class="p">{</span>
+<div class="highlighter-rouge"><pre class="highlight"><code><span class="nx">zebkit</span><span class="p">.</span><span class="nx">require</span><span class="p">(</span><span class="s2">"ui"</span><span class="p">,</span> <span class="kd">function</span><span class="p">(</span><span class="nx">ui</span><span class="p">)</span> <span class="p">{</span>
     <span class="p">...</span>
     <span class="kd">var</span> <span class="nx">pan</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">ui</span><span class="p">.</span><span class="nx">Panel</span><span class="p">();</span>
     <span class="c1">// Set layout manager for the container</span>
-    <span class="nx">pan</span><span class="p">.</span><span class="nx">setLayout</span><span class="p">(</span><span class="k">new</span> <span class="nx">layout</span><span class="p">.</span><span class="nx">BorderLayout</span><span class="p">())</span> 
+    <span class="nx">pan</span><span class="p">.</span><span class="nx">setBorderLayout</span><span class="p">();</span> 
     <span class="p">...</span>
     <span class="c1">// Border layout manager orders child components </span>
     <span class="c1">// with number of predefined alignments (top, center, left, </span>
@@ -460,11 +460,11 @@
     </tr>
 </table>
 
-<div class="highlighter-rouge"><pre class="highlight"><code><span class="nx">zebkit</span><span class="p">.</span><span class="nx">require</span><span class="p">(</span><span class="s2">"ui"</span><span class="p">,</span><span class="s2">"layout"</span><span class="p">,</span><span class="kd">function</span><span class="p">(</span><span class="nx">ui</span><span class="p">,</span> <span class="nx">lay</span><span class="p">)</span> <span class="p">{</span>
+<div class="highlighter-rouge"><pre class="highlight"><code><span class="nx">zebkit</span><span class="p">.</span><span class="nx">require</span><span class="p">(</span><span class="s2">"ui"</span><span class="p">,</span> <span class="kd">function</span><span class="p">(</span><span class="nx">ui</span><span class="p">)</span> <span class="p">{</span>
     <span class="kd">var</span> <span class="nx">r</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">ui</span><span class="p">.</span><span class="nx">zCanvas</span><span class="p">().</span><span class="nx">root</span><span class="p">;</span>
     <span class="c1">// raster layout that size components according to </span>
     <span class="c1">// its preferred size</span>
-    <span class="nx">r</span><span class="p">.</span><span class="nx">setLayout</span><span class="p">(</span><span class="k">new</span> <span class="nx">lay</span><span class="p">.</span><span class="nx">RasterLayout</span><span class="p">(</span><span class="kc">true</span><span class="p">));</span>
+    <span class="nx">r</span><span class="p">.</span><span class="nx">setRasterLayout</span><span class="p">(</span><span class="kc">true</span><span class="p">);</span>
 
     <span class="c1">// add children UI components with different constraints</span>
     <span class="nx">r</span><span class="p">.</span><span class="nx">add</span><span class="p">(</span><span class="s2">"center"</span><span class="p">,</span> <span class="k">new</span> <span class="nx">ui</span><span class="p">.</span><span class="nx">Button</span><span class="p">(</span><span class="s2">"Center,\npreferred Sized"</span><span class="p">));</span>
@@ -494,10 +494,10 @@
     </tr>
 </table>
 
-<div class="highlighter-rouge"><pre class="highlight"><code><span class="nx">zebkit</span><span class="p">.</span><span class="nx">require</span><span class="p">(</span><span class="s2">"ui"</span><span class="p">,</span><span class="s2">"layout"</span><span class="p">,</span><span class="kd">function</span><span class="p">(</span><span class="nx">ui</span><span class="p">,</span> <span class="nx">lay</span><span class="p">)</span> <span class="p">{</span>
+<div class="highlighter-rouge"><pre class="highlight"><code><span class="nx">zebkit</span><span class="p">.</span><span class="nx">require</span><span class="p">(</span><span class="s2">"ui"</span><span class="p">,</span> <span class="kd">function</span><span class="p">(</span><span class="nx">ui</span><span class="p">)</span> <span class="p">{</span>
     <span class="kd">var</span> <span class="nx">r</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">ui</span><span class="p">.</span><span class="nx">zCanvas</span><span class="p">().</span><span class="nx">root</span><span class="p">;</span>
     <span class="c1">// setup stack layout</span>
-    <span class="nx">r</span><span class="p">.</span><span class="nx">setLayout</span><span class="p">(</span><span class="k">new</span> <span class="nx">lay</span><span class="p">.</span><span class="nx">StackLayout</span><span class="p">());</span>
+    <span class="nx">r</span><span class="p">.</span><span class="nx">setStackLayout</span><span class="p">();</span>
 
     <span class="c1">// add child component stretched vertically and </span>
     <span class="c1">// horizontally over the whole parent component area</span>
@@ -530,10 +530,10 @@
     </tr>
 </table>
 
-<div class="highlighter-rouge"><pre class="highlight"><code><span class="nx">zebkit</span><span class="p">.</span><span class="nx">require</span><span class="p">(</span><span class="s2">"ui"</span><span class="p">,</span><span class="s2">"layout"</span><span class="p">,</span><span class="kd">function</span><span class="p">(</span><span class="nx">ui</span><span class="p">,</span> <span class="nx">lay</span><span class="p">)</span> <span class="p">{</span>
+<div class="highlighter-rouge"><pre class="highlight"><code><span class="nx">zebkit</span><span class="p">.</span><span class="nx">require</span><span class="p">(</span><span class="s2">"ui"</span><span class="p">,</span><span class="kd">function</span><span class="p">(</span><span class="nx">ui</span><span class="p">)</span> <span class="p">{</span>
     <span class="kd">var</span> <span class="nx">r</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">ui</span><span class="p">.</span><span class="nx">zCanvas</span><span class="p">().</span><span class="nx">root</span><span class="p">;</span>
     <span class="c1">// set border layout manager</span>
-    <span class="nx">r</span><span class="p">.</span><span class="nx">setLayout</span><span class="p">(</span><span class="k">new</span> <span class="nx">lay</span><span class="p">.</span><span class="nx">BorderLayout</span><span class="p">());</span>
+    <span class="nx">r</span><span class="p">.</span><span class="nx">setBorderLayout</span><span class="p">();</span>
 
     <span class="c1">// add children UI components with different constraints</span>
     <span class="nx">r</span><span class="p">.</span><span class="nx">add</span><span class="p">(</span><span class="s2">"center"</span><span class="p">,</span> <span class="k">new</span> <span class="nx">ui</span><span class="p">.</span><span class="nx">Button</span><span class="p">(</span><span class="s2">"CENTER"</span><span class="p">));</span>
@@ -565,11 +565,11 @@
     </tr>
 </table>
 
-<div class="highlighter-rouge"><pre class="highlight"><code><span class="nx">zebkit</span><span class="p">.</span><span class="nx">require</span><span class="p">(</span><span class="s2">"ui"</span><span class="p">,</span><span class="s2">"layout"</span><span class="p">,</span> <span class="kd">function</span><span class="p">(</span><span class="nx">ui</span><span class="p">,</span> <span class="nx">layout</span><span class="p">)</span> <span class="p">{</span>
+<div class="highlighter-rouge"><pre class="highlight"><code><span class="nx">zebkit</span><span class="p">.</span><span class="nx">require</span><span class="p">(</span><span class="s2">"ui"</span><span class="p">,</span> <span class="kd">function</span><span class="p">(</span><span class="nx">ui</span><span class="p">)</span> <span class="p">{</span>
     <span class="kd">var</span> <span class="nx">r</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">ui</span><span class="p">.</span><span class="nx">zCanvas</span><span class="p">().</span><span class="nx">root</span><span class="p">;</span>
     <span class="c1">// set list layout manager that orders components as list </span>
     <span class="c1">// items and stretches child components horizontally</span>
-    <span class="nx">r</span><span class="p">.</span><span class="nx">setLayout</span><span class="p">(</span><span class="k">new</span> <span class="nx">layout</span><span class="p">.</span><span class="nx">ListLayout</span><span class="p">());</span>
+    <span class="nx">r</span><span class="p">.</span><span class="nx">setListLayout</span><span class="p">();</span>
 
     <span class="c1">// add child components</span>
     <span class="nx">r</span><span class="p">.</span><span class="nx">add</span><span class="p">(</span><span class="k">new</span> <span class="nx">ui</span><span class="p">.</span><span class="nx">Button</span><span class="p">(</span><span class="s2">"Stretched Item 1"</span><span class="p">));</span>
@@ -636,12 +636,12 @@
     </tr>
 </table>
 
-<div class="highlighter-rouge"><pre class="highlight"><code><span class="nx">zebkit</span><span class="p">.</span><span class="nx">require</span><span class="p">(</span><span class="s2">"ui"</span><span class="p">,</span><span class="s2">"layout"</span><span class="p">,</span> <span class="kd">function</span><span class="p">(</span><span class="nx">ui</span><span class="p">,</span> <span class="nx">lay</span><span class="p">)</span> <span class="p">{</span>
+<div class="highlighter-rouge"><pre class="highlight"><code><span class="nx">zebkit</span><span class="p">.</span><span class="nx">require</span><span class="p">(</span><span class="s2">"ui"</span><span class="p">,</span> <span class="kd">function</span><span class="p">(</span><span class="nx">ui</span><span class="p">)</span> <span class="p">{</span>
     <span class="kd">var</span> <span class="nx">r</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">ui</span><span class="p">.</span><span class="nx">zCanvas</span><span class="p">().</span><span class="nx">root</span><span class="p">;</span>
 
     <span class="c1">// set flow layout with vertical components ordering and center </span>
     <span class="c1">// vertical and horizontal alignments</span>
-    <span class="nx">r</span><span class="p">.</span><span class="nx">setLayout</span><span class="p">(</span><span class="k">new</span> <span class="nx">lay</span><span class="p">.</span><span class="nx">FlowLayout</span><span class="p">(</span><span class="s2">"center"</span><span class="p">,</span><span class="s2">"center"</span><span class="p">,</span><span class="s2">"vertical"</span><span class="p">,</span><span class="mi">2</span><span class="p">));</span>
+    <span class="nx">r</span><span class="p">.</span><span class="nx">setFlowLayout</span><span class="p">(</span><span class="s2">"center"</span><span class="p">,</span> <span class="s2">"center"</span><span class="p">,</span> <span class="s2">"vertical"</span><span class="p">,</span> <span class="mi">2</span><span class="p">);</span>
 
     <span class="c1">// add child components</span>
     <span class="nx">r</span><span class="p">.</span><span class="nx">add</span><span class="p">(</span><span class="k">new</span> <span class="nx">ui</span><span class="p">.</span><span class="nx">Button</span><span class="p">(</span><span class="s2">"VCentered"</span><span class="p">));</span>
@@ -869,7 +869,7 @@ zebkit.require("ui", "layout", function(ui, lay) {
 
     // Border layout
     var r = new ui.zCanvas("layoutSample1", 500, 400).root;
-    r.setLayout(new lay.BorderLayout());
+    r.setBorderLayout();
     r.add(new ui.Panel({
         layout : new lay.BorderLayout(4),
         kids   : {

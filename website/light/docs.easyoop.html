@@ -32,7 +32,7 @@
     <!-- RSS -->
     <link rel="alternate" type="application/rss+xml" title="RSS" href="/atom.xml">
 
-    <script type="text/javascript" src="/build/zebkit.js?16092017">  </script>
+    <script type="text/javascript" src="/build/zebkit.js?11072017">  </script>
 
     <script type="text/javascript">
         zebkit.ui.config("theme", "light");
@@ -536,11 +536,11 @@
 <div class="highlighter-rouge"><pre class="highlight"><code><span class="c1">// Declare an interface that renders rectangle </span>
 <span class="kd">var</span> <span class="nx">DrawRect</span> <span class="o">=</span> <span class="nx">zebkit</span><span class="p">.</span><span class="nx">Interface</span><span class="p">([</span>
     <span class="kd">function</span> <span class="nx">paint</span><span class="p">(</span><span class="nx">g</span><span class="p">)</span> <span class="p">{</span>
-        <span class="k">if</span> <span class="p">(</span><span class="k">typeof</span> <span class="k">this</span><span class="p">.</span><span class="nx">color</span> <span class="o">!==</span> <span class="s1">'undefined'</span><span class="p">)</span> <span class="p">{</span>
+        <span class="k">if</span> <span class="p">(</span><span class="k">this</span><span class="p">.</span><span class="nx">color</span> <span class="o">!==</span> <span class="kc">undefined</span><span class="p">)</span> <span class="p">{</span>
             <span class="nx">g</span><span class="p">.</span><span class="nx">color</span> <span class="o">=</span> <span class="k">this</span><span class="p">.</span><span class="nx">color</span><span class="p">;</span> 
         <span class="p">}</span>
 
-        <span class="k">if</span> <span class="p">(</span><span class="k">typeof</span> <span class="k">this</span><span class="p">.</span><span class="nx">lineWidth</span> <span class="o">!==</span> <span class="s1">'undefined'</span><span class="p">)</span> <span class="p">{</span>
+        <span class="k">if</span> <span class="p">(</span><span class="k">this</span><span class="p">.</span><span class="nx">lineWidth</span> <span class="o">!==</span> <span class="kc">undefined</span><span class="p">)</span> <span class="p">{</span>
             <span class="nx">g</span><span class="p">.</span><span class="nx">lineWidth</span> <span class="o">=</span> <span class="k">this</span><span class="p">.</span><span class="nx">lineWidth</span><span class="p">;</span>
         <span class="p">}</span>
 

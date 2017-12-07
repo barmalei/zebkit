@@ -32,7 +32,7 @@
     <!-- RSS -->
     <link rel="alternate" type="application/rss+xml" title="RSS" href="/atom.xml">
 
-    <script type="text/javascript" src="/build/zebkit.js?16092017">  </script>
+    <script type="text/javascript" src="/build/zebkit.js?11072017">  </script>
 
     <script type="text/javascript">
         zebkit.ui.config("theme", "light");
@@ -631,9 +631,9 @@ compAdded, compRemoved</p>
 </table>
 
 <script type="text/javascript">
-zebkit.require("ui", "layout", function(ui, layout) {
+zebkit.require("ui", function(ui) {
     var root = new ui.zCanvas("childrenEvents", 400, 300).root;
-    root.setLayout(new layout.ListLayout(8));
+    root.setListLayout(8);
     root.setPadding(8);
     root.setBorder("plain");
     for (var i = 0; i < 5; i++) {
@@ -649,9 +649,9 @@ zebkit.require("ui", "layout", function(ui, layout) {
 });  
 </script>
 
-<div class="highlighter-rouge"><pre class="highlight"><code><span class="nx">zebkit</span><span class="p">.</span><span class="nx">require</span><span class="p">(</span><span class="s2">"ui"</span><span class="p">,</span> <span class="s2">"layout"</span><span class="p">,</span> <span class="kd">function</span><span class="p">(</span><span class="nx">ui</span><span class="p">,</span> <span class="nx">layout</span><span class="p">)</span> <span class="p">{</span>
+<div class="highlighter-rouge"><pre class="highlight"><code><span class="nx">zebkit</span><span class="p">.</span><span class="nx">require</span><span class="p">(</span><span class="s2">"ui"</span><span class="p">,</span> <span class="kd">function</span><span class="p">(</span><span class="nx">ui</span><span class="p">)</span> <span class="p">{</span>
     <span class="kd">var</span> <span class="nx">root</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">ui</span><span class="p">.</span><span class="nx">zCanvas</span><span class="p">(</span><span class="mi">400</span><span class="p">,</span> <span class="mi">300</span><span class="p">).</span><span class="nx">root</span><span class="p">;</span>
-    <span class="nx">root</span><span class="p">.</span><span class="nx">setLayout</span><span class="p">(</span><span class="k">new</span> <span class="nx">layout</span><span class="p">.</span><span class="nx">ListLayout</span><span class="p">(</span><span class="mi">8</span><span class="p">));</span>
+    <span class="nx">root</span><span class="p">.</span><span class="nx">setListLayout</span><span class="p">(</span><span class="mi">8</span><span class="p">);</span>
     <span class="nx">root</span><span class="p">.</span><span class="nx">setPadding</span><span class="p">(</span><span class="mi">8</span><span class="p">);</span>
     <span class="nx">root</span><span class="p">.</span><span class="nx">setBorder</span><span class="p">(</span><span class="s2">"plain"</span><span class="p">);</span>
     <span class="k">for</span> <span class="p">(</span><span class="kd">var</span> <span class="nx">i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="nx">i</span> <span class="o">&lt;</span> <span class="mi">5</span><span class="p">;</span> <span class="nx">i</span><span class="o">++</span><span class="p">)</span> <span class="p">{</span>
@@ -818,9 +818,9 @@ zebkit.require("ui", "layout", function(ui, layout) {
 </table>
 
 <script type="text/javascript">
-zebkit.require("ui", "layout", function(ui, layout) {
+zebkit.require("ui", function(ui) {
     var root = new ui.zCanvas("globalEvents", 400, 300).root;
-    root.setLayout(new layout.RasterLayout(true));
+    root.setRasterLayout(true);
     root.setPadding(8);
     root.setBorder("plain");
 
@@ -847,9 +847,9 @@ zebkit.require("ui", "layout", function(ui, layout) {
 });  
 </script>
 
-<div class="highlighter-rouge"><pre class="highlight"><code><span class="nx">zebkit</span><span class="p">.</span><span class="nx">require</span><span class="p">(</span><span class="s2">"ui"</span><span class="p">,</span> <span class="s2">"layout"</span><span class="p">,</span> <span class="kd">function</span><span class="p">(</span><span class="nx">ui</span><span class="p">,</span> <span class="nx">layout</span><span class="p">)</span> <span class="p">{</span>
+<div class="highlighter-rouge"><pre class="highlight"><code><span class="nx">zebkit</span><span class="p">.</span><span class="nx">require</span><span class="p">(</span><span class="s2">"ui"</span><span class="p">,</span> <span class="kd">function</span><span class="p">(</span><span class="nx">ui</span><span class="p">)</span> <span class="p">{</span>
     <span class="kd">var</span> <span class="nx">root</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">ui</span><span class="p">.</span><span class="nx">zCanvas</span><span class="p">(</span><span class="s2">"globalEvents"</span><span class="p">,</span> <span class="mi">400</span><span class="p">,</span> <span class="mi">300</span><span class="p">).</span><span class="nx">root</span><span class="p">;</span>
-    <span class="nx">root</span><span class="p">.</span><span class="nx">setLayout</span><span class="p">(</span><span class="k">new</span> <span class="nx">layout</span><span class="p">.</span><span class="nx">RasterLayout</span><span class="p">(</span><span class="kc">true</span><span class="p">));</span>
+    <span class="nx">root</span><span class="p">.</span><span class="nx">setRasterLayout</span><span class="p">(</span><span class="kc">true</span><span class="p">);</span>
     <span class="nx">root</span><span class="p">.</span><span class="nx">setPadding</span><span class="p">(</span><span class="mi">8</span><span class="p">);</span>
     <span class="nx">root</span><span class="p">.</span><span class="nx">setBorder</span><span class="p">(</span><span class="s2">"plain"</span><span class="p">);</span>
     <span class="c1">// add number of components</span>

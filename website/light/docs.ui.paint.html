@@ -32,7 +32,7 @@
     <!-- RSS -->
     <link rel="alternate" type="application/rss+xml" title="RSS" href="/atom.xml">
 
-    <script type="text/javascript" src="/build/zebkit.js?16092017">  </script>
+    <script type="text/javascript" src="/build/zebkit.js?11072017">  </script>
 
     <script type="text/javascript">
         zebkit.ui.config("theme", "light");
@@ -556,7 +556,7 @@ Painting procedure starts traversing UI hierarchy (where every UI component is i
 </tr>
 </table>
 
-<div class="highlighter-rouge"><pre class="highlight"><code><span class="nx">zebkit</span><span class="p">.</span><span class="nx">require</span><span class="p">(</span><span class="s2">"ui"</span><span class="p">,</span> <span class="s2">"layout"</span><span class="p">,</span> <span class="kd">function</span><span class="p">(</span><span class="nx">ui</span><span class="p">,</span> <span class="nx">layout</span><span class="p">)</span> <span class="p">{</span>
+<div class="highlighter-rouge"><pre class="highlight"><code><span class="nx">zebkit</span><span class="p">.</span><span class="nx">require</span><span class="p">(</span><span class="s2">"ui"</span><span class="p">,</span> <span class="kd">function</span><span class="p">(</span><span class="nx">ui</span><span class="p">)</span> <span class="p">{</span>
     <span class="c1">// inherit "zebkit.ui.Panel" and implement "paint()"</span>
     <span class="nx">ui</span><span class="p">.</span><span class="nx">PaintComponent</span><span class="o">=</span><span class="nx">zebkit</span><span class="p">.</span><span class="nx">Class</span><span class="p">(</span><span class="nx">ui</span><span class="p">.</span><span class="nx">Panel</span><span class="p">,[</span>
         <span class="kd">function</span> <span class="nx">paint</span><span class="p">(</span><span class="nx">g</span><span class="p">)</span> <span class="p">{</span>
@@ -569,14 +569,14 @@ Painting procedure starts traversing UI hierarchy (where every UI component is i
     <span class="p">]);</span>
     <span class="c1">// create canvas and add just developed component</span>
     <span class="kd">var</span> <span class="nx">c</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">ui</span><span class="p">.</span><span class="nx">zCanvas</span><span class="p">(</span><span class="mi">150</span><span class="p">,</span> <span class="mi">150</span><span class="p">);</span>
-    <span class="nx">c</span><span class="p">.</span><span class="nx">root</span><span class="p">.</span><span class="nx">setLayout</span><span class="p">(</span><span class="k">new</span> <span class="nx">layout</span><span class="p">.</span><span class="nx">BorderLayout</span><span class="p">());</span>
+    <span class="nx">c</span><span class="p">.</span><span class="nx">root</span><span class="p">.</span><span class="nx">setBorderLayout</span><span class="p">();</span>
     <span class="nx">c</span><span class="p">.</span><span class="nx">root</span><span class="p">.</span><span class="nx">add</span><span class="p">(</span><span class="s2">"center"</span><span class="p">,</span> <span class="k">new</span> <span class="nx">ui</span><span class="p">.</span><span class="nx">PaintComponent</span><span class="p">());</span>
 <span class="p">});</span>
 </code></pre>
 </div>
 
 <script>
-zebkit.require("ui", "layout", function(ui, layout) {
+zebkit.require("ui", function(ui) {
     var z = new ui.zCanvas("paintSample1", 150, 150);
     var PaintComponent = zebkit.Class(zebkit.ui.Panel,[
         function paint(g) {
@@ -587,7 +587,7 @@ zebkit.require("ui", "layout", function(ui, layout) {
     ]);
     // create canvas and add just developed component
     var r = z.root;
-    r.setLayout(new layout.BorderLayout());
+    r.setBorderLayout();
     r.add("center", new PaintComponent());   
 
     var z = new ui.zCanvas("paintSample2", 150, 150);
@@ -598,7 +598,7 @@ zebkit.require("ui", "layout", function(ui, layout) {
         }
     ]);
     var r = z.root;
-    r.setLayout(new layout.BorderLayout());
+    r.setBorderLayout();
     r.add("center", new UpdateComponent()); 
 
     var PaintOnTopComponent = zebkit.Class(UpdateComponent,[
@@ -610,7 +610,7 @@ zebkit.require("ui", "layout", function(ui, layout) {
         }
     ]);
     var c = new ui.zCanvas("paintSample3", 150,150);
-    c.root.setLayout(new layout.BorderLayout());
+    c.root.setBorderLayout();
     c.root.add("center",new PaintOnTopComponent());
 });
 </script>
@@ -619,7 +619,7 @@ zebkit.require("ui", "layout", function(ui, layout) {
 
 <p>Inherit developed on previous step “PaintComponent” class and extend it with “update(g)” method that fills the component background with red color:</p>
 
-<div class="highlighter-rouge"><pre class="highlight"><code><span class="nx">zebkit</span><span class="p">.</span><span class="nx">require</span><span class="p">(</span><span class="s2">"ui"</span><span class="p">,</span> <span class="s2">"layout"</span><span class="p">,</span> <span class="kd">function</span><span class="p">(</span><span class="nx">ui</span><span class="p">,</span> <span class="nx">layout</span><span class="p">)</span> <span class="p">{</span>
+<div class="highlighter-rouge"><pre class="highlight"><code><span class="nx">zebkit</span><span class="p">.</span><span class="nx">require</span><span class="p">(</span><span class="s2">"ui"</span><span class="p">,</span> <span class="kd">function</span><span class="p">(</span><span class="nx">ui</span><span class="p">)</span> <span class="p">{</span>
     <span class="c1">// extend "PaintComponent" class with "update" method</span>
     <span class="nx">ui</span><span class="p">.</span><span class="nx">UpdateComponent</span><span class="o">=</span><span class="nx">zebra</span><span class="p">.</span><span class="nx">Class</span><span class="p">(</span><span class="nx">ui</span><span class="p">.</span><span class="nx">PaintComponent</span><span class="p">,[</span>
         <span class="kd">function</span> <span class="nx">update</span><span class="p">(</span><span class="nx">g</span><span class="p">)</span> <span class="p">{</span>
@@ -629,7 +629,7 @@ zebkit.require("ui", "layout", function(ui, layout) {
     <span class="p">]);</span>
     <span class="c1">// create canvas and add just developed component</span>
     <span class="kd">var</span> <span class="nx">c</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">ui</span><span class="p">.</span><span class="nx">zCanvas</span><span class="p">(</span><span class="mi">150</span><span class="p">,</span> <span class="mi">150</span><span class="p">);</span>
-    <span class="nx">c</span><span class="p">.</span><span class="nx">root</span><span class="p">.</span><span class="nx">setLayout</span><span class="p">(</span><span class="k">new</span> <span class="nx">layout</span><span class="p">.</span><span class="nx">BorderLayout</span><span class="p">());</span>
+    <span class="nx">c</span><span class="p">.</span><span class="nx">root</span><span class="p">.</span><span class="nx">setBorderLayout</span><span class="p">();</span>
     <span class="nx">c</span><span class="p">.</span><span class="nx">root</span><span class="p">.</span><span class="nx">add</span><span class="p">(</span><span class="s2">"center"</span><span class="p">,</span> <span class="k">new</span> <span class="nx">ui</span><span class="p">.</span><span class="nx">UpdateComponent</span><span class="p">());</span>
 <span class="p">});</span>
 </code></pre>
@@ -639,7 +639,7 @@ zebkit.require("ui", "layout", function(ui, layout) {
 
 <p>Inherit developed on previous step “UpdateComponent” class and extend it with “paintOnTop(g)” method that draws white rectangle over gray cross:</p>
 
-<div class="highlighter-rouge"><pre class="highlight"><code><span class="nx">zebkit</span><span class="p">.</span><span class="nx">require</span><span class="p">(</span><span class="s2">"ui"</span><span class="p">,</span> <span class="s2">"layout"</span><span class="p">,</span> <span class="kd">function</span><span class="p">(</span><span class="nx">ui</span><span class="p">,</span> <span class="nx">layout</span><span class="p">)</span> <span class="p">{</span>
+<div class="highlighter-rouge"><pre class="highlight"><code><span class="nx">zebkit</span><span class="p">.</span><span class="nx">require</span><span class="p">(</span><span class="s2">"ui"</span><span class="p">,</span> <span class="kd">function</span><span class="p">(</span><span class="nx">ui</span><span class="p">)</span> <span class="p">{</span>
     <span class="c1">// extend "UpdateComponent" class with "paintOnTop"</span>
     <span class="c1">// method</span>
     <span class="nx">ui</span><span class="p">.</span><span class="nx">PaintOnTopComponent</span><span class="o">=</span><span class="nx">zebkit</span><span class="p">.</span><span class="nx">Class</span><span class="p">(</span><span class="nx">ui</span><span class="p">.</span><span class="nx">UpdateComponent</span><span class="p">,[</span>
@@ -652,7 +652,7 @@ zebkit.require("ui", "layout", function(ui, layout) {
     <span class="p">]);</span>
     <span class="c1">// create canvas and add just developed component</span>
     <span class="kd">var</span> <span class="nx">c</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">ui</span><span class="p">.</span><span class="nx">zCanvas</span><span class="p">(</span><span class="mi">150</span><span class="p">,</span> <span class="mi">150</span><span class="p">);</span>
-    <span class="nx">c</span><span class="p">.</span><span class="nx">root</span><span class="p">.</span><span class="nx">setLayout</span><span class="p">(</span><span class="k">new</span> <span class="nx">layout</span><span class="p">.</span><span class="nx">BorderLayout</span><span class="p">());</span>
+    <span class="nx">c</span><span class="p">.</span><span class="nx">root</span><span class="p">.</span><span class="nx">setBorderLayout</span><span class="p">();</span>
     <span class="nx">c</span><span class="p">.</span><span class="nx">root</span><span class="p">.</span><span class="nx">add</span><span class="p">(</span><span class="s2">"center"</span><span class="p">,</span> <span class="k">new</span> <span class="nx">ui</span><span class="p">.</span><span class="nx">PaintOnTopComponent</span><span class="p">());</span>
 <span class="p">});</span>
 </code></pre>
@@ -708,10 +708,10 @@ zebkit.require("ui", "layout", function(ui, layout) {
 
 <p>Then let’s use the developed above shape to a component:</p>
 
-<div class="highlighter-rouge"><pre class="highlight"><code><span class="nx">zebkit</span><span class="p">.</span><span class="nx">require</span><span class="p">(</span><span class="s2">"ui"</span><span class="p">,</span> <span class="s2">"draw"</span><span class="p">,</span> <span class="s2">"layout"</span><span class="p">,</span> <span class="kd">function</span><span class="p">(</span><span class="nx">ui</span><span class="p">,</span> <span class="nx">draw</span><span class="p">,</span> <span class="nx">layout</span><span class="p">)</span> <span class="p">{</span>
+<div class="highlighter-rouge"><pre class="highlight"><code><span class="nx">zebkit</span><span class="p">.</span><span class="nx">require</span><span class="p">(</span><span class="s2">"ui"</span><span class="p">,</span> <span class="s2">"draw"</span><span class="p">,</span> <span class="kd">function</span><span class="p">(</span><span class="nx">ui</span><span class="p">,</span> <span class="nx">draw</span><span class="p">)</span> <span class="p">{</span>
     <span class="p">...</span>
     <span class="kd">var</span> <span class="nx">r</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">ui</span><span class="p">.</span><span class="nx">zCanvas</span><span class="p">(</span><span class="s2">"roundShape"</span><span class="p">,</span> <span class="mi">300</span><span class="p">,</span> <span class="mi">300</span><span class="p">).</span><span class="nx">root</span><span class="p">;</span>
-    <span class="nx">r</span><span class="p">.</span><span class="nx">setLayout</span><span class="p">(</span><span class="k">new</span> <span class="nx">layout</span><span class="p">.</span><span class="nx">BorderLayout</span><span class="p">());</span>
+    <span class="nx">r</span><span class="p">.</span><span class="nx">setBorderLayout</span><span class="p">();</span>
     <span class="nx">r</span><span class="p">.</span><span class="nx">add</span><span class="p">(</span><span class="k">new</span> <span class="nx">ui</span><span class="p">.</span><span class="nx">Panel</span><span class="p">({</span>
         <span class="na">border</span><span class="p">:</span> <span class="k">new</span> <span class="nx">RoundShape</span><span class="p">(),</span>  <span class="c1">// set shape via border</span>
         <span class="na">background</span><span class="p">:</span> <span class="k">new</span> <span class="nx">draw</span><span class="p">.</span><span class="nx">Gradient</span><span class="p">(</span><span class="s2">"red"</span><span class="p">,</span> <span class="s2">"orange"</span><span class="p">)</span>
@@ -739,7 +739,7 @@ zebkit.require("ui", "layout", function(ui, layout) {
 </table>
 
 <script type="text/javascript">
-zebkit.require("ui", "draw", "layout", function(ui, draw, layout) {
+zebkit.require("ui", "draw", function(ui, draw) {
     var RoundShape = zebkit.Class(draw.View, [
         function outline(g,x,y,w,h,d) {
             if (w === h) {
@@ -756,7 +756,7 @@ zebkit.require("ui", "draw", "layout", function(ui, draw, layout) {
     ]); 
 
     var r = new ui.zCanvas("roundShape1", 300, 300).root;
-    r.setLayout(new layout.BorderLayout());
+    r.setBorderLayout();
     r.add(new ui.Panel({
         border: new RoundShape(),
         background: new draw.Gradient("red", "orange")
@@ -811,7 +811,7 @@ zebkit.require("ui", "draw", "layout", function(ui, draw, layout) {
 </table>
 
 <script type="text/javascript">  
-zebkit.require("ui", "draw", "layout", function(ui, draw, layout) {
+zebkit.require("ui", "draw", function(ui, draw) {
     var RoundShape = zebkit.Class(draw.View, [
         function outline(g,x,y,w,h,d) {
             if (w === h) {
@@ -828,7 +828,7 @@ zebkit.require("ui", "draw", "layout", function(ui, draw, layout) {
     ]); 
 
     var r = new ui.zCanvas("roundShape2", 300, 300).root;
-    r.setLayout(new layout.BorderLayout());
+    r.setBorderLayout();
     r.add(new ui.Panel({
         border: new RoundShape(),
         background: new draw.Gradient("red", "orange")

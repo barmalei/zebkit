@@ -34,23 +34,23 @@
  * @param  {Object} root a tree root element. If the element has a children elements
  * the children have to be stored in "kids" field as an array.
  * @param  {String}  path a path-like expression. The path has to satisfy number of requirements:
-
-    - has to start with "." or "/" or "//" character
-    - has to define path part after "/" or "//"
-    - path part can be either "*" or a name
-    - optionally an attribute or/and its value can be defined as "[@<attr_name>=<attr_value>]"
-    - attribute value is optional and can be boolean (true or false), integer, null or string value
-    - string attribute value has to be wrapped with single quotes
-
+ *
+ *   - has to start with "." or "/" or "//" character
+ *   - has to define path part after "/" or "//"
+ *   - path part can be either "*" or a name
+ *   - optionally an attribute or/and its value can be defined as "[@<attr_name>=<attr_value>]"
+ *   - attribute value is optional and can be boolean (true or false), integer, null or string value
+ *   - string attribute value has to be wrapped with single quotes
+ *
  *
  * For examples:
-
-    - "//*" traverse all tree elements
-    - "//*[@a=10]" traverse all tree elements that has an attribute "a" that equals 10
-    - "//*[@a]" traverse all tree elements that has an attribute "a" defined
-    - "/Item1/Item2" find an element by exact path
-    - ".//" traverse all tree elements including the root element
-
+ *
+ *   - "//*" traverse all tree elements
+ *   - "//*[@a=10]" traverse all tree elements that has an attribute "a" that equals 10
+ *   - "//*[@a]" traverse all tree elements that has an attribute "a" defined
+ *   - "/Item1/Item2" find an element by exact path
+ *   - ".//" traverse all tree elements including the root element
+ *
  * @param  {Function} cb callback function that is called every time a new tree element
  * matches the given path fragment. The function has to return true if the tree look up
  * has to be interrupted
@@ -64,7 +64,7 @@
  */
 var PATH_RE = /^[.]?(\/[\/]?)([^\[\/]+)\s*(\[\s*\@([a-zA-Z_][a-zA-Z0-9_\.]*)\s*(\=\s*[0-9]+|\=\s*true|\=\s*false|\=\s*null|\=\s*\'[^']*\')?\s*\])?/;
 function findInTree(root, path, cb, eq, m) {
-    if (root === null || typeof root === 'undefined') {
+    if (root === null || root === undefined) {
         throw new Error("Null tree root");
     }
 
@@ -83,18 +83,18 @@ function findInTree(root, path, cb, eq, m) {
     }
 
     if (eq === null || arguments.length < 4) {
-        eq = function(n, fragment) { return n.path === fragment; };
+        eq = function(n, fragment) { return n.value === fragment; };
     }
 
-    if (typeof root.kids !== 'undefined' &&   // a node has children
-        root.kids        !== null        &&
-        root.kids.length > 0                )
+    if (root.kids !== undefined &&   // a node has children
+        root.kids !== null      &&
+        root.kids.length > 0      )
     {
         //
         // m == null                      : means this is the first call of the method
         // m[0].length !== m.input.length : means this is terminal part of the path
         //
-        if (m === null ||  m[0].length !== m.input.length) {
+        if (m === null || m[0].length !== m.input.length) {
             m = path.match(PATH_RE);
 
             if (m === null) {
@@ -107,7 +107,7 @@ function findInTree(root, path, cb, eq, m) {
             }
 
             // normalize attribute value
-            if (typeof m[3] !== 'undefined' && typeof m[5] !== 'undefined') {
+            if (m[3] !== undefined && m[5] !== undefined) {
                 m[5] = m[5].substring(1).trim();
 
                 if (m[5][0] === "'") {
@@ -136,11 +136,11 @@ function findInTree(root, path, cb, eq, m) {
                 isMatch = false;
                                         // XOR
             if (pathValue === "*" || (eq(kid, pathValue) ? pathValue[0] !== '!' : pathValue[0] === '!')) {
-                if (typeof m[3] !== 'undefined') { // has attributes
+                if (m[3] !== undefined) { // has attributes
                     var attrName = m[4].trim();
 
                     // leave if attribute doesn't match
-                    if (typeof kid[attrName] !== 'undefined' && (typeof m[5] === 'undefined' || kid[attrName] === m[5])) {
+                    if (kid[attrName] !== undefined && (m[5] === undefined || kid[attrName] === m[5])) {
                         isMatch = true;
                     }
                 } else {
@@ -186,7 +186,7 @@ var PathSearch = Interface([
          * @return {Object} found children item or null if no children items were found
          */
         this.byPath = function(path, cb) {
-            if (typeof this.$normalizePath !== 'undefined') {
+            if (this.$normalizePath !== undefined) {
                 path = this.$normalizePath(path);
             }
 
@@ -196,19 +196,19 @@ var PathSearch = Interface([
                     findInTree(this, path, function(n) {
                         r.push(n);
                         return false;
-                    }, typeof this.$matchPath !== 'undefined' ? this.$matchPath
-                                                              : null);
+                    }, this.$matchPath !== undefined ? this.$matchPath
+                                                     : null);
                     return r;
                 } else {
-                    findInTree(this, path, cb, typeof this.$matchPath !== 'undefined' ? this.$matchPath
-                                                                                      : null);
+                    findInTree(this, path, cb, this.$matchPath !== undefined ? this.$matchPath
+                                                                             : null);
                 }
             } else {
                 var res = null;
                 findInTree(this, path, function(n) {
                     res = n;
                     return true;
-                }, typeof this.$matchPath !== 'undefined' ? this.$matchPath : null);
+                }, this.$matchPath !== undefined ? this.$matchPath : null);
                 return res;
             }
         };

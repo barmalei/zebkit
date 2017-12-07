@@ -164,7 +164,7 @@ var $NewListener = function() {
 
             var n   = null,
                 k   = null,
-                nms = typeof this.$names !== 'undefined' ? this.$names : names;
+                nms = this.$names !== undefined ? this.$names : names;
 
             if (arguments.length > 1) {
                 n = arguments[0];
@@ -172,19 +172,19 @@ var $NewListener = function() {
             }
 
             if (typeof l === 'function') {
-                if (n !== null && nms.hasOwnProperty(n) === false) {
+                if (n !== null && nms[n] === undefined) {
                     throw new Error("Unknown event type " + n);
                 }
 
                 if (n === null) {
                     for(k in nms) {
-                        if (this.$methods.hasOwnProperty(k) === false) {
+                        if (this.$methods[k] === undefined) {
                             this.$methods[k] = [];
                         }
                         this.$methods[k].push(this, l);
                     }
                 } else {
-                    if (this.$methods.hasOwnProperty(n) === false) {
+                    if (this.$methods[n] === undefined) {
                         this.$methods[n] = [];
                     }
                     this.$methods[n].push(this, l);
@@ -194,7 +194,7 @@ var $NewListener = function() {
                 for (k in nms) {
                     if (typeof l[k] === "function") {
                         b = true;
-                        if (this.$methods.hasOwnProperty(k) === false) {
+                        if (this.$methods[k] === undefined) {
                             this.$methods[k] = [];
                         }
                         this.$methods[k].push(l, l[k]);
@@ -225,7 +225,7 @@ var $NewListener = function() {
         };
 
         clazz.prototype.addEvents = function() {
-            if (typeof this.$names === 'undefined') {
+            if (this.$names === undefined) {
                 this.$names = {};
                 for (var k in names) {
                     this.$names[k] = names[k];
@@ -235,14 +235,14 @@ var $NewListener = function() {
             for(var i = 0; i < arguments.length; i++) {
                 var name = arguments[i];
 
-                if (name === null || typeof name === 'undefined' || typeof this[name] !== 'undefined') {
+                if (name === null || name === undefined || this[name] !== undefined) {
                     throw new Error("Invalid " + name + " (event name)");
                 }
 
                 this[name] = (function(name) {
                     return function() {
                         // typeof is faster then hasOwnProperty under nodejs
-                        if (this.$methods !== null && typeof this.$methods[name] !== 'undefined') {
+                        if (this.$methods !== null && this.$methods[name] !== undefined) {
                             var c = this.$methods[name];
                             for(var i = 0; i < c.length; i += 2) {
                                 if (c[i + 1].apply(c[i], arguments) === true) {
@@ -267,7 +267,7 @@ var $NewListener = function() {
                 var k = null;
                 if (arguments.length === 0) {
                     for(k in this.$methods) {
-                        if (this.$methods.hasOwnProperty(k)) {
+                        if (this.$methods[k] !== undefined) {
                             this.$methods[k].length = 0;
                         }
                     }
@@ -281,7 +281,7 @@ var $NewListener = function() {
                         v    = null;
 
                     if (name !== null) {
-                        if (this.$methods.hasOwnProperty(name)) {
+                        if (this.$methods[name] !== undefined) {
                             if (fn === null) {
                                 this.$methods[name].length = 0;
                                 delete this.$methods[name];
@@ -319,14 +319,9 @@ var $NewListener = function() {
         };
 
         clazz.prototype.hasEvent = function(nm) {
-            if (typeof this.$names !== 'undefined') {
-                return this.$names.hasOwnProperty(nm);
-            } else {
-                return names.hasOwnProperty(nm);
-            }
+            return (this.$names !== undefined && this.$names[nm] !== undefined) || names[nm] !== undefined;
         };
     }
-
 
     return clazz;
 };
@@ -447,8 +442,8 @@ var EventProducer = Interface([
             }
 
             if (arguments.length === 1) {
-                if (typeof this._ === 'undefined') {
-                    if (typeof this.clazz.Listeners !== 'undefined') {
+                if (this._ === undefined) {
+                    if (this.clazz.Listeners !== undefined) {
                         this._ = new this.clazz.Listeners();
                     } else {
                         return false;
@@ -461,8 +456,8 @@ var EventProducer = Interface([
                 } else if (arguments[0][0] === '.' || arguments[0][0] === '/' || arguments[0][0] === '#') { // a path detected
                     pt = arguments[0];
                 } else {
-                    if (typeof this._ === 'undefined') {
-                        if (typeof this.clazz.Listeners !== 'undefined') {
+                    if (this._ === undefined) {
+                        if (this.clazz.Listeners !== undefined) {
                             this._ = new this.clazz.Listeners();
                         } else {
                             return false;
@@ -474,8 +469,8 @@ var EventProducer = Interface([
                 pt = arguments[1];
                 nm = arguments[0];
                 if (pt === null) {
-                    if (typeof this._ === 'undefined') {
-                        if (typeof this.clazz.Listeners !== 'undefined') {
+                    if (this._ === undefined) {
+                        if (this.clazz.Listeners !== undefined) {
                             this._ = new this.clazz.Listeners();
                         } else {
                             return false;
@@ -491,13 +486,13 @@ var EventProducer = Interface([
 
             this.byPath(pt, function(node) {
                 // try to initiate
-                if (typeof node._ === 'undefined' && typeof node.clazz.Listeners !== 'undefined') {
+                if (node._ === undefined && node.clazz.Listeners !== undefined) {
                     node._ = new node.clazz.Listeners();
                 }
 
-                if (typeof node._ !== 'undefined') {
+                if (node._ !== undefined) {
                     if (nm !== null) {
-                        if (typeof node._[nm] !== 'undefined') {
+                        if (node._[nm] !== undefined) {
                             node._.add(nm, cb);
                         }
                     } else {
@@ -560,11 +555,11 @@ var EventProducer = Interface([
             }
 
             this.byPath(pt, function(node) {
-                if (typeof node._ !== 'undefined') {
+                if (node._ !== undefined) {
                     if (fn !== null) {
                         node._.remove(fn);
                     } else if (nm !== null) {
-                        if (typeof node._[nm] !== 'undefined') {
+                        if (node._[nm] !== undefined) {
                             node._.remove(nm);
                         }
                     } else {
@@ -577,61 +572,48 @@ var EventProducer = Interface([
 
         /**
          * Fire event with the given parameters.
-         * @param {String} event an event name
+         * @param {String} name an event name
          * @param {String} [path]  a path if the event has to be send to multiple destination in the tree
          * @param {Object|Array}  [params] array of parameters or single parameter to be passed to an event
          * handler or handlers.
          * @method fire
          */
-        this.fire = function() {
-            var pt   = null,  // path
-                args = null,
-                nm   = arguments[0];  // event name or listener
-
-            if (arguments.length >= 0 && arguments.length < 3) {
-                if (typeof this._ !== 'undefined') {
-                    if (arguments.length === 0) {
-                        nm = "fired";
+        this.fire = function(name) {
+            if (arguments.length > 0 && arguments.length < 3) {
+                if (this._ !== undefined) {
+                    if (this._.hasEvent(name) === false) {
+                        throw new Error("Listener doesn't support '" + name + "' event");
                     }
 
-                    if (this._.hasEvent(nm) === false) {
-                        throw new Error("Listener doesn't '" + nm + "' support the event");
-                    }
-
-                    var fn = this._[nm];
                     if (arguments.length === 2) {
-                        return Array.isArray(arguments[1]) ? fn.apply(this._, arguments[1])
-                                                           : fn.call(this._,  arguments[1]);
+                        Array.isArray(arguments[1]) ? this._[name].apply(this._, arguments[1])
+                                                    : this._[name].call(this._, arguments[1]);
                     } else {
-                        return fn.call(this._, this);
+                        this._[name].call(this._);
                     }
-                } else {
-                    return false;
                 }
             } else if (arguments.length === 3) {
-                pt   = arguments[1];
-                args = arguments[2];
+                var args = arguments[2];
+                this.byPath(arguments[1], function(n) {
+                    if (n._ !== undefined && n._.hasEvent(name)) {
+                        var ec = n._;
+                        if (args !== null && Array.isArray(args)) {
+                            ec[name].apply(ec, args);
+                        } else {
+                            ec[name].call(ec, args);
+                        }
+                    }
+                    return false;
+                });
             } else {
                 throw new Error("Invalid number of arguments");
             }
-
-            this.byPath(pt, function(n) {
-                var ec = n._;
-                if (typeof ec !== 'undefined' && n._.hasEvent(nm)) {
-                    if (args !== null && Array.isArray(args)) {
-                        ec[nm].apply(ec, args);
-                    } else {
-                        ec[nm].call(ec, args);
-                    }
-                }
-                return false;
-            });
         };
     }
 ]);
 
 classTemplateProto.isEventFired = function(name) {
-    if (typeof this.clazz.Listeners === 'undefined') {
+    if (this.clazz.Listeners === undefined) {
         return false;
     }
 
@@ -659,13 +641,14 @@ classTemplateProto.isEventFired = function(name) {
  * @for  zebkit.Class
  */
 classTemplateFields.events = function() {
-    var args = Array.prototype.slice.call(arguments);
     if (arguments.length === 0) {
-        args.push("fired");
+        throw new Error("No an event name was found");
     }
 
-    var c = args.length;
-    if (typeof this.Listeners !== 'undefined') {
+    var args = Array.prototype.slice.call(arguments),
+        c    = args.length;
+
+    if (this.Listeners !== undefined) {
         for (var i = 0; i < this.Listeners.eventNames.length; i++) {
             var en = this.Listeners.eventNames[i];
             if (args.indexOf(en) < 0) {
@@ -674,9 +657,7 @@ classTemplateFields.events = function() {
         }
     }
 
-    if (typeof this.Listeners === 'undefined') {
-        this.Listeners = $NewListener.apply($NewListener, args);
-    } else if (c !== args.length) {
+    if (this.Listeners === undefined || c !== args.length) {
         this.Listeners = $NewListener.apply($NewListener, args);
     }
 

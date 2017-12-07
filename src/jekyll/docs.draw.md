@@ -162,9 +162,9 @@ Border view allows developers to render borders of with the given color, size an
 {% include zsample.html canvas_id='borderView1' title='Border view variations' description=description %}                    
 
 <script type="text/javascript">
-zebkit.require("draw","ui", "layout", function(draw, ui, lay) {
+zebkit.require("draw","ui", function(draw, ui) {
     var canvas = new ui.zCanvas("borderView1", 600, 200);
-    canvas.root.setLayout(new lay.FlowLayout(32));
+    canvas.root.setFlowLayout(32);
 
     canvas.root.add(new ui.Panel().setBorder(new draw.Border("red", 4))).setPreferredSize(150, 150);    
     canvas.root.add(new ui.Panel().setBorder(new draw.Border("orange", 4, 16))).setPreferredSize(150, 150);    ;   
@@ -177,9 +177,9 @@ Developers can specify which parts ("top", "left", "right", "bottom") of a borde
 {% include zsample.html canvas_id='borderView2' title='Partially rendered border view' description=description %}                    
 
 <script type="text/javascript">
-zebkit.require("draw","ui", "layout", function(draw, ui, lay) {
+zebkit.require("draw","ui", function(draw, ui) {
     var canvas = new ui.zCanvas("borderView2", 600, 200);
-    canvas.root.setLayout(new lay.FlowLayout(32));
+    canvas.root.setFlowLayout(32);
 
     var br = new draw.Border("red", 4);
     br.setSides("top", "bottom");
@@ -202,9 +202,9 @@ Round border view allows developer to render round or oval views and also shape 
 {% include zsample.html canvas_id='roundView1' title='Round border view variations' description=description %}                    
 
 <script type="text/javascript">
-zebkit.require("draw","ui", "layout", function(draw, ui, lay) {
+zebkit.require("draw","ui", function(draw, ui) {
     var canvas = new ui.zCanvas("roundView1", 600, 200);
-    canvas.root.setLayout(new lay.FlowLayout(32));
+    canvas.root.setFlowLayout(32);
 
     var br = new draw.RoundBorder("red", 4);
     canvas.root.add(new ui.Panel()).setBorder(br).setPreferredSize(150, 150);  
@@ -218,9 +218,9 @@ zebkit.require("draw","ui", "layout", function(draw, ui, lay) {
 </script>
 
 ```js
-zebkit.require("draw","ui", "layout", function(draw, ui, lay) {
+zebkit.require("draw","ui", function(draw, ui) {
     var canvas = new ui.zCanvas("roundView1", 600, 200);
-    canvas.root.setLayout(new lay.FlowLayout(32));
+    canvas.root.setFlowLayout(32);
 
     var br = new draw.RoundBorder("red", 4);
     canvas.root.add(new ui.Panel()).setBorder(br).setPreferredSize(150, 150);  
@@ -240,30 +240,30 @@ Set of old-style, windows-like borders views ("zebkit.draw.Sunken", "zebkit.draw
 {% include zsample.html canvas_id='classicBorder1' title='Classic, old-style borders views' description=description %}                    
 
 <script type="text/javascript">
-zebkit.require("draw","ui", "layout", function(draw, ui, lay) {
+zebkit.require("draw","ui", function(draw, ui) {
     var canvas = new ui.zCanvas("classicBorder1", 300, 300);
-    canvas.root.setLayout(new lay.BorderLayout());
+    canvas.root.setBorderLayout();
     canvas.setBackground("lightGray");
     canvas.setPadding(8);
 
     canvas.root.add(new ui.Panel({
         padding: 8,
-        layout : new lay.BorderLayout(),
+        borderLayout : 0,
         border : new draw.Sunken(),
         kids   : {
           center: new ui.Panel({
             padding: 15,
-            layout : new lay.BorderLayout(),
+            borderLayout : 0,
             border : new draw.Raised(),
             kids   : {
               center: new ui.Panel({
                 padding: 15,
-                layout : new lay.BorderLayout(),
+                borderLayout : 0,
                 border : new draw.Etched(),
                 kids   : {
                   center: new ui.Panel({
                     padding: 15,
-                    layout : new lay.BorderLayout(),
+                    borderLayout : 0,
                     border : new draw.Dotted(),
                   })
                 }
@@ -283,9 +283,9 @@ Zebkit supplies views for vertical, horizontal and radial gradients rendering.
 {% include zsample.html canvas_id='gradientView1' title='Gradient views' description=description %}                    
 
 <script type="text/javascript">
-zebkit.require("draw","ui","layout", function(draw, ui, lay) {
+zebkit.require("draw","ui", function(draw, ui) {
     var c = new ui.zCanvas("gradientView1", 600, 200);
-    c.root.setLayout(new lay.FlowLayout(32));
+    c.root.setFlowLayout(32);
 
     var gr = new draw.Gradient("red", "orange");
     c.root.add(new ui.Panel()).setBackground(gr).setPreferredSize(150, 150);  
@@ -299,9 +299,9 @@ zebkit.require("draw","ui","layout", function(draw, ui, lay) {
 </script>
 
 ```js
-zebkit.require("draw","ui","layout", function(draw, ui, lay) {
+zebkit.require("draw","ui", function(draw, ui) {
     var c = new ui.zCanvas("gradientView1", 600, 200);
-    c.root.setLayout(new lay.FlowLayout(32));
+    c.root.setFlowLayout(32);
 
     var gr = new draw.Gradient("red", "orange");
     c.root.add(new ui.Panel()).setBackground(gr).setPreferredSize(150, 150);  
@@ -416,9 +416,9 @@ Zebkit supplies different kind of text renders: simple single line text render, 
 {% include zsample.html canvas_id='textView1' title='Text renders' description=description %}                    
 
 <script type="text/javascript">
-zebkit.require("draw","ui","layout",function(draw, ui, lay) {
+zebkit.require("draw","ui",function(draw, ui) {
     var c = new ui.zCanvas("textView1", 700, 300);
-    c.root.setLayout(new lay.FlowLayout(48));
+    c.root.setFlowLayout(48);
 
     c.root.add(new ui.ViewPan()
           .setView(new draw.StringRender("String render")
@@ -461,9 +461,9 @@ View to render arrows.
 {% include zsample.html canvas_id='arrowView1' title='Arrow views' description=description %}                    
 
 <script type="text/javascript">
-zebkit.require("draw","ui","layout",function(draw, ui, lay) {
+zebkit.require("draw","ui",function(draw, ui) {
     var c = new ui.zCanvas("arrowView1", 300, 300);
-    c.root.setLayout(new lay.BorderLayout(16));
+    c.root.setBorderLayout(16);
 
     draw.ArrowView.prototype.color = "orange";
 
@@ -486,9 +486,9 @@ View set is special type of container view that hosts set of views identified by
 {% include zsample.html canvas_id='setView1' title='View set' description=description %}                    
 
 <script type="text/javascript">
-zebkit.require("draw","ui","layout",function(draw, ui, lay) {
+zebkit.require("draw","ui",function(draw, ui) {
     var c = new ui.zCanvas("setView1", 300, 300);
-    c.root.setLayout(new lay.BorderLayout(8));
+    c.root.setBorderLayout(8);
 
     var pan = new ui.ViewPan().setBackground(new draw.ViewSet({
         "Pattern"  : new draw.Pattern(ui.imgPattern),
@@ -509,9 +509,9 @@ zebkit.require("draw","ui","layout",function(draw, ui, lay) {
 </script>
 
 ```js
-zebkit.require("draw","ui","layout",function(draw, ui, lay) {
+zebkit.require("draw","ui",function(draw, ui) {
     var c = new ui.zCanvas("setView1", 300, 300);
-    c.root.setLayout(new lay.BorderLayout(8));
+    c.root.setBorderLayout(8);
     // set view set as a background view
     var pan = new ui.ViewPan().setBackground(new draw.ViewSet({
         "Pattern"  : new draw.Pattern(ui.imgPattern),

@@ -90,7 +90,7 @@ Inherit the basic top level "zebra.ui.Panel" UI component class and implement "p
 
 
 ```js
-zebkit.require("ui", "layout", function(ui, layout) {
+zebkit.require("ui", function(ui) {
     // inherit "zebkit.ui.Panel" and implement "paint()"
     ui.PaintComponent=zebkit.Class(ui.Panel,[
         function paint(g) {
@@ -103,14 +103,14 @@ zebkit.require("ui", "layout", function(ui, layout) {
     ]);
     // create canvas and add just developed component
     var c = new ui.zCanvas(150, 150);
-    c.root.setLayout(new layout.BorderLayout());
+    c.root.setBorderLayout();
     c.root.add("center", new ui.PaintComponent());
 });
 ```
 
 
 <script>
-zebkit.require("ui", "layout", function(ui, layout) {
+zebkit.require("ui", function(ui) {
     var z = new ui.zCanvas("paintSample1", 150, 150);
     var PaintComponent = zebkit.Class(zebkit.ui.Panel,[
         function paint(g) {
@@ -121,7 +121,7 @@ zebkit.require("ui", "layout", function(ui, layout) {
     ]);
     // create canvas and add just developed component
     var r = z.root;
-    r.setLayout(new layout.BorderLayout());
+    r.setBorderLayout();
     r.add("center", new PaintComponent());   
 
     var z = new ui.zCanvas("paintSample2", 150, 150);
@@ -132,7 +132,7 @@ zebkit.require("ui", "layout", function(ui, layout) {
         }
     ]);
     var r = z.root;
-    r.setLayout(new layout.BorderLayout());
+    r.setBorderLayout();
     r.add("center", new UpdateComponent()); 
 
     var PaintOnTopComponent = zebkit.Class(UpdateComponent,[
@@ -144,7 +144,7 @@ zebkit.require("ui", "layout", function(ui, layout) {
         }
     ]);
     var c = new ui.zCanvas("paintSample3", 150,150);
-    c.root.setLayout(new layout.BorderLayout());
+    c.root.setBorderLayout();
     c.root.add("center",new PaintOnTopComponent());
 });
 </script>
@@ -154,7 +154,7 @@ zebkit.require("ui", "layout", function(ui, layout) {
 Inherit developed on previous step "PaintComponent" class and extend it with "update(g)" method that fills the component background with red color:
 
 ```js
-zebkit.require("ui", "layout", function(ui, layout) {
+zebkit.require("ui", function(ui) {
     // extend "PaintComponent" class with "update" method
     ui.UpdateComponent=zebra.Class(ui.PaintComponent,[
         function update(g) {
@@ -164,7 +164,7 @@ zebkit.require("ui", "layout", function(ui, layout) {
     ]);
     // create canvas and add just developed component
     var c = new ui.zCanvas(150, 150);
-    c.root.setLayout(new layout.BorderLayout());
+    c.root.setBorderLayout();
     c.root.add("center", new ui.UpdateComponent());
 });
 ```
@@ -175,7 +175,7 @@ zebkit.require("ui", "layout", function(ui, layout) {
 Inherit developed on previous step "UpdateComponent" class and extend it with "paintOnTop(g)" method that draws white rectangle over gray cross:
 
 ```js
-zebkit.require("ui", "layout", function(ui, layout) {
+zebkit.require("ui", function(ui) {
     // extend "UpdateComponent" class with "paintOnTop"
     // method
     ui.PaintOnTopComponent=zebkit.Class(ui.UpdateComponent,[
@@ -188,7 +188,7 @@ zebkit.require("ui", "layout", function(ui, layout) {
     ]);
     // create canvas and add just developed component
     var c = new ui.zCanvas(150, 150);
-    c.root.setLayout(new layout.BorderLayout());
+    c.root.setBorderLayout();
     c.root.add("center", new ui.PaintOnTopComponent());
 });
 ```
@@ -238,10 +238,10 @@ zebkit.require("ui", "draw", "layout", function(ui, draw, layout) {
 Then let's use the developed above shape to a component:
 
 ```js
-zebkit.require("ui", "draw", "layout", function(ui, draw, layout) {
+zebkit.require("ui", "draw", function(ui, draw) {
     ...
     var r = new ui.zCanvas("roundShape", 300, 300).root;
-    r.setLayout(new layout.BorderLayout());
+    r.setBorderLayout();
     r.add(new ui.Panel({
         border: new RoundShape(),  // set shape via border
         background: new draw.Gradient("red", "orange")
@@ -254,7 +254,7 @@ The result is shown below:
 {% include zsample2.html canvas_id='roundShape1' title='Custom shape' description=description %}          
 
 <script type="text/javascript">
-zebkit.require("ui", "draw", "layout", function(ui, draw, layout) {
+zebkit.require("ui", "draw", function(ui, draw) {
     var RoundShape = zebkit.Class(draw.View, [
         function outline(g,x,y,w,h,d) {
             if (w === h) {
@@ -271,7 +271,7 @@ zebkit.require("ui", "draw", "layout", function(ui, draw, layout) {
     ]); 
 
     var r = new ui.zCanvas("roundShape1", 300, 300).root;
-    r.setLayout(new layout.BorderLayout());
+    r.setBorderLayout();
     r.add(new ui.Panel({
         border: new RoundShape(),
         background: new draw.Gradient("red", "orange")
@@ -312,7 +312,7 @@ The result is shown below:
 {% include zsample2.html canvas_id='roundShape2' title='Custom shape' description=description %}          
 
 <script type="text/javascript">  
-zebkit.require("ui", "draw", "layout", function(ui, draw, layout) {
+zebkit.require("ui", "draw", function(ui, draw) {
     var RoundShape = zebkit.Class(draw.View, [
         function outline(g,x,y,w,h,d) {
             if (w === h) {
@@ -329,7 +329,7 @@ zebkit.require("ui", "draw", "layout", function(ui, draw, layout) {
     ]); 
 
     var r = new ui.zCanvas("roundShape2", 300, 300).root;
-    r.setLayout(new layout.BorderLayout());
+    r.setBorderLayout();
     r.add(new ui.Panel({
         border: new RoundShape(),
         background: new draw.Gradient("red", "orange")

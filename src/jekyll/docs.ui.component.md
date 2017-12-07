@@ -89,7 +89,7 @@ Zebkit UI components framework utilizes HTML5 Canvas as a target surface to rend
 For example: 
 
 ```js
-zebkit.require("ui", "layout", function(ui, layout) {
+zebkit.require("ui", function(ui) {
     // create HTML Canvas element where zebkit UI to host
     // zebkit UI components hierarchy 
     var htmlCanvas = new ui.zCanvas(500, 400);
@@ -100,7 +100,7 @@ zebkit.require("ui", "layout", function(ui, layout) {
 
     // everything has to be ordered with rules
     // so specify layout manager 
-    root.setLayout(new layout.BorderLayout(8));
+    root.setBorderLayout(8);
 
     // add button zebkit component
     root.add("bottom", new ui.Button("Hello zebkit"));    

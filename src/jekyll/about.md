@@ -210,7 +210,7 @@ zebkit.require("ui", "layout", "draw", function(ui, layout, draw) {
     }
 
     var cpan = new ui.Panel().setPreferredSize(230, 120);
-    cpan.setLayout(new layout.StackLayout());
+    cpan.setStackLayout();
     cpan.add(new SimpleChart(function(x) {
         return Math.cos(x) * Math.sin(x) - 2 * Math.sin(x*x);
     }, -2, 5, "#FF7744"));
@@ -313,7 +313,7 @@ zebkit.require("ui", "draw", "layout", function(ui, draw, layout) {
         root = new ui.Panel(new layout.FlowLayout("center", 
                                                   "center", 
                                                   "vertical", 16));
-    zcan.root.setLayout(new layout.FlowLayout(16));
+    zcan.root.setFlowLayout(16);
     zcan.root.add(root);
 
 
@@ -452,7 +452,7 @@ zebkit.require("ui", "draw", "layout", function(ui, draw, layout) {
         "out"          : "orange",
         "pressed.over" : "black" 
     });
-    b.setBorder(new Cloud("red", 4));
+    b.setBorder(new Cloud("red", null, 4));
     b.setPreferredSize(140, 90);
     root.add(b);
 
@@ -546,7 +546,7 @@ function(ui, lay) {
 <script>
 zebkit.require("ui", "layout", function(ui, layout) {
     var root = new ui.zCanvas("jsonSample", 300, 300).root;
-    root.setLayout(new layout.StackLayout());
+    root.setStackLayout();
     zebkit.Zson.then("public/simpleapp.json").then(function(bag) {
         root.add(bag.root);
     }).catch();    
@@ -562,7 +562,7 @@ zebkit.require("ui", "layout", function(ui, layout) {
                    function(ui, gr, tr, design, layout) 
     {
         var root = new ui.zCanvas("sampleRichSet", 650, 750).root;
-        root.setLayout(new layout.RasterLayout(true));
+        root.setRasterLayout(true);
 
         root.add(new ui.Button("Button"));
         root.add(new ui.Button(
@@ -649,25 +649,53 @@ zebkit.require("ui", "layout", function(ui, layout) {
         tabs.add("Border panel", p);
         root.add(tabs.setLocation(290, 80));
 
-        var mbar = new ui.Menubar({
-           "Menu Item 1" : [
-               "[x]Sub Item 1",
-               "-",
-               "Sub Item 2",
-               "Sub Item 3" ],
-           "Menu Item 2" : [
-               "()Sub Item 1",
-               "()Sub Item 2",
-               "(x)Sub Item 3" ],
-           "Menu Item 3": {
-               "Sub Item 1" : null,
-               "Sub Item 2" : {
-                   "Sub Item 1" : null,
-                   "Sub Item 2" : null,
-                   "Sub Item 3" : null
-               }
+        var grp = new ui.Group();
+        var mbar = new ui.Menubar([
+           { 
+                content: "Menu Item 1",
+                sub    : [
+                    {
+                        content: "Sub Item 1",
+                        checked: true
+                    },
+                    "-",
+                    "Sub Item 2",
+                    "Sub Item 3" 
+                ]
+            },
+            {
+                content: "Menu Item 2", 
+                sub: [
+                    { 
+                        content: "Sub Item 1",
+                        group: grp
+                    },
+                    { 
+                        content: "Sub Item 2",
+                        group: grp
+                    },
+                    { 
+                        content: "Sub Item 3",
+                        group: grp,
+                        checked: true
+                    }
+                ]
+            },
+            {
+                content: "Menu Item 3",
+                sub: [
+                    "Sub Item 1",
+                    { 
+                        content: "Sub Item 2",
+                        sub: [
+                            "Sub Item 1",
+                            "Sub Item 2",
+                            "Sub Item 3"
+                        ]
+                    }
+               ]
            }
-        }).setLocation(250, 0);
+        ]).setLocation(250, 0);
         root.add(mbar);
 
         var tree = new tr.CompTree({

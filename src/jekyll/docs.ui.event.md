@@ -197,9 +197,9 @@ For instance, imagine a panel contains number of labels components as its childr
 {% include zsample.html canvas_id='childrenEvents' title='Child UI events handling' description=description %}                    
 
 <script type="text/javascript">
-zebkit.require("ui", "layout", function(ui, layout) {
+zebkit.require("ui", function(ui) {
     var root = new ui.zCanvas("childrenEvents", 400, 300).root;
-    root.setLayout(new layout.ListLayout(8));
+    root.setListLayout(8);
     root.setPadding(8);
     root.setBorder("plain");
     for (var i = 0; i < 5; i++) {
@@ -216,9 +216,9 @@ zebkit.require("ui", "layout", function(ui, layout) {
 </script>
 
 ```js
-zebkit.require("ui", "layout", function(ui, layout) {
+zebkit.require("ui", function(ui) {
     var root = new ui.zCanvas(400, 300).root;
-    root.setLayout(new layout.ListLayout(8));
+    root.setListLayout(8);
     root.setPadding(8);
     root.setBorder("plain");
     for (var i = 0; i < 5; i++) {
@@ -349,9 +349,9 @@ For example let's listening "pointerPressed" event for all UI components to show
 
 
 <script type="text/javascript">
-zebkit.require("ui", "layout", function(ui, layout) {
+zebkit.require("ui", function(ui) {
     var root = new ui.zCanvas("globalEvents", 400, 300).root;
-    root.setLayout(new layout.RasterLayout(true));
+    root.setRasterLayout(true);
     root.setPadding(8);
     root.setBorder("plain");
 
@@ -380,9 +380,9 @@ zebkit.require("ui", "layout", function(ui, layout) {
 
 
 ```js
-zebkit.require("ui", "layout", function(ui, layout) {
+zebkit.require("ui", function(ui) {
     var root = new ui.zCanvas("globalEvents", 400, 300).root;
-    root.setLayout(new layout.RasterLayout(true));
+    root.setRasterLayout(true);
     root.setPadding(8);
     root.setBorder("plain");
     // add number of components

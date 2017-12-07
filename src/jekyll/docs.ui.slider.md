@@ -20,8 +20,6 @@ zebkit.require("ui", "layout", "draw", function(ui, layout, draw) {
     s3.setRuler(new ui.PointRulerPan("vertical").
     setPointsGenerator(new ui.PointRulerPan.PointsGenerator([
         function pointValue(ruler, index) {
-            console.log("index = " + index);
-
             var min = ruler.getMin();
             var max = ruler.getMax();
             if (index === 0) {

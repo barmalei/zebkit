@@ -14,11 +14,11 @@ Layout managers is well known solution to get adaptive UI that helps developing 
 Usage layout manager in zebkit looks something like the following:
 
 ```js
-zebkit.require("ui", "layout", function(ui, layout) {
+zebkit.require("ui", function(ui) {
     ...
     var pan = new ui.Panel();
     // Set layout manager for the container
-    pan.setLayout(new layout.BorderLayout()) 
+    pan.setBorderLayout(); 
     ...
     // Border layout manager orders child components 
     // with number of predefined alignments (top, center, left, 
@@ -37,11 +37,11 @@ The layout manager orders child components basing on its exact locations and siz
 {% include zsample.html canvas_id='rasterLayout1' title='Raster layout' %}
 
 ```js
-zebkit.require("ui","layout",function(ui, lay) {
+zebkit.require("ui", function(ui) {
     var r = new ui.zCanvas().root;
     // raster layout that size components according to 
     // its preferred size
-    r.setLayout(new lay.RasterLayout(true));
+    r.setRasterLayout(true);
 
     // add children UI components with different constraints
     r.add("center", new ui.Button("Center,\npreferred Sized"));
@@ -58,10 +58,10 @@ This the most simple layout manager that place child components on top of each o
 
 
 ```js
-zebkit.require("ui","layout",function(ui, lay) {
+zebkit.require("ui", function(ui) {
     var r = new ui.zCanvas().root;
     // setup stack layout
-    r.setLayout(new lay.StackLayout());
+    r.setStackLayout();
 
     // add child component stretched vertically and 
     // horizontally over the whole parent component area
@@ -81,10 +81,10 @@ The layout manager splits container area into five logical areas: "left", "right
 {% include zsample.html canvas_id='layoutSample1' title='Border layout' %}
 
 ```js
-zebkit.require("ui","layout",function(ui, lay) {
+zebkit.require("ui",function(ui) {
     var r = new ui.zCanvas().root;
     // set border layout manager
-    r.setLayout(new lay.BorderLayout());
+    r.setBorderLayout();
 
     // add children UI components with different constraints
     r.add("center", new ui.Button("CENTER"));
@@ -103,11 +103,11 @@ List layout manager treats child components as sequence of list items ordered ve
 {% include zsample.html canvas_id='layoutSample2' title='List layout' %}
 
 ```js
-zebkit.require("ui","layout", function(ui, layout) {
+zebkit.require("ui", function(ui) {
     var r = new ui.zCanvas().root;
     // set list layout manager that orders components as list 
     // items and stretches child components horizontally
-    r.setLayout(new layout.ListLayout());
+    r.setListLayout();
 
     // add child components
     r.add(new ui.Button("Stretched Item 1"));
@@ -148,12 +148,12 @@ Flow layout manager orders child components vertically or horizontally according
 {% include zsample.html canvas_id='layoutSample4' title='Flow layout' %}
 
 ```js
-zebkit.require("ui","layout", function(ui, lay) {
+zebkit.require("ui", function(ui) {
     var r = new ui.zCanvas().root;
 
     // set flow layout with vertical components ordering and center 
     // vertical and horizontal alignments
-    r.setLayout(new lay.FlowLayout("center","center","vertical",2));
+    r.setFlowLayout("center", "center", "vertical", 2);
 
     // add child components
     r.add(new ui.Button("VCentered"));
@@ -354,7 +354,7 @@ zebkit.require("ui", "layout", function(ui, lay) {
 
     // Border layout
     var r = new ui.zCanvas("layoutSample1", 500, 400).root;
-    r.setLayout(new lay.BorderLayout());
+    r.setBorderLayout();
     r.add(new ui.Panel({
         layout : new lay.BorderLayout(4),
         kids   : {

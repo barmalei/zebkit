@@ -26,11 +26,11 @@ Technically zbkit layout manager class has to implement the following:
 A layout manager can be applied to any Zebra UI component by calling "setLayout(layout)" method. Additionally children UI components can specify extra parameter called constraints that is specific for a particular layout manager. It is can be done either by setting a children component "constraints" field or during insertion of the component to the parent component:
 
 ```js
-zebkit.require("ui", "layout", function(ui, lay) {
+zebkit.require("ui", function(ui) {
     // create panel
     var p = new ui.Panel();
     // set layout manager for the panel
-    p.setLayout(new lay.BorderLayout());
+    p.setBorderLayout();
     // add children components
     p.add("center", new ui.Label("Center")); 
 
@@ -164,11 +164,11 @@ The layout manager places children UI components over each other and stretches i
 {% include zsample2.html canvas_id='layoutSample1' title='Paint on top method implementation' description=description %}                    
 
 ```js
-zebkit.require("ui", "layout", function(ui, layout) {
+zebkit.require("ui", function(ui) {
     var r = new ui.zCanvas("layoutSample1", 300, 300).root;
     r.setBorder("plain");
     // set stack layout manager
-    r.setLayout(new layout.StackLayout());
+    r.setStackLayout();
     // add button
     r.add(new ui.Button("Under transparent"));
     // add partially transparent panel component
@@ -179,10 +179,10 @@ zebkit.require("ui", "layout", function(ui, layout) {
 ```
 
 <script type="text/javascript">  
-zebkit.require("ui", "layout", function(ui, layout) {
+zebkit.require("ui", function(ui) {
     var r = new ui.zCanvas("layoutSample1", 300, 300).root;
     r.setBorder("plain");
-    r.setLayout(new layout.StackLayout());
+    r.setStackLayout();
     r.add(new ui.Button("Under transparent"));
     var p = new ui.Panel();
     p.setBackground("rgba(240,240,240,0.7)");
@@ -196,9 +196,9 @@ zebkit.require("ui", "layout", function(ui, layout) {
 Border layout manager splits component area into five parts: top, left, right, bottom and center. Children components are placed to one of the part basing on constraints that have been specified for them:
 
 <script type="text/javascript">
-    zebkit.require("ui","layout",function(ui, layout) {
+    zebkit.require("ui", function(ui) {
         var r = new ui.zCanvas("layoutSampleBorder", 600,350).root;
-        r.setLayout(new layout.BorderLayout());
+        r.setBorderLayout();
         r.add("center",new ui.Button("CENTER"));
         r.add("left", new ui.Button("LEFT"));
         r.add("right",new ui.Button("RIGHT"));
@@ -210,10 +210,10 @@ Border layout manager splits component area into five parts: top, left, right, b
 {% include zsample2.html canvas_id='layoutSampleBorder' title='Border layout' description=description %}                    
 
 ```js
-zebkit.require("ui","layout",function(ui, lay) {
+zebkit.require("ui", function(ui) {
     var r = new ui.zCanvas("layoutSampleBorder", 600,350).root;
     // set border layout manager
-    r.setLayout(new lay.BorderLayout());
+    r.setBorderLayout();
 
     // add children UI components with different constraints
     r.add("center", new ui.Button("CENTER"));
@@ -377,13 +377,13 @@ Flow layout provides many possibilities to align children components.
 {% include zsample2.html canvas_id='flowLayout1' title='Flow layout' description=description %}                      
 
 ```js
-zebkit.require("ui","layout", function(ui, lay) {
+zebkit.require("ui", function(ui) {
     var r = new ui.zCanvas("flowLayout1", 400, 200).root;
     r.setBorder("plain");
 
     // set flow layout with vertical components ordering and center 
     // vertical and horizontal alignments
-    r.setLayout(new lay.FlowLayout("center","center","vertical",2));
+    r.setFlowLayout("center","center","vertical",2);
 
     // add children components
     r.add(new ui.Button("VCentered"));
@@ -393,10 +393,10 @@ zebkit.require("ui","layout", function(ui, lay) {
 ```
 
 <script type="text/javascript">
-    zebkit.require("ui","layout", function(ui, layout) {
+    zebkit.require("ui", function(ui) {
         var r = new ui.zCanvas("flowLayout1", 400,200).root;
         r.setBorder("plain");
-        r.setLayout(new layout.FlowLayout("center","center","vertical", 2));
+        r.setFlowLayout("center","center","vertical", 2);
         r.add(new ui.Button("VCentered"));
         r.add(new ui.Button("VCentered"));
         r.add(new ui.Button("VCentered"));
@@ -409,14 +409,13 @@ zebkit.require("ui","layout", function(ui, lay) {
 {% include zsample2.html canvas_id='flowLayout2' title='Flow layout' description=description %}                    
 
 ```js
-zebkit.require("ui","layout", function(ui, lay) {
+zebkit.require("ui", function(ui) {
     var r = new ui.zCanvas("flowLayout2", 400,200).root;
     r.setBorder("plain");
     // set flow layout with vertical components
     // ordering, top-left alignment and 2 pixels
     // gap between inserted components
-    r.setLayout(new lay.FlowLayout("left","top",
-                                    "vertical", 2));
+    r.setFlowLayout("left","top","vertical", 2);
     // add children components
     r.add(new ui.Button("Left-Top-Ver"));
     r.add(new ui.Button("Left-Top-Ver"));
@@ -425,10 +424,10 @@ zebkit.require("ui","layout", function(ui, lay) {
 ```
 
 <script type="text/javascript">
-    zebkit.require("ui","layout", function(ui, layout) {
+    zebkit.require("ui", function(ui) {
         var r = new ui.zCanvas("flowLayout2", 400,200).root;
         r.setBorder("plain");
-        r.setLayout(new layout.FlowLayout("left","top","vertical", 2));
+        r.setFlowLayout("left","top","vertical", 2);
         r.add(new ui.Button("Left-Top-Ver"));
         r.add(new ui.Button("Left-Top-Ver"));
         r.add(new ui.Button("Left-Top-Ver"));
@@ -441,14 +440,13 @@ zebkit.require("ui","layout", function(ui, lay) {
 {% include zsample2.html canvas_id='flowLayout3' title='Flow layout' description=description %}                    
 
 ```js
-zebkit.require("ui","layout", function(ui, layout) {
+zebkit.require("ui", function(ui) {
     var r = new ui.zCanvas("flowLayout3", 400,200).root;
     r.setBorder("plain");
     // set flow layout with vertical components
     // ordering, top-right alignment and 2 pixels
     // gap between inserted components
-    r.setLayout(new layout.FlowLayout("right","top",
-                                      "vertical", 2));
+    r.setFlowLayout("right","top","vertical", 2));
     // add children components
     r.add(new ui.Button("Right-Top-Ver"));
     r.add(new ui.Button("Right-Top-Ver"));
@@ -457,10 +455,10 @@ zebkit.require("ui","layout", function(ui, layout) {
 ```
 
 <script type="text/javascript">
-    zebkit.require("ui","layout", function(ui, layout) {
+    zebkit.require("ui", function(ui) {
         var r = new ui.zCanvas("flowLayout3", 400,200).root;
         r.setBorder("plain");
-        r.setLayout(new layout.FlowLayout("right","top","vertical", 2));
+        r.setFlowLayout("right","top","vertical", 2);
         r.add(new ui.Button("Right-Top-Ver"));
         r.add(new ui.Button("Right-Top-Ver"));
         r.add(new ui.Button("Right-Top-Ver"));
@@ -473,14 +471,13 @@ zebkit.require("ui","layout", function(ui, layout) {
 {% include zsample2.html canvas_id='flowLayout4' title='Flow layout' description=description %}                    
 
 ```js
-zebkit.require("ui","layout", function(ui, layout) {
+zebkit.require("ui", function(ui) {
     var r = new ui.zCanvas("flowLayout4", 200,200).root;
     r.setBorder("plain");
     // set flow layout with vertical components
     // ordering, bottom-right alignment and 2 pixels
     // gap between inserted components
-    r.setLayout(new layout.FlowLayout("right","bottom",
-                                      "vertical", 2));
+    r.setFlowLayout("right","bottom", "vertical", 2);
     // add children components
     r.add(new ui.Button("Right-Bottom-Ver"));
     r.add(new ui.Button("Right-Bottom-Ver"));
@@ -489,10 +486,10 @@ zebkit.require("ui","layout", function(ui, layout) {
 ```
 
 <script type="text/javascript">
-    zebkit.require("ui","layout", function(ui, layout) {
+    zebkit.require("ui", function(ui) {
         var r = new ui.zCanvas("flowLayout4", 200,200).root;
         r.setBorder("plain");
-        r.setLayout(new layout.FlowLayout("right","bottom","vertical", 2));
+        r.setFlowLayout("right","bottom","vertical", 2);
         r.add(new ui.Button("Right-Bottom-Ver"));
         r.add(new ui.Button("Right-Bottom-Ver"));
         r.add(new ui.Button("Right-Bottom-Ver"));
@@ -504,14 +501,13 @@ zebkit.require("ui","layout", function(ui, layout) {
 {% include zsample2.html canvas_id='flowLayout5' title='Flow layout' description=description %}                    
 
 ```js
-zebkit.require("ui","layout", function(ui, layout) {
+zebkit.require("ui", function(ui) {
     var r = new ui.zCanvas("flowLayout5", 600,120).root;
     r.setBorder("plain");
     // set flow layout with horizontal components
     // ordering, center-center alignment and 2 pixels
     // gap between inserted components
-    r.setLayout(new layout.FlowLayout("center","center",
-                                      "horizontal", 2));
+    r.setFlowLayout("center","center","horizontal", 2);
     // add children components
     r.add(new ui.Button("HCentered"));
     r.add(new ui.Button("HCentered"));
@@ -520,10 +516,10 @@ zebkit.require("ui","layout", function(ui, layout) {
 ```
 
 <script type="text/javascript">
-    zebkit.require("ui","layout", function(ui, layout) {
+    zebkit.require("ui", function(ui) {
         var r = new ui.zCanvas("flowLayout5", 600,120).root;
         r.setBorder("plain");
-        r.setLayout(new layout.FlowLayout("center","center","horizontal", 2));
+        r.setFlowLayout("center","center","horizontal", 2);
         r.add(new ui.Button("HCentered"));
         r.add(new ui.Button("HCentered"));
         r.add(new ui.Button("HCentered"));
@@ -535,14 +531,13 @@ zebkit.require("ui","layout", function(ui, layout) {
 {% include zsample2.html canvas_id='flowLayout6' title='Flow layout' description=description %}                    
 
 ```js
-zebkit.require("ui","layout", function(ui, layout) {
+zebkit.require("ui", function(ui) {
     var r = new ui.zCanvas("flowLayout6", 600,120).root;
     r.setBorder("plain");
     // set flow layout with horizontal components
     // ordering, center-left alignment and 2 pixels
     // gap between inserted components
-    r.setLayout(new layout.FlowLayout("left","center",
-                                      "horizontal",2));
+    r.setFlowLayout("left","center","horizontal",2);
     // add children components
     r.add(new ui.Button("Left-Center-Hor"));
     r.add(new ui.Button("Left-Center-Hor"));
@@ -551,10 +546,10 @@ zebkit.require("ui","layout", function(ui, layout) {
 ```
 
 <script type="text/javascript">
-    zebkit.require("ui","layout", function(ui, layout) {
+    zebkit.require("ui", function(ui) {
         var r = new ui.zCanvas("flowLayout6", 600,120).root;
         r.setBorder("plain");
-        r.setLayout(new layout.FlowLayout("left","center","horizontal",2));
+        r.setFlowLayout("left","center","horizontal",2);
         r.add(new ui.Button("Left-Center-Hor"));
         r.add(new ui.Button("Left-Center-Hor"));
         r.add(new ui.Button("Left-Center-Hor"));
@@ -566,14 +561,13 @@ zebkit.require("ui","layout", function(ui, layout) {
 {% include zsample2.html canvas_id='flowLayout7' title='Flow layout' description=description %}                    
 
 ```js
-zebkit.require("ui","layout", function(ui, layout) {
+zebkit.require("ui", function(ui) {
     var r = new ui.zCanvas("flowLayout7", 600,120).root;
     r.setBorder("plain");
     // set flow layout with horizontal components
     // ordering, center-right alignment and 2 pixels
     // gap between inserted components
-    r.setLayout(new layout.FlowLayout("right","center",
-                                      "horizontal", 2));
+    r.setFlowLayout("right","center","horizontal", 2);
     // add children components
     r.add(new ui.Button("Right-Center-Hor"));
     r.add(new ui.Button("Right-Center-Hor"));
@@ -582,10 +576,10 @@ zebkit.require("ui","layout", function(ui, layout) {
 ```
 
 <script type="text/javascript">
-    zebkit.require("ui","layout", function(ui, layout) {
+    zebkit.require("ui", function(ui) {
         var r = new ui.zCanvas("flowLayout7", 600,120).root;
         r.setBorder("plain");
-        r.setLayout(new layout.FlowLayout("right","center","horizontal", 2));
+        r.setFlowLayout("right","center","horizontal", 2);
         r.add(new ui.Button("Right-Center-Hor"));
         r.add(new ui.Button("Right-Center-Hor"));
         r.add(new ui.Button("Right-Center-Hor"));
@@ -597,14 +591,13 @@ zebkit.require("ui","layout", function(ui, layout) {
 {% include zsample2.html canvas_id='flowLayout8' title='Flow layout' description=description %}                    
 
 ```js
-zebkit.require("ui","layout", function(ui, layout) {
+zebkit.require("ui", function(ui) {
     var r = new ui.zCanvas("flowLayout8", 600,120).root;
     r.setBorder("plain");
     // set flow layout with horizontal components
     // ordering, top-right alignment and 2 pixels
     // gap between inserted components
-    r.setLayout(new layout.FlowLayout("right","top",
-                                      "horizontal", 2));
+    r.setFlowLayout("right","top","horizontal", 2));
     // add children components
     r.add(new ui.Button("Right-Top-Hor"));
     r.add(new ui.Button("Right-Top-Hor"));
@@ -613,10 +606,10 @@ zebkit.require("ui","layout", function(ui, layout) {
 ```
 
 <script type="text/javascript">
-    zebkit.require("ui","layout", function(ui, layout) {
+    zebkit.require("ui", function(ui) {
         var r = new ui.zCanvas("flowLayout8", 600,120).root;
         r.setBorder("plain");
-        r.setLayout(new layout.FlowLayout("right","top","horizontal", 2));
+        r.setFlowLayout("right","top","horizontal", 2);
         r.add(new ui.Button("Right-Top-Hor"));
         r.add(new ui.Button("Right-Top-Hor"));
         r.add(new ui.Button("Right-Top-Hor"));
@@ -628,14 +621,14 @@ zebkit.require("ui","layout", function(ui, layout) {
 {% include zsample2.html canvas_id='flowLayout9' title='Flow layout' description=description %}                    
 
 ```js
-zebkit.require("ui","layout", function(ui, layout) {
+zebkit.require("ui", function(ui) {
     var r = new ui.zCanvas("flowLayout9", 600,120).root;
     r.setBorder("plain");
     // set flow layout with horizontal components
     // ordering, top-left alignment and 2 pixels
     // gap between inserted components
-    r.setLayout(new layout.FlowLayout("left","top",
-                                      "horizontal",2));
+    r.setFlowLayout("left","top","horizontal",2);
+
     // add children components
     r.add(new ui.Button("Left-Top-Hor"));
     r.add(new ui.Button("Left-Top-Hor"));
@@ -644,10 +637,10 @@ zebkit.require("ui","layout", function(ui, layout) {
 ```
 
 <script type="text/javascript">
-    zebkit.require("ui","layout", function(ui, layout) {
+    zebkit.require("ui", function(ui) {
         var r = new ui.zCanvas("flowLayout9", 600,120).root;
         r.setBorder("plain");
-        r.setLayout(new layout.FlowLayout("left","top","horizontal",2));
+        r.setFlowLayout("left","top","horizontal",2);
         r.add(new ui.Button("Left-Top-Hor"));
         r.add(new ui.Button("Left-Top-Hor"));
         r.add(new ui.Button("Left-Top-Hor"));
@@ -663,10 +656,10 @@ Raster layout manager is default Zebra component layout manager. It emulates the
 {% include zsample2.html canvas_id='rasterLayout1' title='Raster layout' description=description %}                    
 
 <script type="text/javascript">
-    zebkit.require("ui","layout", function(ui, layout) {
+    zebkit.require("ui", function(ui) {
         var r = new ui.zCanvas("rasterLayout1",400,200).root;
         r.setBorder("plain");
-        r.setLayout(new layout.RasterLayout());
+        r.setRasterLayout();
 
         // create component, setup its metrics precisely
         // and add its to parent component
@@ -687,13 +680,13 @@ Raster layout manager also can be less dependent from an environment an UI appli
 {% include zsample2.html canvas_id='rasterLayout2' title='Raster layout' description=description %}                    
 
 <script type="text/javascript">
-    zebkit.require("ui","layout", function(ui, layout) {
+    zebkit.require("ui", function(ui) {
         var r = new ui.zCanvas("rasterLayout2",400,200).root;
         r.setBorder("plain");
 
         // set raster layout that sizes children components
         // according to its preferred size
-        r.setLayout(new layout.RasterLayout(true));
+        r.setRasterLayout(true);
 
         // add children components
         var b=new ui.Button("(10,10) Preferred Sized");
@@ -712,14 +705,14 @@ Raster layout manager also can be less dependent from an environment an UI appli
 {% include zsample2.html canvas_id='rasterLayout3' title='Raster layout' description=description %}                    
 
 <script type="text/javascript">
-    zebkit.require("ui","layout", function(ui, layout) {
+    zebkit.require("ui", function(ui) {
         var r = new ui.zCanvas("rasterLayout3", 400,200).root,
             MLabel=ui.MLabel; //shortcut to class
         r.setBorder("plain");
 
         // set raster layout that sizes children components
         // according to its preferred size
-        r.setLayout(new layout.RasterLayout(true));
+        r.setRasterLayout(true);
 
         var b = new ui.Button("(10,10) Preferred Sized");
         b.setLocation(10,10);
@@ -751,14 +744,14 @@ List layout manager orders children component vertically as a list of items.
 {% include zsample2.html canvas_id='listLayout1' title='Raster layout' description=description %}                    
 
 <script type="text/javascript">
-    zebkit.require("ui","layout", function(ui, layout) {
+    zebkit.require("ui", function(ui) {
         var r = new ui.zCanvas("listLayout1", 400,200).root;
         r.setBorder("plain");
 
         // set list layout manager that orders
         // components as list item and stretches
         // children horizontally
-        r.setLayout(new layout.ListLayout());
+        r.setListLayout();
 
         // add children components
         r.add(new ui.Button("Item1"));
@@ -772,14 +765,14 @@ List layout manager orders children component vertically as a list of items.
 {% include zsample2.html canvas_id='listLayout2' title='List layout' description=description %}                    
 
 <script type="text/javascript">
-    zebkit.require("ui","layout", function(ui, layout) {
+    zebkit.require("ui", function(ui) {
         var r = new ui.zCanvas("listLayout2", 400,200).root;
         r.setBorder("plain");
 
         // set list layout manager with centered
         // horizontally children components and
         // 2 pixels gap between the components
-        r.setLayout(new layout.ListLayout("center",2));
+        r.setListLayout("center",2);
 
         // add children components
         r.add(new ui.Button("Item1"));
@@ -793,14 +786,14 @@ List layout manager orders children component vertically as a list of items.
 {% include zsample2.html canvas_id='listLayout3' title='List layout' description=description %}                    
 
 <script type="text/javascript">
-  zebkit.require("ui","layout", function(ui, layout) {
+  zebkit.require("ui", function(ui) {
         var r = new ui.zCanvas("listLayout3", 400,200).root;
         r.setBorder("plain");
 
         // set list layout manager with aligned
         // left children components and
         // 2 pixels gap between the components
-        r.setLayout(new layout.ListLayout("left", 2));
+        r.setListLayout("left", 2);
 
         // add children components
         r.add(new ui.Button("Item1"));

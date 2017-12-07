@@ -124,11 +124,11 @@ b.cde();
 // Declare an interface that renders rectangle 
 var DrawRect = zebkit.Interface([
     function paint(g) {
-        if (typeof this.color !== 'undefined') {
+        if (this.color !== undefined) {
             g.color = this.color; 
         }
 
-        if (typeof this.lineWidth !== 'undefined') {
+        if (this.lineWidth !== undefined) {
             g.lineWidth = this.lineWidth;
         }
 

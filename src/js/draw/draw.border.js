@@ -318,6 +318,7 @@ zebkit.package("draw", function(pkg, Class) {
                         }
                     } else {
                         var dt = this.width / 2;
+
                         g.beginPath();
                         g.rect(x + dt, y + dt, w - this.width, h - this.width);
                         g.closePath();
@@ -532,7 +533,7 @@ zebkit.package("draw", function(pkg, Class) {
 
             this.outline = function (g,x,y,w,h,d) {
                 var xx = x + w, yy = y + h;
-                if (typeof d.getTitleInfo !== 'undefined') {
+                if (d.getTitleInfo !== undefined) {
                     var r = d.getTitleInfo();
                     if (r !== null) {
                         switch(r.orient) {
@@ -573,7 +574,7 @@ zebkit.package("draw", function(pkg, Class) {
                 }
 
                 if (this.target !== null &&
-                    typeof this.target.outline !== 'undefined' &&
+                    this.target.outline !== undefined &&
                     this.target.outline(g, x, y, xx - x, yy - y, d) === true)
                 {
                     return true;
@@ -594,7 +595,7 @@ zebkit.package("draw", function(pkg, Class) {
             };
 
             this.paint = function(g,x,y,w,h,d){
-                if (typeof d.getTitleInfo !== 'undefined'){
+                if (d.getTitleInfo !== undefined) {
                     var r = d.getTitleInfo();
                     if (r !== null) {
                         var xx = x + w, yy = y + h, t = g.$states[g.$curState];

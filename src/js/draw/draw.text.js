@@ -167,7 +167,7 @@ zebkit.package("draw", function(pkg, Class) {
                         this.owner.invalidate();
                     }
 
-                    if (typeof this.invalidate !== 'undefined') {
+                    if (this.invalidate !== undefined) {
                         this.invalidate();
                     }
                 }
@@ -240,7 +240,7 @@ zebkit.package("draw", function(pkg, Class) {
                     this.owner.invalidate();
                 }
 
-                if (typeof this.invalidate !== 'undefined') {
+                if (this.invalidate !== undefined) {
                     this.invalidate();
                 }
             };
@@ -393,7 +393,7 @@ zebkit.package("draw", function(pkg, Class) {
                     g.setFont(this.font);
                 }
 
-                if (d !== null && typeof d.getStartSelection !== 'undefined') {
+                if (d !== null && d.getStartSelection !== undefined) {
                     var startSel = d.getStartSelection(),
                         endSel   = d.getEndSelection();
 
@@ -419,8 +419,8 @@ zebkit.package("draw", function(pkg, Class) {
                 if (d !== null && d.isEnabled === false) {
                     g.fillStyle = d !== null &&
                                   d.disabledColor !== null &&
-                                  typeof d.disabledColor !== 'undefined'  ? d.disabledColor
-                                                                          : this.clazz.disabledColor;
+                                  d.disabledColor !== undefined ? d.disabledColor
+                                                                : this.clazz.disabledColor;
                 }
 
                 g.fillText(this.target, x, y);
@@ -568,7 +568,7 @@ zebkit.package("draw", function(pkg, Class) {
                 if (this.target !== s) {
                     var old = this.target;
                     this.target = s;
-                    if (typeof this.valueWasChanged !== 'undefined') {
+                    if (this.valueWasChanged !== undefined) {
                         this.valueWasChanged(old, s);
                     }
                 }
@@ -622,7 +622,6 @@ zebkit.package("draw", function(pkg, Class) {
              * @method textUpdated
              */
             this.textUpdated = function(e) {
-
                 if (e.id === "remove") {
                     if (this.invLines > 0) {
                         var p1 = e.line - this.startInvLine,
@@ -634,7 +633,7 @@ zebkit.package("draw", function(pkg, Class) {
                         this.invLines = 1;
                     }
 
-                    if (this.owner !== null && this.owner.isValid !== true) {
+                    if (this.owner !== null && this.owner.isValid === true) {
                         this.owner.invalidate();
                     }
                 } else {  // insert
@@ -658,6 +657,7 @@ zebkit.package("draw", function(pkg, Class) {
              * @private
              */
             this.invalidate = function(start,size) {
+
                 if (arguments.length === 0) {
                     start = 0;
                     size  = this.getLines();
@@ -728,7 +728,7 @@ zebkit.package("draw", function(pkg, Class) {
                             }
 
                             var p1 = null, p2 = null, bsel = false;
-                            if (lines > 0 && d !== null && typeof d.getStartSelection !== 'undefined') {
+                            if (lines > 0 && d !== null && d.getStartSelection !== undefined) {
                                 p1   = d.getStartSelection();
                                 p2   = d.getEndSelection();
                                 bsel = p1 !== null && (p1.row !== p2.row || p1.col !== p2.col);
@@ -768,8 +768,8 @@ zebkit.package("draw", function(pkg, Class) {
                         } else {
                             var dcol = d !== null &&
                                        d.disabledColor !== null &&
-                                       typeof d.disabledColor !== 'undefined' ? d.disabledColor
-                                                                              : pkg.TextRender.disabledColor;
+                                       d.disabledColor !== undefined ? d.disabledColor
+                                                                     : pkg.TextRender.disabledColor;
 
                             for(i = 0; i < lines; i++) {
                                 g.setColor(dcol);
@@ -808,7 +808,7 @@ zebkit.package("draw", function(pkg, Class) {
             };
         },
 
-        function valueWasChanged(o,n){
+        function valueWasChanged(o, n) {
             if (o !== null) {
                 o.off(this);
             }
@@ -816,6 +816,7 @@ zebkit.package("draw", function(pkg, Class) {
             if (n !== null) {
                 n.on(this);
             }
+
             this.$super(o, n);
         }
     ]);
@@ -823,7 +824,7 @@ zebkit.package("draw", function(pkg, Class) {
     /**
      * Render to visualize string whose width is greater than available or specified width.
      * @class zebkit.draw.CutStringRender
-     * @extends {zebkit.draw.StringRender}
+     * @extends zebkit.draw.StringRender
      * @constructor
      * @param  {String} [txt] a string to be rendered
      */
@@ -854,7 +855,7 @@ zebkit.package("draw", function(pkg, Class) {
                 maxw = this.maxWidth;
             } else if (this.stringWidth > w) {
                 maxw = w;
-            } else if (typeof g.$states !== 'undefined') {
+            } else if (g.$states !== undefined) {
                 var ts = g.$states[g.$curState];
                 if (ts.x > x || (ts.x + ts.width) < (x + w)) {
                     maxw = ts.width;
@@ -886,7 +887,7 @@ zebkit.package("draw", function(pkg, Class) {
      * @constructor
      * @param  {String|zebkit.data.TextModel} text a text as string or text model object
      * @class zebkit.draw.WrappedTextRender
-     * @extends {zebkit.draw.TextRender}
+     * @extends zebkit.draw.TextRender
      */
     pkg.WrappedTextRender = Class(pkg.TextRender, [
         function $prototype() {
@@ -966,7 +967,7 @@ zebkit.package("draw", function(pkg, Class) {
      * Decorated text render. This decorator allows developer to draw under, over or strike
      * lines over the rendered text.
      * @class  zebkit.draw.DecoratedTextRender
-     * @extends {zebkit.draw.TextRender}
+     * @extends zebkit.draw.TextRender
      * @constructor
      * @param  {String|zebkit.data.TextModel} text a text as string or text model object
      */
@@ -1003,7 +1004,7 @@ zebkit.package("draw", function(pkg, Class) {
              * @method setDecorations
              * @chainable
              */
-            this.setDecorations = function(d) {
+            this.setDecorations = function() {
                 for(var k in this.decorations) {
                     this.decorations[k] = false;
                 }

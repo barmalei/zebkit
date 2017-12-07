@@ -26,14 +26,14 @@ zebkit.package("draw", function(pkg, Class) {
       */
      pkg.Context2D = {
         setFont : function(f) {
-            f = (typeof f.s !== 'undefined' ? f.s : f.toString());
+            f = (f.s !== undefined ? f.s : f.toString());
             if (f !== this.font) {
                 this.font = f;
             }
         },
 
         setColor : function (c) {
-            c = (typeof c.s !== 'undefined' ? c.s : c.toString());
+            c = (c.s !== undefined ? c.s : c.toString());
             if (c !== this.fillStyle) {
                 this.fillStyle = c;
             }
@@ -207,12 +207,12 @@ zebkit.package("draw", function(pkg, Class) {
      * @for zebkit.draw
      */
     pkg.$view = function(v) {
-        if (v === null || typeof v.paint !== 'undefined') {
+        if (v === null || v.paint !== undefined) {
             return v;
         } else if (typeof v === "string" || v.constructor === String) {
-            if (typeof pkg.rgb[v] !== 'undefined') { // detect color
+            if (pkg.rgb[v] !== undefined) { // detect color
                 return pkg.rgb[v];
-            } else if (typeof pkg.$views[v] !== 'undefined') { // detect predefined view
+            } else if (pkg.$views[v] !== undefined) { // detect predefined view
                 return pkg.$views[v];
             } else {
                 if (v.length > 0 &&
@@ -345,7 +345,7 @@ zebkit.package("draw", function(pkg, Class) {
                 if (this.target !== o) {
                     var old = this.target;
                     this.target = o;
-                    if (typeof this.valueWasChanged !== 'undefined') {
+                    if (this.valueWasChanged !== undefined) {
                         this.valueWasChanged(old, o);
                     }
                 }
@@ -392,7 +392,7 @@ zebkit.package("draw", function(pkg, Class) {
      * @param  {Float}   [a] alpha color intensity
      * @constructor
      * @class zebkit.draw.rgb
-     * @extends {zebkit.draw.View}
+     * @extends zebkit.draw.View
      */
     pkg.rgb = Class(pkg.View, [
         function (r, g, b, a) {
@@ -440,7 +440,7 @@ zebkit.package("draw", function(pkg, Class) {
                                 this.isOpaque = (this.a == 1.0);
                             }
                         }
-                    } else if (r.length > 2 && typeof this.clazz[r] !== 'undefined') {
+                    } else if (r.length > 2 && this.clazz[r] !== undefined) {
                         var col = this.clazz.colors[r];
                         this.r = col.r;
                         this.g = col.g;
@@ -527,22 +527,22 @@ zebkit.package("draw", function(pkg, Class) {
                 // and the area that has to be filled. IE11/10 have a bug
                 // that triggers filling more space than it is restricted
                 // with clip
-                if (typeof g.$states !== 'undefined') {
-                    var t  = g.$states[g.$curState],
-                        rx = x > t.x ? x : t.x,
-                        rw = Math.min(x + w, t.x + t.width) - rx;
+                // if (g.$states !== undefined) {
+                //     var t  = g.$states[g.$curState],
+                //         rx = x > t.x ? x : t.x,
+                //         rw = Math.min(x + w, t.x + t.width) - rx;
 
-                    if (rw > 0)  {
-                        var ry = y > t.y ? y : t.y,
-                        rh = Math.min(y + h, t.y + t.height) - ry;
+                //     if (rw > 0)  {
+                //         var ry = y > t.y ? y : t.y,
+                //         rh = Math.min(y + h, t.y + t.height) - ry;
 
-                        if (rh > 0) {
-                            g.fillRect(rx, ry, rw, rh);
-                        }
-                    }
-                } else {
+                //         if (rh > 0) {
+                //             g.fillRect(rx, ry, rw, rh);
+                //         }
+                //     }
+                // } else {
                     g.fillRect(x, y, w, h);
-                }
+//                }
             };
 
             this.toString = function() {
@@ -741,28 +741,28 @@ zebkit.package("draw", function(pkg, Class) {
 
             this.$recalc = function(v) {
                 var b = 0, ps = v.getPreferredSize();
-                if (typeof v.getLeft !== 'undefined') {
+                if (v.getLeft !== undefined) {
                     b = v.getLeft();
                     if (b > this.left) {
                         this.left = b;
                     }
                 }
 
-                if (typeof v.getRight !== 'undefined') {
+                if (v.getRight !== undefined) {
                     b = v.getRight();
                     if (b > this.right) {
                         this.right = b;
                     }
                 }
 
-                if (typeof v.getTop !== 'undefined') {
+                if (v.getTop !== undefined) {
                     b = v.getTop();
                     if (b > this.top) {
                         this.top = b;
                     }
                 }
 
-                if (typeof v.getBottom !== 'undefined') {
+                if (v.getBottom !== undefined) {
                     b = v.getBottom();
                     if (b > this.bottom) {
                         this.bottom = b;
@@ -778,7 +778,7 @@ zebkit.package("draw", function(pkg, Class) {
                     this.height = ps.height;
                 }
 
-                if (typeof this.voutline === 'undefined' && typeof v.outline !== 'undefined') {
+                if (this.voutline === undefined && v.outline !== undefined) {
                     this.voutline = v;
                 }
             };
@@ -804,7 +804,7 @@ zebkit.package("draw", function(pkg, Class) {
 
             this.ownerChanged = function(o) {
                 this.iterate(function(k, v) {
-                    if (v !== null && typeof v.ownerChanged !== 'undefined') {
+                    if (v !== null && v.ownerChanged !== undefined) {
                         v.ownerChanged(o);
                     }
                 });
@@ -840,7 +840,7 @@ zebkit.package("draw", function(pkg, Class) {
             };
 
             this.outline = function(g,x,y,w,h,d) {
-                return typeof this.voutline !== 'undefined' && this.voutline.outline(g,x,y,w,h,d);
+                return this.voutline !== undefined && this.voutline.outline(g,x,y,w,h,d);
             };
         }
     ]);
@@ -955,23 +955,29 @@ zebkit.package("draw", function(pkg, Class) {
 
     /**
      * Abstract shape view.
-     * @param  {String}  [c]  a color of the shape
-     * @param  {Integer} [w]  a line size
+     * @param  {String}  [c]   a color of the shape
+     * @param  {String}  [fc]  a fill color of the shape
+     * @param  {Integer} [w]   a line size
      * @class zebkit.draw.Shape
      * @constructor
      * @extends zebkit.draw.View
      */
     pkg.Shape = Class(pkg.View, [
-        function (c, w) {
+        function (c, fc, w) {
             if (arguments.length > 0) {
                 this.color = c;
                 if (arguments.length > 1) {
-                    this.lineWidth = this.gap = w;
+                    this.fillColor = fc;
+                    if (arguments.length > 1) {
+                        this.lineWidth = this.gap = w;
+                    }
                 }
             }
         },
 
         function $prototype() {
+            this.gap = 1;
+
             /**
              * Shape color.
              * @attribute color
@@ -979,8 +985,6 @@ zebkit.package("draw", function(pkg, Class) {
              * @default  "gray"
              */
             this.color = "gray";
-
-            this.gap = 1;
 
             /**
              * Shape line width
@@ -990,6 +994,22 @@ zebkit.package("draw", function(pkg, Class) {
              */
             this.lineWidth = 1;
 
+            /**
+             * Fill color. null if the shape should not be filled with a color
+             * @attribute fillColor
+             * @type {String}
+             * @default null
+             */
+            this.fillColor = null;
+
+            //TODO: comment
+            this.width = this.height = 8;
+
+            //TODO: comment
+            this.stretched = true;
+
+
+            // TODO: comment
             this.setLineWidth = function(w) {
                 if (w !== this.lineWidth) {
                     this.lineWidth = this.gap = w;
@@ -998,13 +1018,39 @@ zebkit.package("draw", function(pkg, Class) {
             };
 
             this.paint = function(g,x,y,w,h,d) {
-                if (g.lineWidth !== this.lineWidth) {
-                    g.lineWidth = this.lineWidth;
+                if (this.stretched === false) {
+                    x = x + Math.floor((w - this.width) / 2);
+                    y = y + Math.floor((h - this.height) / 2);
+                    w = this.width;
+                    h = this.height;
                 }
 
                 this.outline(g,x,y,w,h,d);
-                g.setColor(this.color);
-                g.stroke();
+
+                if (this.fillColor !== null) {
+                    if (this.fillColor !== g.fillStyle) {
+                        g.fillStyle = this.fillColor;
+                    }
+                    g.fill();
+                }
+
+                if (this.color !== null) {
+                    if (g.lineWidth !== this.lineWidth) {
+                        g.lineWidth = this.lineWidth;
+                    }
+
+                    if (this.color !== g.strokeStyle) {
+                        g.strokeStyle = this.color;
+                    }
+                    g.stroke();
+                }
+            };
+
+            this.getPreferredSize = function() {
+                return {
+                    width  : this.width,
+                    height : this.height
+                };
             };
         }
     ]);

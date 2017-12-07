@@ -370,78 +370,30 @@ zebkit.package("draw", function(pkg, Class) {
     /**
      * Arrow view. Tye view can be use to render triangle arrow element to one of the
      * following direction: "top", "left", "bottom", "right".
-     * @param  {String} d an arrow view direction.
-     * @param  {String} col an arrow view color.
-     * @param  {Integer} w an arrow view width.
-     * @param  {Integer} h an arrow view height.
+     * @param  {String} direction an arrow view direction.
+     * @param  {String} color an arrow view line color.
+     * @param  {String} fillColor an arrow view filling.
      * @constructor
      * @class zebkit.draw.ArrowView
-     * @extends zebkit.draw.View
+     * @extends zebkit.draw.Shape
      */
-    pkg.ArrowView = Class(pkg.View, [
-        function (d, col, w, h) {
+    pkg.ArrowView = Class(pkg.Shape, [
+        function (direction, color, fillColor) {
             if (arguments.length > 0) {
-                this.direction = zebkit.util.validateValue(d, "left", "right", "bottom", "top");
+                this.direction = zebkit.util.validateValue(direction, "left", "right", "bottom", "top");
                 if (arguments.length > 1) {
-                    this.color = col;
+                    this.color = color;
                     if (arguments.length > 2) {
-                        this.width = this.height = w;
-                        if (arguments.length > 3) {
-                            this.height = h;
-                        }
+                        this.fillColor = fillColor;
                     }
                 }
             }
         },
 
         function $prototype() {
-            /**
-             *  Line width.
-             *  @attribute lineWidth
-             *  @type {Integer}
-             *  @default 1
-             */
-            this.lineWidth = 1;
-
-            /**
-             *  Indicates if the arrow has to be filled with the arrow line color.
-             *  @attribute fill
-             *  @type {Boolean}
-             *  @default true
-             */
-            this.fill = true;
-
-            /**
-             * Gap
-             * @attribute gap
-             * @type {Integer}
-             * @default 0
-             */
-            this.gap = 0;
-
-            /**
-             * Arrow color
-             * @attribute color
-             * @type {String}
-             * @default "black"
-             */
-            this.color = "black";
-
-            /**
-             * Arrow width.
-             * @attribute width
-             * @type {Integer}
-             * @default 8
-             */
-            this.width = 8;
-
-             /**
-              * Arrow height.
-              * @attribute height
-              * @type {Integer}
-              * @default 8
-              */
-            this.height = 8;
+            this.gap   = 0;
+            this.color = null;
+            this.fillColor = "black";
 
             /**
              * Arrow direction.
@@ -462,7 +414,6 @@ zebkit.package("draw", function(pkg, Class) {
                     h2 = Math.round(h / 2) - (h % 2 === 0 ? 0 : dt);
 
                 g.beginPath();
-
                 if ("bottom" === this.direction) {
                     g.moveTo(x, y + dt);
                     g.lineTo(x + w - 1, y + dt);
@@ -497,23 +448,6 @@ zebkit.package("draw", function(pkg, Class) {
             this.setGap = function(gap) {
                 this.gap = gap;
                 return this;
-            };
-
-            this.paint = function(g, x, y, w, h, d) {
-                this.outline(g, x, y, w, h, d);
-                g.setColor(this.color);
-                g.lineWidth = this.lineWidth;
-
-                if (this.fill === true) {
-                    g.fill();
-                } else {
-                    g.stroke();
-                }
-            };
-
-            this.getPreferredSize = function () {
-                return { width  : this.width  + this.gap * 2,
-                         height : this.height + this.gap * 2 };
             };
         }
     ]);
@@ -732,29 +666,33 @@ zebkit.package("draw", function(pkg, Class) {
     /**
      * Thumb element view.
      * @class  zebkit.draw.ThumbView
-     * @extends {zebkit.draw.View}
+     * @extends zebkit.draw.Shape
      * @constructor
      * @param  {String} [dir]  a direction
+     * @param  {String} [color] a shape line color
      * @param  {String} [fillColor] a fill color
+     * @param  {Integer} [lineWidth] a shape line width
      */
-    pkg.ThumbView = Class(pkg.View, [
-        function(dir, fillColor) {
+    pkg.ThumbView = Class(pkg.Shape, [
+        function(dir, color, fillColor, lineWidth) {
             if (arguments.length > 0) {
                 this.direction = zebkit.util.validateValue(dir, "vertical", "horizontal");
                 if (arguments.length > 1) {
-                    this.fillColor = fillColor;
+                    this.color = color;
+                    if (arguments.length > 2) {
+                        this.fillColor = fillColor;
+                        if (arguments.length > 3) {
+                            this.lineWidth = lineWidth;
+                        }
+                    }
                 }
             }
         },
 
         function $prototype() {
-            /**
-             * Fill color.
-             * @attribute fillColor
-             * @type {String}
-             * @default "#AAAAAA"
-             */
             this.fillColor = "#AAAAAA";
+
+            this.color = null;
 
             /**
              * Direction.
@@ -764,10 +702,10 @@ zebkit.package("draw", function(pkg, Class) {
              */
             this.direction = "vertical";
 
-            this.paint =  function(g,x,y,w,h,d) {
+            this.outline = function(g, x, y, w, h, d) {
                 g.beginPath();
 
-                var  r = 0;
+                var r = 0;
                 if (this.direction === "vertical") {
                     r = w / 2;
                     g.arc(x + r, y + r, r, Math.PI, 0, false);
@@ -781,8 +719,6 @@ zebkit.package("draw", function(pkg, Class) {
                     g.arc(x + w - r, y + h - r, r, 1.5 * Math.PI, 0.5 * Math.PI, false);
                     g.lineTo(x + r, y + h);
                 }
-                g.setColor(this.fillColor);
-                g.fill();
             };
         }
     ]);
@@ -982,7 +918,7 @@ zebkit.package("draw", function(pkg, Class) {
      * within the given interval.
      * @constructor
      * @class zebkit.draw.FunctionRender
-     * @extends {zebkit.draw.Render}
+     * @extends zebkit.draw.Render
      * @param  {Function} fn  a function to be rendered
      * @param  {Number}   x1  a minimal value of rendered function interval
      * @param  {Number}   x2  a maximal value of rendered function interval
@@ -1185,8 +1121,8 @@ zebkit.package("draw", function(pkg, Class) {
              * @readOnly
              * @protected
              */
-            this.render = (arguments.length === 0 || typeof render === 'undefined' ? new zebkit.draw.StringRender("")
-                                                                                   : render);
+            this.render = (arguments.length === 0 || render === undefined ? new zebkit.draw.StringRender("")
+                                                                          : render);
             zebkit.properties(this, this.clazz);
         },
 
@@ -1198,7 +1134,7 @@ zebkit.package("draw", function(pkg, Class) {
              * @chainable
              */
             this.setFont = function(f) {
-                if (typeof this.render.setFont !== 'undefined') {
+                if (this.render.setFont !== undefined) {
                     this.render.setFont(f);
                 }
                 return this;
@@ -1211,7 +1147,7 @@ zebkit.package("draw", function(pkg, Class) {
              * @chainable
              */
             this.setColor = function(c) {
-                if (typeof this.render.setColor !== 'undefined') {
+                if (this.render.setColor !== undefined) {
                     this.render.setColor(c);
                 }
                 return this;
@@ -1228,10 +1164,10 @@ zebkit.package("draw", function(pkg, Class) {
              */
             this.getView = function(target) {
                 var obj = arguments[arguments.length - 1];
-                if (obj !== null && typeof obj !== 'undefined') {
-                    if (typeof obj.toView !== 'undefined') {
+                if (obj !== null && obj !== undefined) {
+                    if (obj.toView !== undefined) {
                         return obj.toView();
-                    } else if (typeof obj.paint !== 'undefined') {
+                    } else if (obj.paint !== undefined) {
                         return obj;
                     } else {
                         this.render.setValue(obj.toString());

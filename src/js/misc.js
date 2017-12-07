@@ -24,11 +24,11 @@ var $exports     = {},
 
 if (parseInt.name !== "parseInt") {
     $FN = function(f) {  // IE stuff
-        if (typeof f.$methodName === 'undefined') { // test if name has been earlier detected
+        if (f.$methodName === undefined) { // test if name has been earlier detected
             var mt = f.toString().match(/^function\s+([^\s(]+)/);
                 f.$methodName = (mt === null) ? ''
-                                              : (typeof mt[1] === "undefined" ? ''
-                                                                              : mt[1]);
+                                              : (mt[1] === undefined ? ''
+                                                                     : mt[1]);
         }
         return f.$methodName;
     };
@@ -162,7 +162,7 @@ var ZFS = {
 
     load: function(pkg, files) {
         var catalog = this.catalogs[pkg];
-        if (typeof catalog === 'undefined') {
+        if (catalog === undefined) {
             catalog = {};
             this.catalogs[pkg] = catalog;
         }
@@ -183,7 +183,7 @@ var ZFS = {
             }
 
             p = new URI(uri).relative(pkg.$url);
-            if (p !== null && typeof files[p] !== 'undefined' && files[p] !== null) {
+            if (p !== null && files[p] !== undefined && files[p] !== null) {
                 return files[p];
             }
         }
@@ -223,7 +223,7 @@ function dumpError(e) {
                   date.getFullYear() + " " +
                   date.getHours() + ":" + date.getMinutes() + ":" + date.getSeconds();
         }
-        if (e === null || typeof e === 'undefined') {
+        if (e === null || e === undefined) {
             console.log("Unknown error");
         } else {
             console.log(msg + " : " + e);
@@ -252,7 +252,7 @@ function image(ph, fireErr) {
     if (isString(ph) && ph.length > marker.length) {
         // use "for" instead of "indexOf === 0"
         var i = 0;
-        for(; i < marker.length && marker[i] === ph[i]; i++);
+        for(; i < marker.length && marker[i] === ph[i]; i++) {}
 
         if (i < marker.length) {
             var file = ZFS.read(ph);
@@ -289,7 +289,7 @@ function image(ph, fireErr) {
  * @for zebkit
  */
 function isString(o)  {
-    return typeof o !== "undefined" && o !== null &&
+    return o !== undefined && o !== null &&
           (typeof o === "string" || o.constructor === String);
 }
 
@@ -301,7 +301,7 @@ function isString(o)  {
  * @for zebkit
  */
 function isNumber(o)  {
-    return typeof o !== "undefined" && o !== null &&
+    return o !== undefined && o !== null &&
           (typeof o === "number" || o.constructor === Number);
 }
 
@@ -313,7 +313,7 @@ function isNumber(o)  {
  * @for zebkit
  */
 function isBoolean(o) {
-    return typeof o !== "undefined" && o !== null &&
+    return o !== undefined && o !== null &&
           (typeof o === "boolean" || o.constructor === Boolean);
 }
 
@@ -325,11 +325,19 @@ function isBoolean(o) {
  * @for zebkit
  */
 function isAtomic(v) {
-    return v === null || typeof v === 'undefined' ||
+    return v === null || v === undefined ||
            (typeof v === "string"  || v.constructor === String)  ||
            (typeof v === "number"  || v.constructor === Number)  ||
            (typeof v === "boolean" || v.constructor === Boolean)  ;
 }
+
+
+Number.isInteger = Number.isInteger || function(value) {
+    return typeof value === "number" &&
+           isFinite(value) &&
+           Math.floor(value) === value;
+};
+
 
 /**
  * Get property value for the given object and the specified property path
@@ -347,14 +355,14 @@ function getPropertyValue(obj, path, useGetter) {
         useGetter = false;
     }
 
-    if (typeof path === 'undefined' || path.trim().length === 0) {
+    if (path === undefined || path.trim().length === 0) {
         throw new Error("Invalid field path: '" + path + "'");
     }
 
     var paths = path.trim().split('.');
     for(var i = 0; i < paths.length; i++) {
         var p = paths[i], m = null;
-        if (typeof obj !== 'undefined' && obj !== null &&
+        if (obj !== undefined && obj !== null &&
             ((useGetter === true && (m = getPropertyGetter(obj, p))) || obj.hasOwnProperty(p)))
         {
             if (useGetter === true && m !== null) {
@@ -368,7 +376,7 @@ function getPropertyValue(obj, path, useGetter) {
     }
 
     // detect object value factory
-    if (obj !== null && typeof obj !== 'undefined' && typeof obj.$new === 'function') {
+    if (obj !== null && obj !== undefined && typeof obj.$new === 'function') {
         return obj.$new();
     } else {
         return obj;
@@ -387,14 +395,17 @@ function getPropertyValue(obj, path, useGetter) {
  * @for zebkit
  */
 function getPropertySetter(obj, name) {
-    var pi = obj.constructor.$propertyInfo, m = null;
-    if (typeof pi !== 'undefined') {
-        if (typeof pi[name] === "undefined") {
+    var pi = obj.constructor.$propertyInfo,
+        m  = null;
+
+    if (pi !== undefined) {
+        if (pi[name] === undefined) {
             m = obj[ "set" + name[0].toUpperCase() + name.substring(1) ];
             pi[name] = (typeof m  === "function") ? m : null;
         }
         return pi[name];
     } else {
+        // if this is not a zebkit class
         m = obj[ "set" + name[0].toUpperCase() + name.substring(1) ];
         return (typeof m  === "function") ? m : null;
     }
@@ -423,39 +434,81 @@ function getPropertyGetter(obj, name) {
 /**
  * Populate the given target object with the properties set. The properties set
  * is a dictionary that keeps properties names and its corresponding values.
- * The method detects if a property setter method exits and call it to apply
- * the property value. Otherwise property is initialized as a field. Setter
- * method is a method that matches "set<PropertyName>" pattern.
+ * Applying of the properties to an object does the following:
+ *
+ *
+ *   - Detects if a property setter method exits and call it to apply
+ *     the property value. Otherwise property is initialized as a field.
+ *     Setter method is a method that matches "set<PropertyName>" pattern.
+ *
+ *   - Ignores properties whose names start from "$" character, equals "clazz"
+ *     and properties whose values are function.
+ *
+ *   - Remove properties from the target object for properties that start from "-"
+ *     character.
+ *
+ *   - Uses factory "$new" method to create a property value if the method can be
+ *     detected in the property value.
+ *
+ *   - Apply properties recursively for properties whose names end with '/'
+ *     character.
+ *
+ *
  * @param  {Object} target a target object
- * @param  {Object} p   a properties set
+ * @param  {Object} props  a properties set
  * @return {Object} an object with the populated properties set.
  * @method  properties
  * @for  zebkit
  */
-function properties(target, p) {
-    for(var k in p) {
+function properties(target, props) {
+    for(var k in props) {
         // skip private properties( properties that start from "$")
-        if (k !== "clazz" && k[0] !== '$' && p.hasOwnProperty(k) && typeof p[k] !== "undefined" && typeof p[k] !== 'function') {
+        if (k !== "clazz" && k[0] !== '$' && props.hasOwnProperty(k) && props[k] !== undefined && typeof props[k] !== 'function') {
             if (k[0] === '-') {
                 delete target[k.substring(1)];
             } else {
-                var v = p[k],
-                    m = getPropertySetter(target, k);
+                var pv        = props[k],
+                    recursive = k[k.length - 1] === '/',
+                    tv        = null;
 
                 // value factory detected
-                if (v !== null && typeof v.$new !== 'undefined') {
-                    v = v.$new();
+                if (pv !== null && pv.$new !== undefined) {
+                    pv = pv.$new();
                 }
 
-                if (m === null) {
-                    target[k] = v;  // setter doesn't exist, setup it as a field
+                if (recursive === true) {
+                    k = k.substring(0, k.length - 1);
+                    tv = target[k];
+
+                    // it is expected target value can be traversed recursively
+                    if (pv !== null && (tv === null || tv === undefined || !(tv instanceof Object))) {
+                        throw new Error("Target value is null, undefined or not an object. '" +
+                                         k + "' property cannot be applied as recursive");
+                    }
                 } else {
-                    // property setter is detected, call setter to
-                    // set the property value
-                    if (Array.isArray(v)) {
-                        m.apply(target, v);
+                    tv = target[k];
+                }
+
+                if (recursive === true) {
+                    if (pv === null) { // null value can be used to flush target value
+                        target[k] = pv;
+                    } else if (tv.properties !== undefined) {
+                        tv.properties(pv); // target value itself has properties method
                     } else {
-                        m.call(target, v);
+                        properties(tv, pv);
+                    }
+                } else {
+                    var m = getPropertySetter(target, k);
+                    if (m === null) {
+                        target[k] = pv;  // setter doesn't exist, setup it as a field
+                    } else {
+                        // property setter is detected, call setter to
+                        // set the property value
+                        if (Array.isArray(pv)) {
+                            m.apply(target, pv);
+                        } else {
+                            m.call(target, pv);
+                        }
                     }
                 }
             }
@@ -536,10 +589,10 @@ function URI(uri) {
         }
 
         // fetch scheme
-        if (typeof m[1] !== 'undefined') {
+        if (m[1] !== undefined) {
             this.scheme = m[2].toLowerCase();
 
-            if (typeof m[3] === 'undefined') {
+            if (m[3] === undefined) {
                 if (this.scheme !== "file") {
                     throw new Error("Invalid host name : '" + uri + "'");
                 }
@@ -547,19 +600,19 @@ function URI(uri) {
                 this.host = m[3];
             }
 
-            if (typeof m[4] !== 'undefined') {
+            if (m[4] !== undefined) {
                 this.port = parseInt(m[4].substring(1), 10);
             }
         }
 
         // fetch path
-        if (typeof m[6] !== 'undefined') {
+        if (m[6] !== undefined) {
             this.path = m[6];
-        } else if (typeof m[1] !== 'undefined') {
+        } else if (m[1] !== undefined) {
             this.path = "/";
         }
 
-        if (typeof m[7] !== 'undefined' && m[7].length > 1) {
+        if (m[7] !== undefined && m[7].length > 1) {
             this.qs = m[7].substring(1).trim();
         }
     }

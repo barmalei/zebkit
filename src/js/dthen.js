@@ -4,32 +4,32 @@
  * the class instance. The idea of the runner implementation is making the
  * code more readable and plain nevertheless it includes asynchronous parts:
  * @example
-
-      var r = new zebkit.DoIt();
-
-      // step 1
-      r.then(function() {
-          // call three asynchronous HTTP GET requests to read three files
-          // pass join to every async. method to be notified when the async.
-          // part is completed
-          asyncHttpCall("http://test.com/a.txt", this.join());
-          asyncHttpCall("http://test.com/b.txt", this.join());
-          asyncHttpCall("http://test.com/c.txt", this.join());
-      })
-      .  // step 2
-      then(function(r1, r2, r3) {
-          // handle completely read on previous step files
-          r1.responseText  // "a.txt" file content
-          r2.responseText  // "b.txt" file content
-          r3.responseText  // "c.txt" file content
-      })
-      . // handle error
-      catch(function(e) {
-          // called when an exception has occurred
-          ...
-      });
-
-
+ *
+ *     var r = new zebkit.DoIt();
+ *
+ *     // step 1
+ *     r.then(function() {
+ *         // call three asynchronous HTTP GET requests to read three files
+ *         // pass join to every async. method to be notified when the async.
+ *         // part is completed
+ *         asyncHttpCall("http://test.com/a.txt", this.join());
+ *         asyncHttpCall("http://test.com/b.txt", this.join());
+ *         asyncHttpCall("http://test.com/c.txt", this.join());
+ *     })
+ *     .  // step 2
+ *     then(function(r1, r2, r3) {
+ *         // handle completely read on previous step files
+ *         r1.responseText  // "a.txt" file content
+ *         r2.responseText  // "b.txt" file content
+ *         r3.responseText  // "c.txt" file content
+ *     })
+ *     . // handle error
+ *     catch(function(e) {
+ *         // called when an exception has occurred
+ *         ...
+ *     });
+ *
+ *
  * @class zebkit.DoIt
  * @param {Boolean} [ignore] flag to rule error ignorance
  * @constructor
@@ -38,7 +38,7 @@ function DoIt(body, ignore) {
     this.recover();
 
     if (arguments.length === 1) {
-        if (body !== "undefined" && body !== null && (typeof body === "boolean" || body.constructor === Boolean)) {
+        if (body !== undefined && body !== null && (typeof body === "boolean" || body.constructor === Boolean)) {
             this.$ignoreError = body;
             body = null;
         } else {
@@ -132,7 +132,7 @@ DoIt.prototype = {
                 var pc = this.$taskCounter, args = null, r;
 
                 if (this.$error === null) {
-                    if (typeof this.$results[level] !== 'undefined') {
+                    if (this.$results[level] !== undefined) {
                         args = this.$results[level];
                     }
 
@@ -154,7 +154,7 @@ DoIt.prototype = {
 
                     // this.$busy === 0 means we have called synchronous task
                     // and make sure the task has returned a result
-                    if (this.$busy === 0 && this.$error === null && typeof r !== "undefined") {
+                    if (this.$busy === 0 && this.$error === null && r !== undefined) {
                         this.$results[level] = [ r ];
                     }
                 }
@@ -203,7 +203,7 @@ DoIt.prototype = {
             if (this.$error === null) {
                 if (level === 0 && this.$busy === 0) {
                     if (this.$results[level] !== null &&
-                        typeof this.$results[level] !== 'undefined' &&
+                        this.$results[level] !== undefined &&
                         this.$results[level].length > 0)
                     {
                         task.apply(this, this.$results[level]);
@@ -352,7 +352,7 @@ DoIt.prototype = {
                 index = this.$busy++;
 
             return function() {
-                if ($this.$results[level] === null || typeof $this.$results[level] === 'undefined') {
+                if ($this.$results[level] === null || $this.$results[level] === undefined) {
                     $this.$results[level] = [];
                 }
 
@@ -485,8 +485,8 @@ DoIt.prototype = {
     },
 
     dumpError: function(e) {
-        if (typeof console !== "undefined" && typeof console.log !== "undefined") {
-            if (e === null || typeof e === 'undefined') {
+        if (typeof console !== "undefined" && console.log !== undefined) {
+            if (e === null || e === undefined) {
                 console.log("Unknown error");
             } else {
                 console.log((e.stack ? e.stack : e));

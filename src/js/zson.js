@@ -207,7 +207,7 @@ var Zson = Class([
         this.usePropertySetters = true;
 
         /**
-         * Cache busting
+         * Cache busting flag.
          * @attribute cacheBusting
          * @type {Boolean}
          * @default false
@@ -217,11 +217,18 @@ var Zson = Class([
         /**
          * Internal variables set
          * @attribute $variables
+         * @protected
          * @type {Object}
          */
         this.$variables = null;
 
-
+        /**
+         * Base URI to be used to build paths to external resources. The path is
+         * used for references that occur in zson.
+         * @type {String}
+         * @attribute baseUri
+         * @default null
+         */
         this.baseUri = null;
 
         /**
@@ -238,7 +245,7 @@ var Zson = Class([
          * @method  get
          */
         this.get = function(key) {
-            if (key === null || typeof key === 'undefined') {
+            if (key === null || key === undefined) {
                 throw new Error("Null key");
             }
 
@@ -262,7 +269,8 @@ var Zson = Class([
         };
 
         /**
-         * Call method.
+         * Call the given method defined with the Zson class instance and
+         * pass the given arguments to the method.
          * @param  {String} name a method name
          * @param  {Object} d arguments
          * @return {Object} a method execution result
@@ -333,7 +341,7 @@ var Zson = Class([
         this.$resolveRef = function(target, names) {
             var fn = function(ref, rn) {
                 rn.then(function(target) {
-                    if (target !== null && typeof target !== 'undefined' && target.hasOwnProperty(ref) === true) {
+                    if (target !== null && target !== undefined && target.hasOwnProperty(ref) === true) {
                         var v = target[ref];
                         if (v instanceof DoIt) {
                             var jn = this.join();
@@ -484,7 +492,7 @@ var Zson = Class([
                 qs = uri.qs;
             }
 
-            if (qs !== null || typeof qs === 'undefined') {
+            if (qs !== null || qs === undefined) {
                 qs = URI.parseQS(qs);
                 for(var k in qs) {
                     if (vars === null) {
@@ -577,7 +585,7 @@ var Zson = Class([
                     var target = targets[i];
                     if (target !== null) {
                         var value = this.$resolveRef(target, names);
-                        if (typeof value !== 'undefined') {
+                        if (value !== undefined) {
                             return value;
                         }
                     }
@@ -599,7 +607,7 @@ var Zson = Class([
          * @method buildValue
          */
         this.buildValue = function(d) {
-            if (typeof d === 'undefined' || d === null || d instanceof DoIt ||
+            if (d === undefined || d === null || d instanceof DoIt ||
                 (typeof d === "number"   || d.constructor === Number)       ||
                 (typeof d === "boolean"  || d.constructor === Boolean)        )
             {
@@ -682,6 +690,20 @@ var Zson = Class([
             });
         };
 
+        /**
+         * Merge values of the given destination object with the values of
+         * the specified  source object.
+         * @param  {Object} dest  a destination object
+         * @param  {Object} src   a source object
+         * @param  {Boolean} [recursively] flag that indicates if the complex
+         * properties of destination object has to be traversing recursively.
+         * By default the flag is true. The destination property value is
+         * considered not traversable if its class defines "mergeable" property
+         * that is set top true.
+         * @return {Object} a merged destination object.
+         * @protected
+         * @method merge
+         */
         this.merge = function(dest, src, recursively) {
             if (arguments.length < 3) {
                 recursively = true;
@@ -702,11 +724,11 @@ var Zson = Class([
 
                     if (isAtomic(dv) || Array.isArray(dv) ||
                         isAtomic(sv) || Array.isArray(sv) ||
-                        typeof sv.clazz !== 'undefined'            )
+                        sv.clazz !== undefined              )
                     {
                         this.$assignValue(dest, k, sv);
                     } else if (recursively === true) {
-                        if (dv !== null && typeof dv !== 'undefined' && typeof dv.clazz !== 'undefined' && dv.clazz.mergeable === false) {
+                        if (dv !== null && dv !== undefined && dv.clazz !== undefined && dv.clazz.mergeable === false) {
                             this.$assignValue(dest, k, sv);
                         } else {
                             this.merge(dv, sv);
@@ -722,14 +744,14 @@ var Zson = Class([
                 var $this = this;
                 this.$runner.then(src.then(function(src) {
                     for (var k in src) {
-                        if (src.hasOwnProperty(k) && (typeof dest[k] === 'undefined' || dest[k] === null)) {
+                        if (src.hasOwnProperty(k) && (dest[k] === undefined || dest[k] === null)) {
                             $this.$assignValue(dest, k, src[k]);
                         }
                     }
                 }));
             } else {
                 for (var k in src) {
-                    if (src.hasOwnProperty(k) && (typeof dest[k] === 'undefined' || dest[k] === null)) {
+                    if (src.hasOwnProperty(k) && (dest[k] === undefined || dest[k] === null)) {
                         this.$assignValue(dest, k, src[k]);
                     }
                 }
@@ -752,8 +774,8 @@ var Zson = Class([
 
         /**
          * Adds class aliases
-         * @param {Object} aliases dictionary where key is a class alias that can be referenced from
-         * JSON and the value is class itself (constructor)
+         * @param {Object} aliases dictionary where key is a class alias that can be referenced
+         * from JSON and the value is class itself (constructor)
          * @method  addClassAliases
          */
         this.addClassAliases = function(aliases) {
@@ -763,7 +785,7 @@ var Zson = Class([
         };
 
         this.expr = function(expr) {
-            if (expr.length > 200) {
+            if (expr.length > 300) {
                 throw new Error("Out of evaluated script limit");
             }
 
@@ -792,7 +814,7 @@ var Zson = Class([
          *     });
          */
         this.then = function(json, fn) {
-            if (json === null || typeof json === 'undefined' || (isString(json) && json.trim().length === 0)) {
+            if (json === null || json === undefined || (isString(json) && json.trim().length === 0)) {
                 throw new Error("Null content");
             }
 

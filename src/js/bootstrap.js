@@ -136,7 +136,7 @@ if ($isInBrowser) {
             }
 
             var cacheBusting = zebkit.config("zson.cacheBusting");
-            if (typeof cacheBusting !== 'undefined' && cacheBusting !== null) {
+            if (cacheBusting !== undefined && cacheBusting !== null) {
                 Zson.prototype.cacheBusting = cacheBusting;
             }
         }

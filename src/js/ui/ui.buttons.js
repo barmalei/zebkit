@@ -5,7 +5,7 @@ zebkit.package("ui", function(pkg, Class) {
      * @class zebkit.ui.ButtonRepeatMix
      * @interface zebkit.ui.ButtonRepeatMix
      */
-    pkg.ButtonRepeatMix = zebkit.Interface([
+    pkg.ButtonRepeatMix = zebkit.Interface([  // TODO: rename
         function $prototype() {
             /**
              * Indicate if the button should
@@ -36,6 +36,12 @@ zebkit.package("ui", function(pkg, Class) {
              */
             this.startIn = 400;
 
+            /**
+             * Task that has been run to support repeatable "fired" event.
+             * @attribute $repeatTask
+             * @type {zebkit.util.Task}
+             * @private
+             */
             this.$repeatTask = null;
 
             /**
@@ -67,8 +73,8 @@ zebkit.package("ui", function(pkg, Class) {
             };
 
             this.$fire = function() {
-                this.fire();
-                if (typeof this.fired !== 'undefined') {
+                this.fire("fired", [ this ]);
+                if (this.fired !== undefined) {
                     this.fired();
                 }
             };
@@ -105,168 +111,19 @@ zebkit.package("ui", function(pkg, Class) {
     ]);
 
     /**
-     * Arrow button component. The component use arrow views as its icon.
-     * @class zebkit.ui.ArrowButton
-     * @constructor
-     * @param  {String} direction an arrow icon direction. Use "left", "right", "top", "bottom" as
-     * the parameter value.
-     * @extends zebkit.ui.EvStatePan
-     * @uses zebkit.ui.ButtonRepeatMix
-     */
-
-     /**
-      * Fired when a button has been pressed
-
-             var b = new zebkit.ui.ArrowButton("left");
-             b.on(function (src) {
-                 ...
-             });
-
-      * Button can be adjusted in respect how it generates the pressed event. Event can be
-      * triggered by pressed or clicked even. Also event can be generated periodically if
-      * the button is kept in pressed state.
-      * @event fired
-      * @param {zebkit.ui.ArrowButton} src a button that has been pressed
-      */
-    pkg.ArrowButton = Class(pkg.EvStatePan, pkg.ButtonRepeatMix, [
-        function(direction) {
-            this.cursorType = pkg.Cursor.HAND;
-
-            if (arguments.length > 0) {
-                this.direction = zebkit.util.validateValue(direction, "left", "right", "top", "bottom");
-            }
-
-            var clz = typeof this.clazz.$colors !== 'undefined' ? this.clazz : pkg.ArrowButton;
-            this.setView({
-                "out"          : new clz.ArrowView(this.direction, clz.$colors.out),
-                "over"         : new clz.ArrowView(this.direction, clz.$colors.over),
-                "pressed.over" : new clz.ArrowView(this.direction, clz.$colors["pressed.over"]),
-                "disabled"     : new clz.ArrowView(this.direction, clz.$colors.disabled)
-            });
-
-            this.$super();
-            this.syncState(this.state, this.state);
-        },
-
-        function $clazz() {
-            this.Listeners = zebkit.Listeners;
-
-            this.ArrowView = Class(zebkit.draw.ArrowView, []);
-
-            this.$colors = {
-                "out"          : "red",
-                "over"         : "red",
-                "pressed.over" : "black",
-                "disabled"     : "lightGray"
-            };
-        },
-
-        function $prototype() {
-            /**
-             * Arrow icon view direction
-             * @attribute direction
-             * @type {String}
-             * @default "left"
-             * @readOnly
-             */
-            this.direction = "left";
-
-            /**
-             * Set arrow view orientation.
-             * @param {String} d an orientation of triangle arrow
-             * @method setArrowDirection
-             * @chainable
-             */
-            this.setArrowDirection = function(d) {
-                this.iterateArrowViews(function(k, v) {
-                    if (v !== null) {
-                        v.direction = d;
-                    }
-                });
-                this.repaint();
-                return this;
-            };
-
-            /**
-             * Set arrow view size.
-             * @param {Integer} w an arrow view width
-             * @param {Integer} h an arrow view height
-             * @method setArrowSize
-             * @chainable
-             */
-            this.setArrowSize = function(w, h) {
-                if (arguments.length < 2) {
-                    h = w;
-                }
-                this.iterateArrowViews(function(k, v) {
-                    if (v !== null) {
-                        v.width  = w;
-                        v.height = h;
-                    }
-                });
-                this.vrp();
-                return this;
-            };
-
-            /**
-             * Set arrow views states colors.
-             * @param {String} pressedColor a pressed state color
-             * @param {String} overColor an over state color
-             * @param {String} outColor an out state color
-             * @method setArrowColors
-             * @chainable
-             */
-            this.setArrowColors = function(pressedColor, overColor, outColor) {
-                var views = this.view.views;
-                if (views.out !== null && typeof views.out !== 'undefined') {
-                    views.out.color = outColor;
-                }
-
-                if (views.over.color !== null && typeof views.over !== 'undefined') {
-                    views.over.color = overColor;
-                }
-
-                if (views["pressed.over"] !== null && typeof views["pressed.over"] !== 'undefined') {
-                    views["pressed.over"].color = pressedColor;
-                }
-
-                this.repaint();
-                return this;
-            };
-
-            /**
-             * Iterate button arrows views.
-             * @param  {Function} callback a callback that is called for every found arrow view.
-             * The method gets the view id and view itself as its arguments.
-             * @chainable
-             * @method iterateArrowViews
-             */
-            this.iterateArrowViews = function(callback) {
-                var views = this.view.views;
-                for(var k in views) {
-                    if (views.hasOwnProperty(k)) {
-                        callback.call(this, k, views[k]);
-                    }
-                }
-                return this;
-            };
-        }
-    ]);
-
-    /**
      *  Button UI component. Button is composite component whose look and feel can
      *  be easily customized:
-
-            // create image button
-            var button = new zebkit.ui.Button(new zebkit.ui.ImagePan("icon1.gif"));
-
-            // create image + caption button
-            var button = new zebkit.ui.Button(new zebkit.ui.ImageLabel("Caption", "icon1.gif"));
-
-            // create multilines caption button
-            var button = new zebkit.ui.Button("Line1\nLine2");
-
-
+     *
+     *       // create image button
+     *       var button = new zebkit.ui.Button(new zebkit.ui.ImagePan("icon1.gif"));
+     *
+     *       // create image + caption button
+     *       var button = new zebkit.ui.Button(new zebkit.ui.ImageLabel("Caption", "icon1.gif"));
+     *
+     *       // create multilines caption button
+     *       var button = new zebkit.ui.Button("Line1\nLine2");
+     *
+     *
      *  @class  zebkit.ui.Button
      *  @constructor
      *  @param {String|zebkit.ui.Panel|zebkit.draw.View} [t] a button label.
@@ -303,8 +160,6 @@ zebkit.package("ui", function(pkg, Class) {
         },
 
         function $clazz() {
-            this.Listeners = zebkit.Listeners;
-
             this.Label = Class(pkg.Label, []);
 
             this.ViewPan = Class(pkg.ViewPan, [
@@ -315,7 +170,7 @@ zebkit.package("ui", function(pkg, Class) {
 
                 function $prototype() {
                     this.setState = function(id) {
-                        if (this.view !== null && typeof this.view.activate !== 'undefined') {
+                        if (this.view !== null && this.view.activate !== undefined) {
                             this.activate(id);
                         }
                     };
@@ -334,7 +189,7 @@ zebkit.package("ui", function(pkg, Class) {
              */
             this.canHaveFocus = true;
         }
-    ]);
+    ]).events("fired");
 
     /**
      * Group class to help managing group of element where only one can be on.
@@ -346,20 +201,17 @@ zebkit.package("ui", function(pkg, Class) {
      *     var ch3 = new zebkit.ui.Checkbox("Test 3", gr);
      *
      * @class  zebkit.ui.Group
+     * @uses  zebkit.EventProducer
      * @param {Boolean} [un] indicates if group can have no one item selected.
      * @constructor
      */
-    pkg.Group = Class(zebkit.EventProducer, [
+    pkg.Group = Class([
         function(un) {
             this.selected = null;
 
             if (arguments.length > 0) {
                 this.allowNoneSelected = un;
             }
-        },
-
-        function $clazz() {
-            this.Listeners = zebkit.ListenersClass("selected");
         },
 
         function $prototype() {
@@ -450,7 +302,7 @@ zebkit.package("ui", function(pkg, Class) {
                 this.fire("selected", [this, this.selected, old]);
             };
         }
-    ]);
+    ]).events("selected");
 
     /**
      * Check-box UI component. The component is a container that consists from two other UI components:
@@ -535,8 +387,6 @@ zebkit.package("ui", function(pkg, Class) {
         },
 
         function $clazz() {
-            this.Listeners = zebkit.Listeners;
-
             /**
              * The box UI component class that is used by default with the check box component.
              * @constructor
@@ -579,11 +429,11 @@ zebkit.package("ui", function(pkg, Class) {
                 if (this.value !== v && (this.$group === null || this.$group.$allowValueUpdate(this))) {
                     this.value = v;
                     this.stateUpdated(this.state, this.state);
-                    if (typeof this.switched !== 'undefined') {
+                    if (this.switched !== undefined) {
                         this.switched(this);
                     }
 
-                    this.fire();
+                    this.fire("fired", this);
                 }
                 return this;
             };
@@ -687,7 +537,7 @@ zebkit.package("ui", function(pkg, Class) {
             }
             this.$super(e);
         }
-    ]);
+    ]).events("fired");
 
     /**
      * Radio-box UI component class. This class is extension of "zebkit.ui.Checkbox" class that sets group
@@ -712,7 +562,7 @@ zebkit.package("ui", function(pkg, Class) {
                 this.$super();
             }
 
-            if (typeof group !== 'undefined') {
+            if (group !== undefined) {
                 this.setGroup(group);
             }
         }
@@ -813,7 +663,7 @@ zebkit.package("ui", function(pkg, Class) {
             if (this.view !== null &&
                 this.view.color !== this.colors[k] &&
                 this.colors[k]  !== null &&
-                typeof this.colors[k] !== 'undefined')
+                this.colors[k]  !== undefined)
             {
                 this.view.setColor(this.colors[k]);
                 b = true;
@@ -868,8 +718,6 @@ zebkit.package("ui", function(pkg, Class) {
      */
     pkg.Toolbar = Class(pkg.Panel, [
         function $clazz() {
-            this.Listeners = zebkit.Listeners;
-
             this.ToolPan = Class(pkg.EvStatePan, [
                 function(c) {
                     this.$super(new zebkit.layout.BorderLayout());
@@ -883,7 +731,7 @@ zebkit.package("ui", function(pkg, Class) {
                 function stateUpdated(o, n) {
                     this.$super(o, n);
                     if (o === "pressed.over" && n === "over") {
-                        this.parent.fire("fired");
+                        this.parent.fire("fired", [ this.parent, this.getContentComponent() ]);
                     }
                 }
             ]);
@@ -984,6 +832,114 @@ zebkit.package("ui", function(pkg, Class) {
                 d = new this.clazz.Combo(d);
             }
             return this.$super(i, id, new this.clazz.ToolPan(d));
+        }
+    ]).events("fired");
+
+    /**
+     * Arrow button component.
+     * @class zebkit.ui.ArrowButton
+     * @constructor
+     * @param  {String} direction an arrow icon direction. Use "left", "right", "top", "bottom" as
+     * the parameter value.
+     * @extends zebkit.ui.Button
+     */
+    pkg.ArrowButton = Class(pkg.Button, [
+        function(direction) {
+            this.view = new zebkit.draw.ArrowView();
+            this.$super();
+            this.syncState();
+        },
+
+        function $prototype() {
+            this.cursorType = pkg.Cursor.HAND;
+
+            this.canHaveFocus = false;
+
+            this.statesToProps = null;
+
+            /**
+             * Set arrow direction. Use one of the following values: "top",
+             * "left", "right" or "bottom" as the argument value.
+             * @param {String} d an arrow direction
+             * @method setDirection
+             * @chainable
+             */
+            this.setDirection = function(d) {
+                if (this.view.direction !== d) {
+                    this.view.direction = d;
+                    this.repaint();
+                }
+                return this;
+            };
+
+            this.setStretchArrow = function(b) {
+                if (this.view.stretched !== b) {
+                    this.view.stretched = b;
+                    this.repaint();
+                }
+                return this;
+            };
+
+            this.setArrowSize = function(w, h) {
+                if (arguments.length === 1) {
+                    h = w;
+                }
+
+                if (this.view.width !== w || this.view.height !== h) {
+                    this.view.width  = w;
+                    this.view.height = h;
+                    this.vrp();
+                }
+                return this;
+            };
+
+            this.setFillColor = function(c) {
+                if (this.view.fillColor !== c) {
+                    this.view.fillColor = c;
+                    this.repaint();
+                }
+                return this;
+            };
+
+            this.setColor = function(c) {
+                if (this.view.color !== c) {
+                    this.view.color = c;
+                    this.repaint();
+                }
+                return this;
+            };
+
+            this.setLineSize = function(s) {
+                if (this.view.lineSize !== s) {
+                    this.view.lineSize = s;
+                    this.repaint();
+                }
+                return this;
+            };
+
+            /**
+             * Set properties set for the states
+             * @param {Object} s a states
+             * @method setStatesToProps
+             * @chainable
+             */
+            this.setStatesToProps = function(s) {
+                this.statesToProps = zebkit.clone(s);
+                this.syncState();
+                this.vrp();
+                return this;
+            };
+        },
+
+        function stateUpdated(o, n) {
+            this.$super(o, n);
+            if (this.statesToProps    !== undefined &&
+                this.statesToProps    !== null &&
+                this.statesToProps[n] !== undefined &&
+                this.statesToProps[n] !== null         )
+            {
+                zebkit.properties(this, this.statesToProps[n], true);
+            }
         }
     ]);
 });

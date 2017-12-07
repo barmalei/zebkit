@@ -85,20 +85,20 @@ zebkit.package("ui", function(pkg, Class) {
                 if (id !== null) {
                     for(var i = 0; i < this.kids.length; i++) {
                         var kid = this.kids[i];
-                        if (typeof kid.setState !== 'undefined') {
+                        if (kid.setState !== undefined) {
                             kid.setState(id);
                         }
                     }
 
-                    if (this.border !== null && typeof this.border.activate !== 'undefined') {
+                    if (this.border !== null && this.border.activate !== undefined) {
                         b = this.border.activate(id, this) === true || b;
                     }
 
-                    if (this.view !== null && typeof this.view.activate !== 'undefined') {
+                    if (this.view !== null && this.view.activate !== undefined) {
                         b = this.view.activate(id, this) === true || b;
                     }
 
-                    if (this.bg !== null && typeof this.bg.activate !== 'undefined') {
+                    if (this.bg !== null && this.bg.activate !== undefined) {
                         b = this.bg.activate(id, this) === true || b;
                     }
 
@@ -118,12 +118,13 @@ zebkit.package("ui", function(pkg, Class) {
             };
         },
 
-        function setView(v){
-            if (v != this.view){
+        function setView(v) {
+            if (v !== this.view) {
                 this.$super(v);
+
                 // check if the method called after constructor execution
                 // otherwise sync is not possible
-                if (typeof this.kids !== 'undefined') {
+                if (this.kids !== undefined) {
                     this.syncState(this.state, this.state);
                 }
             }
@@ -131,7 +132,7 @@ zebkit.package("ui", function(pkg, Class) {
         },
 
         function setBorder(v) {
-            if (v != this.border){
+            if (v !== this.border) {
                 this.$super(v);
                 this.syncState(this.state, this.state);
             }
@@ -139,7 +140,7 @@ zebkit.package("ui", function(pkg, Class) {
         },
 
         function setBackground(v){
-            if (v != this.bg){
+            if (v !== this.bg){
                 this.$super(v);
                 this.syncState(this.state, this.state);
             }
@@ -157,8 +158,9 @@ zebkit.package("ui", function(pkg, Class) {
     /**
      * Input events state panel.
      * @class zebkit.ui.EvStatePan
-     * @extends {zebkit.ui.StatePan}
+     * @extends zebkit.ui.StatePan
      * @uses zebkit.ui.event.InputEventState
+     * @uses zebkit.ui.StatePan
      * @constructor
      */
     pkg.EvStatePan = Class(pkg.StatePan, pkg.event.InputEventState, []);
@@ -259,8 +261,9 @@ zebkit.package("ui", function(pkg, Class) {
             };
 
             /**
-             * Set the specified children component to be used as focus marker view anchor component.
-             * Anchor component is a component over that the focus marker view is painted.
+             * Set the specified children component to be used as focus marker view anchor
+             * component. Anchor component is a component over that the focus marker view
+             * is painted.
              * @param  {zebkit.ui.Panel} c an anchor component
              * @method setFocusAnchorComponent
              * @chainable

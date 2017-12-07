@@ -3511,6 +3511,47 @@ if (typeof(zebkit) === "undefined") {
                 zebkit.getPropertySetter(dd, "abc");
             }
             console.log("Property setter result :  " + (new Date().getTime() - d));
+        },
+
+        function test_properties() {
+            var cc     = 0,
+                target = { a: 10, b: 20, c: 700, setC : function(c) { this.c = c }, e: 333, complex: {
+                    setA: function(a) { this.a = a; },
+                    b   : "",
+                    c   : null
+                }},
+
+                props  = { a: 70,
+                   b: 90,
+                   c: 400,
+                   d : { "$new": function() { return ++cc; } },
+                   "-e":null,
+                   "complex/" : {
+                        a: 342,
+                        b: "abc",
+                        c: 10
+                   }
+                };
+
+            var r = zebkit.properties(target, props);
+            assert(r.a, 70, "test_properties 1");
+            assert(r.b, 90, "test_properties 2");
+            assert(r.c, 400, "test_properties 3");
+            assert(r.d, 1, "test_properties 4");
+            assert(r.e, undefined, "test_properties 41");
+            assert(r.complex.a, 342, "test_properties 42");
+            assert(r.complex.b, "abc", "test_properties 43");
+            assert(r.complex.c, 10, "test_properties 44");
+            assert(typeof r.setC === 'function', true, "test_properties 5");
+
+
+            var r = zebkit.properties(target, props);
+            assert(r.a, 70, "test_properties 6");
+            assert(r.b, 90, "test_properties 7");
+            assert(r.c, 400, "test_properties 8");
+            assert(r.d, 2, "test_properties 9");
+            assert(r.e, undefined, "test_properties 91");
+            assert(typeof r.setC === 'function', true, "test_properties 10");
         }
     );
 })();

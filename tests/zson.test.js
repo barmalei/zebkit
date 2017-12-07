@@ -976,47 +976,6 @@ zebkit.runTests("util objects bag",
         }).catch();
     },
 
-    function test_test() {
-        A = Class([
-            function setA(a) {
-                this.a = a;
-            }
-        ])
-
-        B = Class([
-            function setM(m) {
-                this.m = m;
-            }
-        ])
-
-        var z1 = `{
-                "variables" : {
-                    "id" : "MyID"
-                }
-            }
-        `;
-
-        var z2 = `{
-                "@A": [],
-                "id" : "%{id}"
-            }
-        `;
-
-        // Zson.then(z1, function(zson) {
-        //     var zs = new Zson(zson.root);
-        //     zs.usePropertySetters = false;
-        //     zs.then(z2, function(zson_) {
-        //         zson.root; // get result here
-        //     }).catch();
-        // }).catch();
-
-        var zs = new Zson();
-//        zs.$variables = { id2 : 333333 };
-        zs.then("http://localhost:8090/tests/defs.json?test=312323", function(zson) {
-
-        }).catch();
-
-    },
 
     function test_prom() {
         var rr = null, p = new Promise(function(resolve, reject) {

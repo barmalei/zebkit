@@ -78,8 +78,6 @@ zebkit.runTests("Util",
         }, Error);
 
         zebkit.findInTree(treeLikeRoot, "//Root/a/*", function() {}, function() {});
-
-        zebkit.findInTree(treeLikeRoot, "//*[@id='dsds/sds']", function() {}, function() {});
     },
 
     function test_treelookup() {
@@ -104,7 +102,6 @@ zebkit.runTests("Util",
                 res.push(e);
                 return false;
             };
-
 
         res = [];
         zebkit.findInTree(treeLikeRoot, ".//*", collect);

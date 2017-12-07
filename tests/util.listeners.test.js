@@ -897,7 +897,6 @@ zebkit.runTests("Util Listeners",
             r.fire("fired2",  [ 1, 2 ]);
         }, Error);
 
-
         assert(cnt, 3);
         r.off(obj);
         cnt = 0;
@@ -915,10 +914,10 @@ zebkit.runTests("Util Listeners",
 
         cnt = 0;
         r.on("fired", function() { cnt+=5; });
-        r.fire();
+        r.fire("fired", r);
         assert(cnt, 5);
         r.off("fired");
-        r.fire();
+        r.fire("fired", r);
         assert(cnt, 5);
     },
 
@@ -933,15 +932,33 @@ zebkit.runTests("Util Listeners",
             //c1.event3();
             c2.fired();
         }
-
         console.log(">>> " + (new Date().getTime() - t1));
 
         var t2 = new Date().getTime();
-       // for(var i=0; i < 10000000; i++) {
-            //c1.event1();
-        //}
-        //console.log(">>> " + (new Date().getTime() - t));
+        for(var i=0; i < 10000000; i++) {
+            c1.event1();
+        }
+        console.log(">>> " + (new Date().getTime() - t2));
 
+        var L1 = Class(zebkit.EventProducer, []).events("a1", "a2"), l1 = new L1();
+        var L2 = Class(zebkit.EventProducer, []).events("a1"), l2 = new L2();
+
+        l1.on("a1", function() {});
+        l2.on(function() {});
+
+
+        var t1 = new Date().getTime();
+        for(var i=0; i < 10000000; i++) {
+            //c1.event3();
+            l1.fire("a1", [1,2,3]);
+        }
+        console.log(">>> " + (new Date().getTime() - t1));
+
+        var t2 = new Date().getTime();
+        for(var i=0; i < 10000000; i++) {
+            l2.fire("a1", [1,2,3]);
+        }
+        console.log(">>> " + (new Date().getTime() - t2));
     }
 );
 

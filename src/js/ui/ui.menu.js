@@ -97,14 +97,15 @@ zebkit.package("ui", function(pkg, Class) {
             } else if (zebkit.instanceOf(c, pkg.Panel) === false) {
                 var ch = null;
 
-                if (c.checked === true || c.checked === false || c.group) {
-                    ch = (typeof c.group !== 'undefined') ? new this.clazz.Radiobox()
-                                                          : new this.clazz.Checkbox();
+                if (c.checked === true || c.checked === false || c.group !== undefined) {
+                    ch = (c.group !== undefined) ? new this.clazz.Radiobox()
+                                                 : new this.clazz.Checkbox();
 
-                    ch.setValue(typeof c.checked === 'undefined' ? false : c.checked);
-                    if (typeof c.group !== 'undefined') {
+                    if (c.group !== undefined) {
                         ch.setGroup(c.group);
                     }
+
+                    ch.setValue(c.checked === undefined ? false : c.checked);
                 } else {
                     ch = new this.clazz.Checkbox();
                     ch.setVisible(false);
@@ -112,17 +113,17 @@ zebkit.package("ui", function(pkg, Class) {
 
                 this.add(ch);
 
-                if (typeof c.id !== 'undefined') {
+                if (c.id !== undefined) {
                     this.setId(c.id);
                 }
 
-                if (typeof c.handler !== 'undefined') {
+                if (c.handler !== undefined) {
                     this.$handler = c.handler;
                 }
 
                 if (zebkit.instanceOf(c.content, zebkit.ui.Panel)) {
                     c = c.content;
-                } else if (typeof c.icon !== 'undefined') {
+                } else if (c.icon !== undefined) {
                     c = new this.clazz.ImageLabel(c.content, c.icon);
                 } else {
                     c = new this.clazz.ImageLabel(c.content, null);
@@ -359,7 +360,8 @@ zebkit.package("ui", function(pkg, Class) {
      *                     content: "SubMenu Checked Item 3",
      *                     checked: false
      *                 }
-     *         },
+     *             ]
+     *          },
      *         "Menu Item 2",
      *         "Menu Item 3"
      *      ]);
@@ -379,7 +381,7 @@ zebkit.package("ui", function(pkg, Class) {
                 for(var i = 0; i < d.length; i++) {
                     var item = d[i];
                     this.add(item);
-                    if (zebkit.isString(item) === false && typeof item.sub !== 'undefined') {
+                    if (zebkit.isString(item) === false && item.sub !== undefined) {
                         var sub = item.sub;
                         this.setMenuAt(this.kids.length - 1, zebkit.instanceOf(sub, pkg.Menu) ? sub
                                                                                               : new pkg.Menu(sub));
@@ -552,7 +554,7 @@ zebkit.package("ui", function(pkg, Class) {
                 }
 
                 var p = this.kids[i];
-                if (typeof p.activateSub !== 'undefined') {
+                if (p.activateSub !== undefined) {
                     var sub = this.menus.hasOwnProperty(p) ? this.menus[p] : null;
                     if (m !== null) {
                         if (sub === null) {
@@ -568,7 +570,7 @@ zebkit.package("ui", function(pkg, Class) {
                     this.select(-1);
                 }
 
-                if (typeof p.$hash$ === 'undefined') {
+                if (p.$hash$ === undefined) {
                     throw new Error("Invalid key");
                 }
 
@@ -604,7 +606,7 @@ zebkit.package("ui", function(pkg, Class) {
              * @protected
              */
             this.$canceled = function(m) {
-                if (this.$parentMenu !== null && typeof this.$canceled !== 'undefined') {
+                if (this.$parentMenu !== null && this.$canceled !== undefined) {
                     this.$parentMenu.$canceled(m);
                 }
             };
@@ -754,7 +756,7 @@ zebkit.package("ui", function(pkg, Class) {
         },
 
         function kidRemoved(i, c) {
-            if (typeof c.$$isDecorative !== 'undefined') {
+            if (c.$$isDecorative !== undefined) {
                 delete c.$$isDecorative;
             }
             this.setMenuAt(i, null);
@@ -815,7 +817,7 @@ zebkit.package("ui", function(pkg, Class) {
                         // handle an item menu selection here.
                         // hide the whole menu hierarchy
                         var k = this.kids[this.selectedIndex];
-                        if (typeof k.itemSelected !== 'undefined') {
+                        if (k.itemSelected !== undefined) {
                             k.itemSelected();
                         }
 
@@ -849,26 +851,34 @@ zebkit.package("ui", function(pkg, Class) {
     /**
      * Menu bar UI component class. Menu bar can be build in any part of UI application.
      * There is no restriction regarding the placement of the component.
-
-            var canvas = new zebkit.ui.zCanvas(300,200);
-            canvas.setLayout(new zebkit.layout.BorderLayout());
-
-            var mbar = new zebkit.ui.Menubar({
-                "Item 1": {
-                    "Subitem 1.1":null,
-                    "Subitem 1.2":null,
-                    "Subitem 1.3":null
-                },
-                "Item 2": {
-                    "Subitem 2.1":null,
-                    "Subitem 2.2":null,
-                    "Subitem 2.3":null
-                },
-                "Item 3": null
-            });
-
-            canvas.root.add("bottom", mbar);
-
+     *
+     *      var canvas = new zebkit.ui.zCanvas(300,200);
+     *      canvas.setBorderLayout();
+     *
+     *      var mbar = new zebkit.ui.Menubar([
+     *          {
+     *              content: "Item 1",
+     *              sub    : [
+     *                  "Subitem 1.1",
+     *                  "Subitem 1.2",
+     *                  "Subitem 1.3"
+     *              ]
+     *          },
+     *          {
+     *              content: "Item 2",
+     *              sub: [
+     *                  "Subitem 2.1",
+     *                  "Subitem 2.2",
+     *                  "Subitem 2.3"
+     *              ]
+     *          },
+     *          {
+     *              content: "Item 3"
+     *          }
+     *      ]);
+     *
+     *      canvas.root.add("bottom", mbar);
+     *
      * @class zebkit.ui.Menubar
      * @constructor
      * @extends zebkit.ui.Menu
@@ -1016,7 +1026,7 @@ zebkit.package("ui", function(pkg, Class) {
              */
             this.childKeyPressed = function(e){
                 var p = e.source.$parentMenu;
-                if (typeof p !== 'undefined' && p !== null) {
+                if (p !== undefined && p !== null) {
                     switch (e.code) {
                         case "ArrowRight" :
                             if (p.selectedIndex < p.model.count() - 1) {
@@ -1054,12 +1064,31 @@ zebkit.package("ui", function(pkg, Class) {
                 }
             };
 
+            this.pointerPressed = function(e) {
+                if (this.kids.length > 0) {
+                    var top = this.$topMenu();
+                    if (top !== null) {
+                        top.$hideMenu();
+                    }
+
+                    // still have a pop up components, than remove it
+                    if (this.kids.length > 0) {
+                        this.removeAll();
+                    }
+
+                    return true;
+                } else {
+                    return false;
+                }
+            };
+
+            // show popup
             this.layerPointerClicked = function (e) {
                 if (this.kids.length === 0 && this.isTriggeredWith(e)) {
                     var popup = null;
-                    if (typeof e.source.popup !== 'undefined' && e.source.popup !== null) {
+                    if (e.source.popup !== undefined && e.source.popup !== null) {
                         popup = e.source.popup;
-                    } else if (typeof e.source.getPopup !== 'undefined') {
+                    } else if (e.source.getPopup !== undefined) {
                         popup = e.source.getPopup(e.source, e.x, e.y);
                     }
 
@@ -1070,38 +1099,10 @@ zebkit.package("ui", function(pkg, Class) {
                     }
 
                     return true;
+                } else {
+                    return false;
                 }
-                return false;
             };
-        },
-
-        function layerPointerPressed(e) {
-            // if a shown menu exists
-            if (this.kids.length > 0) {
-                // if pressed has happened over a popup layer no a menu
-                if (this.$getSuper("getComponentAt").call(this, e.x, e.y) === this) {
-                    var top = this.$topMenu();
-                    if (top !== null) {
-                        // if top menu is menu bar. menu bar is located in other layer
-                        // we need check if the pressed has happened not over the
-                        // menu bar
-                        if (zebkit.instanceOf(top, pkg.Menubar)) {
-                            var origin = zebkit.layout.toParentOrigin(top);
-                            if (e.x >= origin.x && e.y >= origin.y && e.x < origin.x + top.width && e.y < origin.y + top.height) {
-                                return;
-                            }
-                        }
-
-                        // hide all shown menu
-                        top.$hideMenu();
-                    }
-
-                    // still have a pop up components, than remove it
-                    if (this.kids.length > 0) {
-                        this.removeAll();
-                    }
-                }
-            }
         },
 
         function getComponentAt(x, y) {
@@ -1109,12 +1110,27 @@ zebkit.package("ui", function(pkg, Class) {
             // not the popup layer itself than return the component otherwise
             // return null what delegates getComponentAt() to other layer
             if (this.kids.length > 0) {
-                var comp = this.$super(x, y);
-                if (comp !== this) {
-                    return comp;
+                // if pressed has happened over a popup layer no a menu
+                var cc = this.$super(x, y);
+                if (cc === this) {
+                    var top = this.$topMenu();
+                    if (top !== null) {
+                        // if top menu is menu bar. menu bar is located in other layer
+                        // we need check if the pressed has happened not over the
+                        // menu bar
+                        if (zebkit.instanceOf(top, pkg.Menubar)) {
+                            var origin = zebkit.layout.toParentOrigin(top);
+                            // is pointer pressed inside menu bar
+                            if (x >= origin.x && y >= origin.y && x < origin.x + top.width && y < origin.y + top.height) {
+                                return null;
+                            }
+                        }
+                    }
                 }
+                return cc;
+            } else {
+                return null;
             }
-            return null;
         }
     ]);
 

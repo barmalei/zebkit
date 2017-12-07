@@ -33,6 +33,76 @@ zebkit.package("util", function(pkg, Class) {
         throw new Error("Invalid value '" + value + "',the following values are expected: " + values.join(','));
     };
 
+    /**
+     * Compare two dates.
+     * @param  {Date} d1 a first date
+     * @param  {Date} d2 a second sate
+     * @return {Integer} 0 if the two dates are equal, -1 if d1 < d2, 1 if d1 > d2,
+     * null if one of the date is null
+     * @method compareDates
+     */
+    pkg.compareDates = function(d1, d2) {
+        if (arguments.length === 2 && d1 === d2) {
+            return 0;
+        }
+
+        // exclude null dates
+        if (d1 === null || d2 === null) {
+            return null;
+        }
+
+        var day1, month1, year1,
+            day2, month2, year2,
+            i = 1;
+
+        if (d1 instanceof Date) {
+            day1   = d1.getDate();
+            month1 = d1.getMonth();
+            year1  = d1.getFullYear();
+        } else {
+            day1   = arguments[0];
+            month1 = arguments[1];
+            year1  = arguments[2];
+            i = 3;
+        }
+
+        d2 = arguments[i];
+        if (d2 instanceof Date) {
+            day2   = d2.getDate();
+            month2 = d2.getMonth();
+            year2  = d2.getFullYear();
+        } else {
+            day2   = arguments[i];
+            month2 = arguments[i + 1];
+            year2  = arguments[i + 2];
+        }
+
+        if (day1 === day2 && month1 === month2 && year1 === year2) {
+            return 0;
+        } else if (year1 > year2 ||
+                   (year1 === year2 && month1 > month2) ||
+                   (year1 === year2 && month1 === month2 && day1 > day2))
+        {
+            return 1;
+        } else {
+            return -1;
+        }
+    };
+
+    /**
+     * Validate the given date
+     * @param  {Date} date a date to be validated
+     * @return {Boolean} true if the date is valid
+     * @method validateDate
+     */
+    pkg.validateDate = function(day, month, year) {
+        var d = (arguments.length < 3) ? (arguments.length === 1 ? day : new Date(month, day))
+                                       : new Date(year, month, day);
+        if (d.isValid() === false) {
+            throw new Error("Invalid date : " + d);
+        }
+    };
+
     pkg.format = function(s, obj, ph) {
         if (arguments.length < 3) {
             ph = '';
@@ -57,11 +127,11 @@ zebkit.package("util", function(pkg, Class) {
                 v = f.call(obj);
             }
 
-            if (typeof m[1] !== 'undefined') {
+            if (m[1] !== undefined) {
                 var ml  = parseInt(m[1].substring(0, m[1].length - 1).trim()),
-                    ph2 = typeof m[2] !== 'undefined' ? m[2].substring(0, m[2].length - 1) : ph;
+                    ph2 = m[2] !== undefined ? m[2].substring(0, m[2].length - 1) : ph;
 
-                if (v === null || typeof v === 'undefined') {
+                if (v === null || v === undefined) {
                     ph2 = ph;
                     v = "";
                 } else {
@@ -73,7 +143,7 @@ zebkit.package("util", function(pkg, Class) {
                 }
             }
 
-            if (v === null || typeof v === 'undefined') {
+            if (v === null || v === undefined) {
                 v = ph;
             }
 
@@ -191,10 +261,8 @@ zebkit.package("util", function(pkg, Class) {
      * @param {Integer} prevLine a previous virtual cursor line
      * @param {Integer} prevCol a previous virtual cursor column in the previous line
      */
-    pkg.Position = Class(zebkit.EventProducer, [
+    pkg.Position = Class([
         function(pi){
-            this._ = new this.clazz.Listeners();
-
             /**
              * Shows if the position object is in valid state.
              * @private
@@ -229,8 +297,6 @@ zebkit.package("util", function(pkg, Class) {
         },
 
         function $clazz() {
-            this.Listeners = zebkit.ListenersClass("posChanged");
-
             /**
              * Position metric interface. This interface is designed for describing
              * a navigational structure that consists on number of lines where
@@ -307,7 +373,7 @@ zebkit.package("util", function(pkg, Class) {
                         this.currentLine = this.currentCol = -1;
                     }
                     this.isValid = true;
-                    this._.posChanged(this, prevOffset, prevLine, prevCol);
+                    this.fire("posChanged", [this, prevOffset, prevLine, prevCol]);
                 }
 
                 return o;
@@ -338,7 +404,7 @@ zebkit.package("util", function(pkg, Class) {
                     this.offset = this.getOffsetByPoint(r, c);
                     this.currentLine = r;
                     this.currentCol = c;
-                    this._.posChanged(this, prevOffset, prevLine, prevCol);
+                    this.fire("posChanged", [this, prevOffset, prevLine, prevCol]);
                 }
             };
 
@@ -534,7 +600,7 @@ zebkit.package("util", function(pkg, Class) {
                         default: throw new Error("" + t);
                     }
 
-                    this._.posChanged(this, prevOffset, prevLine, prevCol);
+                    this.fire("posChanged", [this, prevOffset, prevLine, prevCol]);
                 }
             };
 
@@ -544,8 +610,8 @@ zebkit.package("util", function(pkg, Class) {
              * @param {zebkit.util.Position.Metric} p a position metric
              * @method setMetric
              */
-            this.setMetric = function (p){
-                if (p === null || typeof p === 'undefined') {
+            this.setMetric = function(p) {
+                if (p === null || p === undefined) {
                     throw new Error("Null metric");
                 }
 
@@ -555,7 +621,7 @@ zebkit.package("util", function(pkg, Class) {
                 }
             };
         }
-    ]);
+    ]).events("posChanged");
 
     /**
      * Single column position implementation. More simple and more fast implementation of
@@ -589,7 +655,7 @@ zebkit.package("util", function(pkg, Class) {
 
                     this.currentLine = this.offset = o;
                     this.isValid = true;
-                    this._.posChanged(this, prevOffset, prevLine, prevCol);
+                    this.fire("posChanged", [this, prevOffset, prevLine, prevCol]);
                 }
 
                 return o;
@@ -864,7 +930,7 @@ zebkit.package("util", function(pkg, Class) {
              * @method run
              */
             this.run = function(f, si, ri){
-                if (f === null || typeof f === 'undefined') {
+                if (f === null || f === undefined) {
                     throw new Error("" + f);
                 }
 
@@ -882,7 +948,7 @@ zebkit.package("util", function(pkg, Class) {
                         if (t.isStarted === true) {
                             if (t.si <= 0) {
                                 try {
-                                    if (typeof t.task.run !== 'undefined') {
+                                    if (t.task.run !== undefined) {
                                         t.task.run(t);
                                     } else {
                                         t.task(t);

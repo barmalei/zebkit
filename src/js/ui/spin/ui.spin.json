@@ -5,8 +5,8 @@
             "border": "plain",
             "padding": [ 2,  0, 0,0],
             "fireParams": [ true, 100, 1000],
-            "preferredSize": [14,12],
-            "arrowDirection": "top"
+            "arrowSize": [14,12],
+            "direction": "top"
         },
 
         "DecButton" : {
@@ -14,8 +14,8 @@
             "border": "plain",
             "padding": [ 0,  0, 2, 0 ],
             "fireParams": [ true, 100, 1000],
-            "preferredSize": [14,12],
-            "arrowDirection": "bottom"
+            "arrowSize": [14,12],
+            "direction": "bottom"
         },
 
         "TextField" : {

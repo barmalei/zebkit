@@ -11,8 +11,8 @@
             "expandedSign"    : { "@zebkit.draw.Picture": [ "%{zebkit.ui.pictures.zebkit}", 49 ,34, 16, 14, true ] },
             "leafSign"        : { "@zebkit.draw.Picture": [ "%{zebkit.ui.pictures.zebkit}", 49 ,20 ,16, 14, true ] },
 
-            "collapsedToggle"     : { "@zebkit.draw.ArrowView":  [  "right", "#66CCFF", 10, 14] },
-            "expandedToggle"      : { "@zebkit.draw.ArrowView":  [ "bottom", "#66CCFF", 14, 10] },
+            "collapsedToggle"     : { "@zebkit.draw.ArrowView":  [  "right", null, "#66CCFF" ], "width": 10, "height": 14 },
+            "expandedToggle"      : { "@zebkit.draw.ArrowView":  [ "bottom", null, "#66CCFF" ],  "width": 14, "height": 10 },
 
             "focusOnSelect" : [ [ "rgb(228, 244, 252)", { "@zebkit.draw.Border": "rgb(200,180,200)" } ] ]
         }

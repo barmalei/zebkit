@@ -146,7 +146,7 @@ zebkit.package("ui.web", function(pkg, Class) {
             }
 
             // call event method if it is defined
-            if (typeof this.canvasInitialized !== 'undefined') {
+            if (this.canvasInitialized !== undefined) {
                 this.canvasInitialized();
             }
 
@@ -174,7 +174,6 @@ zebkit.package("ui.web", function(pkg, Class) {
         },
 
         function $clazz () {
-            this.CLASS_NAME = "zebcanvas";
             this.$canvases  = [];
 
             this.$getCanvasByElement = function(e) {
@@ -256,9 +255,9 @@ zebkit.package("ui.web", function(pkg, Class) {
 
             // TODO: may be rename to dedicated method $doWheelScroll
             this.$doScroll = function(dx, dy, src) {
-                if (src === "wheel" && pkg.$pointerOwner.mouse != null) {
+                if (src === "wheel" && pkg.$pointerOwner.mouse !== null && pkg.$pointerOwner.mouse !== undefined) {
                     var owner = pkg.$pointerOwner.mouse;
-                    while (owner !== null && typeof owner.doScroll === 'undefined') {
+                    while (owner !== null && owner.doScroll === undefined) {
                         owner = owner.parent;
                     }
 
@@ -293,9 +292,10 @@ zebkit.package("ui.web", function(pkg, Class) {
              * @return {Boolean}  true if the event has been processed
              */
             this.$keyPressed = function(e) {
+                // go through layers to detect layerKeyPressed event handler
                 for(var i = this.kids.length - 1;i >= 0; i--){
                     var l = this.kids[i];
-                    if (typeof l.layerKeyPressed !== 'undefined' && l.layerKeyPressed(e) === true) {
+                    if (l.layerKeyPressed !== undefined && l.layerKeyPressed(e) === true) {
                         return true;
                     }
                 }
@@ -455,21 +455,17 @@ zebkit.package("ui.web", function(pkg, Class) {
             this.$pointerDragEnded = function(e) {
                 if (pkg.$pointerOwner.hasOwnProperty(e.identifier)) {
                     return ui.events.fire("pointerDragEnded", e.update(pkg.$pointerOwner[e.identifier],
-                                                                        this.$toElementX(e.pageX, e.pageY),
-                                                                        this.$toElementY(e.pageX, e.pageY)));
+                                                                       this.$toElementX(e.pageX, e.pageY),
+                                                                       this.$toElementY(e.pageX, e.pageY)));
                 }
                 return false;
             };
 
-            this.$isBlockedByLayer = function(id, method, e) {
-                // adjust event for passing it to layers
-                // e.x = x;
-                // e.y = y;
-
+            this.$isAbsorbedByLayer = function(id, method, e) {
+                e.id = id;
                 for(var i = this.kids.length - 1; i >= 0; i--){
                     var layer = this.kids[i];
-                    if (typeof layer[method] !== 'undefined') {
-                        e.id = id;
+                    if (layer[method] !== undefined) {
                         if (layer[method](e) === true) {
                             return true;
                         }
@@ -489,7 +485,7 @@ zebkit.package("ui.web", function(pkg, Class) {
                     y = this.$toElementY(e.pageX, e.pageY),
                     d = this.getComponentAt(x, y);
 
-                // zoom inn zoom out can bring to a situation
+                // zoom in zoom out can bring to a situation
                 // d is null, in this case offset should be recalculated
                 // TODO: the cause of the issue has to be investigated deeper
                 if (d === null) {
@@ -501,7 +497,7 @@ zebkit.package("ui.web", function(pkg, Class) {
 
                 if (d !== null) {
                     e = e.update(d, x, y);
-                    if (this.$isBlockedByLayer("pointerClicked", "layerPointerClicked", e)) {
+                    if (this.$isAbsorbedByLayer("pointerClicked", "layerPointerClicked", e)) {
                         return true;
                     } else {
                         return ui.events.fire("pointerClicked", e);
@@ -534,7 +530,7 @@ zebkit.package("ui.web", function(pkg, Class) {
                 if (pkg.$pointerPressedOwner.hasOwnProperty(e.identifier)) {
                     try {
                         e = e.update(pkg.$pointerPressedOwner[e.identifier], x, y);
-                        if (this.$isBlockedByLayer("pointerReleased", "layerPointerReleased", e) !== true) {
+                        if (this.$isAbsorbedByLayer("pointerReleased", "layerPointerReleased", e) !== true) {
                             ui.events.fire("pointerReleased", e);
                         }
                     } finally {
@@ -575,7 +571,7 @@ zebkit.package("ui.web", function(pkg, Class) {
                 var x  = this.$toElementX(e.pageX, e.pageY),
                     y  = this.$toElementY(e.pageX, e.pageY);
 
-                // free pointer previous pressed if any
+                // free previous pointer pressed state if it was hung up
                 if (pkg.$pointerPressedOwner.hasOwnProperty(e.identifier)) {
                     try {
                         ui.events.fire("pointerReleased", e.update(pkg.$pointerPressedOwner[e.identifier], x, y));
@@ -585,9 +581,10 @@ zebkit.package("ui.web", function(pkg, Class) {
                 }
 
                 e.source = null;
-                e.x = x;
-                e.y = y;
-                if (this.$isBlockedByLayer("pointerPressed", "layerPointerPressed", e)) {
+                e.x  = x;
+                e.y  = y;
+
+                if (this.$isAbsorbedByLayer("pointerPressed", "layerPointerPressed", e)) {
                     return true;
                 }
 
@@ -617,11 +614,16 @@ zebkit.package("ui.web", function(pkg, Class) {
                     if (c !== null) {
                         // detect a composite parent component that catches
                         // input and return the found composite
+                        // TODO: probably this is not good place to detect composition, but it is done here
+                        // since real destination component has to be detected before delegating it to event
+                        // manager. One of the reason is adjusting (pointer) event coordinates to found
+                        // destination component. Event manager knows nothing about an event structure,
+                        // whether it has or not coordinates.
                         var p = c;
                         while ((p = p.parent) !== null) {
                             // test if the parent catches input events (what means the parent is a composite component)
                             // and store the composite as result
-                            if (typeof p.catchInput !== 'undefined' && (p.catchInput === true || (p.catchInput !== false && p.catchInput(c)))) {
+                            if (p.catchInput !== undefined && (p.catchInput === true || (p.catchInput !== false && p.catchInput(c)))) {
                                 c = p;
                             }
                         }
@@ -704,15 +706,16 @@ zebkit.package("ui.web", function(pkg, Class) {
 
                         this.setLocation(0, 0);
 
-                        // adjust body to kill unnecessary gap for inline-block zCanvas element
+                        // adjust body to kill unnecessary gap for in-line-block zCanvas element
                         // otherwise body size will be slightly horizontally bigger than visual
-                        // viewport height what causes scroller appears
+                        // view-port height what causes scroll appears
                         document.body.style["font-size"] = "0px";
 
                         var ws = zebkit.web.$viewPortSize();
                         this.setSize(ws.width, ws.height);
                     }
                 }
+                return this;
             };
         },
 
@@ -818,9 +821,9 @@ zebkit.package("ui.web", function(pkg, Class) {
     window.onbeforeunload = function(e) {
         var msgs = [];
         for (var i = pkg.zCanvas.$canvases.length - 1; i >= 0; i--) {
-            if (typeof pkg.zCanvas.$canvases[i].saveBeforeLeave !== 'undefined') {
+            if (pkg.zCanvas.$canvases[i].saveBeforeLeave !== undefined) {
                 var m = pkg.zCanvas.$canvases[i].saveBeforeLeave();
-                if (m !== null && typeof m !== 'undefined') {
+                if (m !== null && m !== undefined) {
                     msgs.push(m);
                 }
             }
@@ -828,7 +831,7 @@ zebkit.package("ui.web", function(pkg, Class) {
 
         if (msgs.length > 0) {
             var message = msgs.join("  ");
-            if (typeof e === 'undefined') {
+            if (e === undefined) {
                 e = window.event;
             }
 
@@ -840,8 +843,8 @@ zebkit.package("ui.web", function(pkg, Class) {
         }
     };
 
-    // TODO: this is depricated events that can have significant impact to
-    // page performance. That means it has to be removed and replace with soemting
+    // TODO: this is deprecated events that can have significant impact to
+    // page performance. That means it has to be removed and replace with something
     // else
     //
     // bunch of handlers to track HTML page metrics update
@@ -857,7 +860,7 @@ zebkit.package("ui.web", function(pkg, Class) {
             var canvas = pkg.zCanvas.$canvases[i];
             if (zebkit.web.$contains(canvas.element) !== true) {
                 pkg.zCanvas.$canvases.splice(i, 1);
-                if (typeof canvas.saveBeforeLeave !== 'undefined') {
+                if (canvas.saveBeforeLeave !== undefined) {
                     canvas.saveBeforeLeave();
                 }
             }

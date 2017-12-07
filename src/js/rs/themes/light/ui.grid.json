@@ -19,7 +19,7 @@
 
         "Checkbox": {
             "inheritProperties" : true,
-            "layout": { "@zebkit.layout.FlowLayout": [ "center", "center" ]},
+            "flowLayout": [ "center", "center" ],
             "border": { "@zebkit.draw.Border":  "blue" }
         }
     },
@@ -33,9 +33,9 @@
 
         "StatusPan": {
             "view" : {
-                "*"       : { "@zebkit.draw.ArrowView" : [ "left", "rgb(255, 153, 0)" ], "width" : 9, "height" : 9  },
-                "ascent"  : { "@zebkit.draw.ArrowView" : [ "top", "rgb(255, 153, 0)"  ]   },
-                "descent" : { "@zebkit.draw.ArrowView" : [ "bottom", "rgb(255, 153, 0)" ] }
+                "*"       : { "@zebkit.draw.ArrowView" : [ "left", null, "rgb(255, 153, 0)" ], "width" : 9, "height" : 9  },
+                "ascent"  : { "@zebkit.draw.ArrowView" : [ "top", null, "rgb(255, 153, 0)"  ]   },
+                "descent" : { "@zebkit.draw.ArrowView" : [ "bottom", null, "rgb(255, 153, 0)" ] }
             }
         },
 
@@ -78,8 +78,11 @@
         },
 
         "views" : {
-            "focusOnSelect" :"#D0EAFF",
-            "focusOffSelect" :"#ADC1D6"
+            "focusOnSelect"  :"#D0EAFF",
+            "focusOffSelect" :"#ADC1D6",
+            "marker"         : {
+                "@zebkit.draw.Border" : ["red", 2]
+            }
         },
 
         "lineColor": "rgb(65, 131, 215)",

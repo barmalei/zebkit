@@ -12,22 +12,33 @@ zebkit.package("ui", function(pkg, Class) {
             this.layoutComponents(new this.clazz.TextField(this, this.min, this.max),
                                   new this.clazz.IncButton(),
                                   new this.clazz.DecButton());
-
-            this._ = new zebkit.Listeners();
         },
 
         function $clazz() {
-            this.SpinButton = Class(pkg.ArrowButton, [
-                function $prototype() {
-                    this.increment = 1;
-                }
-            ]);
+            this.IncButton = Class(pkg.ArrowButton, []);
+            this.DecButton = Class(pkg.ArrowButton, []);
 
-            this.IncButton = Class(this.SpinButton, []);
-            this.DecButton = Class(this.SpinButton, []);
             this.DecButton.prototype.increment = -1;
+            this.IncButton.prototype.increment =  1;
 
             this.TextField = Class(pkg.TextField, [
+                function (target, min, max) {
+                    this.target = target;
+                    this.min = min;
+                    this.max = max;
+
+                    var $this = this;
+                    this.$super(new zebkit.data.SingleLineTxt([
+                        function () {
+                            this.$super("" + min);
+                        },
+
+                        function validate(value) {
+                            return $this.isValideValue(value);
+                        }
+                    ]));
+                },
+
                 function isValideValue(v) {
                     if (/^[-+]?^[0]*[0-9]+$/.test(v) === true) {
                         var iv = parseInt(v);
@@ -62,27 +73,10 @@ zebkit.package("ui", function(pkg, Class) {
                              height : font.height };
                 },
 
-                function (target, min, max) {
-                    this.target = target;
-                    this.min = min;
-                    this.max = max;
-
-                    var $this = this;
-                    this.$super(new zebkit.data.SingleLineTxt([
-                        function () {
-                            this.$super("" + min);
-                        },
-
-                        function validate(value) {
-                            return $this.isValideValue(value);
-                        }
-                    ]));
-                },
-
                 function textUpdated(src, op, off, size, startLine, lines) {
                     this.$super(src, op, off, size, startLine, lines);
-                    if (typeof this.getModel().validate !== 'undefined') {
-                        this.target._.fired(this.target);
+                    if (this.getModel().validate !== undefined) {
+                        // TODO: manual text input is not allowed yet
                     }
                 }
             ]);
@@ -90,7 +84,7 @@ zebkit.package("ui", function(pkg, Class) {
 
         function layoutComponents(text, inc, dec) {
             var buttons = new pkg.Panel(new zebkit.layout.PercentLayout("vertical"));
-            this.setLayout(new zebkit.layout.BorderLayout());
+            this.setBorderLayout();
 
             var tfPan = new pkg.Panel(new zebkit.layout.FlowLayout("left", "center"));
             tfPan.layout.stretchLast = true;
@@ -102,7 +96,7 @@ zebkit.package("ui", function(pkg, Class) {
             buttons.add(50, dec);
 
 
-            // this.setLayout(new zebkit.layout.BorderLayout());
+            // this.setBorderLayout();
             // this.add("center", text);
 
             // var buttons = new pkg.Panel(new zebkit.layout.BorderLayout());
@@ -111,14 +105,17 @@ zebkit.package("ui", function(pkg, Class) {
             // this.add("right", buttons);
 
 
-            // this.setLayout(new zebkit.layout.BorderLayout());
+            // this.setBorderLayout();
             // this.add("center", text );
             // this.add("left", dec);
             // this.add("right", inc);
         },
 
         function $install(child) {
-            if (child.isEventFired()) {
+            console.log("$install() : " + child.clazz.$name  + ","  + child.isEventFired("fired"));
+
+
+            if (child.isEventFired("fired")) {
                 child.on(this);
             } else if (zebkit.instanceOf(child, pkg.TextField)) {
                 this.editor = child;
@@ -126,7 +123,7 @@ zebkit.package("ui", function(pkg, Class) {
         },
 
         function $uninstall(child) {
-            if (child.isEventFired()) {
+            if (child.isEventFired("fired")) {
                 child.off(this);
             } else if (zebkit.instanceOf(child, pkg.TextField)) {
                 this.editor = null;
@@ -151,6 +148,16 @@ zebkit.package("ui", function(pkg, Class) {
             this.$uninstall(e.kid);
         },
 
+
+        function keyPressed(e) {
+            if (e.code === "ArrowDown") {
+                this.setValue(this.getValue() - this.step);
+            } else if (e.code === "ArrowUp") {
+                this.setValue(this.getValue() + this.step);
+            }
+        },
+
+
         function setMinMax (min, max) {
             if (this.min !== min && this.max !== max) {
                 this.min = min;
@@ -158,6 +165,10 @@ zebkit.package("ui", function(pkg, Class) {
                 this.setValue(this.getValue());
                 this.vrp();
             }
+        },
+
+        function catchInput(c) {
+            return zebkit.instanceOf(c, pkg.ArrowButton) === false;
         },
 
         function setLoopEnabled(b) {
@@ -187,12 +198,13 @@ zebkit.package("ui", function(pkg, Class) {
             }
 
             var prev = this.getValue();
-            if (prev !== v){
-                this.prevValue = prev;
+            if (prev !== v) {
+                var prevValue = prev;
                 this.editor.setValue("" + v);
                 this.repaint();
+                this.fire("fired", [ this, prevValue ]);
             }
         }
-    ]);
+    ]).events("fired");
 });
 

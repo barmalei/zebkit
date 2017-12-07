@@ -148,7 +148,7 @@ zebkit.package("ui.event", function(pkg, Class) {
             // given direction (forward or backward lookup)
             this.fd = function(t, index, d) {
                 if (t.kids.length > 0){
-                    var isNComposite = typeof t.catchInput === 'undefined' || t.catchInput === false;
+                    var isNComposite = t.catchInput === undefined || t.catchInput === false;
                     for(var i = index; i >= 0 && i < t.kids.length; i += d) {
                         var cc = t.kids[i];
 
@@ -161,7 +161,7 @@ zebkit.package("ui.event", function(pkg, Class) {
                             cc.height     >  0                                              &&
                             (isNComposite || (t.catchInput !== true      &&
                                               t.catchInput(cc) === false)  )                &&
-                            ( (cc.canHaveFocus === true || (typeof cc.canHaveFocus !== 'undefined'  &&
+                            ( (cc.canHaveFocus === true || (cc.canHaveFocus !== undefined   &&
                                                             cc.canHaveFocus !== false &&
                                                             cc.canHaveFocus())            ) ||
                               (cc = this.fd(cc, d > 0 ? 0 : cc.kids.length - 1, d)) !== null)  )
@@ -179,7 +179,7 @@ zebkit.package("ui.event", function(pkg, Class) {
             // d - a direction of next focusable component lookup: 1 (forward) or -1 (backward)
             this.ff = function(c, d) {
                 var top = c;
-                while (top !== null && typeof top.getFocusRoot === 'undefined') {
+                while (top !== null && top.getFocusRoot === undefined) {
                     top = top.parent;
                 }
 
@@ -192,7 +192,7 @@ zebkit.package("ui.event", function(pkg, Class) {
                     return null;
                 }
 
-                if (typeof top.traverseFocus !== 'undefined') {
+                if (top.traverseFocus !== undefined) {
                     return top.traverseFocus(c, d);
                 }
 

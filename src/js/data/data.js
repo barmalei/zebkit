@@ -18,7 +18,7 @@ zebkit.package("data", function(pkg, Class) {
      */
 
     pkg.descent = function descent(a, b) {
-        if (typeof a === 'undefined' || a === null) {
+        if (a === undefined || a === null) {
             return 1;
         } else {
             return zebkit.isString(a) ? a.localeCompare(b) : a - b;
@@ -26,7 +26,7 @@ zebkit.package("data", function(pkg, Class) {
     };
 
     pkg.ascent = function ascent(a, b) {
-        if (b === null || typeof b === 'undefined') {
+        if (b === null || b === undefined) {
             return 1;
         } else {
             return zebkit.isString(b) ? b.localeCompare(a) : b - a;
@@ -45,6 +45,7 @@ zebkit.package("data", function(pkg, Class) {
      * Abstract text model class
      * @class zebkit.data.TextModel
      * @uses zebkit.data.DataModel
+     * @uses zebkit.EventProducer
      */
 
     /**
@@ -107,10 +108,6 @@ zebkit.package("data", function(pkg, Class) {
      * @param {zebkit.data.TextEvent} e a text model event
      */
     pkg.TextModel = Class(pkg.DataModel, [
-        function $clazz() {
-            this.Listeners = zebkit.ListenersClass("textUpdated");
-        },
-
         function $prototype() {
             this.replace = function(s, off, size) {
                 if (s.length === 0) {
@@ -123,13 +120,13 @@ zebkit.package("data", function(pkg, Class) {
                 }
             };
         }
-    ]);
+    ]).events("textUpdated");
 
     /**
      * Text model event class.
      * @constructor
      * @class zebkit.data.TextEvent
-     * @extends {zebkit.Event}
+     * @extends zebkit.Event
      */
     pkg.TextEvent = Class(zebkit.Event, [
         function $prototype() {
@@ -203,9 +200,8 @@ zebkit.package("data", function(pkg, Class) {
      * @param  {String}  [s] the specified text the model has to be filled
      * @constructor
      * @extends zebkit.data.TextModel
-     * @uses zebkit.EventProducer
      */
-    pkg.Text = Class(pkg.TextModel, zebkit.EventProducer, [
+    pkg.Text = Class(pkg.TextModel, [
         function(s) {
             /**
              * Array of lines
@@ -215,7 +211,6 @@ zebkit.package("data", function(pkg, Class) {
              * @readOnly
              */
             this.$lines = [ new this.clazz.Line("") ];
-            this._ = new this.clazz.Listeners();
             this.setValue(arguments.length === 0 || s === null ? "" : s);
         },
 
@@ -341,7 +336,7 @@ zebkit.package("data", function(pkg, Class) {
                 }
 
                 this.$lines.splice(start, size);
-                this._.textUpdated(TE_STUB.$fillWith(this, "remove", start, size, off, olen));
+                this.fire("textUpdated", TE_STUB.$fillWith(this, "remove", start, size, off, olen));
             };
 
             /**
@@ -364,7 +359,7 @@ zebkit.package("data", function(pkg, Class) {
                     offlen += arguments[i].length + 1;
                     this.$lines.splice(startLine + i - 1, 0, new this.clazz.Line(arguments[i]));
                 }
-                this._.textUpdated(TE_STUB.$fillWith(this, "insert", startLine, arguments.length - 1, off, offlen));
+                this.fire("textUpdated", TE_STUB.$fillWith(this, "insert", startLine, arguments.length - 1, off, offlen));
             };
 
             this.write = function (s, offset, b) {
@@ -394,7 +389,7 @@ zebkit.package("data", function(pkg, Class) {
                         if (arguments.length > 2) {
                             TE_STUB.isLastStep = b;
                         }
-                        this._.textUpdated(TE_STUB);
+                        this.fire("textUpdated", TE_STUB);
                         return true;
                     }
                 }
@@ -424,7 +419,7 @@ zebkit.package("data", function(pkg, Class) {
                         if (arguments.length > 2) {
                             TE_STUB.isLastStep = b;
                         }
-                        this._.textUpdated(TE_STUB);
+                        this.fire("textUpdated", TE_STUB);
                         return true;
                     }
                 }
@@ -455,13 +450,13 @@ zebkit.package("data", function(pkg, Class) {
                         this.$lines = [ new this.clazz.Line("") ];
                         TE_STUB.$fillWith(this, "remove", 0, numLines, 0, txtLen);
                         TE_STUB.isLastStep = false;
-                        this._.textUpdated(TE_STUB);
+                        this.fire("textUpdated", TE_STUB);
                     }
 
                     this.$lines = [];
                     this.parse(0, text);
                     this.textLength = text.length;
-                    this._.textUpdated(TE_STUB.$fillWith(this, "insert", 0, this.getLines(), 0, this.textLength));
+                    this.fire("textUpdated", TE_STUB.$fillWith(this, "insert", 0, this.getLines(), 0, this.textLength));
                     return true;
                 }
                 return false;
@@ -476,15 +471,12 @@ zebkit.package("data", function(pkg, Class) {
      * @constructor
      * @class zebkit.data.SingleLineTxt
      * @extends zebkit.data.TextModel
-     * @uses zebkit.EventProducer
      */
-    pkg.SingleLineTxt = Class(pkg.TextModel, zebkit.EventProducer,[
+    pkg.SingleLineTxt = Class(pkg.TextModel, [
         function (s, max) {
             if (arguments.length > 1) {
                 this.maxLen = max;
             }
-
-            this._ = new this.clazz.Listeners();
             this.setValue(arguments.length === 0 || s === null ? "" : s);
         },
 
@@ -556,7 +548,7 @@ zebkit.package("data", function(pkg, Class) {
                         if (arguments.length > 2) {
                             TE_STUB.isLastStep = b;
                         }
-                        this._.textUpdated(TE_STUB);
+                        this.fire("textUpdated", TE_STUB);
                         return true;
                     }
                 }
@@ -582,7 +574,7 @@ zebkit.package("data", function(pkg, Class) {
                             if (arguments.length > 2) {
                                 TE_STUB.isLastStep = b;
                             }
-                            this._.textUpdated(TE_STUB);
+                            this.fire("textUpdated", TE_STUB);
                             return true;
                         }
                     }
@@ -601,7 +593,7 @@ zebkit.package("data", function(pkg, Class) {
                     if (this.$buf !== null && this.$buf.length > 0) {
                         TE_STUB.$fillWith(this, "remove", 0, 1, 0, this.$buf.length);
                         TE_STUB.isLastStep = false;
-                        this._.textUpdated(TE_STUB);
+                        this.fire("textUpdated", TE_STUB);
                     }
 
                     if (this.maxLen > 0 && text.length > this.maxLen) {
@@ -609,7 +601,7 @@ zebkit.package("data", function(pkg, Class) {
                     }
 
                     this.$buf = text;
-                    this._.textUpdated(TE_STUB.$fillWith(this, "insert", 0, 1, 0, text.length));
+                    this.fire("textUpdated", TE_STUB.$fillWith(this, "insert", 0, 1, 0, text.length));
                     return true;
                 }
 
@@ -689,15 +681,9 @@ zebkit.package("data", function(pkg, Class) {
       * @param {Object}  p a previous element
       * @param {Integer} i an index at that the element has been re-set
       */
-
     pkg.ListModel = Class(pkg.DataModel, zebkit.EventProducer,[
         function() {
-            this._ = new this.clazz.Listeners();
             this.$data = (arguments.length === 0) ? [] : arguments[0];
-        },
-
-        function $clazz () {
-            this.Listeners = zebkit.ListenersClass("elementInserted", "elementRemoved", "elementSet");
         },
 
         function $prototype() {
@@ -721,7 +707,7 @@ zebkit.package("data", function(pkg, Class) {
              */
             this.add = function(o) {
                 this.$data.push(o);
-                this._.elementInserted(this, o, this.$data.length - 1);
+                this.fire("elementInserted", [this, o, this.$data.length - 1]);
             };
 
             /**
@@ -743,7 +729,7 @@ zebkit.package("data", function(pkg, Class) {
             this.removeAt = function(i) {
                 var re = this.$data[i];
                 this.$data.splice(i, 1);
-                this._.elementRemoved(this, re, i);
+                this.fire("elementRemoved", [this, re, i]);
             };
 
             /**
@@ -770,7 +756,7 @@ zebkit.package("data", function(pkg, Class) {
                     throw new RangeError(i);
                 }
                 this.$data.splice(i, 0, o);
-                this._.elementInserted(this, o, i);
+                this.fire("elementInserted", [this, o, i]);
             };
 
             /**
@@ -795,7 +781,7 @@ zebkit.package("data", function(pkg, Class) {
                 }
                 var pe = this.$data[i];
                 this.$data[i] = o;
-                this._.elementSet(this, o, pe, i);
+                this.fire("elementSet", [this, o, pe, i]);
                 return pe;
             };
 
@@ -819,7 +805,7 @@ zebkit.package("data", function(pkg, Class) {
                 return this.$data.indexOf(o);
             };
         }
-    ]);
+    ]).events("elementInserted", "elementRemoved", "elementSet");
 
     /**
      * Tree model item class. The structure is used by tree model to store
@@ -866,7 +852,6 @@ zebkit.package("data", function(pkg, Class) {
              this.value = null;
         }
     ]).hashable();
-
 
     /**
      * Tree model class. The class is simple and handy way to keep hierarchical structure.
@@ -945,20 +930,16 @@ zebkit.package("data", function(pkg, Class) {
      * @param {zebkit.data.TreeModel} src a tree model that triggers the event
      * @param {zebkit.data.Item}  item an item that has been inserted into the tree model
      */
-    pkg.TreeModel = Class(pkg.DataModel, zebkit.EventProducer, [
+    pkg.TreeModel = Class(pkg.DataModel, [
         function(r) {
             if (arguments.length === 0) {
                 this.root = new pkg.Item();
             } else {
                 this.root = zebkit.instanceOf(r, pkg.Item) ? r : this.clazz.create(r);
             }
-
-            this._ = new this.clazz.Listeners();
         },
 
         function $clazz() {
-            this.Listeners = zebkit.ListenersClass("itemModified", "itemRemoved", "itemInserted");
-
             /**
              * Create tree model item hierarchy by the given JavaScript object.
              * @param  {Object} r
@@ -1001,7 +982,7 @@ zebkit.package("data", function(pkg, Class) {
             this.create = function(r, p) {
                 var item = new pkg.Item(r.hasOwnProperty("value")? r.value : r);
                 item.parent = arguments.length < 2 ? null : p;
-                if (typeof r.kids !== 'undefined' && r.kids !== null) {
+                if (r.kids !== undefined && r.kids !== null) {
                     for(var i = 0; i < r.kids.length; i++) {
                         item.kids[i] = this.create(r.kids[i], item);
                     }
@@ -1075,7 +1056,7 @@ zebkit.package("data", function(pkg, Class) {
                     }
                 }
 
-                if (typeof root.kids !== 'undefined' && root.kids !== null) {
+                if (root.kids !== undefined && root.kids !== null) {
                     for (var i = 0; i < root.kids.length; i++) {
                         if (this.find(root.kids[i], value, cb)) {
                             return true;
@@ -1102,7 +1083,7 @@ zebkit.package("data", function(pkg, Class) {
                     }
                 }
 
-                var b = typeof root.kids !== 'undefined' && root.kids !== null;
+                var b = root.kids !== undefined && root.kids !== null;
 
                 if (render !== null) {
                     render(root);
@@ -1156,7 +1137,7 @@ zebkit.package("data", function(pkg, Class) {
             this.setValue = function(item, v){
                 var prev = item.value;
                 item.value = v;
-                this._.itemModified(this, item, prev);
+                this.fire("itemModified", [this, item, prev]);
             };
 
             /**
@@ -1196,7 +1177,7 @@ zebkit.package("data", function(pkg, Class) {
                 }
                 to.kids.splice(i, 0, item);
                 item.parent = to;
-                this._.itemInserted(this, item);
+                this.fire("itemInserted", [this, item]);
 
                 // !!!
                 // it is necessary to analyze if the inserted item has kids and
@@ -1212,7 +1193,7 @@ zebkit.package("data", function(pkg, Class) {
                 if (item === this.root) {
                     this.root = null;
                 } else {
-                    if (typeof item.kids !== 'undefined') {
+                    if (item.kids !== undefined) {
                         for(var i = item.kids.length - 1; i >= 0; i--) {
                             this.remove(item.kids[i]);
                         }
@@ -1222,7 +1203,7 @@ zebkit.package("data", function(pkg, Class) {
 
                 // preserve reference to parent when we call a listener
                 try {
-                    this._.itemRemoved(this, item);
+                    this.fire("itemRemoved", [this, item]);
                 } catch(e) {
                     item.parent = null;
                     throw e;
@@ -1241,7 +1222,7 @@ zebkit.package("data", function(pkg, Class) {
                 }
             };
         }
-    ]);
+    ]).events("itemModified", "itemRemoved", "itemInserted");
 
     /**
      *  Matrix model class.
@@ -1353,7 +1334,7 @@ zebkit.package("data", function(pkg, Class) {
      * @param {Integer}  colIndex a column that has been inserted
      * contains:
      */
-    pkg.Matrix = Class(pkg.DataModel, zebkit.EventProducer, [
+    pkg.Matrix = Class(pkg.DataModel, [
         function() {
             /**
              * Number of rows in the matrix model
@@ -1377,7 +1358,6 @@ zebkit.package("data", function(pkg, Class) {
              * @private
              */
 
-            this._ = new this.clazz.Listeners();
             if (arguments.length === 1) {
                 this.$objs = arguments[0];
                 this.cols = (this.$objs.length > 0) ? this.$objs[0].length : 0;
@@ -1389,12 +1369,6 @@ zebkit.package("data", function(pkg, Class) {
                     this.setRowsCols(arguments[0], arguments[1]);
                 }
             }
-        },
-
-        function $clazz() {
-            this.Listeners = zebkit.ListenersClass("matrixResized", "cellModified",
-                                                   "matrixSorted",  "matrixRowInserted",
-                                                   "matrixColInserted");
         },
 
         function $prototype() {
@@ -1414,7 +1388,7 @@ zebkit.package("data", function(pkg, Class) {
                     throw new RangeError(col);
                 }
 
-                return typeof this.$objs[row] === 'undefined' ? undefined : this.$objs[row][col];
+                return this.$objs[row] === undefined ? undefined : this.$objs[row][col];
             };
 
             /**
@@ -1477,14 +1451,14 @@ zebkit.package("data", function(pkg, Class) {
                 }
 
                 this.setRowsCols(nr, nc);
-                var old = typeof this.$objs[row] !== 'undefined' ? this.$objs[row][col] : undefined;
-                if (old === 'undefined' || obj !== old) {
+                var old = this.$objs[row] !== undefined ? this.$objs[row][col] : undefined;
+                if (old === undefined || obj !== old) {
                     // allocate array if no data for the given row exists
-                    if (typeof this.$objs[row] === 'undefined') {
+                    if (this.$objs[row] === undefined) {
                         this.$objs[row] = [];
                     }
                     this.$objs[row][col] = obj;
-                    this._.cellModified(this, row, col, old);
+                    this.fire("cellModified", [this, row, col, old]);
                 }
 
                 return this;
@@ -1530,13 +1504,13 @@ zebkit.package("data", function(pkg, Class) {
                         for(var i = 0; i < this.$objs.length; i++) {
                             // check if data for columns has been allocated and the size
                             // is greater than set number of columns
-                            if (typeof this.$objs[i] !== 'undefined' && this.$objs[i].length > cols) {
+                            if (this.$objs[i] !== undefined && this.$objs[i].length > cols) {
                                 this.$objs[i].length = cols;
                             }
                         }
                     }
 
-                    this._.matrixResized(this, pr, pc);
+                    this.fire("matrixResized", [this, pr, pc]);
                 }
                 return this;
             };
@@ -1582,7 +1556,7 @@ zebkit.package("data", function(pkg, Class) {
 
                 this.$objs.splice(begrow, count);
                 this.rows -= count;
-                this._.matrixResized(this, this.rows + count, this.cols);
+                this.fire("matrixResized", [this, this.rows + count, this.cols]);
                 return this;
             };
 
@@ -1604,13 +1578,13 @@ zebkit.package("data", function(pkg, Class) {
                 }
 
                 for(var i = 0; i < this.$objs.length; i++) {
-                    if (typeof this.$objs[i] !== 'undefined' && this.$objs[i].length > 0) {
+                    if (this.$objs[i] !== undefined && this.$objs[i].length > 0) {
                         this.$objs[i].splice(begcol, count);
                     }
                 }
 
                 this.cols -= count;
-                this._.matrixResized(this, this.rows, this.cols + count);
+                this.fire("matrixResized", [this, this.rows, this.cols + count]);
                 return this;
             };
 
@@ -1630,16 +1604,16 @@ zebkit.package("data", function(pkg, Class) {
                 if (row <= this.$objs.length - 1) {
                     for(i = 0; i < count; i++) {
                         this.$objs.splice(row, 0, undefined);
-                        this._.matrixRowInserted(this, row + i);
+                        this.fire("matrixRowInserted", [this, row + i]);
                     }
                 } else {
                     for(i = 0; i < count; i++) {
-                        this._.matrixRowInserted(this, row + i);
+                        this.fire("matrixRowInserted", [this, row + i]);
                     }
                 }
 
                 this.rows += count;
-                this._.matrixResized(this, this.rows - count, this.cols);
+                this.fire("matrixResized", [this, this.rows - count, this.cols]);
                 return this;
             };
 
@@ -1658,16 +1632,16 @@ zebkit.package("data", function(pkg, Class) {
                 if (this.$objs.length  > 0) {
                     for(var j = 0; j < count; j++) {
                         for(var i = 0; i < this.rows; i++) {
-                            if (typeof this.$objs[i] !== 'undefined' && j <= this.$objs[i].length) {
+                            if (this.$objs[i] !== undefined && j <= this.$objs[i].length) {
                                 this.$objs[i].splice(col, 0, undefined);
                             }
                         }
-                        this._.matrixColInserted(this, col + j);
+                        this.fire("matrixColInserted", [this, col + j]);
                     }
                 }
 
                 this.cols += count;
-                this._.matrixResized(this, this.rows, this.cols - count);
+                this.fire("matrixResized", [this, this.rows, this.cols - count]);
                 return this;
             };
 
@@ -1724,10 +1698,12 @@ zebkit.package("data", function(pkg, Class) {
                     return f(a[col], b[col]);
                 });
 
-                this._.matrixSorted(this, { col : col,
+                this.fire("matrixSorted", [ this, { col : col,
                                             func: f,
-                                            name: zebkit.$FN(f).toLowerCase() });
+                                            name: zebkit.$FN(f).toLowerCase() }]);
             };
         }
-    ]);
+    ]).events("matrixResized", "cellModified",
+              "matrixSorted",  "matrixRowInserted",
+              "matrixColInserted");
 });

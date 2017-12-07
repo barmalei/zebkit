@@ -4,15 +4,16 @@ zebkit.package("ui", function(pkg, Class) {
      * @param {zebkit.ui.Panel} t a target component to be scrolled
      * @constructor
      * @class zebkit.ui.ScrollManager
+     * @uses  zebkit.EventProducer
      */
 
      /**
       * Fired when a target component has been scrolled
-
-            scrollManager.on(function(px, py) {
-                ...
-            });
-
+      *
+      *      scrollManager.on(function(px, py) {
+      *          ...
+      *      });
+      *
       * @event scrolled
       * @param  {Integer} px a previous x location target component scroll location
       * @param  {Integer} py a previous y location target component scroll location
@@ -20,18 +21,18 @@ zebkit.package("ui", function(pkg, Class) {
 
      /**
       * Fired when a scroll state has been updated
-
-            scrollManager.scrollStateUpdated = function(x, y, px, py) {
-                ...
-            };
-
+      *
+      *      scrollManager.scrollStateUpdated = function(x, y, px, py) {
+      *          ...
+      *      };
+      *
       * @event scrollStateUpdated
       * @param  {Integer} x a new x location target component scroll location
       * @param  {Integer} y a new y location target component scroll location
       * @param  {Integer} px a previous x location target component scroll location
       * @param  {Integer} py a previous y location target component scroll location
       */
-    pkg.ScrollManager = Class(zebkit.EventProducer, [
+    pkg.ScrollManager = Class([
         function(c) {
             /**
              * Target UI component for that the scroll manager has been instantiated
@@ -40,10 +41,6 @@ zebkit.package("ui", function(pkg, Class) {
              * @readOnly
              */
             this.target = c;
-        },
-
-        function $clazz() {
-            this.Listeners = zebkit.ListenersClass("scrolled");
         },
 
         function $prototype() {
@@ -100,14 +97,15 @@ zebkit.package("ui", function(pkg, Class) {
                 if (psx !== x || psy !== y){
                     this.sx = x;
                     this.sy = y;
-                    if (typeof this.scrollStateUpdated !== 'undefined') {
+                    if (this.scrollStateUpdated !== undefined) {
                         this.scrollStateUpdated(x, y, psx, psy);
                     }
-                    if (typeof this.target.catchScrolled !== 'undefined') {
+                    if (this.target.catchScrolled !== undefined) {
                         this.target.catchScrolled(psx, psy);
                     }
 
-                    if (typeof this._ !== 'undefined') {
+                    // TODO: a bit faster then .fire("scrolled", [this, psx, psy])
+                    if (this._ !== undefined) {
                         this._.scrolled(this, psx, psy);
                     }
                 }
@@ -132,7 +130,7 @@ zebkit.package("ui", function(pkg, Class) {
                 return this;
             };
         }
-    ]);
+    ]).events("scrolled");
 
     /**
      * Scroll bar UI component
@@ -178,9 +176,9 @@ zebkit.package("ui", function(pkg, Class) {
             this.$super(this);
 
             var b = (this.orient === "vertical");
-            this.add("center", b ? new pkg.Scroll.VerticalThumb() : new pkg.Scroll.HorizontalThumb());
-            this.add("top"   , b ? new pkg.Scroll.VDecButton() : new pkg.Scroll.HDecButton());
-            this.add("bottom", b ? new pkg.Scroll.VIncButton() : new pkg.Scroll.HIncButton());
+            this.add("center", b ? new pkg.Scroll.VerticalThumb()     : new pkg.Scroll.HorizontalThumb());
+            this.add("top"   , b ? new pkg.Scroll.BottomArrowButton() : new pkg.Scroll.RightArrowButton());
+            this.add("bottom", b ? new pkg.Scroll.TopArrowButton()    : new pkg.Scroll.LeftArrowButton());
 
             this.setPosition(new zebkit.util.SingleColPosition(this));
         },
@@ -195,18 +193,20 @@ zebkit.package("ui", function(pkg, Class) {
                 }
             ]);
 
-            this.VIncButton = Class(this.ArrowButton, []);
-            this.VDecButton = Class(this.ArrowButton, []);
-            this.HIncButton = Class(this.ArrowButton, []);
-            this.HDecButton = Class(this.ArrowButton, []);
+            this.ArrowButton.inheritProperties = true;
 
-            this.VerticalThumb = Class(pkg.Panel, []);
-            this.HorizontalThumb = Class(pkg.Panel, []);
+            this.TopArrowButton    = Class(this.ArrowButton, []);
+            this.BottomArrowButton = Class(this.ArrowButton, []);
+            this.LeftArrowButton   = Class(this.ArrowButton, []);
+            this.RightArrowButton  = Class(this.ArrowButton, []);
 
-            this.MIN_BUNDLE_SIZE = 16;
+            this.VerticalThumb = Class(pkg.ViewPan, []);
+            this.HorizontalThumb = Class(pkg.ViewPan, []);
         },
 
         function $prototype() {
+            this.MIN_BUNDLE_SIZE = 16;
+
             this.incBt = this.decBt = this.thumb = this.position = null;
 
             /**
@@ -391,7 +391,7 @@ zebkit.package("ui", function(pkg, Class) {
                     b      = (this.orient === "horizontal"),
                     ps1    = pkg.$getPS(this.decBt),
                     ps2    = pkg.$getPS(this.incBt),
-                    minbs  = this.clazz.MIN_BUNDLE_SIZE;
+                    minbs  = this.MIN_BUNDLE_SIZE;
 
                 this.decBt.setBounds(left, top, b ? ps1.width
                                                   : ew,
@@ -763,7 +763,7 @@ zebkit.package("ui", function(pkg, Class) {
                         this.vBar.position.setOffset( -this.scrollObj.scrollManager.getSY());
                     }
 
-                    if (this.scrollObj.scrollManager === null || typeof this.scrollObj.scrollManager === 'undefined') {
+                    if (this.scrollObj.scrollManager === null || this.scrollObj.scrollManager === undefined) {
                         this.invalidate();
                     }
 
@@ -956,7 +956,7 @@ zebkit.package("ui", function(pkg, Class) {
 
         function insert(i,ctr,c) {
             if ("center" === ctr) {
-                if (c.scrollManager === null || typeof c.scrollManager === 'undefined') {
+                if (c.scrollManager === null || c.scrollManager === undefined) {
                     c = new this.clazz.ContentPan(c);
                 }
 
@@ -1020,11 +1020,11 @@ zebkit.package("ui", function(pkg, Class) {
                     this.$target     = e.source;
 
                     // detect scrollable component
-                    while (this.$target !== null && typeof this.$target.doScroll === 'undefined') {
+                    while (this.$target !== null && this.$target.doScroll === undefined) {
                         this.$target = this.$target.parent;
                     }
 
-                    if (this.$target !== null && typeof this.$target.pointerDragged !== 'undefined') {
+                    if (this.$target !== null && this.$target.pointerDragged !== undefined) {
                          this.$target = null;
                     }
                 }

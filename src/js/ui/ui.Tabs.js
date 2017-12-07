@@ -47,6 +47,7 @@ zebkit.package("ui", function(pkg, Class) {
      *
      * @class zebkit.ui.Tabs
      * @uses  zebkit.ui.DecorationViews
+     * @uses  zebkit.EventProducer
      * @constructor
      * @extends zebkit.ui.Panel
      */
@@ -76,15 +77,14 @@ zebkit.package("ui", function(pkg, Class) {
             this.tabAreaY = this.tabAreaWidth = this.tabAreaHeight = 0;
             this.overTab = this.selectedIndex = -1;
 
-            this._ = new zebkit.Listeners();
             this.pages = [];
             this.views = {};
 
-            if (typeof pkg.Tabs.font      !== 'undefined') {
+            if (pkg.Tabs.font !== undefined) {
                 this.render.setFont(pkg.Tabs.font);
             }
 
-            if (typeof pkg.Tabs.fontColor !== 'undefined') {
+            if (pkg.Tabs.fontColor !== undefined) {
                 this.render.setColor(pkg.Tabs.fontColor);
             }
 
@@ -166,7 +166,7 @@ zebkit.package("ui", function(pkg, Class) {
 
                                 function getCaption(id) {
                                     var v = this.views[id];
-                                    return v == null ? null : v.getValue();
+                                    return (v === null || v === undefined ? null : v.getValue());
                                 }
                             ]
                         )
@@ -477,12 +477,12 @@ zebkit.package("ui", function(pkg, Class) {
                 var marker = this.views.marker;
                 if (marker) {
                     //TODO: why only "out" is checked ?
-                    var bv   = this.views.outTab,
+                    var bv   = (this.views.outTab === null || this.views.outTab === undefined ? null : this.views.outTab),
                         left = bv ? bv.getLeft() : 0,
                         top  = bv ? bv.getTop()  : 0;
                     marker.paint(g, r.x + left, r.y + top,
-                                    r.width  - left - (bv == null ? 0 : bv.getRight()),
-                                    r.height - top  - (bv == null ? 0 : bv.getBottom()), this);
+                                    r.width  - left - (bv === null ? 0 : bv.getRight()),
+                                    r.height - top  - (bv === null ? 0 : bv.getBottom()), this);
                 }
             };
 
@@ -828,7 +828,7 @@ zebkit.package("ui", function(pkg, Class) {
                         this.pages[index * 2].selected(this, index, true);
                     }
 
-                    this._.fired(this, this.selectedIndex);
+                    this.fire("selected", [this, this.selectedIndex]);
                     this.vrp();
                 }
 
@@ -1002,5 +1002,5 @@ zebkit.package("ui", function(pkg, Class) {
             }
             return this;
         }
-    ]);
+    ]).events("selected");
 });

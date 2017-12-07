@@ -10,7 +10,7 @@ zebkit.package("ui.grid", function(pkg, Class) {
      *         grid = new zebkit.ui.grid.Grid(100,10),
      *         pan  = new zebkit.ui.grid.GridStretchPan(grid);
      *
-     *     canvas.root.setLayout(new zebkit.layout.BorderLayout());
+     *     canvas.root.setBorderLayout();
      *     canvas.root.add("center", pan);
      *
      *     ...
@@ -182,7 +182,7 @@ zebkit.package("ui.grid", function(pkg, Class) {
                         // the scroll bar visibility
                         if (isScr === true &&
                             p.height > 0 &&
-                            (typeof p.vBar !== 'undefined' || p.vBar === null) &&
+                            (p.vBar !== undefined || p.vBar === null) &&
                             p.autoHide === false &&
                             taHeight < this.$strPs.height)
                         {

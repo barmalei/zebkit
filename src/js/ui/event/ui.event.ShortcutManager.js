@@ -130,7 +130,7 @@ zebkit.package("ui.event", function(pkg, Class) {
 
             if (arguments.length > 0) {
                 this.setShortcuts(shortcuts.common);
-                if (zebkit.isMacOS === true && typeof shortcuts.osx !== 'undefined') {
+                if (zebkit.isMacOS === true && shortcuts.osx !== undefined) {
                     this.setShortcuts(shortcuts.osx);
                 }
             }

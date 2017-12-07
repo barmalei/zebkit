@@ -98,8 +98,6 @@ zebkit.package("ui.web", function(pkg, Class) {
         },
 
         function $clazz() {
-            this.Listeners = zebkit.ListenersClass("playbackStateUpdated");
-
             this.SignLabel = Class(ui.Panel, [
                 function $clazz() {
                     this.font = new zebkit.Font("bold", 18);
@@ -384,7 +382,7 @@ zebkit.package("ui.web", function(pkg, Class) {
                 }
             };
         }
-    ]);
+    ]).events("playbackStateUpdated");
 });
 
 

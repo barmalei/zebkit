@@ -16,7 +16,7 @@ zebkit.package("ui.event", function(pkg, Class) {
     pkg.Manager = Class([
         function() {
             //TODO: correct to event package
-            if (zebkit.ui.events !== null && typeof zebkit.ui.events !== 'undefined') {
+            if (zebkit.ui.events !== null && zebkit.ui.events !== undefined) {
                 zebkit.ui.events.on(this);
             }
         }
@@ -512,7 +512,7 @@ zebkit.package("ui.event", function(pkg, Class) {
                 // TODO: not stable concept. the idea to suppress event
                 // distribution to global listeners (managers) and child
                 // components
-                if (typeof e.source.suppressEvent !== 'undefined' &&
+                if (e.source.suppressEvent !== undefined &&
                     e.source.suppressEvent(e) === true)
                 {
                     return true;
@@ -521,13 +521,13 @@ zebkit.package("ui.event", function(pkg, Class) {
                 // call global listeners
                 if (this._[id](e) === false) {
                     // call target component listener
-                    if (typeof e.source[id] !== 'undefined' && e.source[id].call(e.source, e) === true) {
+                    if (e.source[id] !== undefined && e.source[id].call(e.source, e) === true) {
                         return true;
                     }
 
-                    // call parent listeners
+                    // call parents listeners
                     for(var t = e.source.parent; t !== null; t = t.parent){
-                        if (typeof t[childEvent] !== 'undefined') {
+                        if (t[childEvent] !== undefined) {
                             t[childEvent].call(t, e);
                         }
                     }
@@ -810,7 +810,7 @@ zebkit.package("ui.event", function(pkg, Class) {
                 if (s !== this.state){
                     var prev = this.state;
                     this.state = s;
-                    if (typeof this.stateUpdated !== 'undefined') {
+                    if (this.stateUpdated !== undefined) {
                         this.stateUpdated(prev, s);
                     }
                 }

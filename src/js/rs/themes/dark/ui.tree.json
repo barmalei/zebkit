@@ -14,8 +14,8 @@
             "collapsedSign": null,
             "expandedSign" : null,
 
-            "collapsedToggle"     : { "@zebkit.draw.ArrowView":  [  "right", "orange", 10 , 14] },
-            "expandedToggle"      : { "@zebkit.draw.ArrowView":  [ "bottom", "orange", 14, 10 ] },
+            "collapsedToggle"     : { "@zebkit.draw.ArrowView":  [ "right",  null, "orange"], "width":10 , "height":14 },
+            "expandedToggle"      : { "@zebkit.draw.ArrowView":  [ "bottom", null, "orange"], "width":14, "height":10  },
 
             "focusOnSelect"  : { "@zebkit.draw.Border" : [ "orange", 2, 6 ] },
             "focusOffSelect" : { "@zebkit.draw.Border" : [ "gray", 2, 6 ]   }

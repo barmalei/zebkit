@@ -76,7 +76,7 @@ zebkit.package("web", function(pkg, Class) {
                 window.addEventListener("keydown", function(e) {
                     var dest = $this.getDestination();
                     if (dest !== null) {
-                        if (typeof dest.clipCopy !== 'undefined' || typeof dest.clipPaste !== 'undefined') {
+                        if (dest.clipCopy !== undefined || dest.clipPaste !== undefined) {
                             if (zebkit.web.$fetchKeyCode(e) === $this.triggerKeyCode) {
                                 // value has to be set, otherwise some browsers (Safari) do not generate
                                 // "copy" event
@@ -120,12 +120,12 @@ zebkit.package("web", function(pkg, Class) {
                 this.$clipboard.oncopy = function(ee) {
                     var dest = $this.getDestination();
                     if (dest          !== null &&
-                        typeof dest.clipCopy !== 'undefined')
+                        dest.clipCopy !== undefined)
                     {
                         var v = dest.clipCopy();
-                        $this.$clipboard.value = (v === null || typeof v === 'undefined' ? "" : v);
+                        $this.$clipboard.value = (v === null || v === undefined ? "" : v);
                         $this.$clipboard.select();
-                        if (typeof $this.clipCopy !== 'undefined') {
+                        if ($this.clipCopy !== undefined) {
                             $this.clipCopy(v, $this.$clipboard.value);
                         }
                     }
@@ -133,10 +133,10 @@ zebkit.package("web", function(pkg, Class) {
 
                 this.$clipboard.oncut = function(ee) {
                     var dest = $this.getDestination();
-                    if (dest !== null && typeof dest.cut !== 'undefined') {
+                    if (dest !== null && dest.cut !== undefined) {
                         $this.$clipboard.value = dest.cut();
                         $this.$clipboard.select();
-                        if (typeof $this.clipCut !== 'undefined') {
+                        if ($this.clipCut !== undefined) {
                             $this.clipCut(dest, $this.$clipboard.value);
                         }
                     }
@@ -145,9 +145,9 @@ zebkit.package("web", function(pkg, Class) {
                 if (zebkit.isFF === true) {
                     this.$clipboard.addEventListener("input", function(ee) {
                         var dest = $this.getDestination();
-                        if (dest !== null && typeof dest.clipPaste !== 'undefined') {
+                        if (dest !== null && dest.clipPaste !== undefined) {
                             dest.clipPaste($this.$clipboard.value);
-                            if (typeof $this.clipPaste !== 'undefined') {
+                            if ($this.clipPaste !== undefined) {
                                 $this.clipPaste(dest, $this.$clipboard.value);
                             }
                         }
@@ -156,11 +156,11 @@ zebkit.package("web", function(pkg, Class) {
                 } else {
                     this.$clipboard.onpaste = function(ee) {
                         var dest = $this.getDestination();
-                        if (dest !== null && typeof dest.clipPaste !== 'undefined') {
-                            var txt = (typeof ee.clipboardData === "undefined") ? window.clipboardData.getData('Text')  // IE
-                                                                                : ee.clipboardData.getData('text/plain');
+                        if (dest !== null && dest.clipPaste !== undefined) {
+                            var txt = (ee.clipboardData === undefined) ? window.clipboardData.getData('Text')  // IE
+                                                                       : ee.clipboardData.getData('text/plain');
                             dest.clipPaste(txt);
-                            if (typeof $this.clipPaste !== 'undefined') {
+                            if ($this.clipPaste !== undefined) {
                                 $this.clipPaste(dest, txt);
                             }
                         }
@@ -196,7 +196,7 @@ zebkit.package("web", function(pkg, Class) {
             this.write = function(txt) {
                 try {
                     this.$on(txt);
-                    if (typeof document.execCommand !== 'undefined' && document.execCommand("copy") !== true) {
+                    if (document.execCommand !== undefined && document.execCommand("copy") !== true) {
                         throw new Error("Unsupported 'copy' clipboard command");
                     }
                 } finally {
@@ -214,7 +214,7 @@ zebkit.package("web", function(pkg, Class) {
             this.read = function() {
                 try {
                     var clip = this.$on("");
-                    if (typeof document.execCommand !== 'undefined' && document.execCommand("paste", null, null)) {
+                    if (document.execCommand !== undefined && document.execCommand("paste", null, null)) {
                         return clip.value;
                     } else {
                         throw new Error("Unsupported 'paste' clipboard command");

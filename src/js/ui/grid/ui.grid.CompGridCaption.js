@@ -33,7 +33,7 @@ zebkit.package("ui.grid", function(pkg, Class) {
                             wh   = (b ? target.height - top  - target.getBottom()
                                       : target.width  - left - target.getRight()),
                             xy   = (b ? left + m.getXOrigin()
-                                      : top  + m.getYOrigin());
+                                      : top  + m.getYOrigin()) + m.lineSize;
 
 
                         for (var i = 0; i < target.kids.length; i++) {
@@ -269,11 +269,11 @@ zebkit.package("ui.grid", function(pkg, Class) {
         },
 
         function setParent(p) {
-            if (this.parent !== null && typeof this.parent.scrollManager !== "undefined" && this.parent.scrollManager !== null) {
+            if (this.parent !== null && this.parent.scrollManager !== undefined && this.parent.scrollManager !== null) {
                 this.parent.scrollManager.off(this);
             }
 
-            if (p !== null && typeof p.scrollManager !== 'undefined' && p.scrollManager !== null) {
+            if (p !== null && p.scrollManager !== undefined && p.scrollManager !== null) {
                 p.scrollManager.on(this);
             }
 

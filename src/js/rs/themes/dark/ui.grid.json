@@ -1,10 +1,4 @@
 {
-    "DefViews": {
-        "cellBackground": "orange",
-        "font": "13px 'Lucida Grande', 'Lucida Sans', Arial, sans-serif",
-        "color": "rgb(74,74,74)"
-    },
-
     "DefEditors" : {
         "TextField": {
             "inheritProperties" : true,
@@ -18,7 +12,7 @@
 
         "Checkbox": {
             "inheritProperties" : true,
-            "layout": { "@zebkit.layout.FlowLayout": [ "center", "center" ]},
+            "flowLayout": [ "center", "center" ],
             "border": {"@zebkit.draw.Border":  "blue" }
         }
     },
@@ -31,9 +25,9 @@
         "inheritProperties" : true,
         "StatusPan": {
             "view" : {
-                "*"       : { "@zebkit.draw.ArrowView" : [ "left", "rgb(255, 153, 0)" ], "width" : 9, "height" : 9  },
-                "ascent"  : { "@zebkit.draw.ArrowView" : [ "top", "rgb(255, 153, 0)"  ]   },
-                "descent" : { "@zebkit.draw.ArrowView" : [ "bottom", "rgb(255, 153, 0)" ] }
+                "*"       : { "@zebkit.draw.ArrowView" : [ "left", null, "rgb(255, 153, 0)" ], "width" : 9, "height" : 9  },
+                "ascent"  : { "@zebkit.draw.ArrowView" : [ "top",   null, "rgb(255, 153, 0)"  ]   },
+                "descent" : { "@zebkit.draw.ArrowView" : [ "bottom",  null,  "rgb(255, 153, 0)" ] }
             }
         },
 
@@ -71,7 +65,9 @@
 
     "Grid": {
         "DefViews" : {
-            "color": "white"
+            "font": "13px 'Lucida Grande', 'Lucida Sans', Arial, sans-serif",
+            "color": "rgb(74,74,74)",
+            "background" : "orange"
         },
 
         "CornerPan" : {

@@ -37,12 +37,6 @@
             // what appropriate properties are set
             e.style.margin = e.style.padding = "0px";
 
-            /**
-             * Reference to HTML element the UI component wraps
-             * @attribute element
-             * @readOnly
-             * @type {HTMLElement}
-             */
             this.element = e;
 
             // this is set to make possible to use set z-index for HTML element
@@ -51,16 +45,6 @@
             if (e.parentNode !== null && e.parentNode.getAttribute("data-zebcont") !== null) {
                 throw new Error("DOM element '" + e + "' already has container");
             }
-
-            /**
-             * Every zebkit HTML element is wrapped with a container (div) HTML element.
-             * It is required since not all HTML elements are designed to be a container
-             * (for instance HTMLCanvas element), where every zebkit has to be a container.
-             * @attribute $container
-             * @readOnly
-             * @private
-             * @type {HTMLElement}
-             */
 
             // container is a DIV element that is used as a wrapper around original one
             // it is done to make HtmlElement implementation more universal making
@@ -124,14 +108,11 @@
             this.$super();
 
             // attach listeners
-            if (typeof this.$initListeners !== "undefined") {
+            if (this.$initListeners !== undefined) {
                 this.$initListeners();
             }
 
             var fe = this.$getElementRootFocus();
-
-            // TODO: may be this code should be moved to web place
-            //
             // reg native focus listeners for HTML element that can hold focus
             if (fe !== null) {
                 var $this = this;
@@ -153,13 +134,33 @@
         },
 
         function $clazz() {
-            this.CLASS_NAME = null;
-            this.$bodyFontSize = window.getComputedStyle(document.body, null).getPropertyValue('font-size');
+            this.$bodyFontSize = window.getComputedStyle(document.body, null)
+                                       .getPropertyValue('font-size');
         },
 
         function $prototype() {
-            this.$blockElement = this.$container = this.$canvas = null;
+            this.$blockElement = this.$canvas = null;
+
             this.ePsW = this.ePsH = 0;
+
+            /**
+             * Every zebkit HTML element is wrapped with a container (div) HTML element.
+             * It is required since not all HTML elements are designed to be a container
+             * (for instance HTMLCanvas element), where every zebkit has to be a container.
+             * @attribute $container
+             * @readOnly
+             * @private
+             * @type {HTMLElement}
+             */
+            this.$container = null;
+
+            /**
+             * Reference to HTML element the UI component wraps
+             * @attribute element
+             * @readOnly
+             * @type {HTMLElement}
+             */
+            this.element = null;
 
             /**
              * Indicates that this component is a DOM element wrapper
@@ -174,7 +175,7 @@
             this.$sizeAdjusted = false;
 
             this.wrap = function(c) {
-                this.setLayout(new zebkit.layout.StackLayout());
+                this.setStackLayout();
                 this.add(c);
                 return this;
             };
@@ -745,7 +746,7 @@
                     var e = c.$domKids[k];
                     if (e.isDOMElement === true) {
                         callback.call(this, e);
-                    } else if (typeof e.$domKids !== 'undefined') { // prevent unnecessary method call by condition
+                    } else if (e.$domKids !== undefined) { // prevent unnecessary method call by condition
                         $domElements(e, callback);
                     }
                 }
@@ -771,7 +772,7 @@
                 if (c.isDOMElement === true) {
                     c.$container.style.visibility = (c.isVisible === false || $isInInvisibleState(c) ? "hidden"
                                                                                                      : "visible");
-                } else if (typeof c.$domKids !== 'undefined') {
+                } else if (c.$domKids !== undefined) {
                     $domElements(c, function(e) {
                         e.$container.style.visibility = (e.isVisible === false || $isInInvisibleState(e) ? "hidden" : "visible");
                     });
@@ -794,7 +795,7 @@
                         cont.style.left = ((parseInt(cont.style.left, 10) || 0) - dx) + "px";
                         cont.style.top  = ((parseInt(cont.style.top,  10) || 0) - dy) + "px";
                     }
-                } else if (typeof c.$domKids !== 'undefined') {
+                } else if (c.$domKids !== undefined) {
                     $domElements(c, function(e) {
                         $adjustLocation(e);
                     });
@@ -802,7 +803,7 @@
             };
 
             function isLeaf(c) {
-                if (typeof c.$domKids !== 'undefined') {
+                if (c.$domKids !== undefined) {
                     for(var k in c.$domKids) {
                         if (c.$domKids.hasOwnProperty(k)) {
                             return false;
@@ -816,7 +817,7 @@
                 // DOM parent means the detached element doesn't
                 // have upper parents since it is relative to the
                 // DOM element
-                if (p.isDOMElement !== true && typeof p.$domKids !== 'undefined') {
+                if (p.isDOMElement !== true && p.$domKids !== undefined) {
                     // delete from parent
                     delete p.$domKids[c.$hash$];
 
@@ -836,7 +837,7 @@
 
             function removeDOMChildren(c) {
                 // DOM element cannot have children dependency tree
-                if (c.isDOMElement !== true && typeof c.$domKids !== 'undefined') {
+                if (c.isDOMElement !== true && c.$domKids !== undefined) {
                     for(var k in c.$domKids) {
                         if (c.$domKids.hasOwnProperty(k)) {
                             var kid = c.$domKids[k];
@@ -877,7 +878,7 @@
                 if (c.isDOMElement === true) {
                     $resolveDOMParent(c);
                 } else {
-                    if (typeof c.$domKids !== 'undefined') {
+                    if (c.$domKids !== undefined) {
                         $domElements(c, function(e) {
                             $resolveDOMParent(e);
                         });
@@ -891,7 +892,7 @@
                     // inserted children is DOM element or an element that
                     // embeds DOM elements
                     while (p !== null && p.isDOMElement !== true) {
-                        if (typeof p.$domKids === 'undefined') {
+                        if (p.$domKids === undefined) {
                             // if reference to kid DOM element or kid DOM elements holder
                             // has bot been created we have to continue go up to parent of
                             // the parent to register the whole chain of DOM and DOM holders
@@ -916,7 +917,7 @@
     // instantiate manager
     pkg.$htmlElementMan = new pkg.HtmlElementMan();
 
-    if (typeof zebkit.ui.event.FocusManager !== 'undefined') {
+    if (zebkit.ui.event.FocusManager !== undefined) {
         zebkit.ui.event.FocusManager.extend([
             function requestFocus(c) {
                 this.$super(c);

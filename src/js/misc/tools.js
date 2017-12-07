@@ -6,7 +6,7 @@ zebkit.package(function(pkg, Class) {
                     return print.apply(this, arguments);
                 } else {
                     var args = Array.prototype.slice.call(arguments);
-                    if (typeof window.alert !== "undefined") {
+                    if (window.alert !== undefined) {
                         window.alert(args.join());
                     } else {
                         throw new Error("Cannot find output to log : " + args.join());
@@ -46,7 +46,7 @@ zebkit.package(function(pkg, Class) {
                     return "<null>";
                 }
 
-                if (typeof o === "undefined") {
+                if (o === undefined) {
                     return "<undefined>";
                 }
 
@@ -222,13 +222,13 @@ zebkit.package(function(pkg, Class) {
     };
 
     pkg.assertDefined = function(o, p, lab) {
-        pkg.assert(typeof o[p] !== "undefined", true, lab,  "AssertDefined");
+        pkg.assert(o[p] !== undefined, true, lab,  "AssertDefined");
     };
 
     pkg.assertFDefined = function(o, f, lab) {
-        var b = typeof o[f] !== "undefined" && typeof o[f] === "function";
+        var b = typeof o[f] === "function";
         if (!b && zebkit.isIE) {
-            b = !!o[f] && typeof o[f].toString==="undefined" && /^\s*\bfunction\b/.test(o[f]);
+            b = !!o[f] && o[f].toString === undefined && /^\s*\bfunction\b/.test(o[f]);
         }
         pkg.assert(b, true, lab, "AssertFunctionDefined");
     };
@@ -243,7 +243,7 @@ zebkit.package(function(pkg, Class) {
                 return true;
             }
 
-            if (obj1 === null || obj2 === null || typeof obj1 === 'undefined' || typeof obj2 === 'undefined') {
+            if (obj1 === null || obj2 === null || obj1 === undefined || obj2 === undefined) {
                 throw new AssertionError("One of the compared object is null. " + (lab ? "'" + lab + "' ":""));
             }
 
@@ -271,7 +271,7 @@ zebkit.package(function(pkg, Class) {
             for(var k in obj1) {
                 var pp =  path === "" ? k : path + "." + k;
 
-                if (typeof obj2[k] === "undefined") {
+                if (obj2[k] === undefined) {
                     throw new AssertionError("Object field '"  + pp + "' is undefined. " + (lab ? "'" + lab + "' ":""));
                 }
 
@@ -286,7 +286,7 @@ zebkit.package(function(pkg, Class) {
     };
 
     pkg.assert = function(c, er, lab, assertLab) {
-        if (typeof assertLab === "undefined") {
+        if (assertLab === undefined) {
             assertLab = "Assert";
         }
         if (c !== er) {
@@ -336,11 +336,11 @@ zebkit.package(function(pkg, Class) {
     };
 
     pkg.obj2str = function(v, shift) {
-        if (typeof shift === "undefined") {
+        if (shift === undefined) {
             shift = "";
         }
 
-        if (v === null || typeof v === 'undefined' || zebkit.isNumber(v) || zebkit.isBoolean(v) || zebkit.isString(v)) {
+        if (v === null || v === undefined || zebkit.isNumber(v) || zebkit.isBoolean(v) || zebkit.isString(v)) {
             return v;
         }
 
@@ -389,7 +389,7 @@ zebkit.package(function(pkg, Class) {
 
         out.print("Running " + args.length + " test cases "  + (title !== null? "from '" + title + "' test suite" : "") + " :");
         out.print("==============================================");
-        if (typeof zebkit.DoIt !== "undefined" && pkg.$useSyncTest !== true) {
+        if (zebkit.DoIt !== undefined && pkg.$useSyncTest !== true) {
             var runner = new zebkit.DoIt();
 
             for(i = 0; i < args.length; i++) {
@@ -520,7 +520,7 @@ zebkit.package(function(pkg, Class) {
         }
 
         var m = clazz.prototype[methodName];
-        if (typeof m.$watched !== 'undefined') {
+        if (m.$watched !== undefined) {
             throw new Error("Method '" + methodName + "' is already annotated");
         }
 

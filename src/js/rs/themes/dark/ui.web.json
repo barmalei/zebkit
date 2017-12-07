@@ -20,8 +20,8 @@
     },
 
     "zCanvas": {
-        "//"    :  "IT IS IMPORTANT TO HAVE CANVAS CSS PADDING = 0 TO FIX IE9 PROBLEM",
-        "layout"    : { "@zebkit.layout.StackLayout":[] },
+        "$"    :  "IT IS IMPORTANT TO HAVE CANVAS CSS PADDING = 0 TO FIX IE9 PROBLEM",
+        "stackLayout": 0,
 
         "styles": {
             "outline"                    : "none",
@@ -62,19 +62,28 @@
 
     "HtmlTextInput": {
         "inheritProperties" : true,
+
+        "styles" : {
+            "background" : "transparent"
+        },
+
+        "border" : {
+            "focuson" :  { "@zebkit.draw.Border" : [ "orange", 2 ] },
+            "focusoff":  { "@zebkit.draw.Border" : [ "orange", 1 ] }
+        },
+
+        "background"    : { "@zebkit.draw.Gradient" : [ "black", "#444444" ]},
         "color"   : "white",
         "style"   : [ "outline", "none"],
         "padding" : [4,4,4,4]
     },
 
     "HtmlTextField": {
-        "inheritProperties" : true,
-        "color": "black"
+        "inheritProperties" : true
     },
 
     "HtmlTextArea": {
         "inheritProperties" : true,
-        "resizeable"  :  false,
-        "color": "black"
+        "resizeable"  :  false
     }
 }

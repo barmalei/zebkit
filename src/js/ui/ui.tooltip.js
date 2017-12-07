@@ -265,7 +265,7 @@ zebkit.package("ui", function(pkg, Class) {
              */
             this.pointerEntered = function(e) {
                 if (this.$target === null &&
-                    ((typeof e.source.tooltip !== 'undefined' && e.source.tooltip !== null) || typeof e.source.getTooltip !== 'undefined'))
+                    ((e.source.tooltip !== undefined && e.source.tooltip !== null) || e.source.getTooltip !== undefined))
                 {
                     this.$target = e.source;
                     this.$targetTooltipLayer = e.source.getCanvas().getLayer("win");
@@ -321,7 +321,7 @@ zebkit.package("ui", function(pkg, Class) {
              */
             this.run = function(t) {
                 if (this.$target !== null) {
-                    var ntooltip = (typeof this.$target.tooltip !== 'undefined' &&
+                    var ntooltip = (this.$target.tooltip !== undefined &&
                                    this.$target.tooltip !== null) ? this.$target.tooltip
                                                                   : this.$target.getTooltip(this.$target,
                                                                                             this.$tooltipX,
@@ -356,7 +356,7 @@ zebkit.package("ui", function(pkg, Class) {
 
                             this.$tooltip.setLocation(tx < 0 ? 0 : tx, ty < 0 ? 0 : ty);
 
-                            if (typeof this.$tooltip.winType === 'undefined') {
+                            if (this.$tooltip.winType === undefined) {
                                 this.$tooltip.winType = "info";
                             }
 

@@ -10,7 +10,7 @@ zebkit.package("web", function(pkg, Class) {
     //    [-] list of active touches or pointers have to be available
     //    [-] meX/meY -> (x, y) ?
 
-    if (typeof pkg.doubleClickDelta === 'undefined') {
+    if (pkg.doubleClickDelta === undefined) {
         pkg.doubleClickDelta = 280;
     }
 
@@ -40,11 +40,11 @@ zebkit.package("web", function(pkg, Class) {
                 this.pageY      = Math.round(e.pageY);
                 this.target     = e.target;
                 this.identifier = identifier;
-                this.altKey     = typeof e.altKey   !== 'undefined' ? e.altKey   : false;
-                this.shiftKey   = typeof e.shiftKey !== 'undefined' ? e.shiftKey : false;
-                this.ctrlKey    = typeof e.ctrlKey  !== 'undefined' ? e.ctrlKey  : false;
-                this.metaKey    = typeof e.metaKey  !== 'undefined' ? e.metaKey  : false;
-                this.pressure   = typeof e.pressure !== 'undefined' ? e.pressure : 0.5;
+                this.altKey     = e.altKey   !== undefined ? e.altKey   : false;
+                this.shiftKey   = e.shiftKey !== undefined ? e.shiftKey : false;
+                this.ctrlKey    = e.ctrlKey  !== undefined ? e.ctrlKey  : false;
+                this.metaKey    = e.metaKey  !== undefined ? e.metaKey  : false;
+                this.pressure   = e.pressure !== undefined ? e.pressure : 0.5;
             };
 
             this.getTouches = function() {
@@ -515,11 +515,11 @@ zebkit.package("web", function(pkg, Class) {
         },
 
         function (element, destination) {
-            if (element === null || typeof element === 'undefined') {
+            if (element === null || element === undefined) {
                 throw new Error("Invalid DOM element");
             }
 
-            if (destination === null || typeof destination === 'undefined') {
+            if (destination === null || destination === undefined) {
                 throw new Error("Invalid destination");
             }
 
@@ -573,7 +573,7 @@ zebkit.package("web", function(pkg, Class) {
 
                     $this.$UP(id, e, ME_STUB);
 
-                    if (typeof e.stopPropagation !== 'undefined') {
+                    if (e.stopPropagation !== undefined) {
                         e.stopPropagation();
                     }
                 }

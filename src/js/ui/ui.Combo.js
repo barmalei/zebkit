@@ -99,13 +99,10 @@ zebkit.package("ui", function(pkg, Class) {
 
             this.add("center", editable ? new this.clazz.EditableContentPan()
                                         : new this.clazz.ReadonlyContentPan());
-            this.add("right", new this.clazz.Button());
+            this.add("right", new this.clazz.ArrowButton());
         },
 
-
         function $clazz() {
-            this.Listeners = zebkit.ListenersClass("selected");
-
             /**
              * UI panel class that is used to implement combo box content area
              * @class  zebkit.ui.Combo.ContentPan
@@ -225,9 +222,10 @@ zebkit.package("ui", function(pkg, Class) {
                         var p = this.getCombo();
                         if (p !== null && this.calcPsByContent !== true) {
                             return p.list.calcMaxItemSize();
+                        } else {
+                            var cv = this.getCurrentView();
+                            return cv === null ? { width: 0, height: 0} : cv.getPreferredSize();
                         }
-                        var cv = this.getCurrentView();
-                        return cv === null ? { width: 0, height: 0} : cv.getPreferredSize();
                     };
 
                     this.comboValueUpdated = function(combo, value) {
@@ -243,6 +241,7 @@ zebkit.package("ui", function(pkg, Class) {
              * @class zebkit.ui.Combo.EditableContentPan
              * @constructor
              * @extends zebkit.ui.Combo.ContentPan
+             * @uses zebkit.EventProducer
              */
 
             /**
@@ -277,7 +276,6 @@ zebkit.package("ui", function(pkg, Class) {
 
                 function $clazz() {
                     this.TextField = Class(pkg.TextField, []);
-                    this.Listeners = zebkit.ListenersClass("contentUpdated");
                 },
 
                 function $prototype() {
@@ -317,14 +315,14 @@ zebkit.package("ui", function(pkg, Class) {
                 }
             ]);
 
-            this.Button = Class(pkg.Button, [
+            this.ArrowButton = Class(pkg.ArrowButton, [
                 function() {
                     this.setFireParams(true,  -1);
                     this.$super();
                 }
             ]);
 
-            this.List = Class(pkg.List, []);
+            this.List     = Class(pkg.List, []);
             this.CompList = Class(pkg.CompList, []);
         },
 
@@ -494,10 +492,12 @@ zebkit.package("ui", function(pkg, Class) {
              * @chainable
              */
             this.hidePad = function() {
-                var d = this.getCanvas();
-                if (d !== null && this.winpad.parent !== null) {
+                if (this.winpad !== null && this.winpad.parent !== null) {
                     this.winpad.removeMe();
-                    this.requestFocus();
+                    var d = this.getCanvas();
+                    if (d !== null) {
+                        this.requestFocus();
+                    }
                 }
                 return this;
             };
@@ -507,7 +507,7 @@ zebkit.package("ui", function(pkg, Class) {
              * @method showPad
              * @chainable
              */
-            this.showPad = function(){
+            this.showPad = function() {
                 var canvas = this.getCanvas();
                 if (canvas !== null) {
                     var ps  = this.winpad.getPreferredSize(),
@@ -543,10 +543,10 @@ zebkit.package("ui", function(pkg, Class) {
                                                                     : this.adjustPadTo.width,
                                           ps.height);
 
-                    this.list.notifyScrollMan(this.list.selectedIndex);
+                    this.list.makeItemVisible(this.list.selectedIndex);
                     canvas.getLayer(pkg.PopupLayerMix.id).add(this, this.winpad);
                     this.list.requestFocus();
-                    if (typeof this.padShown !== 'undefined') {
+                    if (this.padShown !== undefined) {
                         this.padShown(true);
                     }
 
@@ -578,7 +578,7 @@ zebkit.package("ui", function(pkg, Class) {
                     this.winpad = new this.clazz.ComboPadPan(this.list, [
                         function setParent(p) {
                             this.$super(p);
-                            if (typeof $this.padShown !== 'undefined') {
+                            if ($this.padShown !== undefined) {
                                 $this.padShown($this, p !== null);
                             }
                         }
@@ -727,7 +727,7 @@ zebkit.package("ui", function(pkg, Class) {
                 this.button = c;
             }
 
-            if (c.isEventFired()) {
+            if (c.isEventFired() ) {
                 c.on(this);
             }
 
@@ -762,5 +762,5 @@ zebkit.package("ui", function(pkg, Class) {
             }
             this.$super(p);
         }
-    ]);
+    ]).events("selected");
 });

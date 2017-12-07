@@ -71,7 +71,7 @@ zebkit.package("ui.tree", function(pkg, Class) {
             this.createModel = function(item, root, tree) {
                 var mi = new zebkit.data.Item();
 
-                if (typeof item.value !== "undefined") {
+                if (item.value !== undefined) {
                     mi.value = item.value !== null ? item.value : "";
                 } else {
                     mi.value = item;
@@ -79,7 +79,7 @@ zebkit.package("ui.tree", function(pkg, Class) {
 
                 mi.value = ui.$component(mi.value, tree);
                 mi.parent = root;
-                if (typeof item.kids !== 'undefined' && item.kids.length > 0 && zebkit.instanceOf(item, ui.Panel) === false) {
+                if (item.kids !== undefined && item.kids.length > 0 && zebkit.instanceOf(item, ui.Panel) === false) {
                     for (var i = 0; i < item.kids.length; i++) {
                         mi.kids[i] = this.createModel(item.kids[i], mi, tree);
                     }

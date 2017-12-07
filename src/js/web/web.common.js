@@ -12,9 +12,9 @@ zebkit.package("web", function(pkg, Class) {
      * @private
      * @type {Number}
      */
-    pkg.$deviceRatio = typeof window.devicePixelRatio !== "undefined" ? window.devicePixelRatio
-                                                                      : (typeof window.screen.deviceXDPI !== "undefined" ? window.screen.deviceXDPI / window.screen.logicalXDPI // IE
-                                                                                                                         : 1);
+    pkg.$deviceRatio = window.devicePixelRatio !== undefined ? window.devicePixelRatio
+                                                             : (window.screen.deviceXDPI !== undefined ? window.screen.deviceXDPI / window.screen.logicalXDPI // IE
+                                                                                                       : 1);
 
     pkg.$windowSize = function() {
         // iOS retina devices can have a problem with performance
@@ -73,8 +73,8 @@ zebkit.package("web", function(pkg, Class) {
      */
     pkg.$contains = function(element) {
         // TODO: not sure it is required, probably it can be replaced with document.body.contains(e);
-        return (typeof document.contains !== 'undefined' && document.contains(element)) ||
-               (typeof document.body.contains !== 'undefined' && document.body.contains(element)); // !!! use body for IE
+        return (document.contains !== undefined && document.contains(element)) ||
+               (document.body.contains !== undefined && document.body.contains(element)); // !!! use body for IE
     };
 
     /**
@@ -170,9 +170,9 @@ zebkit.package("web", function(pkg, Class) {
                 methods[k].call(ctx);
             } else {
                 var old = ctx[k];
-                if (typeof old !== 'undefined') {
+                if (old !== undefined) {
                     var kk = "$" + k;
-                    if (typeof ctx[kk] === 'undefined') {
+                    if (ctx[kk] === undefined) {
                         ctx[kk] = old;
                     }
                 }
@@ -230,7 +230,7 @@ zebkit.package("web", function(pkg, Class) {
         // canvas 2D context is singleton so check if the
         // context has already been modified to prevent
         // redundancy
-        if (typeof ctx.$ratio === "undefined") {
+        if (ctx.$ratio === undefined) {
             ctx.$ratio = (ctx.webkitBackingStorePixelRatio ||   // backing store ratio
                           ctx.mozBackingStorePixelRatio    ||
                           ctx.msBackingStorePixelRatio     ||
@@ -249,21 +249,44 @@ zebkit.package("web", function(pkg, Class) {
                 };
             }
 
-            // populate extra method to 2d context
+            // populate extra method to 2D context
             pkg.$extendContext(ctx, zebkit.draw.Context2D);
         }
+
+        ctx.$scaleRatio      = 1;
+        ctx.$scaleRatioIsInt = true;
 
         // take in account that canvas can be visualized on
         // Retina screen where the size of canvas (backstage)
         // can be less than it is real screen size. Let's
         // make it match each other
         if (ctx.$ratio != pkg.$deviceRatio) {
-            var ratio = pkg.$deviceRatio / ctx.$ratio;
+            var ratio = ctx.$ratio !== 1 ? pkg.$deviceRatio / ctx.$ratio
+                                         : pkg.$deviceRatio;
 
-            // calculate canvas with and height taking in account
-            // screen ratio
-            cw = Math.floor(cw * ratio);
-            ch = Math.floor(ch * ratio);
+
+            if (Number.isInteger(ratio)) {
+                cw = cw * ratio;
+                ch = ch * ratio;
+            } else {
+                if (pkg.config("approximateRatio") === true) {
+                    ratio = Math.round(ratio);
+                    cw = cw * ratio;
+                    ch = ch * ratio;
+                } else {
+                    // adjust ratio
+                    //  -- get adjusted with ratio width
+                    //  -- floor it and re-calculate ratio again
+                    //  -- the result is slightly corrected ratio that fits better
+                    //  to keep width as integer
+                    ratio = Math.floor(cw * ratio) / cw;
+                    cw = Math.floor(cw * ratio);
+                    ch = Math.floor(ch * ratio);
+                    ctx.$scaleRatioIsInt = Number.isInteger(ratio);
+                }
+            }
+
+            ctx.$scaleRatio = ratio;
 
             // adjust canvas size if it is necessary
             if (c.width != cw || c.height != ch || updateRatio === true || forceResize === true) {
@@ -271,12 +294,9 @@ zebkit.package("web", function(pkg, Class) {
                 c.height = ch;
                 ctx.$scale(ratio, ratio);
             }
-        } else {
-            // adjust canvas size if it is necessary
-            if (c.width != cw || c.height != ch || forceResize === true) {
-                c.width  = cw;
-                c.height = ch;
-            }
+        } else if (c.width != cw || c.height != ch || forceResize === true) { // adjust canvas size if it is necessary
+            c.width  = cw;
+            c.height = ch;
         }
 
         // TODO: top works not good in FF and it is better don't use it

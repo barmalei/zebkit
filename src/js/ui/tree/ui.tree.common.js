@@ -191,6 +191,7 @@ zebkit.package("ui.tree", function(pkg, Class) {
 
      *
      * @class zebkit.ui.tree.BaseTree
+     * @uses  zebkit.EventProducer
      * @constructor
      * @param {zebkit.data.TreeModel|Object} a tree model. It can be an instance of tree model
      * class or an object that described tree model. An example of such object is shown below:
@@ -268,7 +269,7 @@ zebkit.package("ui.tree", function(pkg, Class) {
       * applied to the given tree item
       */
     pkg.BaseTree = Class(ui.Panel, ui.DecorationViews, [
-        function (d, b){
+        function (d, b) {
             if (arguments.length < 2) {
                 b = true;
             }
@@ -288,13 +289,6 @@ zebkit.package("ui.tree", function(pkg, Class) {
             this.$super();
             this.setModel(d);
             this.scrollManager = new ui.ScrollManager(this);
-        },
-
-        function  $clazz() {
-            this.Listeners = zebkit.ListenersClass("toggled",
-                                                   "selected",
-                                                   "editingStarted",
-                                                   "editingStopped");
         },
 
         function $prototype() {
@@ -493,7 +487,7 @@ zebkit.package("ui.tree", function(pkg, Class) {
                 var v = i.kids.length > 0 ? (this.getIM(i).isOpen ? this.views.expandedToggle
                                                                   : this.views.collapsedToggle) : null;
 
-                return (typeof v === 'undefined' ? null : v);
+                return (v === undefined ? null : v);
             };
 
             /**
@@ -814,7 +808,7 @@ zebkit.package("ui.tree", function(pkg, Class) {
             this.paintSelectedItem = function(g, root, node, x, y) {
                 var v = this.hasFocus() ? this.views.focusOnSelect
                                         : this.views.focusOffSelect;
-                if (v !== null && typeof v !== 'undefined') {
+                if (v !== null && v !== undefined) {
                     v.paint(g, x, y, node.viewWidth, node.viewHeight, this);
                 }
             };
@@ -861,7 +855,7 @@ zebkit.package("ui.tree", function(pkg, Class) {
                         this.paintSelectedItem(g, root, node, vx, vy);
                     }
 
-                    if (typeof this.paintItem !== 'undefined') {
+                    if (this.paintItem !== undefined) {
                         this.paintItem(g, root, node, vx, vy);
                     }
 
@@ -1172,13 +1166,15 @@ zebkit.package("ui.tree", function(pkg, Class) {
                     }
 
                     this.select(null);
-                    if (this.model !== null && this.model._) {
+                    if (this.model !== null) {
                         this.model.off(this);
                     }
+
                     this.model = d;
-                    if (this.model !== null && this.model._) {
+                    if (this.model !== null) {
                         this.model.on(this);
                     }
+
                     this.firstVisible = null;
                     delete this.nodes;
                     this.nodes = {};
@@ -1256,5 +1252,5 @@ zebkit.package("ui.tree", function(pkg, Class) {
             }
             this.$super();
         }
-    ]);
+    ]).events("toggled", "selected", "editingStarted", "editingStopped");
 });

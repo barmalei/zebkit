@@ -34,15 +34,15 @@ var Font = Class([
                     var re = /([a-zA-Z_\- ]+)?(([0-9]+px|[0-9]+em)\s+([,\"'a-zA-Z_ \-]+))?/,
                         m  = family.match(re);
 
-                    if (typeof m[4] !== 'undefined') {
+                    if (m[4] !== undefined) {
                         this.family = m[4].trim();
                     }
 
-                    if (typeof m[3] !== 'undefined') {
+                    if (m[3] !== undefined) {
                         this.size = m[3].trim();
                     }
 
-                    if (typeof m[1] !== 'undefined') {
+                    if (m[1] !== undefined) {
                         this.style = m[1].trim();
                     }
 
@@ -106,7 +106,7 @@ var Font = Class([
                 var size = Number(s);
                 if (isNaN(size)) {
                     var m = s.match(/^([0-9]+)(%)$/);
-                    if (m !== null && typeof m[1] !== 'undefined' && m[2] !== 'undefined') {
+                    if (m !== null && m[1] !== undefined && m[2] !== undefined) {
                         size = Math.floor((defaultSize * parseInt(m[1], 10)) / 100);
                         return size + "px";
                     } else {

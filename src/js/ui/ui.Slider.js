@@ -23,7 +23,7 @@ zebkit.package("ui", function(pkg, Class) {
                 function paintLabel(g, x, y, w, h, v, value) {
                     this.$super(g, x, y, w, h, v, value);
 
-                    if (typeof this.$labelsInfo === 'undefined') {
+                    if (this.$labelsInfo === undefined) {
                         this.$labelsInfo = [];
                     }
 
@@ -85,7 +85,7 @@ zebkit.package("ui", function(pkg, Class) {
                     this.highlighterView = zebkit.draw.$view("yellow");
 
                     this.getLabelAt = function(x, y) {
-                        if (typeof this.$labelsInfo !== 'undefined') {
+                        if (this.$labelsInfo !== undefined) {
                             for (var i = 0; i < this.$labelsInfo.length; i++) {
                                 var inf = this.$labelsInfo[i];
                                 if (x >= inf.x && x < inf.w + inf.x && y >= inf.y && y < inf.h + inf.y) {
@@ -167,7 +167,7 @@ zebkit.package("ui", function(pkg, Class) {
                  * @method getView
                  */
                 function getView(t, v) {
-                    if (v !== null && typeof v !== 'undefined' && this.numPrecision !== -1 && zebkit.isNumber(v)) {
+                    if (v !== null && v !== undefined && this.numPrecision !== -1 && zebkit.isNumber(v)) {
                         v = v.toFixed(this.numPrecision);
                     }
                     return this.$super(t, v);
@@ -1153,10 +1153,10 @@ zebkit.package("ui", function(pkg, Class) {
      * @constructor
      * @extends zebkit.ui.Panel
      * @uses   zebkit.ui.DecorationViews
+     * @uses   zebkit.EvenetProducer
      */
     pkg.Slider = Class(pkg.Panel, pkg.DecorationViews, [
         function(o) {
-            this._ = new zebkit.Listeners();
             this.views = {
                 marker: null,
                 gauge : null
@@ -1288,14 +1288,14 @@ zebkit.package("ui", function(pkg, Class) {
             this.getHandleView = function() {
                 var h = this.orient === "horizontal" ? this.views.horHandle
                                                      : this.views.verHandle;
-                return typeof h === 'undefined' ? null : h;
+                return h === undefined ? null : h;
             };
 
             this.getHandlePreferredSize = function() {
                 var h = this.orient === "horizontal" ? this.views.horHandle
                                                      : this.views.verHandle;
-                return typeof h === 'undefined' || h === null ? { width: 0, height: 0}
-                                                              : h.getPreferredSize();
+                return h === undefined || h === null ? { width: 0, height: 0}
+                                                     : h.getPreferredSize();
             };
 
             /**
@@ -1496,7 +1496,7 @@ zebkit.package("ui", function(pkg, Class) {
                 var prev = this.value;
                 if (this.value !== v){
                     this.value = v;
-                    this._.fired(this, prev);
+                    this.fire("fired", [this, prev]);
                     this.repaint();
                 }
 
@@ -1635,5 +1635,5 @@ zebkit.package("ui", function(pkg, Class) {
             this.$super();
             this.repaint();
         }
-    ]);
+    ]).events("fired");
 });

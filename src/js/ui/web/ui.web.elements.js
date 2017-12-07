@@ -125,7 +125,8 @@ zebkit.package("ui.web", function(pkg, Class) {
                 clipRect : function(x,y,w,h){
                     var c = this.$states[this.$curState];
                     if (c.x !== x || y !== c.y || w !== c.width || h !== c.height) {
-                        var xx = c.x, yy = c.y,
+                        var xx = c.x,
+                            yy = c.y,
                             ww = c.width,
                             hh = c.height,
                             xw = x + w,
@@ -264,7 +265,7 @@ zebkit.package("ui.web", function(pkg, Class) {
                     // test if the context has been already full filled
                     // with necessary methods and if it is not true
                     // fill it
-                    if (typeof this.$context.$states === "undefined") {
+                    if (this.$context.$states === undefined) {
                         zebkit.web.$extendContext(this.$context, clazz.$ContextMethods);
                     }
 
@@ -436,7 +437,7 @@ zebkit.package("ui.web", function(pkg, Class) {
             var $this = this;
             this.element.onclick = function() {
                 $this.fire("fired", $this);
-            }
+            };
         }
     ]).events("fired");
 
@@ -473,7 +474,7 @@ zebkit.package("ui.web", function(pkg, Class) {
             this.setValue(text);
 
             this.$keyUnifier = new zebkit.web.KeyEventUnifier(this.element, this);
-            this.$keyUnifier.preventDefault = function(e, key) {}
+            this.$keyUnifier.preventDefault = function(e, key) {};
         },
 
         function $prototype() {
@@ -566,6 +567,7 @@ zebkit.package("ui.web", function(pkg, Class) {
      * @param  {String} [href] an href of the link
      * @extends zebkit.ui.web.HtmlElement
      * @class zebkit.ui.web.HtmlLink
+     * @uses zebkit.EventProducer
      * @constructor
      * @event fired
      * @param {zebkit.ui.web.Link} src a link that has been pressed
@@ -575,13 +577,12 @@ zebkit.package("ui.web", function(pkg, Class) {
             this.$super("a");
             this.setContent(text);
             this.setAttribute("href", arguments.length < 2 ? "#": href);
-            this._ = new zebkit.Listeners();
             var $this = this;
             this.element.onclick = function(e) {
-                $this._.fired($this);
+                $this.fire("fired", $this);
             };
         }
-    ]);
+    ]).events("fired");
 
     /**
      * This special wrapper component that has to be used to put HtmlElement into
@@ -596,7 +597,7 @@ zebkit.package("ui.web", function(pkg, Class) {
      * @param  {zebkit.ui.web.HtmlElement} t target html component that is going to
      * scrolled.
      * @class zebkit.ui.web.HtmlScrollContent
-     * @extends {zebkit.ui.web.HtmlElement}
+     * @extends zebkit.ui.web.HtmlElement
      * @constructor
      */
     pkg.HtmlScrollContent = Class(pkg.HtmlElement, [

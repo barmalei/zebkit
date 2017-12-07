@@ -81,14 +81,15 @@ zebkit.package("ui", function(pkg, Class) {
             this.setModel(m);
         },
 
-        function $clazz() {
-            this.Listeners = zebkit.ListenersClass("selected");
-        },
-
         function $prototype() {
             this.scrollManager = null;
 
-
+            /**
+             * Makes the component focusable
+             * @attribute canHaveFocus
+             * @type {Boolean}
+             * @default true
+             */
             this.canHaveFocus = true;
 
             /**
@@ -210,7 +211,7 @@ zebkit.package("ui", function(pkg, Class) {
                         } else {
                             this.position.setOffset(index);
                         }
-                        this.notifyScrollMan(index);
+                        this.makeItemVisible(index);
                         this.$triggeredByPointer = false;
                     }
                 }
@@ -243,7 +244,7 @@ zebkit.package("ui", function(pkg, Class) {
                     { width:{Integer}, height:{Integer} }
              * @method getItemSize
              */
-            this.getItemSize = function (i){
+            this.getItemSize = function(i) {
                 throw new Error("Not implemented");
             };
 
@@ -382,7 +383,7 @@ zebkit.package("ui", function(pkg, Class) {
              * @method select
              */
             this.select = function(index){
-                if (index === null || typeof index === 'undefined') {
+                if (index === null || index === undefined) {
                     throw new Error("Null index");
                 }
 
@@ -394,7 +395,7 @@ zebkit.package("ui", function(pkg, Class) {
                     if (index < 0 || this.isItemSelectable(index)) {
                         var prev = this.selectedIndex;
                         this.selectedIndex = index;
-                        this.notifyScrollMan(index);
+                        this.makeItemVisible(index);
                         this.repaintByOffsets(prev, this.selectedIndex);
                         this.fireSelected(prev);
                     }
@@ -565,15 +566,14 @@ zebkit.package("ui", function(pkg, Class) {
                 }
 
                 if (this.isComboMode === true) {
-                    this.notifyScrollMan(off);
+                    this.makeItemVisible(off);
                 } else {
                     this.select(off);
                 }
 
-                // this.notifyScrollMan(off);
+                // this.makeItemVisible(off);
                 this.repaintByOffsets(prevOffset, off);
             };
-
 
             /**
              * Set the list model to be rendered with the list component
@@ -587,13 +587,13 @@ zebkit.package("ui", function(pkg, Class) {
                         m = new zebkit.data.ListModel(m);
                     }
 
-                    if (this.model !== null && typeof this.model._ !== 'undefined') {
+                    if (this.model !== null) {
                         this.model.off(this);
                     }
 
                     this.model = m;
 
-                    if (this.model !== null && typeof this.model._ !== 'undefined') {
+                    if (this.model !== null) {
                         this.model.on(this);
                     }
 
@@ -633,7 +633,7 @@ zebkit.package("ui", function(pkg, Class) {
              * @chainable
              */
             this.setViewProvider = function (v){
-                if (this.provider !== v){
+                if (this.provider !== v) {
                     if (typeof v === "function") {
                         var o = new zebkit.Dummy();
                         o.getView = v;
@@ -646,7 +646,13 @@ zebkit.package("ui", function(pkg, Class) {
                 return this;
             };
 
-            this.notifyScrollMan = function (index){
+            /**
+             * Scroll if necessary the given item to make it visible
+             * @param  {Integer} index an item index
+             * @chainable
+             * @method makeItemVisible
+             */
+            this.makeItemVisible = function (index){
                 if (index >= 0 && this.scrollManager !== null) {
                     this.validate();
                     var is = this.getItemSize(index);
@@ -658,11 +664,20 @@ zebkit.package("ui", function(pkg, Class) {
                                                        is.width, is.height);
                     }
                 }
+                return this;
+            };
+
+            this.makeSelectedVisible = function(){
+                if (this.selectedIndex >= 0) {
+                    this.makeItemVisible(this.selectedIndex);
+                }
+                return this;
             };
 
             /**
              * The method returns the page size that has to be scroll up or down
-             * @param  {Integer} d a scrolling direction. -1 means scroll up, 1 means scroll down
+             * @param  {Integer} d a scrolling direction. -1 means scroll up, 1 means
+             * scroll down
              * @return {Integer} a number of list items to be scrolled
              * @method pageSize
              * @protected
@@ -698,7 +713,7 @@ zebkit.package("ui", function(pkg, Class) {
             this.$super();
             this.repaint();
         }
-    ]);
+    ]).events("selected");
 
     /**
      * The class is list component implementation that visualizes zebkit.data.ListModel.
@@ -795,7 +810,6 @@ zebkit.package("ui", function(pkg, Class) {
              */
             this.ViewProvider = Class(zebkit.draw.BaseViewProvider, []);
 
-
             this.Item = Class([
                 function(value, caption) {
                     this.value = value;
@@ -818,11 +832,10 @@ zebkit.package("ui", function(pkg, Class) {
                     if (v !== null) {
                         if (typeof v.getCaption === 'function') {
                             v = v.getCaption();
-                        } else if (typeof v.caption !== 'undefined') {
+                        } else if (v.caption !== undefined) {
                             v = v.caption;
                         }
                     }
-
                     return this.$super(t, i, v);
                 }
 
@@ -1077,7 +1090,6 @@ zebkit.package("ui", function(pkg, Class) {
         function $clazz() {
             this.Label      = Class(pkg.Label, []);
             this.ImageLabel = Class(pkg.ImageLabel, []);
-            this.Listeners  = this.$parent.Listeners.ListenersClass("elementInserted", "elementRemoved", "elementSet");
         },
 
         function $prototype() {
@@ -1225,5 +1237,5 @@ zebkit.package("ui", function(pkg, Class) {
             this.$super(index,e);
             this.model.fire("elementRemoved", [this, e, index]);
         }
-    ]);
+    ]).events("elementInserted", "elementRemoved", "elementSet");
 });

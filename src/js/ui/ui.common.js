@@ -208,8 +208,8 @@ zebkit.package("ui", function(pkg, Class) {
 
             if (m !== null) {
                 txt = desc.substring(m[1].length);
-                var ch  = hasInstance && typeof instance.clazz.Checkbox !== 'undefined' ? new instance.clazz.Checkbox(txt)
-                                                                                        : new pkg.Checkbox(txt);
+                var ch  = hasInstance && instance.clazz.Checkbox !== undefined ? new instance.clazz.Checkbox(txt)
+                                                                               : new pkg.Checkbox(txt);
                 ch.setValue(m[1].indexOf('x') > 0);
                 return ch;
             } else {
@@ -217,12 +217,12 @@ zebkit.package("ui", function(pkg, Class) {
                 if (m !== null) {
                     var path = m[1];
 
-                    txt  = desc.substring(path.length + 3 + (typeof m[2] !== 'undefined' ? m[2].length : 0)).trim();
+                    txt  = desc.substring(path.length + 3 + (m[2] !== undefined ? m[2].length : 0)).trim();
 
-                    var img = hasInstance && typeof instance.clazz.ImagePan !== 'undefined' ? new instance.clazz.ImagePan(path)
-                                                                                            : new pkg.ImagePan(path);
+                    var img = hasInstance && instance.clazz.ImagePan !== undefined ? new instance.clazz.ImagePan(path)
+                                                                                   : new pkg.ImagePan(path);
 
-                    if (typeof m[2] !== 'undefined') {
+                    if (m[2] !== undefined) {
                         var s = m[2].substring(1).split('x'),
                             w = parseInt(s[0], 10),
                             h = parseInt(s[1], 10);
@@ -233,12 +233,12 @@ zebkit.package("ui", function(pkg, Class) {
                     if (txt.length === 0) {
                         return img;
                     } else {
-                        return hasInstance && typeof instance.clazz.ImageLabel !== 'undefined' ? new instance.clazz.ImageLabel(txt, img)
-                                                                                               : new pkg.ImageLabel(txt, img);
+                        return hasInstance && instance.clazz.ImageLabel !== undefined ? new instance.clazz.ImageLabel(txt, img)
+                                                                                      : new pkg.ImageLabel(txt, img);
                     }
                 } else {
-                    return hasInstance && typeof instance.clazz.Label !== 'undefined' ? new instance.clazz.Label(desc)
-                                                                                      : new pkg.Label(desc);
+                    return hasInstance && instance.clazz.Label !== undefined ? new instance.clazz.Label(desc)
+                                                                             : new pkg.Label(desc);
                 }
             }
         } else if (Array.isArray(desc)) {
@@ -251,8 +251,8 @@ zebkit.package("ui", function(pkg, Class) {
                 }
                 return new pkg.grid.Grid(model);
             } else {
-                var clz = hasInstance && typeof instance.clazz.Combo !== 'undefined' ? instance.clazz.Combo
-                                                                                     : pkg.Combo,
+                var clz = hasInstance && instance.clazz.Combo !== undefined ? instance.clazz.Combo
+                                                                            : pkg.Combo,
                     combo = new clz(new clz.CompList(true)),
                     selectedIndex = -1;
 
@@ -271,11 +271,11 @@ zebkit.package("ui", function(pkg, Class) {
                 return combo;
             }
         } else if (desc instanceof Image) {
-            return hasInstance && typeof instance.clazz.ImagePan !== 'undefined' ? new instance.clazz.ImagePan(desc)
-                                                                                 : new pkg.ImagePan(desc);
+            return hasInstance && instance.clazz.ImagePan !== undefined ? new instance.clazz.ImagePan(desc)
+                                                                        : new pkg.ImagePan(desc);
         } else if (zebkit.instanceOf(desc, zebkit.draw.View)) {
-            var v = hasInstance && typeof instance.clazz.ViewPan !== 'undefined' ? new instance.clazz.ViewPan()
-                                                                                 : new pkg.ViewPan();
+            var v = hasInstance && instance.clazz.ViewPan !== undefined ? new instance.clazz.ViewPan()
+                                                                        : new pkg.ViewPan();
             v.setView(desc);
             return v;
         }
@@ -297,7 +297,7 @@ zebkit.package("ui", function(pkg, Class) {
              * @chainable
              */
             this.setViews = function(v){
-                if (typeof this.views === 'undefined') {
+                if (this.views === undefined) {
                     this.views = {};
                 }
 
@@ -435,13 +435,13 @@ zebkit.package("ui", function(pkg, Class) {
 
                         $this.vrp();
 
-                        if (typeof $this.imageLoaded !== 'undefined') {
+                        if ($this.imageLoaded !== undefined) {
                             $this.imageLoaded(img);
                         }
 
                         // fire imageLoaded event to children
                         for(var t = $this.parent; t !== null; t = t.parent){
-                            if (typeof t.childImageLoaded !== 'undefined') {
+                            if (t.childImageLoaded !== undefined) {
                                 t.childImageLoaded(img);
                             }
                         }
@@ -584,9 +584,9 @@ zebkit.package("ui", function(pkg, Class) {
                 if (typeof r === "string" || r.constructor === String) {
                     this.setView(r.length === 0 || r.indexOf('\n') >= 0 ? new zebkit.draw.TextRender(new zebkit.data.Text(r))
                                                                         : new zebkit.draw.StringRender(r));
-                } else if (typeof r.clazz         !== "undefined" &&
-                           typeof r.getTextLength !== 'undefined' &&   // a bit faster tnan instanceOf checking if
-                           typeof r.getLines      !== 'undefined'   )  // test if this is an instance of zebkit.data.TextModel
+                } else if (r.clazz         !== undefined &&
+                           r.getTextLength !== undefined &&   // a bit faster tnan instanceOf checking if
+                           r.getLines      !== undefined   )  // test if this is an instance of zebkit.data.TextModel
                 {
                     this.setView(new zebkit.draw.TextRender(r));
                 } else {
@@ -741,7 +741,7 @@ zebkit.package("ui", function(pkg, Class) {
             // TODO: this is copy paste of Panel constructor to initialize fields that has to
             // be used for adding child components. these components have to be added before
             // properties() call. a bit dirty trick
-            if (typeof this.kids === "undefined") {
+            if (this.kids === undefined) {
                 this.kids = [];
             }
 
@@ -946,8 +946,6 @@ zebkit.package("ui", function(pkg, Class) {
         },
 
         function $prototype() {
-            this.Listeners = zebkit.Listeners;
-
             /**
              * Progress bar value
              * @attribute value
@@ -1164,5 +1162,5 @@ zebkit.package("ui", function(pkg, Class) {
                 return this;
             };
         }
-    ]);
+    ]).events("fired");
 });

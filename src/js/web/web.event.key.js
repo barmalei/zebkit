@@ -133,16 +133,17 @@ zebkit.package("web", function(pkg, Class) {
 
     // codes to that are not the same for different browsers
     function $initializeCodesMap() {
-        var k = null, code = null;
+        var k    = null,
+            code = null;
 
         // validate codes mapping
         for(k in CODES) {
             code = CODES[k];
-            if (typeof code.map !== "undefined")  {
-                if (typeof CODES[code.map] === "undefined") {
+            if (code.map !== undefined)  {
+                if (CODES[code.map] === undefined) {
                     throw new Error("Invalid mapping for code = '" + k + "'");
                 }
-            } else if (typeof code.keyCode === "undefined") {
+            } else if (code.keyCode === undefined) {
                 throw new Error("unknown keyCode  for code = '" + k + "'");
             }
         }
@@ -151,8 +152,8 @@ zebkit.package("web", function(pkg, Class) {
         CODES_MAP = {};
         for(k in CODES) {
             code = CODES[k];
-            if (typeof code.map !== "undefined") {
-                if (typeof code.keyCode !== "undefined") {
+            if (code.map !== undefined) {
+                if (code.keyCode !== undefined) {
                     CODES_MAP[code.keyCode] = code.map;
                 }
             } else {
@@ -163,13 +164,13 @@ zebkit.package("web", function(pkg, Class) {
 
     pkg.$fetchKeyCode = function(e) {
         var code = e.code;
-        if (typeof code !== "undefined") {
+        if (code !== undefined) {
             if (CODES.hasOwnProperty(code) && CODES[code].hasOwnProperty("map")) {
                 code = CODES[code].map;
             }
         } else {
             code = CODES_MAP[(e.which || e.keyCode || 0)];
-            if (typeof code === "undefined") {
+            if (code === undefined) {
                 code = null;
             }
         }

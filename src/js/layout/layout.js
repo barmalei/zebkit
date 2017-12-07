@@ -305,11 +305,11 @@ zebkit.package("layout", function(pkg, Class) {
 
             this.$matchPath = function(node, name) {
                 if (name[0] === '~') {
-                    return typeof node.clazz !== 'undefined' &&
+                    return node.clazz !== undefined &&
                            node.clazz !== null &&
                            zebkit.instanceOf(node, zebkit.Class.forName(name.substring(1)));
                 } else {
-                    return typeof node.clazz.$name !== "undefined" &&
+                    return node.clazz.$name !== undefined &&
                            node.clazz.$name === name;
                 }
             };
@@ -464,7 +464,7 @@ zebkit.package("layout", function(pkg, Class) {
                         this.kids[i].validate();
                     }
                     this.isLayoutValid = true;
-                    if (typeof this.laidout !== 'undefined') {
+                    if (this.laidout !== undefined) {
                         this.laidout();
                     }
                 }
@@ -558,7 +558,7 @@ zebkit.package("layout", function(pkg, Class) {
              * @chainable
              */
             this.setLayout = function (m){
-                if (m === null || typeof m === 'undefined') {
+                if (m === null || m === undefined) {
                     throw new Error("Null layout");
                 }
 
@@ -626,7 +626,7 @@ zebkit.package("layout", function(pkg, Class) {
                 }
                 d.setParent(this);
 
-                if (typeof this.kidAdded !== 'undefined') {
+                if (this.kidAdded !== undefined) {
                     this.kidAdded(i, constr, d);
                 }
                 this.invalidate();
@@ -656,7 +656,7 @@ zebkit.package("layout", function(pkg, Class) {
                     var px = this.x, py = this.y;
                     this.x = xx;
                     this.y = yy;
-                    if (typeof this.relocated !== 'undefined') {
+                    if (this.relocated !== undefined) {
                         this.relocated(px, py);
                     }
                 }
@@ -700,7 +700,7 @@ zebkit.package("layout", function(pkg, Class) {
                     this.width = w;
                     this.height = h;
                     this.isLayoutValid = false;
-                    if (typeof this.resized !== 'undefined') {
+                    if (this.resized !== undefined) {
                         this.resized(pw, ph);
                     }
                 }
@@ -787,7 +787,7 @@ zebkit.package("layout", function(pkg, Class) {
 
                 this.kids.splice(i, 1);
 
-                if (typeof this.kidRemoved !== 'undefined') {
+                if (this.kidRemoved !== undefined) {
                     this.kidRemoved(i, obj);
                 }
 
@@ -831,6 +831,28 @@ zebkit.package("layout", function(pkg, Class) {
             };
 
             /**
+             * Replace the component with the new one. The replacement keeps
+             * layout constraints of the replaced component if other constraints
+             * value is not passed to the method.
+             * @param  {String} [ctr] a new constraints
+             * @param  {zebkit.layout.Layoutable} c a replacement component
+             * @chainable
+             * @method replaceMe
+             */
+            this.replaceMe = function(ctr, c) {
+                if (this.parent !== null) {
+                    if (arguments.length === 1) {
+                        c = ctr;
+                        c.constraints = this.constraints;
+                    } else {
+                        c.constraints = ctr;
+                    }
+                    this.parent.setAt(this.parent.kids.indexOf(this), c);
+                }
+                return this;
+            };
+
+            /**
              * The method can be implemented to be informed every time a children component
              * has been removed
              * @param {Integer} i a children component index at which it has been removed
@@ -852,9 +874,9 @@ zebkit.package("layout", function(pkg, Class) {
              * @method setPreferredSize
              */
             this.setPreferredSize = function(w, h) {
-                // if (arguments.length === 1) {
-                //     h = w;
-                // }
+                if (arguments.length === 1) {
+                    h = w;
+                }
 
                 if (w !== this.psWidth || h !== this.psHeight){
                     this.psWidth  = w;
@@ -941,7 +963,7 @@ zebkit.package("layout", function(pkg, Class) {
      *  @example
      *
      *      var pan = new zebkit.ui.Panel();
-     *      pan.setLayout(new zebkit.ui.StackLayout());
+     *      pan.setStackLayout();
      *
      *      // label component will be stretched over all available pan area
      *      pan.add(new zebkit.ui.Label("A"));
@@ -1293,7 +1315,7 @@ zebkit.package("layout", function(pkg, Class) {
      *     // components added to the panel will be placed
      *     // horizontally aligned at the center of the panel
      *     var p = new zebkit.ui.Panel();
-     *     p.setLayout(new zebkit.layout.FlowLayout("center", "center"));
+     *     p.setFlowLayout("center", "center");
      *
      *     // add three buttons into the panel with flow layout
      *     p.add(new zebkit.ui.Button("Button 1"));
@@ -1485,7 +1507,7 @@ zebkit.package("layout", function(pkg, Class) {
      *
      *     // create panel and set list layout for it
      *     var p = new zebkit.ui.Panel();
-     *     p.setLayout(new zebkit.layout.ListLayout());
+     *     p.setListLayout();
      *
      *     // add three buttons into the panel with list layout
      *     p.add(new zebkit.ui.Button("Item 1"));
@@ -1493,12 +1515,12 @@ zebkit.package("layout", function(pkg, Class) {
      *     p.add(new zebkit.ui.Button("Item 3"));
      *
      * @param {String} [ax] horizontal list item alignment:
-
-         "left"
-         "right"
-         "center"
-         "stretch"
-
+     *
+     *    "left"
+     *    "right"
+     *    "center"
+     *    "stretch"
+     *
      * @param {Integer} [gap] a space in pixels between laid out components
      * @class  zebkit.layout.ListLayout
      * @constructor

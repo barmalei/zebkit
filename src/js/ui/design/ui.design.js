@@ -7,7 +7,7 @@ zebkit.package("ui.design", function(pkg, Class) {
      * size and location.
      *
      *     var root = (new zebkit.ui.zCanvas(400, 300)).root;
-     *     root.setLayout(new zebkit.layout.RasterLayout());
+     *     root.setRasterLayout();
      *     root.setPadding(8);
      *
      *     // Add check box component wrapped with shaper panel
@@ -220,7 +220,7 @@ zebkit.package("ui.design", function(pkg, Class) {
 
                 function $prototype() {
                     this.detectAt = function(t, x, y) {
-                        if (this.activeView !== null && typeof this.activeView.detectAt !== 'undefined') {
+                        if (this.activeView !== null && this.activeView.detectAt !== undefined) {
                             return this.activeView.detectAt(t, x, y);
                         } else {
                             return "none";
@@ -275,9 +275,18 @@ zebkit.package("ui.design", function(pkg, Class) {
             this.$state       = null;
             this.catchInput   = true;
 
+            this.$detectAt = function(t, x, y) {
+                if (this.border !== null && this.border.detectAt !== undefined) {
+                    return this.border.detectAt(t, x, y);
+                } else {
+                    return null;
+                }
+            };
+
             this.getCursorType = function (t, x ,y) {
-                if (this.kids.length > 0 && this.border !== null && typeof this.border.detectAt !== 'undefined') {
-                    return CURSORS[this.border.detectAt(t, x, y)];
+                var cur = this.$detectAt(t, x, y);
+                if (cur !== null) {
+                    return CURSORS[cur];
                 } else {
                     return null;
                 }
@@ -328,7 +337,7 @@ zebkit.package("ui.design", function(pkg, Class) {
             this.pointerDragStarted = function(e) {
                 this.$state = null;
                 if (this.isResizeEnabled || this.isMoveEnabled) {
-                    var t = this.border.detectAt(this, e.x, e.y);
+                    var t = this.$detectAt(this, e.x, e.y);
                     if ((this.isMoveEnabled   === true || t !== "center") ||
                         (this.isResizeEnabled === true || t === "center")   )
                     {
@@ -441,7 +450,7 @@ zebkit.package("ui.design", function(pkg, Class) {
              * @method buildModel
              */
             this.buildModel = function(comp, root){
-                var b    = typeof this.exclude !== 'undefined' && this.exclude(comp),
+                var b    = this.exclude !== undefined && this.exclude(comp),
                     item = b ? root : this.createItem(comp);
 
                 for(var i = 0; i < comp.kids.length; i++) {
@@ -480,7 +489,7 @@ zebkit.package("ui.design", function(pkg, Class) {
 
             this.createItem = function(comp){
                 var name = comp.clazz.$name;
-                if (typeof name === 'undefined') {
+                if (name === undefined) {
                     name = comp.toString();
                 }
 

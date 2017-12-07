@@ -29,8 +29,8 @@
         $Request.prototype.open = function(method, url, async, user, password) {
             var m = url.match(hostRe);
             if (window.location.scheme.toLowerCase() === "file:" ||
-                  (m           !== null &&
-                   typeof m[2] !== 'undefined' &&
+                  (m    !== null &&
+                   m[2] !== undefined &&
                    m[2].toLowerCase() === window.location.host.toLowerCase()))
             {
                 this._request = new XMLHttpRequest();
@@ -162,29 +162,25 @@
          * @method getHttpRequest
          */
         pkg.getHttpRequest = function() {
-            if (typeof XMLHttpRequest !== "undefined") {
-                var r = new XMLHttpRequest();
-
-                if (isFF) {
-                    r.__send = r.send;
-                    r.send = function(data) {
-                        // !!! FF can throw NS_ERROR_FAILURE exception instead of
-                        // !!! returning 404 File Not Found HTTP error code
-                        // !!! No request status, statusText are defined in this case
-                        try {
-                            return this.__send(data);
-                        } catch(e) {
-                            if (!e.message || e.message.toUpperCase().indexOf("NS_ERROR_FAILURE") < 0) {
-                                // exception has to be re-instantiate to be Error class instance
-                                throw new Error(e.toString());
-                            }
+            var r = new XMLHttpRequest();
+            if (isFF) {
+                r.__send = r.send;
+                r.send = function(data) {
+                    // !!! FF can throw NS_ERROR_FAILURE exception instead of
+                    // !!! returning 404 File Not Found HTTP error code
+                    // !!! No request status, statusText are defined in this case
+                    try {
+                        return this.__send(data);
+                    } catch(e) {
+                        if (!e.message || e.message.toUpperCase().indexOf("NS_ERROR_FAILURE") < 0) {
+                            // exception has to be re-instantiate to be Error class instance
+                            throw new Error(e.toString());
                         }
-                    };
-                }
-                return ("withCredentials" in r) ? r  // CORS is supported out of box
-                                                : new $Request(); // IE
+                    }
+                };
             }
-            throw new Error("Archaic browser detected");
+            return ("withCredentials" in r) ? r  // CORS is supported out of box
+                                            : new $Request(); // IE
         };
 
         pkg.parseXML = function(s) {
@@ -269,7 +265,7 @@
                 img.onerror = function(e) {
                     img.onerror = null;
                     try {
-                        if (typeof error !== 'undefined') {
+                        if (error !== undefined) {
                             error.call($this, img, new Error("Image '" + ph + "' cannot be loaded " + e));
                         }
                     } finally {

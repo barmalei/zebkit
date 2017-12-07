@@ -154,64 +154,22 @@ zebkit.package("ui", function(pkg, Class) {
              */
             this.activeWin = null;
 
+            /**
+             * Top modal window index
+             * @type {Integer}
+             * @attribute topModalIndex
+             * @private
+             * @default -1
+             */
             this.topModalIndex = -1;
 
-            this.layerPointerPressed = function(e) {
-                if (this.kids.length > 0) {
-
-                    // I) check most probable variant - pressed has occurred inside an active window that
-                    // is placed on the top of all other windows
-                    if (this.activeWin !== null) {
-                        if (this.indexOf(this.activeWin) === this.kids.length - 1) {
-                            var x1 = this.activeWin.x,
-                                y1 = this.activeWin.y,
-                                x2 = x1 + this.activeWin.width,
-                                y2 = y1 + this.activeWin.height;
-
-                            // pressed has occurred inside the topest active window, so let process
-                            // goes normally by calling winLayer.getComponetAt(x,y)
-                            if (e.x >= x1 && e.y >= y1 && e.x <= x2 && e.y <= y2) {
-                                return false;
-                            }
-                        }
-                    }
-
-                    // II) otherwise looking for a window starting from the topest one where the
-                    // pressed event has occurred. Pay attention modal window can open MDI windows
-                    for(var i = this.kids.length - 1; i >= 0 && i >= this.topModalIndex; i--) {
-                        var d = this.kids[i];
-
-                        if (d.isVisible === true  &&   // check pressed is inside of a MDI window that
-                            d.isEnabled === true  &&   // is shown after currently active modal window
-                            d.winType  !== "info" &&
-                            e.x >= d.x            &&
-                            e.y >= d.y            &&
-                            e.x < d.x + d.width   &&
-                            e.y < d.y + d.height     )
-                        {
-                            if (d !== this.activeWin) {
-                                this.activate(d);
-                                return true;
-                            } else {
-                                return false;  // we are inside activated modal window
-                            }
-                        }
-                    }
-
-                    // III) Check if have to deactivate active MDI window since on prev. step we could not find
-                    // a target window  what means pressed was outside of a window
-                    if (this.topModalIndex < 0 && this.activeWin !== null) { // no a modal window has been shown
-                        this.activate(null);
-                        return false;
-                    } else {
-                        return this.topModalIndex >= 0;
-                    }
+            this.pointerPressed = function(e) {
+                if (this.topModalIndex < 0 && this.activeWin !== null) { // no a modal window has been shown
+                    this.activate(null);
                 }
-
-                return false;
             };
 
-            this.layerKeyPressed = function(e){
+            this.layerKeyPressed = function(e) {
                 if (this.kids.length > 0 &&
                     e.code === "Tab"     &&
                     e.shiftKey === true     )
@@ -227,8 +185,9 @@ zebkit.package("ui", function(pkg, Class) {
                     }
 
                     return true;
+                } else {
+                    return false;
                 }
-                return false;
             };
 
             /**
@@ -240,12 +199,32 @@ zebkit.package("ui", function(pkg, Class) {
                 this.activate(zebkit.layout.getDirectChild(this, e.source));
             };
 
-            this.getFocusRoot = function() {
-                return this.activeWin;
+            this.childPointerClicked = function (e) {
+                if (this.kids.length > 0 && (this.activeWin === null || zebkit.layout.isAncestorOf(this.activeWin, e.source) === false)) {
+                    // II) otherwise looking for a window starting from the topest one where the
+                    // pressed event has occurred. Pay attention modal window can open MDI windows
+                    for(var i = this.kids.length - 1; i >= 0 && i >= this.topModalIndex; i--) {
+                        var d = this.kids[i];
+
+                        if (d.isVisible === true  &&   // check pressed is inside of a MDI window that
+                            d.isEnabled === true  &&   // is shown after currently active modal window
+                            d.winType  !== "info" &&
+                            zebkit.layout.isAncestorOf(d, e.source))
+                        {
+                            this.activate(d);
+                            return true;
+                        }
+                    }
+                }
             };
 
-            this.getWinType = function(w) {
-                return w.winType;
+            /**
+             * Get root a component to start focusing traversing
+             * @return {zebkit.ui.Panel} a root component
+             * @method getFocusRoot
+             */
+            this.getFocusRoot = function() {
+                return this.activeWin;
             };
 
             /**
@@ -315,17 +294,36 @@ zebkit.package("ui", function(pkg, Class) {
                 this.add(win);
             };
 
-            this.getComponentAt = function(x, y) {
-                return (this.activeWin === null) ? null
-                                                 : this.activeWin.getComponentAt(x - this.activeWin.x,
-                                                                                 y - this.activeWin.y);
+            this.getComponentAt = function (x, y) {
+                if (this.kids.length === 0) {
+                    // layer is not active
+                    return null;
+                } else {
+                    for (var i = this.kids.length - 1 ; i >= 0 && i >= this.topModalIndex; i--) {
+                        var kid = this.kids[i];
+                        if (kid.isVisible &&
+                            kid.winType  !== "info"  &&
+                            x >= kid.x               &&
+                            y >= kid.y               &&
+                            x  < kid.x + kid.width   &&
+                            y  < kid.y + kid.height     )
+                        {
+                            return kid.getComponentAt(x - kid.x,
+                                                      y - kid.y);
+                        }
+                    }
+
+                    return this.activeWin !== null ? this : null;
+                }
+                return null;
             };
         },
+
 
         function kidAdded(index, constr, lw){
             this.$super(index, constr, lw);
 
-            if (typeof lw.winType === 'undefined') {
+            if (lw.winType === undefined) {
                 lw.winType = "mdi";
             } else {
                 zebkit.util.validateValue(lw.winType, "mdi", "modal", "info");
@@ -481,7 +479,7 @@ zebkit.package("ui", function(pkg, Class) {
             this.setSizeable(true);
 
             this.$super();
-            this.setLayout(new zebkit.layout.BorderLayout(2,2));
+            this.setBorderLayout(2,2);
 
             this.add("center", this.root);
             this.add("top",    this.caption);
@@ -615,7 +613,7 @@ zebkit.package("ui", function(pkg, Class) {
 
             this.winOpened = function(e) {
                 var state = this.isActive() ? "active" : "inactive";
-                if (this.caption !== null && typeof this.caption.setState !== 'undefined') {
+                if (this.caption !== null && this.caption.setState !== undefined) {
                     this.caption.setState(state);
                 }
                 this.setState(state);

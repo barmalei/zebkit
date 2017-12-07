@@ -8,7 +8,7 @@
         "border"    : { "@zebkit.draw.Border": [ "#CCCCCC", 1, 16 ] },
         "padding"   : 12,
         "background": "white",
-        "layout"    : { "@zebkit.layout.FlowLayout" : [ "center", "top"] }
+        "flowLayout": [ "center", "top"]
     },
 
     "VKeyBase" : {
@@ -89,7 +89,7 @@
         "activeGroup" : "latin",
         "background"  : null,
         "padding"     : 4,
-        "layout"      : { "@zebkit.layout.StackLayout": null }
+        "stackLayout" : 0
     },
 
     "%{../ui.vk.hindi.json}": null

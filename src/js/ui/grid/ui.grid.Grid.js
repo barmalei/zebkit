@@ -32,56 +32,181 @@ zebkit.package("ui.grid", function(pkg, Class) {
     // .<---| grid.getLeft()                            grid.getRight()  |--->.
     //
     //
-    //
 
-    // TODO: this is the future thoughts regarding
-    // grid cell selection customization
-    pkg.RowSelMode = Class([
+
+    /**
+     * Class to that defines grid cell selection mode. This implementation
+     * allows users single grid cell selection.
+     * @constructor
+     * @param  {zebkit.ui.grid.Grid} target a target grid the selection mode
+     * instance class belongs
+     * @class zebkit.ui.grid.CellSelectMode
+     */
+    pkg.CellSelectMode = Class([
+        function(target) {
+            this.target = target;
+        },
+
         function $prototype() {
-            this.selectedIndex = 0;
-            this.$blocked = false;
+            /**
+             * Target grid cell selection mode belongs
+             * @attribute target
+             * @type {zebkit.ui.grid.Grid}
+             */
+            this.target = null;
 
+            this.selectedRow = -1;
+            this.selectedCol = -1;
+            this.prevSelectedRow = -1;
+            this.prevSelectedCol = -1;
+
+            /**
+             *  Callback method that is called every time the select mode is
+             *  attached to the given target grid component
+             *  @param  {zebkit.ui.grid.Grid} target a target grid component
+             *  @method  install
+             */
+
+            /**
+             *  Callback method that is called every time the select mode is
+             *  detached from the given target grid component
+             *  @param  {zebkit.ui.grid.Grid} target a target grid component
+             *  @method  uninstall
+             */
+
+            /**
+             * Evaluates if the given cell is selected.
+             * @param  {Integer}  row a cell row
+             * @param  {Integer}  col a cell column
+             * @return {Boolean} true if the given cell is selected
+             * @method isSelected
+             */
             this.isSelected = function(row, col) {
-                return row >= 0 && this.selectedIndex === row;
+                return row >= 0 && row === this.selectedRow &&
+                       col >= 0 && col === this.selectedCol;
             };
 
+            /**
+             * Callback method that is called every time a grid position
+             * marker has been updated.
+             * @param  {zebkit.util.Position} pos a position manager
+             * @param  {Integer} prevOffset a previous position offset
+             * @param  {Integer} prevLine  a previous position line
+             * @param  {Integer} prevCol  a previous position column
+             * @method posChanged
+             */
+            this.posChanged = function(pos, prevOffset, prevLine, prevCol) {
+                this.prevSelectedRow = prevLine;
+                this.prevSelectedCol = prevCol;
+                this.target.select(pos.currentLine, pos.currentCol, true);
+            };
+
+            /**
+             * Clear all selected cells
+             * @chainable
+             * @method clearSelect
+             */
+            this.clearSelect = function() {
+                if (this.selectedRow >= 0 || this.selectedCol >= 0) {
+                    var prevRow = this.selectedRow,
+                        prevCol = this.selectedCol;
+                    this.selectedCol = this.selectedRow = -1;
+                    this.fireSelected(prevRow, prevCol, false);
+                }
+                return this;
+            };
+
+            /**
+             * Select or de-select the given grid cell
+             * @param  {Integer} row a row of selected or de-selected cell
+             * @param  {Integer} col a column of selected or de-selected cell
+             * @param  {Boolean} b a selection status
+             * @chainable
+             * @method select
+             */
             this.select = function(row, col, b) {
-                if (arguments.length === 1 || (arguments.length === 2 && zebkit.isNumber(col))) {
+                if (arguments.length === 2) {
                     b = true;
                 }
 
-                if (this.isSelected(row, col) !== b){
-                    if (this.selectedIndex >= 0) {
-                        this.clearSelect();
-                    }
+                if (this.isSelected(row, col) !== b) {
+                    this.clearSelect();
 
-                    if (b === true) {
-                        this.selectedIndex = row;
-                        this.target.fire("rowSelected");
+                    if (b) {
+                        this.selectedRow = row;
+                        this.selectedCol = col;
+                        this.fireSelected(row, col, b);
                     }
                 }
+                return this;
             };
 
-            this.clearSelect = function() {
-                if (this.selectedIndex >= 0) {
-                    this.selectedIndex = -1;
-                    this.target.fire("rowSelected");
-                }
+            /**
+             * Fire selected or de-selected event.
+             * @param  {Integer} row a selected or de-selected row
+             * @param  {Integer} col a selected or de-selected column
+             * @param  {Boolean} b   a state of selected cell
+             * @method fireSelected
+             * @protected
+             */
+            this.fireSelected = function(row, col, b) {
+                this.target.fire("selected", [ this.target, row, col, b]);
+                this.repaintTarget(row, col);
             };
 
-            this.posChanged = function(src) {
-                if (this.$blocked === false) {
-                    this.$blocked = true;
-                    try {
-
-                    }
-                    finally {
-                        this.$blocked = false;
-                    }
-                }
+            /**
+             * Force cells repainting.
+             * @param  {Integer} row a cell row
+             * @param  {Integer} col a cell column
+             * @method  repaintTarget
+             * @protected
+             */
+            this.repaintTarget = function(row, col) {
+                this.target.repaintCells(row, col);
             };
         }
     ]);
+
+    /**
+     * Row selection mode class. In this mode it is possible to select single
+     * grid row.
+     * @param  {zebkit.ui.grid.Grid} target a target grid the selection mode
+     * instance class belongs
+     * @extends zebkit.ui.grid.CellSelectMode
+     * @class zebkit.ui.grid.RowSelectMode
+     */
+    pkg.RowSelectMode = Class(pkg.CellSelectMode, [
+        function $prototype() {
+            this.isSelected = function(row, col) {
+                return row >= 0 && this.selectedRow === row;
+            };
+
+            this.repaintTarget = function(row, col) {
+                this.target.repaintRows(row, row + 1);
+            };
+        }
+    ]);
+
+    /**
+     * Column selection mode class. In this mode it is possible to select single
+     * grid column.
+     * @param  {zebkit.ui.grid.Grid} target a target grid the selection mode
+     * instance class belongs
+     * @extends zebkit.ui.grid.CellSelectMode
+     * @class zebkit.ui.grid.ColSelectMode
+     */
+    pkg.ColSelectMode = Class(pkg.CellSelectMode, [
+        function $prototype() {
+            this.isSelected = function(row, col) {
+                return col >= 0 && this.selectedCol === col;
+            };
+
+            this.repaintTarget = function(row, col) {
+                this.target.repaintCols(col, col + 1);
+            };
+        }
+    ]);
+
 
     /**
      * Grid UI component class. The grid component visualizes "zebkit.data.Matrix" data model.
@@ -89,22 +214,22 @@ zebkit.package("ui.grid", function(pkg, Class) {
      * Grid component supports cell editing. Every existent UI component can be configured
      * as a cell editor by defining an own editor provider.
      *
-
-            // create a grid that contains three rows and tree columns
-            var grid  = new zebkit.ui.grid.Grid([
-                [ "Cell 1.1", "Cell 1.2", "Cell 1.3"],
-                [ "Cell 2.1", "Cell 2.2", "Cell 2.3"],
-                [ "Cell 3.1", "Cell 3.2", "Cell 3.3"]
-            ]);
-
-            // add the top caption
-            grid.add("top", new zebkit.ui.grid.GridCaption([
-                "Caption title 1", "Caption title 2", "Caption title 3"
-            ]));
-
-            // set rows size
-            grid.setRowsHeight(45);
-
+     *
+     *       // create a grid that contains three rows and tree columns
+     *       var grid  = new zebkit.ui.grid.Grid([
+     *           [ "Cell 1.1", "Cell 1.2", "Cell 1.3"],
+     *           [ "Cell 2.1", "Cell 2.2", "Cell 2.3"],
+     *           [ "Cell 3.1", "Cell 3.2", "Cell 3.3"]
+     *       ]);
+     *
+     *       // add the top caption
+     *       grid.add("top", new zebkit.ui.grid.GridCaption([
+     *           "Caption title 1", "Caption title 2", "Caption title 3"
+     *       ]));
+     *
+     *       // set rows size
+     *       grid.setRowsHeight(45);
+     *
      *
      * Grid can have top and left captions.
      * @class  zebkit.ui.grid.Grid
@@ -121,33 +246,26 @@ zebkit.package("ui.grid", function(pkg, Class) {
 
     /**
      * Fire when a grid row selection state has been changed
-
-            grid.on(function(grid, row, count, status) {
-                ...
-            });
-
-     * @event rowSelected
+     *
+     *       grid.on("selected", function(grid, row, col, status) {
+     *           ...
+     *       });
+     *
+     * @event selected
      * @param  {zebkit.ui.grid.Grid} grid a grid that triggers the event
-     * @param  {Integer} row a first row whose selection state has been updated. The row is
-     * -1 if all selected rows have been unselected
-     * @param  {Integer} count a number of rows whose selection state has been updated
-     * @param {Boolean} status a status. true means rows have been selected
+     * @param  {Integer} row a selected row
+     * @param  {Integer} col a selected column
+     * @param {Boolean} status a selection status. true means rows have been selected
      */
     pkg.Grid = Class(ui.Panel, zebkit.util.Position.Metric, pkg.Metrics, ui.DecorationViews, [
         function(model) {
-            /**
-             * Default cell background color
-             * @type {String}
-             * @attribute defCellColor
-             * @default pkg.DefViews.cellBackground
-             */
-            this.defCellColor = pkg.DefViews.cellBackground;
-
             if (arguments.length === 0) {
                 model = new this.clazz.Matrix(5, 5);
             } else if (arguments.length === 2) {
                 model = new this.clazz.Matrix(arguments[0], arguments[1]);
             }
+
+            this.setSelectMode("row");
 
             this.views = {};
             this.visibility = new pkg.CellsVisibility();
@@ -155,24 +273,32 @@ zebkit.package("ui.grid", function(pkg, Class) {
 
             this.add("corner", new this.clazz.CornerPan());
             this.setModel(model);
-            this.setViewProvider(new pkg.DefViews());
+            this.setViewProvider(new this.clazz.DefViews());
             this.setPosition(new zebkit.util.Position(this));
             this.scrollManager = new ui.ScrollManager(this);
         },
 
         function $clazz() {
-            this.Listeners = zebkit.ListenersClass("rowSelected");
             this.Matrix    = Class(zebkit.data.Matrix, []);
-
             this.DEF_COLWIDTH  = 80;
             this.DEF_ROWHEIGHT = 25;
             this.CornerPan = Class(ui.Panel, []);
+            this.DefViews = Class(pkg.DefViews, []);
         },
 
         function $prototype() {
             this.psWidth_    = this.psHeight_  = this.colOffset = 0;
-            this.rowOffset   = this.pressedCol = this.selectedIndex = 0;
-            this.scrollManager = this.model = this.visibleArea = null;
+            this.rowOffset   = this.pressedCol = 0;
+            this.visibleArea = null;
+
+            /**
+             * Scroll manager
+             * @attribute scrollManager
+             * @type {zebkit.ui.ScrollManager}
+             * @protected
+             * @readOnly
+             */
+            this.scrollManager = null;
 
             /**
              * Reference to top caption component
@@ -181,6 +307,7 @@ zebkit.package("ui.grid", function(pkg, Class) {
              * @default null
              * @readOnly
              */
+            this.topCaption = null;
 
             /**
              * Reference to left caption component
@@ -189,8 +316,62 @@ zebkit.package("ui.grid", function(pkg, Class) {
              * @default null
              * @readOnly
              */
-            this.editor = this.editors = this.leftCaption = this.topCaption = this.colWidths = null;
-            this.rowHeights = this.position = this.stub = null;
+             this.leftCaption = null;
+
+            /**
+             * Cell editors provider
+             * @type {zebkit.ui.grid.DefEditors}
+             * @attribute editors
+             * @readOnly
+             * @default null
+             */
+            this.editors = null;
+
+            /**
+             * Currently activated cell editor.
+             * @type {zebkit.ui.Panel}
+             * @attribute editor
+             * @readOnly
+             * @default null
+             */
+            this.editor = null;
+
+            /**
+             * Grid cell select mode
+             * @attribute selectMode
+             * @type {zebkit.ui.grid.SelectMode}
+             * @readOnly
+             * @default row
+             */
+            this.selectMode = null;
+
+            /**
+             * Calculated grid columns widths
+             * @attribute colWidths
+             * @type {Array}
+             * @protected
+             * @readOnly
+             */
+            this.colWidths = null;
+
+            /**
+             * Calculated grid columns heights
+             * @attribute rowHeights
+             * @type {Array}
+             * @protected
+             * @readOnly
+             */
+            this.rowHeights = null;
+
+
+            this.position = this.stub = null;
+
+            /**
+             *  Grid model.
+             *  @type {zebkit.data.Matrix}
+             *  @attribute model
+             */
+            this.model = null;
 
             /**
              * Currently editing row. -1 if no row is editing
@@ -199,6 +380,7 @@ zebkit.package("ui.grid", function(pkg, Class) {
              * @default -1
              * @readOnly
              */
+             this.editingRow = -1;
 
             /**
              * Currently editing column. -1 if no column is editing
@@ -207,7 +389,7 @@ zebkit.package("ui.grid", function(pkg, Class) {
              * @default -1
              * @readOnly
              */
-            this.editingRow = this.editingCol = this.pressedRow = -1;
+            this.editingCol = this.pressedRow = -1;
 
             /**
              * Grid navigation mode
@@ -223,6 +405,7 @@ zebkit.package("ui.grid", function(pkg, Class) {
              * @default 1
              * @type {Integer}
              */
+             this.lineSize = 1;
 
             /**
              * Grid cell top padding
@@ -231,6 +414,7 @@ zebkit.package("ui.grid", function(pkg, Class) {
              * @type {Integer}
              * @readOnly
              */
+            this.cellInsetsTop = 1;
 
             /**
              * Grid cell left padding
@@ -239,6 +423,7 @@ zebkit.package("ui.grid", function(pkg, Class) {
              * @type {Integer}
              * @readOnly
              */
+            this.cellInsetsLeft = 2;
 
             /**
              * Grid cell bottom padding
@@ -247,6 +432,7 @@ zebkit.package("ui.grid", function(pkg, Class) {
              * @type {Integer}
              * @readOnly
              */
+             this.cellInsetsBottom = 1;
 
             /**
              * Grid cell right padding
@@ -255,8 +441,7 @@ zebkit.package("ui.grid", function(pkg, Class) {
              * @type {Integer}
              * @readOnly
              */
-            this.lineSize = this.cellInsetsTop = this.cellInsetsBottom = 1;
-            this.cellInsetsLeft = this.cellInsetsRight = 2;
+            this.cellInsetsRight = 2;
 
             /**
              * Default cell content horizontal alignment
@@ -845,7 +1030,7 @@ zebkit.package("ui.grid", function(pkg, Class) {
                         }
 
                         this.paintData(g);
-                        if (this.drawHorLines === true || this.drawVerLines === true) {
+                        if (this.lineSize > 0 && (this.drawHorLines === true || this.drawVerLines === true)) {
                             this.paintNet(g);
                         }
 
@@ -927,6 +1112,12 @@ zebkit.package("ui.grid", function(pkg, Class) {
                 }
             };
 
+            /**
+             * Scroll action handler
+             * @param  {Integer} psx a previous horizontal scroll offset
+             * @param  {Integer} psy a previous vertical scroll offset
+             * @method catchScrolled
+             */
             this.catchScrolled = function (psx, psy){
                 var offx = this.scrollManager.getSX() - psx,
                     offy = this.scrollManager.getSY() - psy;
@@ -1003,14 +1194,66 @@ zebkit.package("ui.grid", function(pkg, Class) {
             };
 
             /**
-             * Set navigation mode. It is possible to use "row" or "cell" navigation mode.
+             * Set the given grid cell select mode.
+             * @param {zebki.ui.grid.SelectMode|String} mode a select mode. It is possible
+             * to specify the mode with one of the following string constant:
+             *
+             *    - "row" - single row select mode
+             *    - "col" - single column select mode
+             *    - "cell" - single cell select mode
+             *
+             *
+             * @method setSelectMode
+             * @chainable
+             */
+            this.setSelectMode = function(mode) {
+                this.clearSelect();
+
+                var prevSelMode = this.selectMode;
+                if (mode !== this.selectMode) {
+                    if (prevSelMode !== null && typeof prevSelMode.uninstall === 'function') {
+                        prevSelMode.uninstall(this);
+                    }
+
+                    if (zebkit.isString(mode)) {
+                        if (mode.toLowerCase() === "row") {
+                            this.selectMode = new pkg.RowSelectMode(this);
+                            this.setNavigationMode(mode);
+                        } else if (mode.toLowerCase() === "col") {
+                            this.selectMode = new pkg.ColSelectMode(this);
+                            this.setNavigationMode(mode);
+                        } else if (mode.toLowerCase() === "cell") {
+                            this.selectMode = new pkg.CellSelectMode(this);
+                            this.setNavigationMode(mode);
+                        } else {
+                            throw new Error("Invalid select mode '" + mode + "'");
+                        }
+                    } else if (mode === null) {
+                        this.selectMode = null;
+                    } else {
+                        this.selectMode = mode;
+                    }
+
+                    if (this.selectMode !== null && typeof this.selectMode.install === 'function') {
+                        this.selectMode.install(this);
+                    }
+                }
+                return this;
+            };
+
+            /**
+             * Set navigation mode. It is possible to use "row" or "cell" or "col" navigation mode.
              * In first case navigation happens over row, in the second
              * case navigation happens over cell.
-             * @param {String} mode a navigation mode ("row" or "cell")
+             * @param {String} mode a navigation mode ("row" or "cell" or "col")
              * @method setNavigationMode
              * @chainable
              */
             this.setNavigationMode = function(mode) {
+                if (this.position !== null) {
+                    this.position.setOffset(null);
+                }
+
                 if (mode.toLowerCase() === "row") {
                     this.navigationMode = "row";
 
@@ -1021,47 +1264,84 @@ zebkit.package("ui.grid", function(pkg, Class) {
                     this.getMaxOffset = function() {
                         return this.getGridRows() - 1;
                     };
-                } else {
+
+                    this.getLines = function() {
+                        return this.getGridRows();
+                    };
+
+                } else if (mode.toLowerCase() === "cell") {
                     this.navigationMode = "cell";
 
-                    if (mode.toLowerCase() === "cell") {
-                        this.getLineSize = function(row) {
-                            return this.getGridCols();
-                        };
+                    this.getLines = function() {
+                        return this.getGridRows();
+                    };
 
-                        this.getMaxOffset = function() {
-                            return this.getGridRows() * this.getGridCols() - 1;
-                        };
-                    } else {
-                        throw new Error("Unsupported position marker mode");
-                    }
+                    this.getLineSize = function(row) {
+                        return this.getGridCols();
+                    };
+
+                    this.getMaxOffset = function() {
+                        return this.getGridRows() * this.getGridCols() - 1;
+                    };
+                } else if (mode.toLowerCase() === "col") {
+                    this.navigationMode = "col";
+
+                    this.getLineSize = function(row) {
+                        return this.getGridCols();
+                    };
+
+                    this.getMaxOffset = function() {
+                        return this.getGridCols() - 1;
+                    };
+
+                    this.getLines = function() {
+                        return 1;
+                    };
+                } else if (mode === null) {
+                    this.navigationMode = null;
+                } else {
+                    throw new Error("Invalid navigation mode value : '" + mode + "'");
                 }
+
                 return this;
             };
 
-            this.getLines = function() {
-                return this.getGridRows();
-            };
-
-            this.getLineSize = function(line) {
-                return 1;
-            };
-
-            this.getMaxOffset = function() {
-                return this.getGridRows() - 1;
-            };
-
+            /**
+             * Position changed event handler.
+             * @param  {zebkit.util.Position} target a position manager
+             * @param  {Integer} prevOffset a previous position offset
+             * @param  {Integer} prevLine a previous position line
+             * @param  {Integer} prevCol a previous position column
+             * @method posChanged
+             */
             this.posChanged = function(target, prevOffset, prevLine, prevCol) {
-                var row = this.position.currentLine;
+                var row = this.position.currentLine,
+                    col = this.position.currentCol;
+
                 if (row >= 0) {
-                    this.makeVisible(row, this.position.currentCol);
-                    this.select(row, true);
-                    this.repaintRows(prevLine, row);
+                    this.makeVisible(row, col);
+
+                    if (this.selectMode !== null) {
+                        this.selectMode.posChanged(target, prevOffset, prevLine, prevCol);
+                    }
+
+                    if (this.navigationMode === "row") {
+                        this.repaintRows(prevLine, row);
+                    } else if (this.navigationMode === "col") {
+                        this.repaintCols(prevCol, col);
+                    } else if (this.navigationMode === "cell") {
+                        this.repaintCells(row, col, prevLine, prevCol);
+                    }
                 } else {
                     this.repaintRows(prevLine, prevLine);
                 }
             };
 
+            /**
+             * Implement key released handler.
+             * @param  {zebkit.ui.event.KeyEvent} e a key event
+             * @method keyReleased
+             */
             this.keyReleased = function(e) {
                 if (this.position !== null) {
                     this.$se(this.position.currentLine,
@@ -1069,12 +1349,22 @@ zebkit.package("ui.grid", function(pkg, Class) {
                 }
             };
 
+            /**
+             * Implement key type handler.
+             * @param  {zebkit.ui.event.KeyEvent} e a key event
+             * @method keyTyped
+             */
             this.keyTyped = function(e){
                 if (this.position !== null) {
                     this.$se(this.position.currentLine, this.position.currentCol, e);
                 }
             };
 
+            /**
+             * Implement key pressed handler.
+             * @param  {zebkit.ui.event.KeyEvent} e a key event
+             * @method keyPressed
+             */
             this.keyPressed = function(e){
                 if (this.position !== null) {
                     switch(e.code) {
@@ -1106,7 +1396,8 @@ zebkit.package("ui.grid", function(pkg, Class) {
              * @method isSelected
              */
             this.isSelected = function(row, col) {
-                return row === this.selectedIndex;
+                return this.selectMode === null ? false
+                                                    : this.selectMode.isSelected(row, col);
             };
 
             /**
@@ -1132,7 +1423,7 @@ zebkit.package("ui.grid", function(pkg, Class) {
                 }
 
                 var rows = this.getGridRows();
-                if (r1 < rows) {
+                if (r1 >= 0 && r1 < rows) {
                     if (r2 >= rows) {
                         r2 = rows - 1;
                     }
@@ -1141,6 +1432,108 @@ zebkit.package("ui.grid", function(pkg, Class) {
                         y2 = ((r1 === r2) ? y1 + 1 : this.getRowY(r2)) + this.rowHeights[r2];
 
                     this.repaint(0, y1 + this.scrollManager.getSY(), this.width, y2 - y1);
+                }
+
+                return this;
+            };
+
+            /**
+             * Repaint range of grid columns
+             * @param  {Integer} c1 the first column to be repainted
+             * @param  {Integer} c2 the last column to be repainted
+             * @method repaintCols
+             * @chainable
+             */
+            this.repaintCols = function(c1, c2){
+                if (c1 < 0) {
+                    c1 = c2;
+                }
+
+                if (c2 < 0) {
+                    c2 = c1;
+                }
+
+                if (c1 > c2) {
+                    var i = c2;
+                    c2 = c1;
+                    c1 = i;
+                }
+
+                var cols = this.getGridCols();
+                if (c1 >= 0 && c1 < cols) {
+                    if (c2 >= cols) {
+                        c2 = cols - 1;
+                    }
+
+                    var x1 = this.getColX(c1),
+                        x2 = ((c1 === c2) ? x1 + 1 : this.getColX(c2)) + this.colWidths[c2];
+
+                    this.repaint(x1 + this.scrollManager.getSX(), 0, x2 - x1, this.height);
+                }
+
+                return this;
+            };
+
+            /**
+             * Repaint cells.
+             * @param  {Integer} r1 first row
+             * @param  {Integer} c1 first column
+             * @param  {Integer} [r2] second row
+             * @param  {Integer} [c2] second column
+             * @method repaintCells
+             * @chainable
+             */
+            this.repaintCells = function(r1, c1, r2, c2) {
+                var cols = this.getGridCols(),
+                    rows = this.getGridRows(),
+                    i    = 0;
+
+                if (arguments.length === 2) {
+                    c2 = c1;
+                    r2 = r1;
+                }
+
+                if (r1 < 0) {
+                    r1 = r2;
+                } else if (r2 < 0) {
+                    r2 = r1;
+                }
+
+                if (c1 < 0) {
+                    c1 = c2;
+                } else if (c2 < 0) {
+                    c2 = c1;
+                }
+
+                if (c1 > c2) {
+                    i = c2;
+                    c2 = c1;
+                    c1 = i;
+                }
+
+                if (r1 > r2) {
+                    i = r2;
+                    r2 = r1;
+                    r1 = i;
+                }
+
+                if (r1 >= 0 && c1 >= 0 && r1 < rows && c1 < cols) {
+                    if (c2 > cols) {
+                        c2 = cols - 1;
+                    }
+
+                    if (r2 > rows) {
+                        r2 = rows - 1;
+                    }
+
+                    var x1 = this.getColX(c1),
+                        x2 = ((c1 === c2) ? x1 + 1 : this.getColX(c2)) + this.colWidths[c2],
+                        y1 = this.getRowY(r1),
+                        y2 = ((r1 === r2) ? y1 + 1 : this.getRowY(r2)) + this.rowHeights[r2];
+
+                    this.repaint(x1 + this.scrollManager.getSX(),
+                                 y1 + this.scrollManager.getSY(),
+                                 x2 - x1, y2 - y1);
                 }
 
                 return this;
@@ -1265,12 +1658,9 @@ zebkit.package("ui.grid", function(pkg, Class) {
              * @method clearSelect
              * @chainable
              */
-            this.clearSelect = function (){
-                if (this.selectedIndex >= 0) {
-                    var prev = this.selectedIndex;
-                    this.selectedIndex = -1;
-                    this.fire("rowSelected", [this, -1, 0, false]);
-                    this.repaintRows(-1, prev);
+            this.clearSelect = function() {
+                if (this.selectMode !== null) {
+                    this.selectMode.clearSelect();
                 }
                 return this;
             };
@@ -1278,26 +1668,27 @@ zebkit.package("ui.grid", function(pkg, Class) {
             /**
              * Mark as selected or unselected the given grid cell
              * @param  {Integer} row a grid row
-             * @param  {Integer} col a grid row,
+             * @param  {Integer} [col] a grid row,
              * @param  {boolean} [b] a selection status. true if the parameter
              * has not been specified
              * @method select
              * @chainable
              */
-            this.select = function (row, b){
-                if (arguments.length < 2) {
-                    b = true;
-                }
-
-                if (this.isSelected(row) !== b){
-                    if (this.selectedIndex >= 0) {
-                        this.clearSelect();
+            this.select = function(row, col, b) {
+                if (this.selectMode !== null) {
+                    if (arguments.length === 1) {
+                        col = -1;
+                        b   = false;
+                    } else if (arguments.length === 2) {
+                        if (zebkit.isInteger(col)) {
+                            b = false;
+                        } else {
+                            b = col;
+                            col = -1;
+                        }
                     }
 
-                    if (b) {
-                        this.selectedIndex = row;
-                        this.fire("rowSelected", [this, row, 1, b]);
-                    }
+                    this.selectMode.select(row, col, b);
                 }
 
                 return this;
@@ -1317,21 +1708,21 @@ zebkit.package("ui.grid", function(pkg, Class) {
                             if (this.position !== null){
                                 var row = this.position.currentLine,
                                     col = this.position.currentCol,
-                                    ls  = this.getLineSize(p.row);
+                                    ls  = this.getLineSize(p.row),
+                                    lns = this.getLines();
 
                                 // normalize column depending on marker mode: row or cell
                                 // in row mode marker can select only the whole row, so
                                 // column can be only 1  (this.getLineSize returns 1)
-                                if (row === p.row && col === p.col % ls) {
+                                if (row === p.row % lns && col === p.col % ls) {
                                     this.makeVisible(row, col);
                                 } else {
-                                    this.clearSelect();
-                                    this.position.setRowCol(p.row, p.col % ls);
+                                    this.position.setRowCol(p.row % lns, p.col % ls);
                                 }
                             }
 
                             if (this.$se(p.row, p.col, e)) {
-                                // TODO: initiated editor has get pointer clicked event
+                                // TODO: initiated editor has to get pointer clicked event
                             }
                         }
                     }
@@ -1417,10 +1808,10 @@ zebkit.package("ui.grid", function(pkg, Class) {
                             if (this.isSelected(i, j) === true) {
                                 this.paintCellSelection(g, i, j, x, y);
                             } else {
-                                var bg = typeof this.provider.getCellColor !== 'undefined' ? this.provider.getCellColor(this, i, j)
-                                                                                           : this.defCellColor;
+                                var bg = this.provider.getCellColor !== undefined ? this.provider.getCellColor(this, i, j)
+                                                                                  : this.provider.background;
                                 if (bg !== null) {
-                                    if (typeof bg.paint !== 'undefined') {
+                                    if (bg.paint !== undefined) {
                                         bg.paint(g, x, y, this.colWidths[j], this.rowHeights[i], this);
                                     } else {
                                         g.setColor(bg);
@@ -1433,6 +1824,7 @@ zebkit.package("ui.grid", function(pkg, Class) {
                                      j === this.editingCol   ) ? null
                                                                : this.provider.getView(this, i, j,
                                                                                        this.model.get(i, j));
+
                             if (v !== null) {
                                 var xv = x + this.cellInsetsLeft,
                                     w  = this.colWidths[j]  - addW,
@@ -1449,10 +1841,10 @@ zebkit.package("ui.grid", function(pkg, Class) {
                                     //     v.paint(g, x, y, w, h, this);
                                     // }
                                     //else {
-                                        var ax = typeof this.provider.getXAlignment !== 'undefined' ? this.provider.getXAlignment(this, i, j)
-                                                                                                    : this.defXAlignment,
-                                            ay = typeof this.provider.getYAlignment !== 'undefined' ? this.provider.getYAlignment(this, i, j)
-                                                                                                    : this.defYAlignment,
+                                        var ax = this.provider.getXAlignment !== undefined ? this.provider.getXAlignment(this, i, j)
+                                                                                           : this.defXAlignment,
+                                            ay = this.provider.getYAlignment !== undefined ? this.provider.getYAlignment(this, i, j)
+                                                                                           : this.defYAlignment,
                                             vw = w, // cell width
                                             vh = h, // cell height
                                             xx = xv,
@@ -1499,8 +1891,8 @@ zebkit.package("ui.grid", function(pkg, Class) {
              * @method  $getPosMarker
              */
             this.$getPosMarker = function() {
-                return this.hasFocus() ? (typeof this.views.marker === 'undefined' ? null : this.views.marker)
-                                       : (typeof this.views.offmarker === 'undefined' ? null : this.views.offmarker);
+                return this.hasFocus() ? (this.views.marker    === undefined ? null : this.views.marker)
+                                       : (this.views.offmarker === undefined ? null : this.views.offmarker);
             };
 
             /**
@@ -1513,35 +1905,35 @@ zebkit.package("ui.grid", function(pkg, Class) {
                 if (this.position       !== null &&
                     this.position.offset >= 0       )
                 {
-                    var view       = this.$getPosMarker(),
-                        row        = this.position.currentLine,
-                        col        = this.position.currentCol,
-                        rowPosMode = this.navigationMode === "row",
-                        v          = this.visibility;
+                    var view = this.$getPosMarker(),
+                        row  = this.position.currentLine,
+                        col  = this.position.currentCol,
+                        v    = this.visibility;
 
                     // depending on position changing mode (cell or row) analyze
                     // whether the current position is in visible area
-                    if (view !== null && row >= v.fr[0] && row <= v.lr[0] &&
-                        (rowPosMode === true || (col >= v.fc[0] && col <= v.lc[0])))
-                    {
-                        // TODO: remove the clip, think it is redundant code
-                        // g.clipRect(this.getLeftCaptionWidth() - this.scrollManager.getSX(),
-                        //            this.getTopCaptionHeight() - this.scrollManager.getSY(),
-                        //            this.width, this.height);
-
-                        // detect if grid marker position works in row selection mode
-                        if (rowPosMode === true) {
-                            // row selection mode
-                            view.paint(g,   v.fc[1],
-                                            this.getRowY(row),
-                                            v.lc[1] - v.fc[1] + this.colWidths[v.lc[0]],
-                                            this.rowHeights[row], this);
-                        } else {
-                            // cell selection mode
-                            view.paint(g,   this.getColX(col),
-                                            this.getRowY(row),
-                                            this.colWidths[col],
-                                            this.rowHeights[row], this);
+                    if (view !== null) {
+                        if (this.navigationMode === "row") {
+                            if (row >= v.fr[0] && row <= v.lr[0]) {
+                                view.paint(g,   v.fc[1],
+                                                this.getRowY(row),
+                                                v.lc[1] - v.fc[1] + this.colWidths[v.lc[0]],
+                                                this.rowHeights[row], this);
+                            }
+                        } else if (this.navigationMode === "cell") {
+                            if (col >= v.fc[0] && col <= v.lc[0] && row >= v.fr[0] && row <= v.lr[0]) {
+                                view.paint(g,   this.getColX(col),
+                                                this.getRowY(row),
+                                                this.colWidths[col],
+                                                this.rowHeights[row], this);
+                            }
+                        } else if (this.navigationMode === "col") {
+                            if (col >= v.fc[0] && col <= v.lc[0]) {
+                                view.paint(g,   this.getColX(col),
+                                                v.fr[1],
+                                                this.colWidths[col],
+                                                v.lr[1] - v.fr[1] + this.rowHeights[v.lr[0]], this);
+                            }
                         }
                     }
                 }
@@ -1561,7 +1953,7 @@ zebkit.package("ui.grid", function(pkg, Class) {
                 if (this.editingRow < 0) {
                     var v = ui.focusManager.focusOwner === this ? this.views.focusOnSelect
                                                                 : this.views.focusOffSelect;
-                    if (v !== null && typeof v !== 'undefined')  {
+                    if (v !== null && v !== undefined)  {
                         v.paint(g, x, y, this.colWidths[col], this.rowHeights[row], this);
                     }
                 }
@@ -1864,7 +2256,7 @@ zebkit.package("ui.grid", function(pkg, Class) {
                 }
 
                 for(var i = 0; i < this.kids.length; i++) {
-                    if (typeof this.kids[i].matrixResized !== 'undefined') {
+                    if (this.kids[i].matrixResized !== undefined) {
                         this.kids[i].matrixResized(target,prevRows,prevCols);
                     }
                 }
@@ -1876,7 +2268,7 @@ zebkit.package("ui.grid", function(pkg, Class) {
                 }
 
                 for(var i=0; i < this.kids.length; i++) {
-                    if (typeof this.kids[i].cellModified !== 'undefined') {
+                    if (this.kids[i].cellModified !== undefined) {
                         this.kids[i].cellModified(target,row,col, prevValue);
                     }
                 }
@@ -1887,7 +2279,7 @@ zebkit.package("ui.grid", function(pkg, Class) {
                 this.vrp();
 
                 for(var i=0; i < this.kids.length; i++) {
-                    if (typeof this.kids[i].matrixSorted !== 'undefined') {
+                    if (this.kids[i].matrixSorted !== undefined) {
                         this.kids[i].matrixSorted(target, info);
                     }
                 }
@@ -2052,8 +2444,8 @@ zebkit.package("ui.grid", function(pkg, Class) {
             };
 
             /**
-             * Set the given grid lines size
-             * @param {Integer} s a size
+             * Control rendering of grid lines on grid caption.
+             * @param {Boolean} b a flag to control lines rendering on caption
              * @method setDrawCaptionLines
              * @chainable
              */
@@ -2110,7 +2502,7 @@ zebkit.package("ui.grid", function(pkg, Class) {
                             var $this = this;
                             this.editor.winOpened = function(e) {
                                 if (e.isShown === false){
-                                    $this.stopEditing(typeof e.source.isAccepted !== 'undefined' ? e.source.isAccepted() : false);
+                                    $this.stopEditing(e.source.isAccepted !== undefined ? e.source.isAccepted() : false);
                                 }
                             };
                             ui.showModalWindow(this, editor, this);
@@ -2248,5 +2640,5 @@ zebkit.package("ui.grid", function(pkg, Class) {
          *
          *  @method  setViews
          */
-    ]);
+    ]).events("selected");
 });

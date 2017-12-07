@@ -208,6 +208,14 @@ zebkit.package("ui.grid", function(pkg, Class) {
     pkg.DefViews = Class(zebkit.draw.BaseViewProvider, [
         function $prototype() {
             /**
+             * Default cell background
+             * @attribute background
+             * @type {String|zebkit.draw.View}
+             * @default null
+             */
+            this.background = null;
+
+            /**
              * Get a renderer to draw the specified grid model value.
              * @param  {zebkit.ui.grid.Grid} target a target Grid component
              * @param  {Integer} row  a grid cell row
@@ -461,6 +469,7 @@ zebkit.package("ui.grid", function(pkg, Class) {
      * as base to implement grid caption components
      * @class  zebkit.ui.grid.BaseCaption
      * @extends zebkit.ui.Panel
+     * @uses zebkit.EventProducer
      * @constructor
      * @param {Array} [titles] a caption component titles
      */
@@ -486,11 +495,6 @@ zebkit.package("ui.grid", function(pkg, Class) {
                     this.setLabel(i, titles[i]);
                 }
             }
-        },
-
-        function $clazz() {
-            this.Listeners = new zebkit.ListenersClass("captionResized",
-                                                       "captionResizeSelected");
         },
 
         function $prototype() {
@@ -770,5 +774,5 @@ zebkit.package("ui.grid", function(pkg, Class) {
                 }
             }
         }
-    ]);
+    ]).events("captionResized", "captionResizeSelected");
 });

@@ -26,6 +26,18 @@
         "font": "%{boldFont}"
     },
 
+    "Link": {
+        "font":  { "@zebkit.Font" : [ "Arial", "italic", 14]},
+        "colors"      : {
+            "pressed.over" : "red",
+            "out"          : "red",
+            "over"         : "orange",
+            "pressed.out"  : "red",
+            "disabled"     : "gray"
+        },
+        "canHaveFocus": false
+    },
+
     "Button": {
         "Link": {
             "font":  { "@zebkit.Font" : ["Arial", "bold italic", 16] },
@@ -53,7 +65,7 @@
             }
         },
 
-        "layout": { "@zebkit.layout.FlowLayout": ["center", "center", "horizontal",2] },
+        "flowLayout": ["center", "center", "horizontal", 2],
 
         "background"   : {
             "pressed.over": { "@zebkit.draw.Gradient": [ "red", "orange" ] },
@@ -72,12 +84,25 @@
         "padding"         : 8
     },
 
+    "ArrowButton": {
+        "padding"   : 2,
+        "stretchArrow": false,
+        "arrowSize": 10,
+        "statesToProps" : {
+            "out"          : { "fillColor" :  "deepPink"},
+            "over"         : { "fillColor" :  "red"},
+            "pressed.over" : { "fillColor" :  "blue"},
+            "pressed.out"  : { "fillColor" :  "blue"},
+            "disabled"     : { "fillColor" :  "#CCCCCC" }
+        }
+    },
+
     "Checkbox": {
         "Box": {
             "preferredSize": [ 18, 18],
             "border"       : { "@zebkit.draw.Border" : [ "orange", 2, 4 ] },
             "background"   : {
-                "*": { "@zebkit.draw.Gradient": [ "red", "orange" ] },
+                "*": { "@zebkit.draw.Gradient": [ "red", "orange" ]     },
                 "disabled": "lightGray",
                 "pressed.disabled" : "lightGray"
             },
@@ -97,10 +122,10 @@
             "font"  : "bold"
         },
 
-        "layout" : { "@zebkit.layout.FlowLayout": [ "left", "center", "horizontal", 6 ] },
+        "flowLayout" : [ "left", "center", "horizontal", 6 ],
         "border" : {
-             "focuson" :  "plain",
-             "focusoff":  { "@zebkit.draw.View" : [] }
+            "focuson" :  "plain",
+            "focusoff":  { "@zebkit.draw.View" : [] }
         },
         "padding": [4, 10, 4, 10]
     },
@@ -172,40 +197,40 @@
     },
 
     "Scroll" : {
-        "HIncButton": {
-            "arrowDirection" : "right",
-            "preferredSize":[ 12, 11 ],
-            "canHaveFocus": false
+        "LeftArrowButton": {
+            "padding" : 0,
+            "direction": "right",
+            "preferredSize":[ 12, 12 ]
         },
 
-        "HDecButton": {
-            "arrowDirection" : "left",
-            "preferredSize":[ 12, 11 ],
-            "canHaveFocus": false
+        "RightArrowButton": {
+            "padding" : 0,
+            "direction" : "left",
+            "preferredSize":[ 12, 12 ]
         },
 
-        "VIncButton": {
-            "arrowDirection" : "bottom",
-            "preferredSize" :[ 11, 12 ],
-            "canHaveFocus": false
+        "TopArrowButton": {
+            "padding" : 0,
+            "direction" : "bottom",
+            "preferredSize": [ 12, 12 ]
         },
 
-        "VDecButton": {
-            "arrowDirection" : "top",
-            "preferredSize":[ 11, 12 ],
-            "canHaveFocus": false
+        "BottomArrowButton": {
+            "padding" : 0,
+            "direction" : "top",
+            "preferredSize":[ 12, 12]
         },
 
         "VerticalThumb": {
             "padding":1,
-            "preferredSize" : [4, -1],
-            "background" : { "@zebkit.draw.ThumbView": [ "vertical", "#DD2255"] }
+            "preferredSize" : [8, -1],
+            "view" : { "@zebkit.draw.ThumbView": [ "vertical", null, "#DD2255"] }
         },
 
         "HorizontalThumb": {
             "padding":1,
-            "preferredSize" : [ -1, 6 ],
-            "background" : { "@zebkit.draw.ThumbView": [ "horizontal", "#DD2255" ] }
+            "preferredSize" : [ -1, 8 ],
+            "view" : { "@zebkit.draw.ThumbView": [ "horizontal", null, "#DD2255" ] }
         },
 
         "background":  null,
@@ -257,7 +282,7 @@
         "TabView": {
             "TabPan": {
                 "padding" : 4,
-                "layout": { "@zebkit.layout.FlowLayout": 4 }
+                "flowLayout": 4
             },
 
             "captionRender"    : "%{zebkit.draw.StringRender}",
@@ -274,6 +299,7 @@
             "selectedTab" : { "@zebkit.draw.Border": [ "orange", 2 ], "sides": "top" },
             "marker"      : null
         },
+
         "pageGaps": [2, 2]
     },
 
@@ -323,8 +349,7 @@
         },
 
         "padding": 2,
-
-        "layout"  : { "@zebkit.layout.ListLayout":[ 4 ] }
+        "listLayout"  : 4
     },
 
     "Combo": {
@@ -349,20 +374,13 @@
             },
 
             "padding": 4,
-            "layout" : { "@zebkit.layout.BorderLayout": 0 }
+            "borderLayout" : 0
         },
 
-        "Button": {
-            "preferredSize": [16, 16],
-            "canHaveFocus" : false,
-            "padding" : [4,0,4,0],
-
-            "view": {
-               "out"       : { "@zebkit.draw.ArrowView": [ "bottom", "orange", 8], "gap" : 4 },
-               "over"      : { "@zebkit.draw.ArrowView": [ "bottom", "red", 8 ], "gap" : 4 },
-               "pressed.*" : { "@zebkit.draw.ArrowView": [ "bottom", "blue", 8], "gap" : 4 },
-               "disabled"  : { "@zebkit.draw.ArrowView": [ "bottom", "#CCCCCC"], "gap" : 4 }
-            }
+        "ArrowButton": {
+            "inheritProperties" : true,
+            "arrowSize" : 12,
+            "padding" : [4,0,4,0]
         },
 
         "List": {
@@ -412,8 +430,18 @@
         },
 
         "background" : null,
-        "layout"     : { "@zebkit.layout.BorderLayout": 0 },
+        "borderLayout" : 0,
         "selectView" :  null
+    },
+
+   "RulerPan" :{
+        "NumLabels": {
+            "color": "red"
+        },
+
+        "PercentageLabels": {
+            "color": "red"
+        }
     },
 
     "Slider": {
@@ -433,18 +461,6 @@
         },
 
         "padding"   : 4
-    },
-
-    "Link": {
-        "font":  { "@zebkit.Font" : [ "Arial", "italic", 14]},
-        "colors"      : {
-            "pressed.over" : "red",
-            "out"          : "red",
-            "over"         : "orange",
-            "pressed.out"  : "red",
-            "disabled"     : "gray"
-        },
-        "canHaveFocus": false
     },
 
     "MenuItem" : {
@@ -476,7 +492,7 @@
         "SubImage": {
             "padding": [ 0, 0, 0, 4],
             "view": {
-                "pressed" :  { "@zebkit.draw.ArrowView" : [ "right", "red", 8, 10 ] },
+                "pressed" :  { "@zebkit.draw.ArrowView" : [ "right", null, "red"], "width":8, "height":10  },
                 "*"       : null
             }
         }
@@ -501,7 +517,7 @@
         "views"      : {
             "marker" : { "@zebkit.draw.Gradient": [ "orange", "red"  ] }
         },
-        "layout"     : { "@zebkit.layout.ListLayout":0 }
+        "listLayout": 0
     },
 
 
@@ -520,7 +536,7 @@
 
         "background" : null ,
         "padding"    : [0,0,0,0],
-        "layout"     : { "@zebkit.layout.FlowLayout": 0 },
+        "flowLayout" : 0,
         "border"     : { "@zebkit.draw.Border": [ "red" ], "gap" : 2, "sides": "top" },
         "views"      : {
             "select" : { "@zebkit.draw.Gradient": [ "red", "orange"  ] },
@@ -543,7 +559,7 @@
         "padding"    : 6,
         "background" : {"@zebkit.draw.Gradient" : [ "black", "gray"]},
         "border"     : { "@zebkit.ui.Tooltip.TooltipBorder" : [ "white", 1 ]},
-        "layout"     : { "@zebkit.layout.FlowLayout": [ "center", "top" ] }
+        "flowLayout" : [ "center", "top" ]
     },
 
     "Toolbar": {
@@ -606,7 +622,7 @@
             "inherit": [ "%{Radiobox}", "%{Toolbar.Checkbox}"]
         },
 
-        "layout" : { "@zebkit.layout.FlowLayout":[ "left", "center", "horizontal", 6 ] },
+        "flowLayout" : [ "left", "center", "horizontal", 6 ],
         "border" : { "@zebkit.draw.Border": ["lightGray", 2, 6 ] },
         "padding": 4
     },
@@ -618,8 +634,8 @@
         },
 
         "Header":{
-            "padding"     : 4,
-            "layout"      : { "@zebkit.layout.FlowLayout": 4  },
+            "padding"   : 4,
+            "flowLayout": 4,
             "border"  : {
                 "over" : { "@zebkit.draw.Border": [ "orange", 1 ], "sides" : "bottom" },
                 "*"    : { "@zebkit.draw.Border": [ "red", 1 ], "sides" : "bottom" }
@@ -651,12 +667,12 @@
         },
 
         "border": "plain",
-        "layout": { "@zebkit.layout.BorderLayout":[] }
+        "borderLayout": 0
     },
 
     "Window": {
         "CaptionPan": {
-            "layout"     : { "@zebkit.layout.BorderLayout":[] },
+            "borderLayout": 0,
             "background" : {
                   "active"  : { "@zebkit.draw.CaptionBgView": "red" },
                   "inactive": { "@zebkit.draw.CaptionBgView": "orange" }
@@ -665,7 +681,7 @@
         },
 
         "ContentPan": {
-            "layout": { "@zebkit.layout.BorderLayout":[] }
+            "borderLayout": 0
         },
 
         "TitleLab": {
@@ -674,7 +690,7 @@
         },
 
         "StatusPan": {
-            "layout": { "@zebkit.layout.FlowLayout":["right","center"] }
+            "flowLayout": ["right","center"]
         },
 
         "SizerPan": {
@@ -698,6 +714,41 @@
                 "pressed": { "@zebkit.draw.CheckboxView": [ "white" ] }
             }
         }
+    },
+
+    "Spin" : {
+        "IncButton" : {
+            "inheritProperties": true,
+            "padding": 0,
+            "fireParams": [ true, 100, 1000],
+            "arrowSize": [16,10],
+            "direction": "top"
+        },
+
+        "DecButton" : {
+            "inheritProperties": true,
+            "padding": 0,
+            "fireParams": [ true, 100, 1000],
+            "arrowSize": [16,10],
+            "direction": "bottom"
+        },
+
+        "TextField" : {
+            "color": "red",
+            "font" : "bold",
+            "border": null
+        },
+
+        "canHaveFocus" : true,
+
+        "padding" : [ 2, 4, 2, 4],
+
+        "border" : {
+            "focuson" :  { "@zebkit.draw.Border" : [ "orange", 2 ] },
+            "focusoff":  { "@zebkit.draw.Border" : [ "orange", 1 ] }
+        },
+
+        "background": { "@zebkit.draw.Gradient" : [ "black", "#444444" ]}
     },
 
     "StatusBarPan" : {

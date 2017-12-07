@@ -91,7 +91,7 @@ zebkit.package("ui", function(pkg, Class) {
     }
 
     zebkit.Zson.prototype.completed = function() {
-        if (typeof this.$actions !== 'undefined' && this.$actions.length > 0) {
+        if (this.$actions !== undefined && this.$actions.length > 0) {
             try {
                 var root = this.root;
                 for (var i = 0; i < this.$actions.length; i++) {
@@ -101,25 +101,25 @@ zebkit.package("ui", function(pkg, Class) {
                         var args    = [],
                             srcComp = root.byPath(source);
 
-                        if (typeof eventName !== 'undefined' && eventName !== null) {
+                        if (eventName !== undefined && eventName !== null) {
                             args.push(eventName);
                         }
                         args.push(source);
                         args.push(function() {
-                            if (cond === null || typeof cond === 'undefined' || testCondition(srcComp, cond)) {
+                            if (cond === null || cond === undefined || testCondition(srcComp, cond)) {
                                 // targets
                                 for(var j = 0; j < targets.length; j++) {
                                     var target     = targets[j],
-                                        targetPath = (typeof target.path === 'undefined') ? source : target.path;
+                                        targetPath = (target.path === undefined) ? source : target.path;
 
                                     // find target
                                     root.byPath(targetPath, function(c) {
-                                        if (typeof target.condition === 'undefined' || testCondition(c, target.condition)) {
-                                            if (target.update !== 'undefined') {
+                                        if (target.condition === undefined || testCondition(c, target.condition)) {
+                                            if (target.update !== undefined) {
                                                 c.properties(target.update);
                                             }
 
-                                            if (target['do'] !== 'undefined') {
+                                            if (target.do !== undefined) {
                                                 for(var cmd in target['do']) {
                                                     c[cmd].apply(c, target['do'][cmd]);
                                                 }
@@ -130,7 +130,7 @@ zebkit.package("ui", function(pkg, Class) {
                             }
                         });
                         root.on.apply(root, args);
-                    } (a.source, a.event, a.condition, typeof a.targets !== 'undefined' ? a.targets : [ a.target ]));
+                    } (a.source, a.event, a.condition, a.targets !== undefined ? a.targets : [ a.target ]));
                 }
             } finally {
                 this.$actions.length = 0;
@@ -318,17 +318,62 @@ zebkit.package("ui", function(pkg, Class) {
                     // with transparent background, otherwise it will be cleaned
                     // by filling the canvas with background later
                     if (canvas.bg === null || canvas.bg.isOpaque !== true) {
-                        canvas.$context.clearRect(canvas.$da.x, canvas.$da.y,
-                                                  canvas.$da.width, canvas.$da.height);
+
+                        // Clear method can be applied to scaled (retina screens) canvas
+                        // The real cleaning location is calculated as x' = scaleX * x.
+                        // The problem appears when scale factor is not an integer value
+                        // what brings to situation x' can be float like 1.2 or 1.8.
+                        // Most likely canvas applies round operation to x' so 1.8 becomes 2.
+                        // That means clear method will clear less then expected, what results
+                        // in visual artifacts are left on the screen. The code below tries
+                        // to correct cleaning area to take in account the round effect.
+                        if (canvas.$context.$scaleRatioIsInt === false) {
+
+
+
+                            // Clear canvas scaling and calculate dirty area bounds.
+                            // Bounds are calculated taking in account the fact that float
+                            // bounds can leave visual traces
+                            var xx = Math.floor(canvas.$da.x * canvas.$context.$scaleRatio),
+                                yy = Math.floor(canvas.$da.y * canvas.$context.$scaleRatio),
+                                ww = Math.ceil((canvas.$da.x + canvas.$da.width) * canvas.$context.$scaleRatio) - xx,
+                                hh = Math.ceil((canvas.$da.y + canvas.$da.height) * canvas.$context.$scaleRatio) - yy;
+
+                                canvas.$context.save();
+                                canvas.$context.setTransform(1, 0, 0, 1, 0, 0);
+                                canvas.$context.clearRect(xx, yy, ww, hh);
+
+                                // !!!! clipping has to be done over not scaled
+                                // canvas, otherwise if we have two overlapped panels
+                                // with its own background moving third panel over overlapped
+                                // part will leave traces that comes from lowest overlapped panel
+                                // !!! Have no idea why !
+                                // canvas.$context.beginPath();
+                                // canvas.$context.rect(xx, yy, ww, hh);
+                                // canvas.$context.closePath();
+                                // canvas.$context.clip();
+
+                                canvas.$context.restore();
+
+                                canvas.$context.clipRect(canvas.$da.x - 1,
+                                                         canvas.$da.y - 1,
+                                                         canvas.$da.width + 2,
+                                                         canvas.$da.height + 2);
+                        } else {
+                            canvas.$context.clearRect(canvas.$da.x, canvas.$da.y,
+                                                      canvas.$da.width, canvas.$da.height);
+
+                            // !!!
+                            // call clipping area later than possible
+                            // clearRect since it can bring to error in IE
+                            canvas.$context.clipRect(canvas.$da.x,
+                                                     canvas.$da.y,
+                                                     canvas.$da.width,
+                                                     canvas.$da.height);
+
+                        }
                     }
 
-                    // !!!
-                    // call clipping area later than possible
-                    // clearRect since it can bring to error in IE
-                    canvas.$context.clipRect(canvas.$da.x,
-                                             canvas.$da.y,
-                                             canvas.$da.width,
-                                             canvas.$da.height);
 
                     // no dirty area anymore. put it hear to prevent calling
                     // animation  task from repaint() method that can be called
@@ -398,8 +443,8 @@ zebkit.package("ui", function(pkg, Class) {
      *      // add few children component to panel top, center and bottom parts
      *      // with help of border layout manager
      *      var p = new zebkit.ui.Panel();
-     *      p.setLayout(new zebkit.layout.BorderLayout(4)); // set layout manager to
-     *                                                     // order children components
+     *      p.setBorderLayout(4); // set layout manager to
+     *                            // order children components
      *
      *      p.add("top", new zebkit.ui.Label("Top label"));
      *      p.add("center", new zebkit.ui.TextArea("Text area"));
@@ -722,8 +767,6 @@ zebkit.package("ui", function(pkg, Class) {
       */
     pkg.Panel = Class(zebkit.layout.Layoutable, [
         function $prototype() {
-            this.bg = this.border = null;
-
             /**
              * Request the whole UI component or part of the UI component to be repainted
              * @param  {Integer} [x] x coordinate of the component area to be repainted
@@ -736,11 +779,11 @@ zebkit.package("ui", function(pkg, Class) {
                 // step I: skip invisible components and components that are not in hierarchy
                 //         don't initiate repainting thread for such sort of the components,
                 //         but don't forget for zCanvas whose parent field is null, but it has $context
-                if (this.isVisible === true && (this.parent !== null || typeof this.$context !== 'undefined')) {
+                if (this.isVisible === true && (this.parent !== null || this.$context !== undefined)) {
                     //!!! find context buffer that holds the given component
 
                     var canvas = this;
-                    for(; typeof canvas.$context === 'undefined'; canvas = canvas.parent) {
+                    for(; canvas.$context === undefined; canvas = canvas.parent) {
                         // component either is not in visible state or is not in hierarchy
                         // than stop repaint procedure
                         if (canvas.isVisible === false || canvas.parent === null) {
@@ -758,6 +801,7 @@ zebkit.package("ui", function(pkg, Class) {
                     // step II: calculate new actual dirty area
                     if (w > 0 && h > 0) {
                         var r = pkg.$cvp(this, temporary);
+
                         if (r !== null) {
                             zebkit.util.intersection(r.x, r.y, r.width, r.height, x, y, w, h, r);
 
@@ -798,7 +842,6 @@ zebkit.package("ui", function(pkg, Class) {
                                 // dirty area of target canvas element
                                 if (w > 0 && h > 0) {
                                     var da = canvas.$da;
-
                                     // if the target canvas already has a dirty area set than
                                     // unite it with requested
                                     if (da.width > 0) {
@@ -866,7 +909,7 @@ zebkit.package("ui", function(pkg, Class) {
             this.getEventDestination = function() {
                 var c = this, p = this;
                 while ((p = p.parent) !== null) {
-                    if (typeof p.catchInput !== 'undefined' &&
+                    if (p.catchInput !== undefined &&
                         (p.catchInput === true || (p.catchInput    !== false &&
                                                    p.catchInput(c) === true     )))
                     {
@@ -900,8 +943,8 @@ zebkit.package("ui", function(pkg, Class) {
                     // if component defines shape and has update, [paint?] or background that
                     // differs from parent background try to apply the shape and than build
                     // clip from the applied shape
-                    if ( (this.border !== null && typeof this.border.outline !== 'undefined') &&
-                         (b === true || typeof this.update !== 'undefined')                   &&
+                    if ( (this.border !== null && this.border.outline !== undefined) &&
+                         (b === true || this.update !== undefined)                   &&
                          this.border.outline(g, 0, 0, this.width, this.height, this) === true)
                     {
                         g.save();
@@ -911,7 +954,7 @@ zebkit.package("ui", function(pkg, Class) {
                             this.bg.paint(g, 0, 0, this.width, this.height, this);
                         }
 
-                        if (typeof this.update !== 'undefined') {
+                        if (this.update !== undefined) {
                             this.update(g);
                         }
 
@@ -921,7 +964,7 @@ zebkit.package("ui", function(pkg, Class) {
                             this.bg.paint(g, 0, 0, this.width, this.height, this);
                         }
 
-                        if (typeof this.update !== 'undefined') {
+                        if (this.update !== undefined) {
                             this.update(g);
                         }
                     }
@@ -930,7 +973,7 @@ zebkit.package("ui", function(pkg, Class) {
                         this.border.paint(g, 0, 0, this.width, this.height, this);
                     }
 
-                    if (typeof this.paint !== 'undefined') {
+                    if (this.paint !== undefined) {
                         var left   = this.getLeft(),
                             top    = this.getTop(),
                             bottom = this.getBottom(),
@@ -961,7 +1004,7 @@ zebkit.package("ui", function(pkg, Class) {
                     for(var i = 0; i < count; i++) {
                         var kid = this.kids[i];
                         // ignore invisible components and components that declare own 2D context
-                        if (kid.isVisible === true && typeof kid.$context === 'undefined') {
+                        if (kid.isVisible === true && kid.$context === undefined) {
                             // calculate if the given component area has intersection
                             // with current clipping area
                             var kidXW = kid.x + kid.width,
@@ -981,7 +1024,7 @@ zebkit.package("ui", function(pkg, Class) {
                         }
                     }
 
-                    if (typeof this.paintOnTop !== 'undefined') {
+                    if (this.paintOnTop !== undefined) {
                         this.paintOnTop(g);
                     }
                 }
@@ -994,6 +1037,7 @@ zebkit.package("ui", function(pkg, Class) {
              * @readOnly
              * @type {zebkit.draw.View}
              */
+            this.border = null;
 
             /**
              * UI component background view
@@ -1002,6 +1046,7 @@ zebkit.package("ui", function(pkg, Class) {
              * @readOnly
              * @type {zebkit.draw.View}
             */
+            this.bg = null;
 
             /**
              * Define and set the property to true if the component has to catch focus
@@ -1033,29 +1078,113 @@ zebkit.package("ui", function(pkg, Class) {
             };
 
             this.notifyRender = function(o, n){
-                if (o !== null && typeof o.ownerChanged !== 'undefined') {
+                if (o !== null && o.ownerChanged !== undefined) {
                     o.ownerChanged(null);
                 }
-                if (n !== null && typeof n.ownerChanged !== 'undefined') {
+                if (n !== null && n.ownerChanged !== undefined) {
                     n.ownerChanged(this);
                 }
             };
 
+            /**
+             * Set border layout shortcut method
+             * @param {Integer} [gap] a gap
+             * @method setBorderLayout
+             * @chainable
+             */
             this.setBorderLayout = function() {
                 this.setLayout(arguments.length > 0 ? new zebkit.layout.BorderLayout(arguments[0])
                                                     : new zebkit.layout.BorderLayout());
                 return this;
             };
 
+            /**
+             * Set flow layout shortcut method.
+             * @param {String} [ax] ("left" by default) horizontal alignment:
+             *
+             *    "left"
+             *    "center"
+             *    "right"
+             *
+             * @param {String} [ay] ("top" by default) vertical alignment:
+             *
+             *    "top"
+             *    "center"
+             *    "bottom"
+             *
+             * @param {String} [dir] ("horizontal" by default) a direction the component has to be placed
+             * in the layout
+             *
+             *    "vertical"
+             *    "horizontal"
+             *
+             * @param {Integer} [gap] a space in pixels between laid out components
+             * @method setFlowLayout
+             * @chainable
+             */
             this.setFlowLayout = function() {
-                this.setLayout(arguments.length > 0 ? new zebkit.layout.FlowLayout(arguments[0])
-                                                    : new zebkit.layout.FlowLayout());
+                if (arguments.length === 0) {
+                    this.setLayout(new zebkit.layout.FlowLayout());
+                } else if (arguments.length === 1) {
+                    this.setLayout(new zebkit.layout.FlowLayout(arguments[0]));
+                } else if (arguments.length === 2) {
+                    this.setLayout(new zebkit.layout.FlowLayout(arguments[0], arguments[1]));
+                } else {
+                    this.setLayout(new zebkit.layout.FlowLayout(arguments[0], arguments[1], arguments[2], arguments[3]));
+                }
+
                 return this;
             };
 
+            /**
+             * Set stack layout shortcut mathod
+             * @param {Integer} [gap] a gap
+             * @method setStackLayout
+             * @chainable
+             */
             this.setStackLayout = function() {
                 this.setLayout(arguments.length > 0 ? new zebkit.layout.StackLayout(arguments[0])
                                                     : new zebkit.layout.StackLayout());
+                return this;
+            };
+
+            /**
+             * Set list layout shortcut mathod
+             * @param {String} [ax] horizontal list item alignment:
+             *
+             *    "left"
+             *    "right"
+             *    "center"
+             *    "stretch"
+             *
+             * @param {Integer} [gap] a space in pixels between laid out components
+             * @method setListLayout
+             * @chainable
+             */
+            this.setListLayout = function() {
+                if (arguments.length === 0) {
+                    this.setLayout(new zebkit.layout.ListLayout());
+                } else if (arguments.length === 1) {
+                    this.setLayout(new zebkit.layout.ListLayout(arguments[0]));
+                } else if (arguments.length === 2) {
+                    this.setLayout(new zebkit.layout.ListLayout(arguments[0], arguments[1]));
+                }
+                return this;
+            };
+
+            /**
+             * Set raster layout shortcut mathod
+             * @param {Boolean} [usePsSize] flag to add extra rule to set components size to its preferred
+             * sizes.
+             * @method setRasterLayout
+             * @chainable
+             */
+            this.setRasterLayout = function() {
+                if (arguments.length === 0) {
+                    this.setLayout(new zebkit.layout.RasterLayout());
+                } else if (arguments.length === 1) {
+                    this.setLayout(new zebkit.layout.RasterLayout(arguments[0]));
+                }
                 return this;
             };
 
@@ -1115,7 +1244,7 @@ zebkit.package("ui", function(pkg, Class) {
                         }
                     }
                 }
-                return typeof this.contains === 'undefined' || this.contains(x, y) === true ? this : null;
+                return this.contains === undefined || this.contains(x, y) === true ? this : null;
             };
 
             /**
@@ -1233,15 +1362,10 @@ zebkit.package("ui", function(pkg, Class) {
                         nx = x < px ? x : px,
                         ny = y < py ? y : py;
 
-                    //TODO: some mobile browser has bug: moving a component
-                    //      leaves 0.5 sized traces to fix it 1 pixel extra
-                    //      has to be added to all sides of repainted rect area
-                    // nx--;
-                    // ny--;
-
                     if (nx < 0) {
                         nx = 0;
                     }
+
                     if (ny < 0) {
                         ny = 0;
                     }
@@ -1251,9 +1375,8 @@ zebkit.package("ui", function(pkg, Class) {
                         h1 = p.height - ny,
                         h2 = h + (y > py ? y - py : py - y);
 
-                    // TODO: add crappy 2 for mobile (android)
-                    p.repaint(nx, ny, (w1 < w2 ? w1 : w2),// + 2,
-                                      (h1 < h2 ? h1 : h2));// + 2);
+                    p.repaint(nx, ny, (w1 < w2 ? w1 : w2),
+                                      (h1 < h2 ? h1 : h2));
                 }
             };
 
@@ -1488,7 +1611,7 @@ zebkit.package("ui", function(pkg, Class) {
                         this.invalidate();
                     }
 
-                    if (v !== null && typeof v.activate !== 'undefined') {
+                    if (v !== null && v.activate !== undefined) {
                         v.activate(this.hasFocus() ?  "focuson": "focusoff", this);
                     }
 
@@ -1558,7 +1681,7 @@ zebkit.package("ui", function(pkg, Class) {
                         for(i = 0; i < arguments.length; i++) {
                             var kid = arguments[i];
                             if (kid !== null) {
-                                this.add(typeof kid.$new !== 'undefined' ? kid.$new() : kid);
+                                this.add(kid.$new !== undefined ? kid.$new() : kid);
                             }
                         }
                     } else {
@@ -1588,16 +1711,16 @@ zebkit.package("ui", function(pkg, Class) {
              */
             this.focused = function() {
                 // extents of activate method indicates it is
-                if (this.border !== null && typeof this.border.activate !== 'undefined') {
+                if (this.border !== null && this.border.activate !== undefined) {
                     var id = this.hasFocus() ? "focuson" : "focusoff" ;
-                    if (typeof this.border.views[id] !== 'undefined') {
+                    if (this.border.views[id] !== undefined) {
                         this.border.activate(id, this);
                         this.repaint();
                     }
                 }
 
                 // TODO: think if the background has to be focus dependent
-                // if (this.bg !== null && typeof this.bg.activate !== 'undefined') {
+                // if (this.bg !== null && this.bg.activate !== undefined) {
                 //     var id = this.hasFocus() ? "focuson" : "focusoff" ;
                 //     if (this.bg.views[id]) {
                 //         this.bg.activate(id);
@@ -1703,7 +1826,16 @@ zebkit.package("ui", function(pkg, Class) {
                 return new pkg.CompRender(this);
             };
 
-            // TODO: not stable API
+            /**
+             * Paint the given view with he specified horizontal and vertical
+             * alignments.
+             * @param  {CanvasRenderingContext2D} g a 2D context
+             * @param  {String} ax a horizontal alignment ("left", "right", "center")
+             * @param  {String} ay a vertical alignment ("top", "center", "bottom")
+             * @param  {zebkit.draw.View} v a view
+             * @chainable
+             * @method paintViewAt
+             */
             this.paintViewAt = function(g, ax, ay, v) {
                 var x  = this.getLeft(),
                     y  = this.getTop(),
@@ -1722,12 +1854,14 @@ zebkit.package("ui", function(pkg, Class) {
                 }
 
                 v.paint(g, x, y, ps.width, ps.height, this);
+                return this;
             };
 
             this[''] = function(l) {
+                // TODO:
                 // !!! dirty trick to call super, for the sake of few milliseconds back
                 //this.$super();
-                if (typeof this.kids === "undefined") {
+                if (this.kids === undefined) {
                     this.kids = [];
                 }
 
@@ -1738,19 +1872,34 @@ zebkit.package("ui", function(pkg, Class) {
                 if (this.clazz.inheritProperties === true) {
                     // instead of recursion collect stack in array than go through it
                     var hierarchy = [],
+                        props     = {},
                         pp        = this.clazz;
 
                     // collect clazz hierarchy
-                    while(pp.$parent !== null && pp.inheritProperties === true) {
+                    while (pp.$parent !== null && pp.inheritProperties === true) {
                         pp = pp.$parent;
                         hierarchy[hierarchy.length] = pp;
                     }
 
-                    // apply properties from the hierarchy
-                    for(var i = hierarchy.length; i >= 0; i--) {
-                        this.properties(hierarchy[i]);
+                    // collect properties taking in account possible  overwriting
+                    var b = false;
+                    for (var i = hierarchy.length; i >= 0; i--) {
+                        pp = hierarchy[i];
+                        for (var k in pp) {
+                            if (this.clazz[k] === undefined && props[k] === undefined) {
+                                props[k] = pp[k];
+                                if (b === false) {
+                                    b = true;
+                                }
+                            }
+                        }
+                    }
+
+                    if (b)  {
+                        this.properties(props);
                     }
                 }
+
                 this.properties(this.clazz);
 
                 if (arguments.length > 0) {

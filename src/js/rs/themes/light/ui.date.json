@@ -11,21 +11,25 @@
     ],
 
     "MONTHS" : [
-          { "name" : "January",  "nickname" : "Jan" },
-          { "name" : "February", "nickname" : "Feb" },
-          { "name" : "March",    "nickname" : "Mar" },
-          { "name" : "April",    "nickname" : "Apr" },
-          { "name" : "May",      "nickname" : "May" },
-          { "name" : "June",     "nickname" : "Jun" },
-          { "name" : "July",     "nickname" : "Jul" },
-          { "name" : "August",   "nickname" : "Aug" },
-          { "name" : "September","nickname" : "Sep" },
-          { "name" : "October",  "nickname" : "Oct" },
-          { "name" : "November", "nickname" : "Nov" },
-          { "name" : "December", "nickname" : "Dec" }
+          { "name" : "January",  "nickname" : "Jan", "value":  0 } ,
+          { "name" : "February", "nickname" : "Feb", "value":  1  },
+          { "name" : "March",    "nickname" : "Mar", "value":  2  },
+          { "name" : "April",    "nickname" : "Apr", "value":  3  },
+          { "name" : "May",      "nickname" : "May", "value":  4  },
+          { "name" : "June",     "nickname" : "Jun", "value":  5  },
+          { "name" : "July",     "nickname" : "Jul", "value":  6  },
+          { "name" : "August",   "nickname" : "Aug", "value":  7  },
+          { "name" : "September","nickname" : "Sep", "value":  8  },
+          { "name" : "October",  "nickname" : "Oct", "value":  9  },
+          { "name" : "November", "nickname" : "Nov", "value":  10 },
+          { "name" : "December", "nickname" : "Dec", "value":  11 }
     ],
 
-    "DaysGrid" : {
+    "MonthDaysGrid" : {
+        "DefViews" : {
+            "background": null
+        },
+
         "GridCaption": {
             "Label" : {
                 "padding" : [0, 2, 0, 2],
@@ -37,10 +41,19 @@
             "namesOfWeekDays" : [ "%{WEEKS}" ]
         },
 
-        "ItemPan" : {
-            "layout" : { "@zebkit.layout.FlowLayout" : [ "right", "center", "horizontal", 2 ] },
+        "DayPan" : {
+            "flowLayout" : [ "right", "center", "horizontal", 2 ],
 
-            "icon" : {
+            "Label" : {
+                "color" : "#442244",
+                "font"  : { "@zebkit.Font" : [ "Arial", "bold", "14" ] },
+                "border":  null,
+                "background": null,
+                "padding" : 0,
+                "textDecorations" : []
+            },
+
+            "IconPan" : {
                 "border": null,
                 "background": null,
                 "view": null,
@@ -48,21 +61,12 @@
                 "preferredSize": [-1, -1]
             },
 
-            "label" : {
-                "color" : "#442244",
-                "font"  : { "@zebkit.Font" : [ "Arial", "bold", "14" ] },
-                "border":  null,
-                "background": null,
-                "padding" : 0
-            },
-
-            "textDecorations" : [],
-
             "border": null,
-            "background": null
+            "background": null,
+            "preferredSize" : [32, -1]
         },
 
-        "tags" : {
+        "tagsDecoration" : {
             "prevMonth" : {
                 "color" : "lightGray"
             },
@@ -72,7 +76,7 @@
             },
 
             "today" : {
-                "icon" :  {
+                "icon/" :  {
                     "view"          : null,
                     "border"        : { "@zebkit.draw.RoundBorder" : []},
                     "background"    : "#65B661",
@@ -82,47 +86,51 @@
 
             "notSelectable" : {
                 "color": "gray",
-                "textDecorations" : ["strike"]
+                "textDecorations" : "strike",
+                "textDecorationsColor" : "red"
             }
         },
 
         "paintPosMarkerOver": false,
         "usePsMetric"       : true,
         "drawLines"         : [ false, true ],
+        "lineSize"          : 0,
         "lineColor"         : "lightGray",
-        "navigationMode"    : "cell",
-        "defCellAlignments" : [ "none", "center" ],
+        "defCellAlignments" : [ "right", "center" ],
         "views": {
             "offmarker"           : "rgba(234, 243, 119, 0.5)",
             "marker"              : "rgba(234, 243, 119, 1.0)",
             "notSelectableMarker" : { "@zebkit.draw.Border": "lightGray" }
-        },
-
-        "selDayBackground" : "#D5F377"
+        }
     },
 
     "Calendar" : {
         "LeftArrowButton" : {
-            "preferredSize" : [10, 10],
-            "id"       : "leftButton"
+            "arrowSize" : [14, 14],
+            "padding"  : 0,
+            "id"       : "leftButton",
+            "direction" : "left"
         },
 
         "RightArrowButton" : {
-            "preferredSize" : [10, 10],
-            "id"             : "rightButton",
-            "arrowDirection" : "right"
+            "arrowSize" : [14, 14],
+            "padding"  : 0,
+            "id"       : "rightButton",
+            "direction" : "right"
         },
 
         "TopArrowButton" : {
             "id"             : "topButton",
-            "arrowDirection" : "top",
-            "preferredSize"  : [ 12, 8 ]
+            "direction" : "top",
+            "padding"  : 0,
+            "arrowSize"  : [ 16, 10 ]
         },
 
         "BottomArrowButton" : {
             "id"            : "bottomButton",
-            "arrowDirection": "bottom",
-            "preferredSize"  : [ 12, 8 ]
+            "padding"  : 0,
+            "direction": "bottom",
+            "arrowSize"  : [ 16, 10 ]
         },
 
         "Link" : {
@@ -146,7 +154,6 @@
 
         "MonthsCombo" : {
             "Label": {
-
                 "font" : { "@zebkit.Font" : [ "Arial", "bold", "14" ] },
                 "padding" : 4,
                 "inheritProperties" : true
@@ -185,7 +192,7 @@
 
         "InfoPan" : {
             "background": "#C0F785",
-            "padding" : 2
+            "padding" : [2, 8, 2, 8]
         },
 
         "border": "plain",
@@ -222,7 +229,7 @@
 
     "DateRangeInput" : {
         "DateInputPan" : {
-            "layout" : { "@zebkit.layout.FlowLayout": 2 }
+            "flowLayout" : 2
         },
 
         "MinDateTextField" : {
@@ -241,13 +248,15 @@
         },
 
         "LeftArrowButton" : {
-            "arrowDirection": "left",
-            "preferredSize"  : [ 8, 14 ]
+            "direction": "left",
+            "padding" : 0,
+            "arrowSize"  : [ 10, 14 ]
         },
 
         "RightArrowButton" : {
-            "arrowDirection" : "right",
-            "preferredSize"  : [ 8, 14 ]
+            "direction" : "right",
+            "padding" : 0,
+            "arrowSize"  : [ 10, 14 ]
         },
 
         "Line" : {
@@ -257,7 +266,7 @@
 
         "tags" : {
             "startDate" : {
-                "border" : { "@zebkit.draw.Border": [] }
+                "border" : { "@zebkit.draw.Border": [ "black", 1, 4 ] }
             },
 
             "endDate" : {
@@ -266,7 +275,7 @@
         },
 
         "border"  : "plain",
-        "layout"  : { "@zebkit.layout.FlowLayout" : 2 },
+        "flowLayout": 2,
         "padding" : [2,4,2,4]
     }
 }

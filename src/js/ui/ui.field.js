@@ -18,6 +18,39 @@ zebkit.package("ui", function(pkg, Class) {
      * @class zebkit.ui.TextField
      * @extends zebkit.ui.Label
      */
+
+    /**
+     * Fire when a text field content has been updated.
+     *
+     *       textField.on("updated", function(src) {
+     *           ...
+     *       });
+     *
+     * @event updated
+     * @param  {zebkit.ui.TextField} src a source of the event
+     */
+
+    /**
+     * Fire when a text field content has been selected.
+     *
+     *       textField.on("selected", function(src) {
+     *           ...
+     *       });
+     *
+     * @event selected
+     * @param  {zebkit.ui.TextField} src a source of the event
+     */
+
+    /**
+     * Fire when a cursor position has been changed.
+     *
+     *       textField.on("posChanged", function(src) {
+     *           ...
+     *       });
+     *
+     * @event posChanged
+     * @param  {zebkit.ui.TextField} src a source of the event
+     */
     pkg.TextField = Class(pkg.Label, [
         function (render, maxCol){
             this.$history = Array(100);
@@ -54,8 +87,6 @@ zebkit.package("ui", function(pkg, Class) {
         },
 
         function $clazz() {
-            this.Listeners = zebkit.ListenersClass("updated", "selected", "posChanged");
-
             /**
              * Text field hint text render
              * @constructor
@@ -122,7 +153,6 @@ zebkit.package("ui", function(pkg, Class) {
              * @readOnly
              */
             this.hint = null;
-
 
             // TODO: check the place the property is required
             this.vkMode = "indirect";
@@ -222,7 +252,7 @@ zebkit.package("ui", function(pkg, Class) {
                 if (this.position !== null) {
                     if (this.endOff !== this.startOff) {
                         this.endOff = this.startOff = -1; // clear selection
-                        this.fire("selected");
+                        this.fire("selected", this);
                     }
 
                     if (e.id === "insert") {
@@ -233,7 +263,10 @@ zebkit.package("ui", function(pkg, Class) {
                 }
 
                 if (e.isLastStep) {
-                    this.fire("updated");
+                    if (this.updated !== undefined) {
+                        this.updated();
+                    }
+                    this.fire("updated", this);
                 }
             };
 
@@ -696,7 +729,7 @@ zebkit.package("ui", function(pkg, Class) {
                         this.endLine = p[0];
                         this.endCol  = p[1];
 
-                        this.fire("selected");
+                        this.fire("selected", this);
                         this.repaint();
                     }
                 }
@@ -737,7 +770,7 @@ zebkit.package("ui", function(pkg, Class) {
                             this.endCol  = position.currentCol;
                             this.endOff  = position.offset;
 
-                            this.fire("selected");
+                            this.fire("selected", this);
                         }
 
                         var minUpdatedLine = pl < position.currentLine ? pl : position.currentLine,
@@ -963,7 +996,7 @@ zebkit.package("ui", function(pkg, Class) {
 
                     if (b) {
                         this.repaint();
-                        this.fire("selected");
+                        this.fire("selected", this);
                     }
                 }
                 return this;
@@ -1187,7 +1220,7 @@ zebkit.package("ui", function(pkg, Class) {
 
         function setView(v){
             if (v != this.view) {
-                if (this.view !== null && typeof this.view.off !== 'undefined') {
+                if (this.view !== null && this.view.off !== undefined) {
                     this.view.off(this);
                 }
 
@@ -1198,7 +1231,7 @@ zebkit.package("ui", function(pkg, Class) {
                     this.position.setMetric(this.view);
                 }
 
-                if (this.view !== null && typeof this.view.on !== 'undefined') {
+                if (this.view !== null && this.view.on !== undefined) {
                     this.view.on(this);
                 }
             }
@@ -1228,7 +1261,7 @@ zebkit.package("ui", function(pkg, Class) {
             this.$super(b);
             return this;
         }
-    ]);
+    ]).events("updated", "selected", "posChanged");
 
     /**
      * Text area UI component. The UI component to render multi-lines text.

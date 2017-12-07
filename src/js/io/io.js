@@ -53,12 +53,10 @@ zebkit.package("io", function(pkg, Class) {
      */
     pkg.b64encode = function(input) {
         var out = [], i = 0, len = input.length, c1, c2, c3;
-        if (typeof ArrayBuffer !== "undefined") {
-            if (input instanceof ArrayBuffer) {
-                input = new Uint8Array(input);
-            }
-            input.charCodeAt = function(i) { return this[i]; };
+        if (input instanceof ArrayBuffer) {
+            input = new Uint8Array(input);
         }
+        input.charCodeAt = function(i) { return this[i]; };
 
         if (Array.isArray(input)) {
             input.charCodeAt = function(i) { return this[i]; };
@@ -540,11 +538,11 @@ zebkit.package("io", function(pkg, Class) {
                 }
 
                 r = zebkit.environment.parseJSON(r);
-                if (typeof(r.error) !== "undefined") {
+                if (r.error !== undefined) {
                     throw new Error(r.error.message);
                 }
 
-                if (typeof r.result === "undefined" || typeof r.id === "undefined") {
+                if (r.result === undefined || r.id === undefined) {
                     throw new Error("Wrong JSON response format");
                 }
                 return r.result;

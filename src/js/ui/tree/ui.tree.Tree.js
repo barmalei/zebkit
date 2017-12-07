@@ -223,7 +223,7 @@ zebkit.package("ui.tree", function(pkg, Class) {
 
                         this.add(editor);
                         editor.requestFocus();
-                        this._.editingStarted(this, item, editor);
+                        this.fire("editingStarted", [this, item, editor]);
                     }
                 }
             };
@@ -250,7 +250,7 @@ zebkit.package("ui.tree", function(pkg, Class) {
                         this.editedItem = null;
                         this.removeAt(0);
                         this.requestFocus();
-                        this._.editingStopped(this, item, oldValue, editor, applyData);
+                        this.fire("editingStopped", [this, item, oldValue, editor, applyData]);
                     }
                 }
             };

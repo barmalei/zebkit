@@ -516,9 +516,44 @@
                                                <a href="../classes/zebkit.ui.Cursor.html">zebkit.ui.Cursor</a>
                                             </td>
                                         </tr>
-                                        <tr class="classNameCell" className="zebkit.ui.date.DaysGrid" name="allClassesItem">
+                                        <tr class="classNameCell" className="zebkit.ui.date.Calendar" name="allClassesItem">
                                             <td>
-                                               <a href="../classes/zebkit.ui.date.DaysGrid.html">zebkit.ui.date.DaysGrid</a>
+                                               <a href="../classes/zebkit.ui.date.Calendar.html">zebkit.ui.date.Calendar</a>
+                                            </td>
+                                        </tr>
+                                        <tr class="classNameCell" className="zebkit.ui.date.Calendar.MonthsCombo" name="allClassesItem">
+                                            <td>
+                                               <a href="../classes/zebkit.ui.date.Calendar.MonthsCombo.html">zebkit.ui.date.Calendar.MonthsCombo</a>
+                                            </td>
+                                        </tr>
+                                        <tr class="classNameCell" className="zebkit.ui.date.DateInputField" name="allClassesItem">
+                                            <td>
+                                               <a href="../classes/zebkit.ui.date.DateInputField.html">zebkit.ui.date.DateInputField</a>
+                                            </td>
+                                        </tr>
+                                        <tr class="classNameCell" className="zebkit.ui.date.DateRangeInput" name="allClassesItem">
+                                            <td>
+                                               <a href="../classes/zebkit.ui.date.DateRangeInput.html">zebkit.ui.date.DateRangeInput</a>
+                                            </td>
+                                        </tr>
+                                        <tr class="classNameCell" className="zebkit.ui.date.DateTextField" name="allClassesItem">
+                                            <td>
+                                               <a href="../classes/zebkit.ui.date.DateTextField.html">zebkit.ui.date.DateTextField</a>
+                                            </td>
+                                        </tr>
+                                        <tr class="classNameCell" className="zebkit.ui.date.MonthDaysGrid" name="allClassesItem">
+                                            <td>
+                                               <a href="../classes/zebkit.ui.date.MonthDaysGrid.html">zebkit.ui.date.MonthDaysGrid</a>
+                                            </td>
+                                        </tr>
+                                        <tr class="classNameCell" className="zebkit.ui.date.MonthDaysGrid.DayPan" name="allClassesItem">
+                                            <td>
+                                               <a href="../classes/zebkit.ui.date.MonthDaysGrid.DayPan.html">zebkit.ui.date.MonthDaysGrid.DayPan</a>
+                                            </td>
+                                        </tr>
+                                        <tr class="classNameCell" className="zebkit.ui.date.PopupCalendarMix" name="allClassesItem">
+                                            <td>
+                                               <a href="../classes/zebkit.ui.date.PopupCalendarMix.html">zebkit.ui.date.PopupCalendarMix</a>
                                             </td>
                                         </tr>
                                         <tr class="classNameCell" className="zebkit.ui.DecorationViews" name="allClassesItem">
@@ -631,9 +666,19 @@
                                                <a href="../classes/zebkit.ui.grid.CaptionViewProvider.html">zebkit.ui.grid.CaptionViewProvider</a>
                                             </td>
                                         </tr>
+                                        <tr class="classNameCell" className="zebkit.ui.grid.CellSelectMode" name="allClassesItem">
+                                            <td>
+                                               <a href="../classes/zebkit.ui.grid.CellSelectMode.html">zebkit.ui.grid.CellSelectMode</a>
+                                            </td>
+                                        </tr>
                                         <tr class="classNameCell" className="zebkit.ui.grid.CellsVisibility" name="allClassesItem">
                                             <td>
                                                <a href="../classes/zebkit.ui.grid.CellsVisibility.html">zebkit.ui.grid.CellsVisibility</a>
+                                            </td>
+                                        </tr>
+                                        <tr class="classNameCell" className="zebkit.ui.grid.ColSelectMode" name="allClassesItem">
+                                            <td>
+                                               <a href="../classes/zebkit.ui.grid.ColSelectMode.html">zebkit.ui.grid.ColSelectMode</a>
                                             </td>
                                         </tr>
                                         <tr class="classNameCell" className="zebkit.ui.grid.CompGridCaption" name="allClassesItem">
@@ -684,6 +729,11 @@
                                         <tr class="classNameCell" className="zebkit.ui.grid.Metrics" name="allClassesItem">
                                             <td>
                                                <a href="../classes/zebkit.ui.grid.Metrics.html">zebkit.ui.grid.Metrics</a>
+                                            </td>
+                                        </tr>
+                                        <tr class="classNameCell" className="zebkit.ui.grid.RowSelectMode" name="allClassesItem">
+                                            <td>
+                                               <a href="../classes/zebkit.ui.grid.RowSelectMode.html">zebkit.ui.grid.RowSelectMode</a>
                                             </td>
                                         </tr>
                                         <tr class="classNameCell" className="zebkit.ui.grid.StrippedRows" name="allClassesItem">
@@ -1616,7 +1666,7 @@ result.</li>
 
                                         <td>
                                             <b>
-                                                <a class="name" href="#methods_properties">properties (target, p)</a>
+                                                <a class="name" href="#methods_properties">properties (target, props)</a>
                                             </b>
                                         </td>
                                     </tr>
@@ -2564,15 +2614,36 @@ arguments.</p>
                     &lt;<a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object" class="crosslink external" target="_blank">Object</a>&gt;
                 </span>
 
-    <strong class="name"><code>properties</code> (<code>target, p</code>)</strong>
+    <strong class="name"><code>properties</code> (<code>target, props</code>)</strong>
 
     <br/>
 
     <p>Populate the given target object with the properties set. The properties set
 is a dictionary that keeps properties names and its corresponding values.
-The method detects if a property setter method exits and call it to apply
-the property value. Otherwise property is initialized as a field. Setter
-method is a method that matches "set<PropertyName>" pattern.</p>
+Applying of the properties to an object does the following:</p>
+<ul>
+<li>
+<p>Detects if a property setter method exits and call it to apply
+the property value. Otherwise property is initialized as a field.
+Setter method is a method that matches "set<PropertyName>" pattern.</p>
+</li>
+<li>
+<p>Ignores properties whose names start from "$" character, equals "clazz"
+and properties whose values are function.</p>
+</li>
+<li>
+<p>Remove properties from the target object for properties that start from "-"
+character.</p>
+</li>
+<li>
+<p>Uses factory "$new" method to create a property value if the method can be
+detected in the property value.</p>
+</li>
+<li>
+<p>Apply properties recursively for properties whose names end with '/'
+character.</p>
+</li>
+</ul>
 
 
         <br/>
@@ -2587,7 +2658,7 @@ method is a method that matches "set<PropertyName>" pattern.</p>
 
                 </li>
                 <li>
-                        <span class="name"><code>p</code></span>
+                        <span class="name"><code>props</code></span>
                         <strong class="type">
                             &lt;<a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object" class="crosslink external" target="_blank">Object</a>&gt;
                         </strong>
@@ -2617,10 +2688,13 @@ method is a method that matches "set<PropertyName>" pattern.</p>
 
 
             <div id="attrs">
-                <br/>
-                <table>
-                        <tr>
-                            <td><a name="attrs_$global"></a>
+
+
+                    <br/>
+                    <table>
+                            <tr>
+                                <td>
+<a name="attrs_$global"></a>
 <div class="attrs item">
 
         <strong>private </strong>
@@ -2644,10 +2718,11 @@ method is a method that matches "set<PropertyName>" pattern.</p>
 
 
 </div>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td><a name="attrs_environment"></a>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>
+<a name="attrs_environment"></a>
 <div class="attrs item">
 
         <strong> public </strong>
@@ -2672,9 +2747,9 @@ zebkit and its components require.</p>
 
 
 </div>
-                            </td>
-                        </tr>
-                </table>
+                                </td>
+                            </tr>
+                    </table>
             </div>
 
 

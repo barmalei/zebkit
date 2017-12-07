@@ -516,9 +516,44 @@
                                                <a href="../classes/zebkit.ui.Cursor.html">zebkit.ui.Cursor</a>
                                             </td>
                                         </tr>
-                                        <tr class="classNameCell" className="zebkit.ui.date.DaysGrid" name="allClassesItem">
+                                        <tr class="classNameCell" className="zebkit.ui.date.Calendar" name="allClassesItem">
                                             <td>
-                                               <a href="../classes/zebkit.ui.date.DaysGrid.html">zebkit.ui.date.DaysGrid</a>
+                                               <a href="../classes/zebkit.ui.date.Calendar.html">zebkit.ui.date.Calendar</a>
+                                            </td>
+                                        </tr>
+                                        <tr class="classNameCell" className="zebkit.ui.date.Calendar.MonthsCombo" name="allClassesItem">
+                                            <td>
+                                               <a href="../classes/zebkit.ui.date.Calendar.MonthsCombo.html">zebkit.ui.date.Calendar.MonthsCombo</a>
+                                            </td>
+                                        </tr>
+                                        <tr class="classNameCell" className="zebkit.ui.date.DateInputField" name="allClassesItem">
+                                            <td>
+                                               <a href="../classes/zebkit.ui.date.DateInputField.html">zebkit.ui.date.DateInputField</a>
+                                            </td>
+                                        </tr>
+                                        <tr class="classNameCell" className="zebkit.ui.date.DateRangeInput" name="allClassesItem">
+                                            <td>
+                                               <a href="../classes/zebkit.ui.date.DateRangeInput.html">zebkit.ui.date.DateRangeInput</a>
+                                            </td>
+                                        </tr>
+                                        <tr class="classNameCell" className="zebkit.ui.date.DateTextField" name="allClassesItem">
+                                            <td>
+                                               <a href="../classes/zebkit.ui.date.DateTextField.html">zebkit.ui.date.DateTextField</a>
+                                            </td>
+                                        </tr>
+                                        <tr class="classNameCell" className="zebkit.ui.date.MonthDaysGrid" name="allClassesItem">
+                                            <td>
+                                               <a href="../classes/zebkit.ui.date.MonthDaysGrid.html">zebkit.ui.date.MonthDaysGrid</a>
+                                            </td>
+                                        </tr>
+                                        <tr class="classNameCell" className="zebkit.ui.date.MonthDaysGrid.DayPan" name="allClassesItem">
+                                            <td>
+                                               <a href="../classes/zebkit.ui.date.MonthDaysGrid.DayPan.html">zebkit.ui.date.MonthDaysGrid.DayPan</a>
+                                            </td>
+                                        </tr>
+                                        <tr class="classNameCell" className="zebkit.ui.date.PopupCalendarMix" name="allClassesItem">
+                                            <td>
+                                               <a href="../classes/zebkit.ui.date.PopupCalendarMix.html">zebkit.ui.date.PopupCalendarMix</a>
                                             </td>
                                         </tr>
                                         <tr class="classNameCell" className="zebkit.ui.DecorationViews" name="allClassesItem">
@@ -631,9 +666,19 @@
                                                <a href="../classes/zebkit.ui.grid.CaptionViewProvider.html">zebkit.ui.grid.CaptionViewProvider</a>
                                             </td>
                                         </tr>
+                                        <tr class="classNameCell" className="zebkit.ui.grid.CellSelectMode" name="allClassesItem">
+                                            <td>
+                                               <a href="../classes/zebkit.ui.grid.CellSelectMode.html">zebkit.ui.grid.CellSelectMode</a>
+                                            </td>
+                                        </tr>
                                         <tr class="classNameCell" className="zebkit.ui.grid.CellsVisibility" name="allClassesItem">
                                             <td>
                                                <a href="../classes/zebkit.ui.grid.CellsVisibility.html">zebkit.ui.grid.CellsVisibility</a>
+                                            </td>
+                                        </tr>
+                                        <tr class="classNameCell" className="zebkit.ui.grid.ColSelectMode" name="allClassesItem">
+                                            <td>
+                                               <a href="../classes/zebkit.ui.grid.ColSelectMode.html">zebkit.ui.grid.ColSelectMode</a>
                                             </td>
                                         </tr>
                                         <tr class="classNameCell" className="zebkit.ui.grid.CompGridCaption" name="allClassesItem">
@@ -684,6 +729,11 @@
                                         <tr class="classNameCell" className="zebkit.ui.grid.Metrics" name="allClassesItem">
                                             <td>
                                                <a href="../classes/zebkit.ui.grid.Metrics.html">zebkit.ui.grid.Metrics</a>
+                                            </td>
+                                        </tr>
+                                        <tr class="classNameCell" className="zebkit.ui.grid.RowSelectMode" name="allClassesItem">
+                                            <td>
+                                               <a href="../classes/zebkit.ui.grid.RowSelectMode.html">zebkit.ui.grid.RowSelectMode</a>
                                             </td>
                                         </tr>
                                         <tr class="classNameCell" className="zebkit.ui.grid.StrippedRows" name="allClassesItem">
@@ -1210,7 +1260,7 @@ a.fire(10);</code></pre>
                     void
                 </span>
 
-    <strong class="name"><code>fire</code> (<code>event, [path], [params]</code>)</strong>
+    <strong class="name"><code>fire</code> (<code>name, [path], [params]</code>)</strong>
 
     <br/>
 
@@ -1221,7 +1271,7 @@ a.fire(10);</code></pre>
         <strong>Parameters:</strong>
         <ul class="params">
                 <li>
-                        <span class="name"><code>event</code></span>
+                        <span class="name"><code>name</code></span>
                         <strong class="type">
                             &lt;<a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String" class="crosslink external" target="_blank">String</a>&gt;
                         </strong>
@@ -1401,13 +1451,8 @@ comp.on("#c1", function() {
                 <br/>
                 <ul style="column-count:2;column-gap:20px;list-style:none;">
                         <li>
-                            <a href="zebkit.data.Text.html">
-                                zebkit.data.Text
-                            </a>
-                        </li>
-                        <li>
-                            <a href="zebkit.data.SingleLineTxt.html">
-                                zebkit.data.SingleLineTxt
+                            <a href="zebkit.data.TextModel.html">
+                                zebkit.data.TextModel
                             </a>
                         </li>
                         <li>
@@ -1428,6 +1473,41 @@ comp.on("#c1", function() {
                         <li>
                             <a href="zebkit.layout.Layoutable.html">
                                 zebkit.layout.Layoutable
+                            </a>
+                        </li>
+                        <li>
+                            <a href="zebkit.ui.Group.html">
+                                zebkit.ui.Group
+                            </a>
+                        </li>
+                        <li>
+                            <a href="zebkit.ui.ScrollManager.html">
+                                zebkit.ui.ScrollManager
+                            </a>
+                        </li>
+                        <li>
+                            <a href="zebkit.ui.Tabs.html">
+                                zebkit.ui.Tabs
+                            </a>
+                        </li>
+                        <li>
+                            <a href="zebkit.ui.Combo.EditableContentPan.html">
+                                zebkit.ui.Combo.EditableContentPan
+                            </a>
+                        </li>
+                        <li>
+                            <a href="zebkit.ui.tree.BaseTree.html">
+                                zebkit.ui.tree.BaseTree
+                            </a>
+                        </li>
+                        <li>
+                            <a href="zebkit.ui.grid.BaseCaption.html">
+                                zebkit.ui.grid.BaseCaption
+                            </a>
+                        </li>
+                        <li>
+                            <a href="zebkit.ui.web.HtmlLink.html">
+                                zebkit.ui.web.HtmlLink
                             </a>
                         </li>
                 </ul>

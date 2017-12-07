@@ -516,9 +516,44 @@
                                                <a href="../classes/zebkit.ui.Cursor.html">zebkit.ui.Cursor</a>
                                             </td>
                                         </tr>
-                                        <tr class="classNameCell" className="zebkit.ui.date.DaysGrid" name="allClassesItem">
+                                        <tr class="classNameCell" className="zebkit.ui.date.Calendar" name="allClassesItem">
                                             <td>
-                                               <a href="../classes/zebkit.ui.date.DaysGrid.html">zebkit.ui.date.DaysGrid</a>
+                                               <a href="../classes/zebkit.ui.date.Calendar.html">zebkit.ui.date.Calendar</a>
+                                            </td>
+                                        </tr>
+                                        <tr class="classNameCell" className="zebkit.ui.date.Calendar.MonthsCombo" name="allClassesItem">
+                                            <td>
+                                               <a href="../classes/zebkit.ui.date.Calendar.MonthsCombo.html">zebkit.ui.date.Calendar.MonthsCombo</a>
+                                            </td>
+                                        </tr>
+                                        <tr class="classNameCell" className="zebkit.ui.date.DateInputField" name="allClassesItem">
+                                            <td>
+                                               <a href="../classes/zebkit.ui.date.DateInputField.html">zebkit.ui.date.DateInputField</a>
+                                            </td>
+                                        </tr>
+                                        <tr class="classNameCell" className="zebkit.ui.date.DateRangeInput" name="allClassesItem">
+                                            <td>
+                                               <a href="../classes/zebkit.ui.date.DateRangeInput.html">zebkit.ui.date.DateRangeInput</a>
+                                            </td>
+                                        </tr>
+                                        <tr class="classNameCell" className="zebkit.ui.date.DateTextField" name="allClassesItem">
+                                            <td>
+                                               <a href="../classes/zebkit.ui.date.DateTextField.html">zebkit.ui.date.DateTextField</a>
+                                            </td>
+                                        </tr>
+                                        <tr class="classNameCell" className="zebkit.ui.date.MonthDaysGrid" name="allClassesItem">
+                                            <td>
+                                               <a href="../classes/zebkit.ui.date.MonthDaysGrid.html">zebkit.ui.date.MonthDaysGrid</a>
+                                            </td>
+                                        </tr>
+                                        <tr class="classNameCell" className="zebkit.ui.date.MonthDaysGrid.DayPan" name="allClassesItem">
+                                            <td>
+                                               <a href="../classes/zebkit.ui.date.MonthDaysGrid.DayPan.html">zebkit.ui.date.MonthDaysGrid.DayPan</a>
+                                            </td>
+                                        </tr>
+                                        <tr class="classNameCell" className="zebkit.ui.date.PopupCalendarMix" name="allClassesItem">
+                                            <td>
+                                               <a href="../classes/zebkit.ui.date.PopupCalendarMix.html">zebkit.ui.date.PopupCalendarMix</a>
                                             </td>
                                         </tr>
                                         <tr class="classNameCell" className="zebkit.ui.DecorationViews" name="allClassesItem">
@@ -631,9 +666,19 @@
                                                <a href="../classes/zebkit.ui.grid.CaptionViewProvider.html">zebkit.ui.grid.CaptionViewProvider</a>
                                             </td>
                                         </tr>
+                                        <tr class="classNameCell" className="zebkit.ui.grid.CellSelectMode" name="allClassesItem">
+                                            <td>
+                                               <a href="../classes/zebkit.ui.grid.CellSelectMode.html">zebkit.ui.grid.CellSelectMode</a>
+                                            </td>
+                                        </tr>
                                         <tr class="classNameCell" className="zebkit.ui.grid.CellsVisibility" name="allClassesItem">
                                             <td>
                                                <a href="../classes/zebkit.ui.grid.CellsVisibility.html">zebkit.ui.grid.CellsVisibility</a>
+                                            </td>
+                                        </tr>
+                                        <tr class="classNameCell" className="zebkit.ui.grid.ColSelectMode" name="allClassesItem">
+                                            <td>
+                                               <a href="../classes/zebkit.ui.grid.ColSelectMode.html">zebkit.ui.grid.ColSelectMode</a>
                                             </td>
                                         </tr>
                                         <tr class="classNameCell" className="zebkit.ui.grid.CompGridCaption" name="allClassesItem">
@@ -684,6 +729,11 @@
                                         <tr class="classNameCell" className="zebkit.ui.grid.Metrics" name="allClassesItem">
                                             <td>
                                                <a href="../classes/zebkit.ui.grid.Metrics.html">zebkit.ui.grid.Metrics</a>
+                                            </td>
+                                        </tr>
+                                        <tr class="classNameCell" className="zebkit.ui.grid.RowSelectMode" name="allClassesItem">
+                                            <td>
+                                               <a href="../classes/zebkit.ui.grid.RowSelectMode.html">zebkit.ui.grid.RowSelectMode</a>
                                             </td>
                                         </tr>
                                         <tr class="classNameCell" className="zebkit.ui.grid.StrippedRows" name="allClassesItem">
@@ -1165,7 +1215,7 @@ following direction: "top", "left", "bottom", "right".</p>
 
 
 
-    <strong class="name"><code>zebkit.draw.ArrowView</code> (<code>d, col, w, h</code>)</strong>
+    <strong class="name"><code>zebkit.draw.ArrowView</code> (<code>direction, color, fillColor</code>)</strong>
 
     <br/>
 
@@ -1175,7 +1225,7 @@ following direction: "top", "left", "bottom", "right".</p>
         <strong>Parameters:</strong>
         <ul class="params">
                 <li>
-                        <span class="name"><code>d</code></span>
+                        <span class="name"><code>direction</code></span>
                         <strong class="type">
                             &lt;<a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String" class="crosslink external" target="_blank">String</a>&gt;
                         </strong>
@@ -1183,27 +1233,19 @@ following direction: "top", "left", "bottom", "right".</p>
 
                 </li>
                 <li>
-                        <span class="name"><code>col</code></span>
+                        <span class="name"><code>color</code></span>
                         <strong class="type">
                             &lt;<a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String" class="crosslink external" target="_blank">String</a>&gt;
                         </strong>
-                    <p>an arrow view color.</p>
+                    <p>an arrow view line color.</p>
 
                 </li>
                 <li>
-                        <span class="name"><code>w</code></span>
+                        <span class="name"><code>fillColor</code></span>
                         <strong class="type">
-                            &lt;Integer&gt;
+                            &lt;<a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String" class="crosslink external" target="_blank">String</a>&gt;
                         </strong>
-                    <p>an arrow view width.</p>
-
-                </li>
-                <li>
-                        <span class="name"><code>h</code></span>
-                        <strong class="type">
-                            &lt;Integer&gt;
-                        </strong>
-                    <p>an arrow view height.</p>
+                    <p>an arrow view filling.</p>
 
                 </li>
         </ul>
@@ -1328,36 +1370,13 @@ following direction: "top", "left", "bottom", "right".</p>
 
 
             <div id="attrs">
-                <br/>
-                <table>
-                        <tr>
-                            <td><a name="attrs_color"></a>
-<div class="attrs item">
-
-        <strong> public </strong>
 
 
-        <strong class="type">
-            &lt;<a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String" class="crosslink external" target="_blank">String</a>&gt;
-        </strong>
-
-    <strong class="name" style="color:orange;">
-        <code>color</code>
-    </strong>
-
-    
-    
-
-    <br>
-
-    <p>Arrow color</p>
-
-
-</div>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td><a name="attrs_direction"></a>
+                    <br/>
+                    <table>
+                            <tr>
+                                <td>
+<a name="attrs_direction"></a>
 <div class="attrs item">
 
         <strong> public </strong>
@@ -1380,139 +1399,9 @@ following direction: "top", "left", "bottom", "right".</p>
 
 
 </div>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td><a name="attrs_fill"></a>
-<div class="attrs item">
-
-        <strong> public </strong>
-
-
-        <strong class="type">
-            &lt;<a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Boolean" class="crosslink external" target="_blank">Boolean</a>&gt;
-        </strong>
-
-    <strong class="name" style="color:orange;">
-        <code>fill</code>
-    </strong>
-
-    
-    
-
-    <br>
-
-    <p>Indicates if the arrow has to be filled with the arrow line color.</p>
-
-
-</div>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td><a name="attrs_gap"></a>
-<div class="attrs item">
-
-        <strong> public </strong>
-
-
-        <strong class="type">
-            &lt;Integer&gt;
-        </strong>
-
-    <strong class="name" style="color:orange;">
-        <code>gap</code>
-    </strong>
-
-    
-    
-
-    <br>
-
-    <p>Gap</p>
-
-
-</div>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td><a name="attrs_height"></a>
-<div class="attrs item">
-
-        <strong> public </strong>
-
-
-        <strong class="type">
-            &lt;Integer&gt;
-        </strong>
-
-    <strong class="name" style="color:orange;">
-        <code>height</code>
-    </strong>
-
-    
-    
-
-    <br>
-
-    <p>Arrow height.</p>
-
-
-</div>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td><a name="attrs_lineWidth"></a>
-<div class="attrs item">
-
-        <strong> public </strong>
-
-
-        <strong class="type">
-            &lt;Integer&gt;
-        </strong>
-
-    <strong class="name" style="color:orange;">
-        <code>lineWidth</code>
-    </strong>
-
-    
-    
-
-    <br>
-
-    <p>Line width.</p>
-
-
-</div>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td><a name="attrs_width"></a>
-<div class="attrs item">
-
-        <strong> public </strong>
-
-
-        <strong class="type">
-            &lt;Integer&gt;
-        </strong>
-
-    <strong class="name" style="color:orange;">
-        <code>width</code>
-    </strong>
-
-    
-    
-
-    <br>
-
-    <p>Arrow width.</p>
-
-
-</div>
-                            </td>
-                        </tr>
-                </table>
+                                </td>
+                            </tr>
+                    </table>
             </div>
 
 

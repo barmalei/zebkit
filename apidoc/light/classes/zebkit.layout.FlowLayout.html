@@ -516,9 +516,44 @@
                                                <a href="../classes/zebkit.ui.Cursor.html">zebkit.ui.Cursor</a>
                                             </td>
                                         </tr>
-                                        <tr class="classNameCell" className="zebkit.ui.date.DaysGrid" name="allClassesItem">
+                                        <tr class="classNameCell" className="zebkit.ui.date.Calendar" name="allClassesItem">
                                             <td>
-                                               <a href="../classes/zebkit.ui.date.DaysGrid.html">zebkit.ui.date.DaysGrid</a>
+                                               <a href="../classes/zebkit.ui.date.Calendar.html">zebkit.ui.date.Calendar</a>
+                                            </td>
+                                        </tr>
+                                        <tr class="classNameCell" className="zebkit.ui.date.Calendar.MonthsCombo" name="allClassesItem">
+                                            <td>
+                                               <a href="../classes/zebkit.ui.date.Calendar.MonthsCombo.html">zebkit.ui.date.Calendar.MonthsCombo</a>
+                                            </td>
+                                        </tr>
+                                        <tr class="classNameCell" className="zebkit.ui.date.DateInputField" name="allClassesItem">
+                                            <td>
+                                               <a href="../classes/zebkit.ui.date.DateInputField.html">zebkit.ui.date.DateInputField</a>
+                                            </td>
+                                        </tr>
+                                        <tr class="classNameCell" className="zebkit.ui.date.DateRangeInput" name="allClassesItem">
+                                            <td>
+                                               <a href="../classes/zebkit.ui.date.DateRangeInput.html">zebkit.ui.date.DateRangeInput</a>
+                                            </td>
+                                        </tr>
+                                        <tr class="classNameCell" className="zebkit.ui.date.DateTextField" name="allClassesItem">
+                                            <td>
+                                               <a href="../classes/zebkit.ui.date.DateTextField.html">zebkit.ui.date.DateTextField</a>
+                                            </td>
+                                        </tr>
+                                        <tr class="classNameCell" className="zebkit.ui.date.MonthDaysGrid" name="allClassesItem">
+                                            <td>
+                                               <a href="../classes/zebkit.ui.date.MonthDaysGrid.html">zebkit.ui.date.MonthDaysGrid</a>
+                                            </td>
+                                        </tr>
+                                        <tr class="classNameCell" className="zebkit.ui.date.MonthDaysGrid.DayPan" name="allClassesItem">
+                                            <td>
+                                               <a href="../classes/zebkit.ui.date.MonthDaysGrid.DayPan.html">zebkit.ui.date.MonthDaysGrid.DayPan</a>
+                                            </td>
+                                        </tr>
+                                        <tr class="classNameCell" className="zebkit.ui.date.PopupCalendarMix" name="allClassesItem">
+                                            <td>
+                                               <a href="../classes/zebkit.ui.date.PopupCalendarMix.html">zebkit.ui.date.PopupCalendarMix</a>
                                             </td>
                                         </tr>
                                         <tr class="classNameCell" className="zebkit.ui.DecorationViews" name="allClassesItem">
@@ -631,9 +666,19 @@
                                                <a href="../classes/zebkit.ui.grid.CaptionViewProvider.html">zebkit.ui.grid.CaptionViewProvider</a>
                                             </td>
                                         </tr>
+                                        <tr class="classNameCell" className="zebkit.ui.grid.CellSelectMode" name="allClassesItem">
+                                            <td>
+                                               <a href="../classes/zebkit.ui.grid.CellSelectMode.html">zebkit.ui.grid.CellSelectMode</a>
+                                            </td>
+                                        </tr>
                                         <tr class="classNameCell" className="zebkit.ui.grid.CellsVisibility" name="allClassesItem">
                                             <td>
                                                <a href="../classes/zebkit.ui.grid.CellsVisibility.html">zebkit.ui.grid.CellsVisibility</a>
+                                            </td>
+                                        </tr>
+                                        <tr class="classNameCell" className="zebkit.ui.grid.ColSelectMode" name="allClassesItem">
+                                            <td>
+                                               <a href="../classes/zebkit.ui.grid.ColSelectMode.html">zebkit.ui.grid.ColSelectMode</a>
                                             </td>
                                         </tr>
                                         <tr class="classNameCell" className="zebkit.ui.grid.CompGridCaption" name="allClassesItem">
@@ -684,6 +729,11 @@
                                         <tr class="classNameCell" className="zebkit.ui.grid.Metrics" name="allClassesItem">
                                             <td>
                                                <a href="../classes/zebkit.ui.grid.Metrics.html">zebkit.ui.grid.Metrics</a>
+                                            </td>
+                                        </tr>
+                                        <tr class="classNameCell" className="zebkit.ui.grid.RowSelectMode" name="allClassesItem">
+                                            <td>
+                                               <a href="../classes/zebkit.ui.grid.RowSelectMode.html">zebkit.ui.grid.RowSelectMode</a>
                                             </td>
                                         </tr>
                                         <tr class="classNameCell" className="zebkit.ui.grid.StrippedRows" name="allClassesItem">
@@ -1154,7 +1204,7 @@ alignments</p>
 // components added to the panel will be placed
 // horizontally aligned at the center of the panel
 var p = new zebkit.ui.Panel();
-p.setLayout(new zebkit.layout.FlowLayout("center", "center"));
+p.setFlowLayout("center", "center");
 
 // add three buttons into the panel with flow layout
 p.add(new zebkit.ui.Button("Button 1"));
@@ -1284,10 +1334,13 @@ in the layout</p>
 
 
             <div id="attrs">
-                <br/>
-                <table>
-                        <tr>
-                            <td><a name="attrs_ax"></a>
+
+
+                    <br/>
+                    <table>
+                            <tr>
+                                <td>
+<a name="attrs_ax"></a>
 <div class="attrs item">
 
         <strong> public </strong>
@@ -1311,10 +1364,11 @@ in the layout</p>
 
 
 </div>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td><a name="attrs_ay"></a>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>
+<a name="attrs_ay"></a>
 <div class="attrs item">
 
         <strong> public </strong>
@@ -1338,10 +1392,11 @@ in the layout</p>
 
 
 </div>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td><a name="attrs_direction"></a>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>
+<a name="attrs_direction"></a>
 <div class="attrs item">
 
         <strong> public </strong>
@@ -1365,10 +1420,11 @@ in the layout</p>
 
 
 </div>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td><a name="attrs_gap"></a>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>
+<a name="attrs_gap"></a>
 <div class="attrs item">
 
         <strong> public </strong>
@@ -1392,10 +1448,11 @@ in the layout</p>
 
 
 </div>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td><a name="attrs_stretchLast"></a>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>
+<a name="attrs_stretchLast"></a>
 <div class="attrs item">
 
         <strong> public </strong>
@@ -1419,9 +1476,9 @@ the rest of horizontal or vertical space of a parent component.</p>
 
 
 </div>
-                            </td>
-                        </tr>
-                </table>
+                                </td>
+                            </tr>
+                    </table>
             </div>
 
 

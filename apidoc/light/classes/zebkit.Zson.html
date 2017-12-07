@@ -516,9 +516,44 @@
                                                <a href="../classes/zebkit.ui.Cursor.html">zebkit.ui.Cursor</a>
                                             </td>
                                         </tr>
-                                        <tr class="classNameCell" className="zebkit.ui.date.DaysGrid" name="allClassesItem">
+                                        <tr class="classNameCell" className="zebkit.ui.date.Calendar" name="allClassesItem">
                                             <td>
-                                               <a href="../classes/zebkit.ui.date.DaysGrid.html">zebkit.ui.date.DaysGrid</a>
+                                               <a href="../classes/zebkit.ui.date.Calendar.html">zebkit.ui.date.Calendar</a>
+                                            </td>
+                                        </tr>
+                                        <tr class="classNameCell" className="zebkit.ui.date.Calendar.MonthsCombo" name="allClassesItem">
+                                            <td>
+                                               <a href="../classes/zebkit.ui.date.Calendar.MonthsCombo.html">zebkit.ui.date.Calendar.MonthsCombo</a>
+                                            </td>
+                                        </tr>
+                                        <tr class="classNameCell" className="zebkit.ui.date.DateInputField" name="allClassesItem">
+                                            <td>
+                                               <a href="../classes/zebkit.ui.date.DateInputField.html">zebkit.ui.date.DateInputField</a>
+                                            </td>
+                                        </tr>
+                                        <tr class="classNameCell" className="zebkit.ui.date.DateRangeInput" name="allClassesItem">
+                                            <td>
+                                               <a href="../classes/zebkit.ui.date.DateRangeInput.html">zebkit.ui.date.DateRangeInput</a>
+                                            </td>
+                                        </tr>
+                                        <tr class="classNameCell" className="zebkit.ui.date.DateTextField" name="allClassesItem">
+                                            <td>
+                                               <a href="../classes/zebkit.ui.date.DateTextField.html">zebkit.ui.date.DateTextField</a>
+                                            </td>
+                                        </tr>
+                                        <tr class="classNameCell" className="zebkit.ui.date.MonthDaysGrid" name="allClassesItem">
+                                            <td>
+                                               <a href="../classes/zebkit.ui.date.MonthDaysGrid.html">zebkit.ui.date.MonthDaysGrid</a>
+                                            </td>
+                                        </tr>
+                                        <tr class="classNameCell" className="zebkit.ui.date.MonthDaysGrid.DayPan" name="allClassesItem">
+                                            <td>
+                                               <a href="../classes/zebkit.ui.date.MonthDaysGrid.DayPan.html">zebkit.ui.date.MonthDaysGrid.DayPan</a>
+                                            </td>
+                                        </tr>
+                                        <tr class="classNameCell" className="zebkit.ui.date.PopupCalendarMix" name="allClassesItem">
+                                            <td>
+                                               <a href="../classes/zebkit.ui.date.PopupCalendarMix.html">zebkit.ui.date.PopupCalendarMix</a>
                                             </td>
                                         </tr>
                                         <tr class="classNameCell" className="zebkit.ui.DecorationViews" name="allClassesItem">
@@ -631,9 +666,19 @@
                                                <a href="../classes/zebkit.ui.grid.CaptionViewProvider.html">zebkit.ui.grid.CaptionViewProvider</a>
                                             </td>
                                         </tr>
+                                        <tr class="classNameCell" className="zebkit.ui.grid.CellSelectMode" name="allClassesItem">
+                                            <td>
+                                               <a href="../classes/zebkit.ui.grid.CellSelectMode.html">zebkit.ui.grid.CellSelectMode</a>
+                                            </td>
+                                        </tr>
                                         <tr class="classNameCell" className="zebkit.ui.grid.CellsVisibility" name="allClassesItem">
                                             <td>
                                                <a href="../classes/zebkit.ui.grid.CellsVisibility.html">zebkit.ui.grid.CellsVisibility</a>
+                                            </td>
+                                        </tr>
+                                        <tr class="classNameCell" className="zebkit.ui.grid.ColSelectMode" name="allClassesItem">
+                                            <td>
+                                               <a href="../classes/zebkit.ui.grid.ColSelectMode.html">zebkit.ui.grid.ColSelectMode</a>
                                             </td>
                                         </tr>
                                         <tr class="classNameCell" className="zebkit.ui.grid.CompGridCaption" name="allClassesItem">
@@ -684,6 +729,11 @@
                                         <tr class="classNameCell" className="zebkit.ui.grid.Metrics" name="allClassesItem">
                                             <td>
                                                <a href="../classes/zebkit.ui.grid.Metrics.html">zebkit.ui.grid.Metrics</a>
+                                            </td>
+                                        </tr>
+                                        <tr class="classNameCell" className="zebkit.ui.grid.RowSelectMode" name="allClassesItem">
+                                            <td>
+                                               <a href="../classes/zebkit.ui.grid.RowSelectMode.html">zebkit.ui.grid.RowSelectMode</a>
                                             </td>
                                         </tr>
                                         <tr class="classNameCell" className="zebkit.ui.grid.StrippedRows" name="allClassesItem">
@@ -1394,6 +1444,25 @@ the given JSON configuration</p>
 
                                         <td>
                                                     <span class="type">
+                                                        &lt;<a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object" class="crosslink external" target="_blank">Object</a>&gt;
+                                                    </span>
+                                        </td>
+
+                                        <td>
+                                            <b>
+                                                <a class="name" href="#methods_merge">merge (dest, src, [recursively])</a>
+                                            </b>
+                                        </td>
+                                    </tr>
+                                    <tr style="background:none;">
+                                        <td>
+                                                <strong> <code>protected</code> </strong>
+
+
+                                        </td>
+
+                                        <td>
+                                                    <span class="type">
                                                         &lt;<a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Function" class="crosslink external" target="_blank">Function</a>&gt;
                                                     </span>
                                         </td>
@@ -1477,8 +1546,8 @@ the given JSON configuration</p>
                         <strong class="type">
                             &lt;<a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object" class="crosslink external" target="_blank">Object</a>&gt;
                         </strong>
-                    <p>dictionary where key is a class alias that can be referenced from
-JSON and the value is class itself (constructor)</p>
+                    <p>dictionary where key is a class alias that can be referenced
+from JSON and the value is class itself (constructor)</p>
 
                 </li>
         </ul>
@@ -1558,7 +1627,8 @@ JSON and the value is class itself (constructor)</p>
 
     <br/>
 
-    <p>Call method.</p>
+    <p>Call the given method defined with the Zson class instance and
+pass the given arguments to the method.</p>
 
 
         <br/>
@@ -1654,6 +1724,78 @@ JSON and the value is class itself (constructor)</p>
                 <span class="type">
                 </span>
                 <p>Error if property cannot be found and it  doesn't start with "?"</p>
+
+            </div>
+
+
+</div>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td><a name="methods_merge"></a>
+
+<div class="method item protected">
+    <span class="foundat">
+    </span>
+
+        <strong> <code>protected</code> </strong>
+
+
+
+                <span class="type">
+                    &lt;<a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object" class="crosslink external" target="_blank">Object</a>&gt;
+                </span>
+
+    <strong class="name"><code>merge</code> (<code>dest, src, [recursively]</code>)</strong>
+
+    <br/>
+
+    <p>Merge values of the given destination object with the values of
+the specified  source object.</p>
+
+
+        <br/>
+        <strong>Parameters:</strong>
+        <ul class="params">
+                <li>
+                        <span class="name"><code>dest</code></span>
+                        <strong class="type">
+                            &lt;<a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object" class="crosslink external" target="_blank">Object</a>&gt;
+                        </strong>
+                    <p>a destination object</p>
+
+                </li>
+                <li>
+                        <span class="name"><code>src</code></span>
+                        <strong class="type">
+                            &lt;<a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object" class="crosslink external" target="_blank">Object</a>&gt;
+                        </strong>
+                    <p>a source object</p>
+
+                </li>
+                <li>
+                        <span class="name"><code>[recursively]</code></span>
+                        <strong class="type">
+                            &lt;<a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Boolean" class="crosslink external" target="_blank">Boolean</a>&gt;
+                        </strong>
+                    <p>flag that indicates if the complex
+properties of destination object has to be traversing recursively.
+By default the flag is true. The destination property value is
+considered not traversable if its class defines "mergeable" property
+that is set top true.</p>
+
+                </li>
+        </ul>
+
+            <br/>
+            <div class="returns">
+                <strong>
+                    Returns:
+                </strong>
+                <span class="type">
+                        &lt;<a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object" class="crosslink external" target="_blank">Object</a>&gt;
+                </span>
+                <p>a merged destination object.</p>
 
             </div>
 
@@ -1860,13 +2002,16 @@ new zebkit.Zson().then("http://test.com/test.json", function(zson) {
 
 
             <div id="attrs">
-                <br/>
-                <table>
-                        <tr>
-                            <td><a name="attrs_$variables"></a>
+
+
+                    <br/>
+                    <table>
+                            <tr>
+                                <td>
+<a name="attrs_$variables"></a>
 <div class="attrs item">
 
-        <strong> public </strong>
+        <strong>protected </strong>
 
 
         <strong class="type">
@@ -1886,10 +2031,39 @@ new zebkit.Zson().then("http://test.com/test.json", function(zson) {
 
 
 </div>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td><a name="attrs_cacheBusting"></a>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>
+<a name="attrs_baseUri"></a>
+<div class="attrs item">
+
+        <strong> public </strong>
+
+
+        <strong class="type">
+            &lt;<a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String" class="crosslink external" target="_blank">String</a>&gt;
+        </strong>
+
+    <strong class="name" style="color:orange;">
+        <code>baseUri</code>
+    </strong>
+
+    
+    
+
+    <br>
+
+    <p>Base URI to be used to build paths to external resources. The path is
+used for references that occur in zson.</p>
+
+
+</div>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>
+<a name="attrs_cacheBusting"></a>
 <div class="attrs item">
 
         <strong> public </strong>
@@ -1908,14 +2082,15 @@ new zebkit.Zson().then("http://test.com/test.json", function(zson) {
 
     <br>
 
-    <p>Cache busting</p>
+    <p>Cache busting flag.</p>
 
 
 </div>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td><a name="attrs_classAliases"></a>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>
+<a name="attrs_classAliases"></a>
 <div class="attrs item">
 
         <strong>protected </strong>
@@ -1938,10 +2113,11 @@ new zebkit.Zson().then("http://test.com/test.json", function(zson) {
 
 
 </div>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td><a name="attrs_content"></a>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>
+<a name="attrs_content"></a>
 <div class="attrs item">
 
         <strong>protected </strong>
@@ -1964,10 +2140,11 @@ new zebkit.Zson().then("http://test.com/test.json", function(zson) {
 
 
 </div>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td><a name="attrs_root"></a>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>
+<a name="attrs_root"></a>
 <div class="attrs item">
 
         <strong> public </strong>
@@ -1991,10 +2168,11 @@ new zebkit.Zson().then("http://test.com/test.json", function(zson) {
 
 
 </div>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td><a name="attrs_uri"></a>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>
+<a name="attrs_uri"></a>
 <div class="attrs item">
 
         <strong> public </strong>
@@ -2017,10 +2195,11 @@ new zebkit.Zson().then("http://test.com/test.json", function(zson) {
 
 
 </div>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td><a name="attrs_usePropertySetters"></a>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>
+<a name="attrs_usePropertySetters"></a>
 <div class="attrs item">
 
         <strong> public </strong>
@@ -2051,9 +2230,9 @@ the loaded with the JSON object and call it to set "red" property value.</p>
 
 
 </div>
-                            </td>
-                        </tr>
-                </table>
+                                </td>
+                            </tr>
+                    </table>
             </div>
 
 

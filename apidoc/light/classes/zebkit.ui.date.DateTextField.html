@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="utf-8">
-    <title>zebkit.ui.date.DaysGrid - zebkit</title>
+    <title>zebkit.ui.date.DateTextField - zebkit</title>
     <link rel="stylesheet" href="http://yui.yahooapis.com/3.9.1/build/cssgrids/cssgrids-min.css">
     <link rel="stylesheet" href="../assets/vendor/prettify/prettify-min.css">
     <link rel="stylesheet" href="../assets/css/dune-light.css">
@@ -516,9 +516,44 @@
                                                <a href="../classes/zebkit.ui.Cursor.html">zebkit.ui.Cursor</a>
                                             </td>
                                         </tr>
-                                        <tr class="classNameCell" className="zebkit.ui.date.DaysGrid" name="allClassesItem">
+                                        <tr class="classNameCell" className="zebkit.ui.date.Calendar" name="allClassesItem">
                                             <td>
-                                               <a href="../classes/zebkit.ui.date.DaysGrid.html">zebkit.ui.date.DaysGrid</a>
+                                               <a href="../classes/zebkit.ui.date.Calendar.html">zebkit.ui.date.Calendar</a>
+                                            </td>
+                                        </tr>
+                                        <tr class="classNameCell" className="zebkit.ui.date.Calendar.MonthsCombo" name="allClassesItem">
+                                            <td>
+                                               <a href="../classes/zebkit.ui.date.Calendar.MonthsCombo.html">zebkit.ui.date.Calendar.MonthsCombo</a>
+                                            </td>
+                                        </tr>
+                                        <tr class="classNameCell" className="zebkit.ui.date.DateInputField" name="allClassesItem">
+                                            <td>
+                                               <a href="../classes/zebkit.ui.date.DateInputField.html">zebkit.ui.date.DateInputField</a>
+                                            </td>
+                                        </tr>
+                                        <tr class="classNameCell" className="zebkit.ui.date.DateRangeInput" name="allClassesItem">
+                                            <td>
+                                               <a href="../classes/zebkit.ui.date.DateRangeInput.html">zebkit.ui.date.DateRangeInput</a>
+                                            </td>
+                                        </tr>
+                                        <tr class="classNameCell" className="zebkit.ui.date.DateTextField" name="allClassesItem">
+                                            <td>
+                                               <a href="../classes/zebkit.ui.date.DateTextField.html">zebkit.ui.date.DateTextField</a>
+                                            </td>
+                                        </tr>
+                                        <tr class="classNameCell" className="zebkit.ui.date.MonthDaysGrid" name="allClassesItem">
+                                            <td>
+                                               <a href="../classes/zebkit.ui.date.MonthDaysGrid.html">zebkit.ui.date.MonthDaysGrid</a>
+                                            </td>
+                                        </tr>
+                                        <tr class="classNameCell" className="zebkit.ui.date.MonthDaysGrid.DayPan" name="allClassesItem">
+                                            <td>
+                                               <a href="../classes/zebkit.ui.date.MonthDaysGrid.DayPan.html">zebkit.ui.date.MonthDaysGrid.DayPan</a>
+                                            </td>
+                                        </tr>
+                                        <tr class="classNameCell" className="zebkit.ui.date.PopupCalendarMix" name="allClassesItem">
+                                            <td>
+                                               <a href="../classes/zebkit.ui.date.PopupCalendarMix.html">zebkit.ui.date.PopupCalendarMix</a>
                                             </td>
                                         </tr>
                                         <tr class="classNameCell" className="zebkit.ui.DecorationViews" name="allClassesItem">
@@ -631,9 +666,19 @@
                                                <a href="../classes/zebkit.ui.grid.CaptionViewProvider.html">zebkit.ui.grid.CaptionViewProvider</a>
                                             </td>
                                         </tr>
+                                        <tr class="classNameCell" className="zebkit.ui.grid.CellSelectMode" name="allClassesItem">
+                                            <td>
+                                               <a href="../classes/zebkit.ui.grid.CellSelectMode.html">zebkit.ui.grid.CellSelectMode</a>
+                                            </td>
+                                        </tr>
                                         <tr class="classNameCell" className="zebkit.ui.grid.CellsVisibility" name="allClassesItem">
                                             <td>
                                                <a href="../classes/zebkit.ui.grid.CellsVisibility.html">zebkit.ui.grid.CellsVisibility</a>
+                                            </td>
+                                        </tr>
+                                        <tr class="classNameCell" className="zebkit.ui.grid.ColSelectMode" name="allClassesItem">
+                                            <td>
+                                               <a href="../classes/zebkit.ui.grid.ColSelectMode.html">zebkit.ui.grid.ColSelectMode</a>
                                             </td>
                                         </tr>
                                         <tr class="classNameCell" className="zebkit.ui.grid.CompGridCaption" name="allClassesItem">
@@ -684,6 +729,11 @@
                                         <tr class="classNameCell" className="zebkit.ui.grid.Metrics" name="allClassesItem">
                                             <td>
                                                <a href="../classes/zebkit.ui.grid.Metrics.html">zebkit.ui.grid.Metrics</a>
+                                            </td>
+                                        </tr>
+                                        <tr class="classNameCell" className="zebkit.ui.grid.RowSelectMode" name="allClassesItem">
+                                            <td>
+                                               <a href="../classes/zebkit.ui.grid.RowSelectMode.html">zebkit.ui.grid.RowSelectMode</a>
                                             </td>
                                         </tr>
                                         <tr class="classNameCell" className="zebkit.ui.grid.StrippedRows" name="allClassesItem">
@@ -1126,7 +1176,7 @@
                 </strong>
 
                 <strong class="name"">
-                   zebkit.ui.date.DaysGrid
+                   zebkit.ui.date.DateTextField
                 </strong>
 
 
@@ -1136,7 +1186,7 @@
                             extends
                         </strong>
 
-                        <span class="type">&lt;<a href="../classes/zebkit.ui.grid.Grid.html" class="crosslink">zebkit.ui.grid.Grid</a>&gt;</span>
+                        <span class="type">&lt;<a href="../classes/zebkit.ui.TextField.html" class="crosslink">zebkit.ui.TextField</a>&gt;</span>
             </td>
                 <td align="right" valign="top">
                     <a href="../classes/zebkit.ui.date.html">
@@ -1149,12 +1199,21 @@
 
 <br/>
 <div class="intro">
-    <p>Shows the given month and year days.</p>
+    <p>Text field component to keep formated with the specified pattern date. The pattern
+can consists of from the placeholders where every placeholder is a formatted value
+of a property of Date object:</p>
+<pre class="code prettyprint"><code> ${N,K,&lt;date_object_property&gt;}
+
+N - length of the field
+K - character to fulfill
+</code></pre>
+<p>For example "${2,0,date}/${2,0,month2}/${4,0,fullYear}" pattern represents "Day/Month/Year"
+date format ("22/12/1997").</p>
 
 </div>
 
 
-        <strong>Constructor:</strong><a name="methods_zebkit.ui.date.DaysGrid"></a>
+        <strong>Constructor:</strong><a name="methods_zebkit.ui.date.DateTextField"></a>
 
 <div class="method item">
     <span class="foundat">
@@ -1164,12 +1223,24 @@
 
 
 
-    <strong class="name"><code>zebkit.ui.date.DaysGrid</code> (<code> </code>)</strong>
+    <strong class="name"><code>zebkit.ui.date.DateTextField</code> (<code>[format]</code>)</strong>
 
     <br/>
 
     
 
+        <br/>
+        <strong>Parameters:</strong>
+        <ul class="params">
+                <li>
+                        <span class="name"><code>[format]</code></span>
+                        <strong class="type">
+                            &lt;<a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String" class="crosslink external" target="_blank">String</a>&gt;
+                        </strong>
+                    <p>format string</p>
+
+                </li>
+        </ul>
 
 
 
@@ -1213,24 +1284,6 @@
                         <strong>Inherited methods:</strong>
                         <div style="padding:6px;">
                                     <small style="white-space: nowrap;">
-                                        <a href="zebkit.ui.grid.Grid.html#methods_$getPosMarker">
-                                            <b>$getPosMarker(</b> <b>)</b>
-                                        </a>
-                                    </small>
-                                    &nbsp;&nbsp;
-                                    <small style="white-space: nowrap;">
-                                        <a href="zebkit.ui.grid.Grid.html#methods_$initialCellX">
-                                            <b>$initialCellX(</b> <b>)</b>
-                                        </a>
-                                    </small>
-                                    &nbsp;&nbsp;
-                                    <small style="white-space: nowrap;">
-                                        <a href="zebkit.ui.grid.Grid.html#methods_$initialCellY">
-                                            <b>$initialCellY(</b> <b>)</b>
-                                        </a>
-                                    </small>
-                                    &nbsp;&nbsp;
-                                    <small style="white-space: nowrap;">
                                         <a href="zebkit.layout.Layoutable.html#methods_$setConstraints">
                                             <b>$setConstraints(</b>c<b>)</b>
                                         </a>
@@ -1255,20 +1308,20 @@
                                     </small>
                                     &nbsp;&nbsp;
                                     <small style="white-space: nowrap;">
-                                        <a href="zebkit.layout.Layoutable.html#methods_calcPreferredSize">
-                                            <b>calcPreferredSize(</b>target<b>)</b>
+                                        <a href="zebkit.ui.ViewPan.html#methods_calcPreferredSize">
+                                            <b>calcPreferredSize(</b>t<b>)</b>
                                         </a>
                                     </small>
                                     &nbsp;&nbsp;
                                     <small style="white-space: nowrap;">
-                                        <a href="zebkit.ui.grid.Grid.html#methods_cellByLocation">
-                                            <b>cellByLocation(</b>x, y<b>)</b>
+                                        <a href="zebkit.ui.TextField.html#methods_clearSelection">
+                                            <b>clearSelection(</b> <b>)</b>
                                         </a>
                                     </small>
                                     &nbsp;&nbsp;
                                     <small style="white-space: nowrap;">
-                                        <a href="zebkit.ui.grid.Grid.html#methods_clearSelect">
-                                            <b>clearSelect(</b> <b>)</b>
+                                        <a href="zebkit.ui.TextField.html#methods_cut">
+                                            <b>cut(</b> <b>)</b>
                                         </a>
                                     </small>
                                     &nbsp;&nbsp;
@@ -1279,8 +1332,20 @@
                                     </small>
                                     &nbsp;&nbsp;
                                     <small style="white-space: nowrap;">
+                                        <a href="zebkit.ui.TextField.html#methods_drawCursor">
+                                            <b>drawCursor(</b>g<b>)</b>
+                                        </a>
+                                    </small>
+                                    &nbsp;&nbsp;
+                                    <small style="white-space: nowrap;">
+                                        <a href="zebkit.ui.TextField.html#methods_findNextWord">
+                                            <b>findNextWord(</b>t, line, col, d<b>)</b>
+                                        </a>
+                                    </small>
+                                    &nbsp;&nbsp;
+                                    <small style="white-space: nowrap;">
                                         <a href="zebkit.EventProducer.html#methods_fire">
-                                            <b>fire(</b>event, [path], [params]<b>)</b>
+                                            <b>fire(</b>name, [path], [params]<b>)</b>
                                         </a>
                                     </small>
                                     &nbsp;&nbsp;
@@ -1303,32 +1368,8 @@
                                     </small>
                                     &nbsp;&nbsp;
                                     <small style="white-space: nowrap;">
-                                        <a href="zebkit.ui.grid.Metrics.html#methods_getCellsVisibility">
-                                            <b>getCellsVisibility(</b> <b>)</b>
-                                        </a>
-                                    </small>
-                                    &nbsp;&nbsp;
-                                    <small style="white-space: nowrap;">
-                                        <a href="zebkit.ui.grid.Grid.html#methods_getCellView">
-                                            <b>getCellView(</b>row, col<b>)</b>
-                                        </a>
-                                    </small>
-                                    &nbsp;&nbsp;
-                                    <small style="white-space: nowrap;">
-                                        <a href="zebkit.ui.grid.Grid.html#methods_getColPSWidth">
-                                            <b>getColPSWidth(</b>col<b>)</b>
-                                        </a>
-                                    </small>
-                                    &nbsp;&nbsp;
-                                    <small style="white-space: nowrap;">
-                                        <a href="zebkit.ui.grid.Grid.html#methods_getColWidth">
-                                            <b>getColWidth(</b>col<b>)</b>
-                                        </a>
-                                    </small>
-                                    &nbsp;&nbsp;
-                                    <small style="white-space: nowrap;">
-                                        <a href="zebkit.ui.grid.Grid.html#methods_getColX">
-                                            <b>getColX(</b>col<b>)</b>
+                                        <a href="zebkit.ui.Label.html#methods_getColor">
+                                            <b>getColor(</b> <b>)</b>
                                         </a>
                                     </small>
                                     &nbsp;&nbsp;
@@ -1339,26 +1380,14 @@
                                     </small>
                                     &nbsp;&nbsp;
                                     <small style="white-space: nowrap;">
-                                        <a href="zebkit.ui.grid.Grid.html#methods_getDataToEdit">
-                                            <b>getDataToEdit(</b>row, col<b>)</b>
+                                        <a href="zebkit.ui.TextField.html#methods_getEndSelection">
+                                            <b>getEndSelection(</b> <b>)</b>
                                         </a>
                                     </small>
                                     &nbsp;&nbsp;
                                     <small style="white-space: nowrap;">
-                                        <a href="zebkit.ui.grid.Metrics.html#methods_getGridCols">
-                                            <b>getGridCols(</b> <b>)</b>
-                                        </a>
-                                    </small>
-                                    &nbsp;&nbsp;
-                                    <small style="white-space: nowrap;">
-                                        <a href="zebkit.ui.grid.Grid.html#methods_getGridColumns">
-                                            <b>getGridColumns(</b> <b>)</b>
-                                        </a>
-                                    </small>
-                                    &nbsp;&nbsp;
-                                    <small style="white-space: nowrap;">
-                                        <a href="zebkit.ui.grid.Grid.html#methods_getGridRows">
-                                            <b>getGridRows(</b> <b>)</b>
+                                        <a href="zebkit.ui.Label.html#methods_getFont">
+                                            <b>getFont(</b> <b>)</b>
                                         </a>
                                     </small>
                                     &nbsp;&nbsp;
@@ -1375,8 +1404,8 @@
                                     </small>
                                     &nbsp;&nbsp;
                                     <small style="white-space: nowrap;">
-                                        <a href="zebkit.ui.grid.Grid.html#methods_getLeftCaptionWidth">
-                                            <b>getLeftCaptionWidth(</b> <b>)</b>
+                                        <a href="zebkit.ui.Label.html#methods_getModel">
+                                            <b>getModel(</b> <b>)</b>
                                         </a>
                                     </small>
                                     &nbsp;&nbsp;
@@ -1387,32 +1416,26 @@
                                     </small>
                                     &nbsp;&nbsp;
                                     <small style="white-space: nowrap;">
-                                        <a href="zebkit.ui.grid.Metrics.html#methods_getPSColWidth">
-                                            <b>getPSColWidth(</b>col<b>)</b>
-                                        </a>
-                                    </small>
-                                    &nbsp;&nbsp;
-                                    <small style="white-space: nowrap;">
-                                        <a href="zebkit.ui.grid.Metrics.html#methods_getPSRowHeight">
-                                            <b>getPSRowHeight(</b>row<b>)</b>
-                                        </a>
-                                    </small>
-                                    &nbsp;&nbsp;
-                                    <small style="white-space: nowrap;">
                                         <a href="zebkit.layout.Layoutable.html#methods_getRight">
                                             <b>getRight(</b> <b>)</b>
                                         </a>
                                     </small>
                                     &nbsp;&nbsp;
                                     <small style="white-space: nowrap;">
-                                        <a href="zebkit.ui.grid.Grid.html#methods_getRowHeight">
-                                            <b>getRowHeight(</b>row<b>)</b>
+                                        <a href="zebkit.ui.TextField.html#methods_getSelectedText">
+                                            <b>getSelectedText(</b> <b>)</b>
                                         </a>
                                     </small>
                                     &nbsp;&nbsp;
                                     <small style="white-space: nowrap;">
-                                        <a href="zebkit.ui.grid.Grid.html#methods_getRowPSHeight">
-                                            <b>getRowPSHeight(</b>col<b>)</b>
+                                        <a href="zebkit.ui.TextField.html#methods_getStartSelection">
+                                            <b>getStartSelection(</b> <b>)</b>
+                                        </a>
+                                    </small>
+                                    &nbsp;&nbsp;
+                                    <small style="white-space: nowrap;">
+                                        <a href="zebkit.ui.TextField.html#methods_getTextRowColAt">
+                                            <b>getTextRowColAt(</b>x, y<b>)</b>
                                         </a>
                                     </small>
                                     &nbsp;&nbsp;
@@ -1423,8 +1446,8 @@
                                     </small>
                                     &nbsp;&nbsp;
                                     <small style="white-space: nowrap;">
-                                        <a href="zebkit.ui.grid.Grid.html#methods_getTopCaptionHeight">
-                                            <b>getTopCaptionHeight(</b> <b>)</b>
+                                        <a href="zebkit.ui.Label.html#methods_getValue">
+                                            <b>getValue(</b> <b>)</b>
                                         </a>
                                     </small>
                                     &nbsp;&nbsp;
@@ -1435,20 +1458,14 @@
                                     </small>
                                     &nbsp;&nbsp;
                                     <small style="white-space: nowrap;">
-                                        <a href="zebkit.ui.grid.Metrics.html#methods_getXOrigin">
-                                            <b>getXOrigin(</b> <b>)</b>
-                                        </a>
-                                    </small>
-                                    &nbsp;&nbsp;
-                                    <small style="white-space: nowrap;">
-                                        <a href="zebkit.ui.grid.Metrics.html#methods_getYOrigin">
-                                            <b>getYOrigin(</b> <b>)</b>
-                                        </a>
-                                    </small>
-                                    &nbsp;&nbsp;
-                                    <small style="white-space: nowrap;">
                                         <a href="zebkit.ui.Panel.html#methods_hasFocus">
                                             <b>hasFocus(</b> <b>)</b>
+                                        </a>
+                                    </small>
+                                    &nbsp;&nbsp;
+                                    <small style="white-space: nowrap;">
+                                        <a href="zebkit.ui.TextField.html#methods_hasSelection">
+                                            <b>hasSelection(</b> <b>)</b>
                                         </a>
                                     </small>
                                     &nbsp;&nbsp;
@@ -1477,8 +1494,8 @@
                                     </small>
                                     &nbsp;&nbsp;
                                     <small style="white-space: nowrap;">
-                                        <a href="zebkit.ui.grid.Grid.html#methods_isSelected">
-                                            <b>isSelected(</b>row, col<b>)</b>
+                                        <a href="zebkit.ui.TextField.html#methods_isFiltered">
+                                            <b>isFiltered(</b>e<b>)</b>
                                         </a>
                                     </small>
                                     &nbsp;&nbsp;
@@ -1507,12 +1524,6 @@
                                     </small>
                                     &nbsp;&nbsp;
                                     <small style="white-space: nowrap;">
-                                        <a href="zebkit.ui.grid.Grid.html#methods_makeVisible">
-                                            <b>makeVisible(</b>row, col<b>)</b>
-                                        </a>
-                                    </small>
-                                    &nbsp;&nbsp;
-                                    <small style="white-space: nowrap;">
                                         <a href="zebkit.EventProducer.html#methods_off">
                                             <b>off(</b>[eventName], [path], [cb]<b>)</b>
                                         </a>
@@ -1525,38 +1536,14 @@
                                     </small>
                                     &nbsp;&nbsp;
                                     <small style="white-space: nowrap;">
-                                        <a href="zebkit.ui.grid.Grid.html#methods_pageSize">
-                                            <b>pageSize(</b>d<b>)</b>
-                                        </a>
-                                    </small>
-                                    &nbsp;&nbsp;
-                                    <small style="white-space: nowrap;">
-                                        <a href="zebkit.ui.grid.Grid.html#methods_paintCellSelection">
-                                            <b>paintCellSelection(</b>g, row, col, x, y<b>)</b>
-                                        </a>
-                                    </small>
-                                    &nbsp;&nbsp;
-                                    <small style="white-space: nowrap;">
                                         <a href="zebkit.ui.Panel.html#methods_paintComponent">
                                             <b>paintComponent(</b>g<b>)</b>
                                         </a>
                                     </small>
                                     &nbsp;&nbsp;
                                     <small style="white-space: nowrap;">
-                                        <a href="zebkit.ui.grid.Grid.html#methods_paintData">
-                                            <b>paintData(</b>g<b>)</b>
-                                        </a>
-                                    </small>
-                                    &nbsp;&nbsp;
-                                    <small style="white-space: nowrap;">
-                                        <a href="zebkit.ui.grid.Grid.html#methods_paintNet">
-                                            <b>paintNet(</b>g<b>)</b>
-                                        </a>
-                                    </small>
-                                    &nbsp;&nbsp;
-                                    <small style="white-space: nowrap;">
-                                        <a href="zebkit.ui.grid.Grid.html#methods_paintPosMarker">
-                                            <b>paintPosMarker(</b>g<b>)</b>
+                                        <a href="zebkit.ui.Panel.html#methods_paintViewAt">
+                                            <b>paintViewAt(</b>g, ax, ay, v<b>)</b>
                                         </a>
                                     </small>
                                     &nbsp;&nbsp;
@@ -1579,14 +1566,20 @@
                                     </small>
                                     &nbsp;&nbsp;
                                     <small style="white-space: nowrap;">
+                                        <a href="zebkit.ui.TextField.html#methods_redo">
+                                            <b>redo(</b> <b>)</b>
+                                        </a>
+                                    </small>
+                                    &nbsp;&nbsp;
+                                    <small style="white-space: nowrap;">
                                         <a href="zebkit.ui.Panel.html#methods_relocated">
                                             <b>relocated(</b>px, py<b>)</b>
                                         </a>
                                     </small>
                                     &nbsp;&nbsp;
                                     <small style="white-space: nowrap;">
-                                        <a href="zebkit.layout.Layoutable.html#methods_remove">
-                                            <b>remove(</b>c<b>)</b>
+                                        <a href="zebkit.ui.TextField.html#methods_remove">
+                                            <b>remove(</b>pos, size<b>)</b>
                                         </a>
                                     </small>
                                     &nbsp;&nbsp;
@@ -1615,14 +1608,26 @@
                                     </small>
                                     &nbsp;&nbsp;
                                     <small style="white-space: nowrap;">
+                                        <a href="zebkit.ui.TextField.html#methods_removeSelected">
+                                            <b>removeSelected(</b> <b>)</b>
+                                        </a>
+                                    </small>
+                                    &nbsp;&nbsp;
+                                    <small style="white-space: nowrap;">
                                         <a href="zebkit.ui.Panel.html#methods_repaint">
                                             <b>repaint(</b>[x], [y], [w], [h]<b>)</b>
                                         </a>
                                     </small>
                                     &nbsp;&nbsp;
                                     <small style="white-space: nowrap;">
-                                        <a href="zebkit.ui.grid.Grid.html#methods_repaintRows">
-                                            <b>repaintRows(</b>r1, r2<b>)</b>
+                                        <a href="zebkit.ui.TextField.html#methods_repaintCursor">
+                                            <b>repaintCursor(</b> <b>)</b>
+                                        </a>
+                                    </small>
+                                    &nbsp;&nbsp;
+                                    <small style="white-space: nowrap;">
+                                        <a href="zebkit.layout.Layoutable.html#methods_replaceMe">
+                                            <b>replaceMe(</b>[ctr], c<b>)</b>
                                         </a>
                                     </small>
                                     &nbsp;&nbsp;
@@ -1645,8 +1650,14 @@
                                     </small>
                                     &nbsp;&nbsp;
                                     <small style="white-space: nowrap;">
-                                        <a href="zebkit.ui.grid.Grid.html#methods_select">
-                                            <b>select(</b>row, col, [b]<b>)</b>
+                                        <a href="zebkit.ui.TextField.html#methods_select">
+                                            <b>select(</b>startOffset, endOffset<b>)</b>
+                                        </a>
+                                    </small>
+                                    &nbsp;&nbsp;
+                                    <small style="white-space: nowrap;">
+                                        <a href="zebkit.ui.TextField.html#methods_selectAll">
+                                            <b>selectAll(</b> <b>)</b>
                                         </a>
                                     </small>
                                     &nbsp;&nbsp;
@@ -1663,8 +1674,20 @@
                                     </small>
                                     &nbsp;&nbsp;
                                     <small style="white-space: nowrap;">
+                                        <a href="zebkit.ui.TextField.html#methods_setBlinking">
+                                            <b>setBlinking(</b>[period]<b>)</b>
+                                        </a>
+                                    </small>
+                                    &nbsp;&nbsp;
+                                    <small style="white-space: nowrap;">
                                         <a href="zebkit.ui.Panel.html#methods_setBorder">
                                             <b>setBorder(</b>[v]<b>)</b>
+                                        </a>
+                                    </small>
+                                    &nbsp;&nbsp;
+                                    <small style="white-space: nowrap;">
+                                        <a href="zebkit.ui.Panel.html#methods_setBorderLayout">
+                                            <b>setBorderLayout(</b>[gap]<b>)</b>
                                         </a>
                                     </small>
                                     &nbsp;&nbsp;
@@ -1687,26 +1710,8 @@
                                     </small>
                                     &nbsp;&nbsp;
                                     <small style="white-space: nowrap;">
-                                        <a href="zebkit.ui.grid.Grid.html#methods_setCellPadding">
-                                            <b>setCellPadding(</b>p<b>)</b>
-                                        </a>
-                                    </small>
-                                    &nbsp;&nbsp;
-                                    <small style="white-space: nowrap;">
-                                        <a href="zebkit.ui.grid.Grid.html#methods_setCellPaddings">
-                                            <b>setCellPaddings(</b>t, l, b, r<b>)</b>
-                                        </a>
-                                    </small>
-                                    &nbsp;&nbsp;
-                                    <small style="white-space: nowrap;">
-                                        <a href="zebkit.ui.grid.Grid.html#methods_setColsWidth">
-                                            <b>setColsWidth(</b>[col], [len], w<b>)</b>
-                                        </a>
-                                    </small>
-                                    &nbsp;&nbsp;
-                                    <small style="white-space: nowrap;">
-                                        <a href="zebkit.ui.grid.Grid.html#methods_setColWidth">
-                                            <b>setColWidth(</b>column, w<b>)</b>
+                                        <a href="zebkit.ui.Label.html#methods_setColor">
+                                            <b>setColor(</b>c<b>)</b>
                                         </a>
                                     </small>
                                     &nbsp;&nbsp;
@@ -1717,50 +1722,50 @@
                                     </small>
                                     &nbsp;&nbsp;
                                     <small style="white-space: nowrap;">
-                                        <a href="zebkit.ui.grid.Grid.html#methods_setDefCellAlignments">
-                                            <b>setDefCellAlignments(</b>ax, ay<b>)</b>
+                                        <a href="zebkit.ui.TextField.html#methods_setCursorSize">
+                                            <b>setCursorSize(</b>w, h<b>)</b>
                                         </a>
                                     </small>
                                     &nbsp;&nbsp;
                                     <small style="white-space: nowrap;">
-                                        <a href="zebkit.ui.grid.Grid.html#methods_setDefCellXAlignment">
-                                            <b>setDefCellXAlignment(</b>ax<b>)</b>
+                                        <a href="zebkit.ui.TextField.html#methods_setCursorView">
+                                            <b>setCursorView(</b>v<b>)</b>
                                         </a>
                                     </small>
                                     &nbsp;&nbsp;
                                     <small style="white-space: nowrap;">
-                                        <a href="zebkit.ui.grid.Grid.html#methods_setDefCellYAlignment">
-                                            <b>setDefCellYAlignment(</b>ay<b>)</b>
+                                        <a href="zebkit.ui.TextField.html#methods_setCursorWidth">
+                                            <b>setCursorWidth(</b>w<b>)</b>
                                         </a>
                                     </small>
                                     &nbsp;&nbsp;
                                     <small style="white-space: nowrap;">
-                                        <a href="zebkit.ui.grid.Grid.html#methods_setDrawCaptionLines">
-                                            <b>setDrawCaptionLines(</b>s<b>)</b>
-                                        </a>
-                                    </small>
-                                    &nbsp;&nbsp;
-                                    <small style="white-space: nowrap;">
-                                        <a href="zebkit.ui.grid.Grid.html#methods_setDrawLines">
-                                            <b>setDrawLines(</b>hor, ver<b>)</b>
-                                        </a>
-                                    </small>
-                                    &nbsp;&nbsp;
-                                    <small style="white-space: nowrap;">
-                                        <a href="zebkit.ui.grid.Grid.html#methods_setEditedData">
-                                            <b>setEditedData(</b>row, col, an<b>)</b>
-                                        </a>
-                                    </small>
-                                    &nbsp;&nbsp;
-                                    <small style="white-space: nowrap;">
-                                        <a href="zebkit.ui.grid.Grid.html#methods_setEditorProvider">
-                                            <b>setEditorProvider(</b>p<b>)</b>
+                                        <a href="zebkit.ui.TextField.html#methods_setEditable">
+                                            <b>setEditable(</b>b<b>)</b>
                                         </a>
                                     </small>
                                     &nbsp;&nbsp;
                                     <small style="white-space: nowrap;">
                                         <a href="zebkit.ui.Panel.html#methods_setEnabled">
                                             <b>setEnabled(</b>b<b>)</b>
+                                        </a>
+                                    </small>
+                                    &nbsp;&nbsp;
+                                    <small style="white-space: nowrap;">
+                                        <a href="zebkit.ui.Panel.html#methods_setFlowLayout">
+                                            <b>setFlowLayout(</b>[ax], [ay], [dir], [gap]<b>)</b>
+                                        </a>
+                                    </small>
+                                    &nbsp;&nbsp;
+                                    <small style="white-space: nowrap;">
+                                        <a href="zebkit.ui.Label.html#methods_setFont">
+                                            <b>setFont(</b>f<b>)</b>
+                                        </a>
+                                    </small>
+                                    &nbsp;&nbsp;
+                                    <small style="white-space: nowrap;">
+                                        <a href="zebkit.ui.TextField.html#methods_setHint">
+                                            <b>setHint(</b>hint<b>)</b>
                                         </a>
                                     </small>
                                     &nbsp;&nbsp;
@@ -1783,26 +1788,14 @@
                                     </small>
                                     &nbsp;&nbsp;
                                     <small style="white-space: nowrap;">
-                                        <a href="zebkit.ui.grid.Grid.html#methods_setLeftCaption">
-                                            <b>setLeftCaption(</b>title<b>)</b>
-                                        </a>
-                                    </small>
-                                    &nbsp;&nbsp;
-                                    <small style="white-space: nowrap;">
                                         <a href="zebkit.ui.Panel.html#methods_setLeftPadding">
                                             <b>setLeftPadding(</b>left<b>)</b>
                                         </a>
                                     </small>
                                     &nbsp;&nbsp;
                                     <small style="white-space: nowrap;">
-                                        <a href="zebkit.ui.grid.Grid.html#methods_setLineColor">
-                                            <b>setLineColor(</b>c<b>)</b>
-                                        </a>
-                                    </small>
-                                    &nbsp;&nbsp;
-                                    <small style="white-space: nowrap;">
-                                        <a href="zebkit.ui.grid.Grid.html#methods_setLineSize">
-                                            <b>setLineSize(</b>s<b>)</b>
+                                        <a href="zebkit.ui.Panel.html#methods_setListLayout">
+                                            <b>setListLayout(</b>[ax], [gap]<b>)</b>
                                         </a>
                                     </small>
                                     &nbsp;&nbsp;
@@ -1813,14 +1806,8 @@
                                     </small>
                                     &nbsp;&nbsp;
                                     <small style="white-space: nowrap;">
-                                        <a href="zebkit.ui.grid.Grid.html#methods_setModel">
-                                            <b>setModel(</b>d<b>)</b>
-                                        </a>
-                                    </small>
-                                    &nbsp;&nbsp;
-                                    <small style="white-space: nowrap;">
-                                        <a href="zebkit.ui.grid.Grid.html#methods_setNavigationMode">
-                                            <b>setNavigationMode(</b>mode<b>)</b>
+                                        <a href="zebkit.ui.Label.html#methods_setModel">
+                                            <b>setModel(</b>m<b>)</b>
                                         </a>
                                     </small>
                                     &nbsp;&nbsp;
@@ -1837,7 +1824,7 @@
                                     </small>
                                     &nbsp;&nbsp;
                                     <small style="white-space: nowrap;">
-                                        <a href="zebkit.ui.grid.Grid.html#methods_setPosition">
+                                        <a href="zebkit.ui.TextField.html#methods_setPosition">
                                             <b>setPosition(</b>p<b>)</b>
                                         </a>
                                     </small>
@@ -1855,20 +1842,26 @@
                                     </small>
                                     &nbsp;&nbsp;
                                     <small style="white-space: nowrap;">
+                                        <a href="zebkit.ui.TextField.html#methods_setPSByRowsCols">
+                                            <b>setPSByRowsCols(</b>r, c<b>)</b>
+                                        </a>
+                                    </small>
+                                    &nbsp;&nbsp;
+                                    <small style="white-space: nowrap;">
+                                        <a href="zebkit.ui.Panel.html#methods_setRasterLayout">
+                                            <b>setRasterLayout(</b>[usePsSize]<b>)</b>
+                                        </a>
+                                    </small>
+                                    &nbsp;&nbsp;
+                                    <small style="white-space: nowrap;">
                                         <a href="zebkit.ui.Panel.html#methods_setRightPadding">
                                             <b>setRightPadding(</b>right<b>)</b>
                                         </a>
                                     </small>
                                     &nbsp;&nbsp;
                                     <small style="white-space: nowrap;">
-                                        <a href="zebkit.ui.grid.Grid.html#methods_setRowHeight">
-                                            <b>setRowHeight(</b>row, h<b>)</b>
-                                        </a>
-                                    </small>
-                                    &nbsp;&nbsp;
-                                    <small style="white-space: nowrap;">
-                                        <a href="zebkit.ui.grid.Grid.html#methods_setRowsHeight">
-                                            <b>setRowsHeight(</b>[row], [len], h<b>)</b>
+                                        <a href="zebkit.ui.TextField.html#methods_setSelectView">
+                                            <b>setSelectView(</b>c<b>)</b>
                                         </a>
                                     </small>
                                     &nbsp;&nbsp;
@@ -1879,8 +1872,14 @@
                                     </small>
                                     &nbsp;&nbsp;
                                     <small style="white-space: nowrap;">
-                                        <a href="zebkit.ui.grid.Grid.html#methods_setTopCaption">
-                                            <b>setTopCaption(</b>title<b>)</b>
+                                        <a href="zebkit.ui.Panel.html#methods_setStackLayout">
+                                            <b>setStackLayout(</b>[gap]<b>)</b>
+                                        </a>
+                                    </small>
+                                    &nbsp;&nbsp;
+                                    <small style="white-space: nowrap;">
+                                        <a href="zebkit.ui.TextField.html#methods_setTextAlignment">
+                                            <b>setTextAlignment(</b>a<b>)</b>
                                         </a>
                                     </small>
                                     &nbsp;&nbsp;
@@ -1891,20 +1890,14 @@
                                     </small>
                                     &nbsp;&nbsp;
                                     <small style="white-space: nowrap;">
-                                        <a href="zebkit.ui.grid.Grid.html#methods_setUsePsMetric">
-                                            <b>setUsePsMetric(</b>b<b>)</b>
+                                        <a href="zebkit.ui.TextField.html#methods_setValue">
+                                            <b>setValue(</b>s<b>)</b>
                                         </a>
                                     </small>
                                     &nbsp;&nbsp;
                                     <small style="white-space: nowrap;">
-                                        <a href="zebkit.ui.grid.Grid.html#methods_setViewProvider">
-                                            <b>setViewProvider(</b>p<b>)</b>
-                                        </a>
-                                    </small>
-                                    &nbsp;&nbsp;
-                                    <small style="white-space: nowrap;">
-                                        <a href="zebkit.ui.grid.Grid.html#methods_setViews">
-                                            <b>setViews(</b>a<b>)</b>
+                                        <a href="zebkit.ui.ViewPan.html#methods_setView">
+                                            <b>setView(</b>v<b>)</b>
                                         </a>
                                     </small>
                                     &nbsp;&nbsp;
@@ -1915,14 +1908,14 @@
                                     </small>
                                     &nbsp;&nbsp;
                                     <small style="white-space: nowrap;">
-                                        <a href="zebkit.ui.grid.Grid.html#methods_startEditing">
-                                            <b>startEditing(</b>row, col<b>)</b>
+                                        <a href="zebkit.ui.TextField.html#methods_shortcutFired">
+                                            <b>shortcutFired(</b>e<b>)</b>
                                         </a>
                                     </small>
                                     &nbsp;&nbsp;
                                     <small style="white-space: nowrap;">
-                                        <a href="zebkit.ui.grid.Grid.html#methods_stopEditing">
-                                            <b>stopEditing(</b>applyData<b>)</b>
+                                        <a href="zebkit.ui.TextField.html#methods_startSelection">
+                                            <b>startSelection(</b> <b>)</b>
                                         </a>
                                     </small>
                                     &nbsp;&nbsp;
@@ -1963,6 +1956,12 @@
                                     </small>
                                     &nbsp;&nbsp;
                                     <small style="white-space: nowrap;">
+                                        <a href="zebkit.ui.TextField.html#methods_undo">
+                                            <b>undo(</b> <b>)</b>
+                                        </a>
+                                    </small>
+                                    &nbsp;&nbsp;
+                                    <small style="white-space: nowrap;">
                                         <a href="zebkit.layout.Layoutable.html#methods_validate">
                                             <b>validate(</b> <b>)</b>
                                         </a>
@@ -1980,13 +1979,19 @@
                                         </a>
                                     </small>
                                     &nbsp;&nbsp;
+                                    <small style="white-space: nowrap;">
+                                        <a href="zebkit.ui.TextField.html#methods_write">
+                                            <b>write(</b>pos, s<b>)</b>
+                                        </a>
+                                    </small>
+                                    &nbsp;&nbsp;
                         </div>
                         <br/><br/>
                     </div>
 
                 <table>
                             <tr>
-                                <td><a name="methods_getCellColor"></a>
+                                <td><a name="methods_setFormat"></a>
 
 <div class="method item">
     <span class="foundat">
@@ -1996,101 +2001,24 @@
             <strong> public </strong>
 
 
-                <span class="type">
-                    &lt;<a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String" class="crosslink external" target="_blank">String</a>&gt;
-                </span>
+                <span class="type">chainable</span>
 
-    <strong class="name"><code>getCellColor</code> (<code>row, col</code>)</strong>
+    <strong class="name"><code>setFormat</code> (<code>format</code>)</strong>
 
     <br/>
 
-    <p>Get days grid cell color.</p>
+    <p>Set the pattern to be used to format date</p>
 
 
         <br/>
         <strong>Parameters:</strong>
         <ul class="params">
                 <li>
-                        <span class="name"><code>row</code></span>
+                        <span class="name"><code>format</code></span>
                         <strong class="type">
-                            &lt;Integer&gt;
+                            &lt;<a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String" class="crosslink external" target="_blank">String</a>&gt;
                         </strong>
-                    <p>a row</p>
-
-                </li>
-                <li>
-                        <span class="name"><code>col</code></span>
-                        <strong class="type">
-                            &lt;Integer&gt;
-                        </strong>
-                    <p>a column</p>
-
-                </li>
-        </ul>
-
-            <br/>
-            <div class="returns">
-                <strong>
-                    Returns:
-                </strong>
-                <span class="type">
-                        &lt;<a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String" class="crosslink external" target="_blank">String</a>&gt;
-                </span>
-                <p>a cell color</p>
-
-            </div>
-
-
-</div>
-                                </td>
-                            </tr>
-                            <tr>
-                                <td><a name="methods_setValue"></a>
-
-<div class="method item">
-    <span class="foundat">
-    </span>
-
-
-            <strong> public </strong>
-
-
-                <span class="type">
-                    void
-                </span>
-
-    <strong class="name"><code>setValue</code> (<code>[date], [month], [year]</code>)</strong>
-
-    <br/>
-
-    <p>Set a month and an year with the given arguments.</p>
-
-
-        <br/>
-        <strong>Parameters:</strong>
-        <ul class="params">
-                <li>
-                        <span class="name"><code>[date]</code></span>
-                        <strong class="type">
-                            &lt;<a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Date" class="crosslink external" target="_blank">Date</a>&gt;
-                        </strong>
-                    <p>a date object.</p>
-
-                </li>
-                <li>
-                        <span class="name"><code>[month]</code></span>
-                        <strong class="type">
-                            &lt;Integer&gt;
-                        </strong>
-                    <p>a month.</p>
-
-                </li>
-                <li>
-                        <span class="name"><code>[year]</code></span>
-                        <strong class="type">
-                            &lt;Integer&gt;
-                        </strong>
-                    <p>a full year.</p>
+                    <p>a format pattern</p>
 
                 </li>
         </ul>
@@ -2105,10 +2033,467 @@
 
 
             <div id="attrs">
-                <br/>
-                <table>
-                        <tr>
-                            <td><a name="attrs_bg"></a>
+                    <br/><br/>
+                    <div class="attrs">
+                        <strong>Inherited attributes:</strong>
+                        <br/>
+                        <div style="padding:6px;">
+                                    <small style="white-space: nowrap;">
+
+                                            <strong> public </strong>
+
+                                            <img title="readonly" width="14" height="14" src="../assets/css/lock.png" />
+
+                                            <strong class="type">
+                                                <a href="../classes/zebkit.draw.View.html" class="crosslink">zebkit.draw.View</a>
+                                            </strong>
+
+                                        <a href="zebkit.ui.Panel.html#atttrs_bg">
+                                              bg
+                                        </a>
+                                    </small>
+                                    &nbsp;&nbsp;
+                                    <small style="white-space: nowrap;">
+
+                                            <strong> public </strong>
+
+                                            <img title="readonly" width="14" height="14" src="../assets/css/lock.png" />
+
+                                            <strong class="type">
+                                                <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number" class="crosslink external" target="_blank">Number</a>
+                                            </strong>
+
+                                        <a href="zebkit.ui.TextField.html#atttrs_blinkigPeriod">
+                                              blinkigPeriod
+                                        </a>
+                                    </small>
+                                    &nbsp;&nbsp;
+                                    <small style="white-space: nowrap;">
+
+                                            <strong> public </strong>
+
+                                            <img title="readonly" width="14" height="14" src="../assets/css/lock.png" />
+
+                                            <strong class="type">
+                                                <a href="../classes/zebkit.draw.View.html" class="crosslink">zebkit.draw.View</a>
+                                            </strong>
+
+                                        <a href="zebkit.ui.Panel.html#atttrs_border">
+                                              border
+                                        </a>
+                                    </small>
+                                    &nbsp;&nbsp;
+                                    <small style="white-space: nowrap;">
+
+                                            <strong> public </strong>
+
+
+                                            <strong class="type">
+                                                <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Boolean" class="crosslink external" target="_blank">Boolean</a>
+                                            </strong>
+
+                                        <a href="zebkit.ui.Panel.html#atttrs_canHaveFocus">
+                                              canHaveFocus
+                                        </a>
+                                    </small>
+                                    &nbsp;&nbsp;
+                                    <small style="white-space: nowrap;">
+
+                                            <strong> public </strong>
+
+
+                                            <strong class="type">
+                                                <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object" class="crosslink external" target="_blank">Object</a>
+                                            </strong>
+
+                                        <a href="zebkit.layout.Layoutable.html#atttrs_constraints">
+                                              constraints
+                                        </a>
+                                    </small>
+                                    &nbsp;&nbsp;
+                                    <small style="white-space: nowrap;">
+
+                                            <strong> public </strong>
+
+                                            <img title="readonly" width="14" height="14" src="../assets/css/lock.png" />
+
+                                            <strong class="type">
+                                                Integer
+                                            </strong>
+
+                                        <a href="zebkit.ui.TextField.html#atttrs_cursorHeight">
+                                              cursorHeight
+                                        </a>
+                                    </small>
+                                    &nbsp;&nbsp;
+                                    <small style="white-space: nowrap;">
+
+                                            <strong> public </strong>
+
+
+                                            <strong class="type">
+                                                <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String" class="crosslink external" target="_blank">String</a>
+                                            </strong>
+
+                                        <a href="zebkit.ui.TextField.html#atttrs_cursorType">
+                                              cursorType
+                                        </a>
+                                    </small>
+                                    &nbsp;&nbsp;
+                                    <small style="white-space: nowrap;">
+
+                                            <strong> public </strong>
+
+                                            <img title="readonly" width="14" height="14" src="../assets/css/lock.png" />
+
+                                            <strong class="type">
+                                                <a href="../classes/zebkit.draw.View.html" class="crosslink">zebkit.draw.View</a>
+                                            </strong>
+
+                                        <a href="zebkit.ui.TextField.html#atttrs_cursorView">
+                                              cursorView
+                                        </a>
+                                    </small>
+                                    &nbsp;&nbsp;
+                                    <small style="white-space: nowrap;">
+
+                                            <strong> public </strong>
+
+                                            <img title="readonly" width="14" height="14" src="../assets/css/lock.png" />
+
+                                            <strong class="type">
+                                                Integer
+                                            </strong>
+
+                                        <a href="zebkit.ui.TextField.html#atttrs_cursorWidth">
+                                              cursorWidth
+                                        </a>
+                                    </small>
+                                    &nbsp;&nbsp;
+                                    <small style="white-space: nowrap;">
+
+                                            <strong> public </strong>
+
+                                            <img title="readonly" width="14" height="14" src="../assets/css/lock.png" />
+
+                                            <strong class="type">
+                                                Integer
+                                            </strong>
+
+                                        <a href="zebkit.ui.TextField.html#atttrs_cursorX">
+                                              cursorX
+                                        </a>
+                                    </small>
+                                    &nbsp;&nbsp;
+                                    <small style="white-space: nowrap;">
+
+                                            <strong> public </strong>
+
+                                            <img title="readonly" width="14" height="14" src="../assets/css/lock.png" />
+
+                                            <strong class="type">
+                                                Integer
+                                            </strong>
+
+                                        <a href="zebkit.ui.TextField.html#atttrs_cursorY">
+                                              cursorY
+                                        </a>
+                                    </small>
+                                    &nbsp;&nbsp;
+                                    <small style="white-space: nowrap;">
+
+                                            <strong> public </strong>
+
+                                            <img title="readonly" width="14" height="14" src="../assets/css/lock.png" />
+
+                                            <strong class="type">
+                                                Integer
+                                            </strong>
+
+                                        <a href="zebkit.layout.Layoutable.html#atttrs_height">
+                                              height
+                                        </a>
+                                    </small>
+                                    &nbsp;&nbsp;
+                                    <small style="white-space: nowrap;">
+
+                                            <strong> public </strong>
+
+                                            <img title="readonly" width="14" height="14" src="../assets/css/lock.png" />
+
+                                            <strong class="type">
+                                                <a href="../classes/zebkit.draw.View.html" class="crosslink">zebkit.draw.View</a>
+                                            </strong>
+
+                                        <a href="zebkit.ui.TextField.html#atttrs_hint">
+                                              hint
+                                        </a>
+                                    </small>
+                                    &nbsp;&nbsp;
+                                    <small style="white-space: nowrap;">
+
+                                            <strong> public </strong>
+
+                                            <img title="readonly" width="14" height="14" src="../assets/css/lock.png" />
+
+                                            <strong class="type">
+                                                <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Boolean" class="crosslink external" target="_blank">Boolean</a>
+                                            </strong>
+
+                                        <a href="zebkit.ui.TextField.html#atttrs_isEditable">
+                                              isEditable
+                                        </a>
+                                    </small>
+                                    &nbsp;&nbsp;
+                                    <small style="white-space: nowrap;">
+
+                                            <strong> public </strong>
+
+                                            <img title="readonly" width="14" height="14" src="../assets/css/lock.png" />
+
+                                            <strong class="type">
+                                                <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Boolean" class="crosslink external" target="_blank">Boolean</a>
+                                            </strong>
+
+                                        <a href="zebkit.ui.Panel.html#atttrs_isEnabled">
+                                              isEnabled
+                                        </a>
+                                    </small>
+                                    &nbsp;&nbsp;
+                                    <small style="white-space: nowrap;">
+
+                                            <strong> public </strong>
+
+                                            <img title="readonly" width="14" height="14" src="../assets/css/lock.png" />
+
+                                            <strong class="type">
+                                                <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Boolean" class="crosslink external" target="_blank">Boolean</a>
+                                            </strong>
+
+                                        <a href="zebkit.layout.Layoutable.html#atttrs_isValid">
+                                              isValid
+                                        </a>
+                                    </small>
+                                    &nbsp;&nbsp;
+                                    <small style="white-space: nowrap;">
+
+                                            <strong> public </strong>
+
+                                            <img title="readonly" width="14" height="14" src="../assets/css/lock.png" />
+
+                                            <strong class="type">
+                                                <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Boolean" class="crosslink external" target="_blank">Boolean</a>
+                                            </strong>
+
+                                        <a href="zebkit.layout.Layoutable.html#atttrs_isVisible">
+                                              isVisible
+                                        </a>
+                                    </small>
+                                    &nbsp;&nbsp;
+                                    <small style="white-space: nowrap;">
+
+                                            <strong> public </strong>
+
+                                            <img title="readonly" width="14" height="14" src="../assets/css/lock.png" />
+
+                                            <strong class="type">
+                                                <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array" class="crosslink external" target="_blank">Array</a>
+                                            </strong>
+
+                                        <a href="zebkit.layout.Layoutable.html#atttrs_kids">
+                                              kids
+                                        </a>
+                                    </small>
+                                    &nbsp;&nbsp;
+                                    <small style="white-space: nowrap;">
+
+                                            <strong> public </strong>
+
+                                            <img title="readonly" width="14" height="14" src="../assets/css/lock.png" />
+
+                                            <strong class="type">
+                                                <a href="../classes/zebkit.layout.Layout.html" class="crosslink">zebkit.layout.Layout</a>
+                                            </strong>
+
+                                        <a href="zebkit.layout.Layoutable.html#atttrs_layout">
+                                              layout
+                                        </a>
+                                    </small>
+                                    &nbsp;&nbsp;
+                                    <small style="white-space: nowrap;">
+
+                                            <strong> public </strong>
+
+                                            <img title="readonly" width="14" height="14" src="../assets/css/lock.png" />
+
+                                            <strong class="type">
+                                                <a href="../classes/zebkit.layout.Layoutable.html" class="crosslink">zebkit.layout.Layoutable</a>
+                                            </strong>
+
+                                        <a href="zebkit.layout.Layoutable.html#atttrs_parent">
+                                              parent
+                                        </a>
+                                    </small>
+                                    &nbsp;&nbsp;
+                                    <small style="white-space: nowrap;">
+
+                                            <strong> public </strong>
+
+                                            <img title="readonly" width="14" height="14" src="../assets/css/lock.png" />
+
+                                            <strong class="type">
+                                                <a href="../classes/zebkit.util.Position.html" class="crosslink">zebkit.util.Position</a>
+                                            </strong>
+
+                                        <a href="zebkit.ui.TextField.html#atttrs_position">
+                                              position
+                                        </a>
+                                    </small>
+                                    &nbsp;&nbsp;
+                                    <small style="white-space: nowrap;">
+
+                                            <strong> public </strong>
+
+                                            <img title="readonly" width="14" height="14" src="../assets/css/lock.png" />
+
+                                            <strong class="type">
+                                                <a href="../classes/zebkit.draw.View.html" class="crosslink">zebkit.draw.View</a> | <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String" class="crosslink external" target="_blank">String</a>
+                                            </strong>
+
+                                        <a href="zebkit.ui.TextField.html#atttrs_selectView">
+                                              selectView
+                                        </a>
+                                    </small>
+                                    &nbsp;&nbsp;
+                                    <small style="white-space: nowrap;">
+
+                                            <strong> public </strong>
+
+                                            <img title="readonly" width="14" height="14" src="../assets/css/lock.png" />
+
+                                            <strong class="type">
+                                                <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String" class="crosslink external" target="_blank">String</a>
+                                            </strong>
+
+                                        <a href="zebkit.ui.TextField.html#atttrs_textAlign">
+                                              textAlign
+                                        </a>
+                                    </small>
+                                    &nbsp;&nbsp;
+                                    <small style="white-space: nowrap;">
+
+                                            <strong> public </strong>
+
+                                            <img title="readonly" width="14" height="14" src="../assets/css/lock.png" />
+
+                                            <strong class="type">
+                                                <a href="../classes/zebkit.draw.View.html" class="crosslink">zebkit.draw.View</a>
+                                            </strong>
+
+                                        <a href="zebkit.ui.ViewPan.html#atttrs_view">
+                                              view
+                                        </a>
+                                    </small>
+                                    &nbsp;&nbsp;
+                                    <small style="white-space: nowrap;">
+
+                                            <strong> public </strong>
+
+                                            <img title="readonly" width="14" height="14" src="../assets/css/lock.png" />
+
+                                            <strong class="type">
+                                                Integer
+                                            </strong>
+
+                                        <a href="zebkit.layout.Layoutable.html#atttrs_width">
+                                              width
+                                        </a>
+                                    </small>
+                                    &nbsp;&nbsp;
+                                    <small style="white-space: nowrap;">
+
+                                            <strong> public </strong>
+
+                                            <img title="readonly" width="14" height="14" src="../assets/css/lock.png" />
+
+                                            <strong class="type">
+                                                Integer
+                                            </strong>
+
+                                        <a href="zebkit.layout.Layoutable.html#atttrs_x">
+                                              x
+                                        </a>
+                                    </small>
+                                    &nbsp;&nbsp;
+                                    <small style="white-space: nowrap;">
+
+                                            <strong> public </strong>
+
+                                            <img title="readonly" width="14" height="14" src="../assets/css/lock.png" />
+
+                                            <strong class="type">
+                                                Integer
+                                            </strong>
+
+                                        <a href="zebkit.layout.Layoutable.html#atttrs_y">
+                                              y
+                                        </a>
+                                    </small>
+                                    &nbsp;&nbsp;
+                        </div>
+                        <br/><br/>
+                    </div>
+
+
+                    <br/>
+                    <table>
+                            <tr>
+                                <td>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>
+<a name="attrs_date"></a>
 <div class="attrs item">
 
         <strong> public </strong>
@@ -2116,1866 +2501,261 @@
         <img title="readonly" width="18" height="18" src="../assets/css/lock.png" />
 
         <strong class="type">
-            &lt;<a href="../classes/zebkit.draw.View.html" class="crosslink">zebkit.draw.View</a>&gt;
+            &lt;<a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Date" class="crosslink external" target="_blank">Date</a>&gt;
         </strong>
 
     <strong class="name" style="color:orange;">
-        <code>bg</code>
+        <code>date</code>
     </strong>
 
-    <em><code>&#x2F;* Extended from zebkit.ui.Panel *&#x2F;</code></em>
+    
     
 
     <br>
 
-    UI component background view
+    <p>Date value</p>
+
 
 </div>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td><a name="attrs_border"></a>
-<div class="attrs item">
-
-        <strong> public </strong>
-
-        <img title="readonly" width="18" height="18" src="../assets/css/lock.png" />
-
-        <strong class="type">
-            &lt;<a href="../classes/zebkit.draw.View.html" class="crosslink">zebkit.draw.View</a>&gt;
-        </strong>
-
-    <strong class="name" style="color:orange;">
-        <code>border</code>
-    </strong>
-
-    <em><code>&#x2F;* Extended from zebkit.ui.Panel *&#x2F;</code></em>
-    
-
-    <br>
-
-    UI component border view
-
-</div>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td><a name="attrs_canHaveFocus"></a>
-<div class="attrs item">
-
-        <strong> public </strong>
-
-
-        <strong class="type">
-            &lt;<a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Boolean" class="crosslink external" target="_blank">Boolean</a>&gt;
-        </strong>
-
-    <strong class="name" style="color:orange;">
-        <code>canHaveFocus</code>
-    </strong>
-
-    <em><code>&#x2F;* Extended from zebkit.ui.Panel *&#x2F;</code></em>
-    
-
-    <br>
-
-    Define and set the property to true if the component has to catch focus
-
-</div>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td><a name="attrs_cellInsetsBottom"></a>
-<div class="attrs item">
-
-        <strong> public </strong>
-
-        <img title="readonly" width="18" height="18" src="../assets/css/lock.png" />
-
-        <strong class="type">
-            &lt;Integer&gt;
-        </strong>
-
-    <strong class="name" style="color:orange;">
-        <code>cellInsetsBottom</code>
-    </strong>
-
-    <em><code>&#x2F;* Extended from zebkit.ui.grid.Grid *&#x2F;</code></em>
-    
-
-    <br>
-
-    Grid cell bottom padding
-
-</div>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td><a name="attrs_cellInsetsLeft"></a>
-<div class="attrs item">
-
-        <strong> public </strong>
-
-        <img title="readonly" width="18" height="18" src="../assets/css/lock.png" />
-
-        <strong class="type">
-            &lt;Integer&gt;
-        </strong>
-
-    <strong class="name" style="color:orange;">
-        <code>cellInsetsLeft</code>
-    </strong>
-
-    <em><code>&#x2F;* Extended from zebkit.ui.grid.Grid *&#x2F;</code></em>
-    
-
-    <br>
-
-    Grid cell left padding
-
-</div>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td><a name="attrs_cellInsetsRight"></a>
-<div class="attrs item">
-
-        <strong> public </strong>
-
-        <img title="readonly" width="18" height="18" src="../assets/css/lock.png" />
-
-        <strong class="type">
-            &lt;Integer&gt;
-        </strong>
-
-    <strong class="name" style="color:orange;">
-        <code>cellInsetsRight</code>
-    </strong>
-
-    <em><code>&#x2F;* Extended from zebkit.ui.grid.Grid *&#x2F;</code></em>
-    
-
-    <br>
-
-    Grid cell right padding
-
-</div>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td><a name="attrs_cellInsetsTop"></a>
-<div class="attrs item">
-
-        <strong> public </strong>
-
-        <img title="readonly" width="18" height="18" src="../assets/css/lock.png" />
-
-        <strong class="type">
-            &lt;Integer&gt;
-        </strong>
-
-    <strong class="name" style="color:orange;">
-        <code>cellInsetsTop</code>
-    </strong>
-
-    <em><code>&#x2F;* Extended from zebkit.ui.grid.Grid *&#x2F;</code></em>
-    
-
-    <br>
-
-    Grid cell top padding
-
-</div>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td><a name="attrs_constraints"></a>
-<div class="attrs item">
-
-        <strong> public </strong>
-
-
-        <strong class="type">
-            &lt;<a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object" class="crosslink external" target="_blank">Object</a>&gt;
-        </strong>
-
-    <strong class="name" style="color:orange;">
-        <code>constraints</code>
-    </strong>
-
-    <em><code>&#x2F;* Extended from zebkit.layout.Layoutable *&#x2F;</code></em>
-    
-
-    <br>
-
-    The component layout constraints. The constraints is specific to
-the parent component layout manager value that customizes the
-children component layouting on the parent component.
-
-</div>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td><a name="attrs_defCellColor"></a>
-<div class="attrs item">
-
-        <strong> public </strong>
-
-
-        <strong class="type">
-            &lt;<a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String" class="crosslink external" target="_blank">String</a>&gt;
-        </strong>
-
-    <strong class="name" style="color:orange;">
-        <code>defCellColor</code>
-    </strong>
-
-    <em><code>&#x2F;* Extended from zebkit.ui.grid.Grid *&#x2F;</code></em>
-    
-
-    <br>
-
-    Default cell background color
-
-</div>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td><a name="attrs_defXAlignment"></a>
-<div class="attrs item">
-
-        <strong> public </strong>
-
-
-        <strong class="type">
-            &lt;<a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String" class="crosslink external" target="_blank">String</a>&gt;
-        </strong>
-
-    <strong class="name" style="color:orange;">
-        <code>defXAlignment</code>
-    </strong>
-
-    <em><code>&#x2F;* Extended from zebkit.ui.grid.Grid *&#x2F;</code></em>
-    
-
-    <br>
-
-    Default cell content horizontal alignment
-
-</div>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td><a name="attrs_defYAlignment"></a>
-<div class="attrs item">
-
-        <strong> public </strong>
-
-
-        <strong class="type">
-            &lt;<a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String" class="crosslink external" target="_blank">String</a>&gt;
-        </strong>
-
-    <strong class="name" style="color:orange;">
-        <code>defYAlignment</code>
-    </strong>
-
-    <em><code>&#x2F;* Extended from zebkit.ui.grid.Grid *&#x2F;</code></em>
-    
-
-    <br>
-
-    Default cell content vertical alignment
-
-</div>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td><a name="attrs_drawCaptionLines"></a>
-<div class="attrs item">
-
-        <strong> public </strong>
-
-
-        <strong class="type">
-            &lt;<a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Boolean" class="crosslink external" target="_blank">Boolean</a>&gt;
-        </strong>
-
-    <strong class="name" style="color:orange;">
-        <code>drawCaptionLines</code>
-    </strong>
-
-    <em><code>&#x2F;* Extended from zebkit.ui.grid.Grid *&#x2F;</code></em>
-    
-
-    <br>
-
-    Indicate if caption lines have to be rendered
-
-</div>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td><a name="attrs_drawHorLines"></a>
-<div class="attrs item">
-
-        <strong> public </strong>
-
-        <img title="readonly" width="18" height="18" src="../assets/css/lock.png" />
-
-        <strong class="type">
-            &lt;<a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Boolean" class="crosslink external" target="_blank">Boolean</a>&gt;
-        </strong>
-
-    <strong class="name" style="color:orange;">
-        <code>drawHorLines</code>
-    </strong>
-
-    <em><code>&#x2F;* Extended from zebkit.ui.grid.Grid *&#x2F;</code></em>
-    
-
-    <br>
-
-    Indicate if horizontal lines have to be rendered
-
-</div>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td><a name="attrs_drawVerLines"></a>
-<div class="attrs item">
-
-        <strong> public </strong>
-
-        <img title="readonly" width="18" height="18" src="../assets/css/lock.png" />
-
-        <strong class="type">
-            &lt;<a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Boolean" class="crosslink external" target="_blank">Boolean</a>&gt;
-        </strong>
-
-    <strong class="name" style="color:orange;">
-        <code>drawVerLines</code>
-    </strong>
-
-    <em><code>&#x2F;* Extended from zebkit.ui.grid.Grid *&#x2F;</code></em>
-    
-
-    <br>
-
-    Indicate if vertical lines have to be rendered
-
-</div>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td><a name="attrs_editingCol"></a>
-<div class="attrs item">
-
-        <strong> public </strong>
-
-        <img title="readonly" width="18" height="18" src="../assets/css/lock.png" />
-
-        <strong class="type">
-            &lt;Integer&gt;
-        </strong>
-
-    <strong class="name" style="color:orange;">
-        <code>editingCol</code>
-    </strong>
-
-    <em><code>&#x2F;* Extended from zebkit.ui.grid.Grid *&#x2F;</code></em>
-    
-
-    <br>
-
-    Currently editing column. -1 if no column is editing
-
-</div>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td><a name="attrs_editingRow"></a>
-<div class="attrs item">
-
-        <strong> public </strong>
-
-        <img title="readonly" width="18" height="18" src="../assets/css/lock.png" />
-
-        <strong class="type">
-            &lt;Integer&gt;
-        </strong>
-
-    <strong class="name" style="color:orange;">
-        <code>editingRow</code>
-    </strong>
-
-    <em><code>&#x2F;* Extended from zebkit.ui.grid.Grid *&#x2F;</code></em>
-    
-
-    <br>
-
-    Currently editing row. -1 if no row is editing
-
-</div>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td><a name="attrs_height"></a>
-<div class="attrs item">
-
-        <strong> public </strong>
-
-        <img title="readonly" width="18" height="18" src="../assets/css/lock.png" />
-
-        <strong class="type">
-            &lt;Integer&gt;
-        </strong>
-
-    <strong class="name" style="color:orange;">
-        <code>height</code>
-    </strong>
-
-    <em><code>&#x2F;* Extended from zebkit.layout.Layoutable *&#x2F;</code></em>
-    
-
-    <br>
-
-    Height of rectangular area
-
-</div>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td><a name="attrs_isEnabled"></a>
-<div class="attrs item">
-
-        <strong> public </strong>
-
-        <img title="readonly" width="18" height="18" src="../assets/css/lock.png" />
-
-        <strong class="type">
-            &lt;<a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Boolean" class="crosslink external" target="_blank">Boolean</a>&gt;
-        </strong>
-
-    <strong class="name" style="color:orange;">
-        <code>isEnabled</code>
-    </strong>
-
-    <em><code>&#x2F;* Extended from zebkit.ui.Panel *&#x2F;</code></em>
-    
-
-    <br>
-
-    UI component enabled state
-
-</div>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td><a name="attrs_isUsePsMetric"></a>
-<div class="attrs item">
-
-        <strong> public </strong>
-
-        <img title="readonly" width="18" height="18" src="../assets/css/lock.png" />
-
-        <strong class="type">
-            &lt;<a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Boolean" class="crosslink external" target="_blank">Boolean</a>&gt;
-        </strong>
-
-    <strong class="name" style="color:orange;">
-        <code>isUsePsMetric</code>
-    </strong>
-
-    <em><code>&#x2F;* Extended from zebkit.ui.grid.Grid *&#x2F;</code></em>
-    <em><code>&#x2F;* Overwritten from isUsePsMetric *&#x2F;</code></em>
-
-    <br>
-
-    Indicate if size of grid cells have to be calculated
-automatically basing on its preferred heights and widths
-
-</div>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td><a name="attrs_isValid"></a>
-<div class="attrs item">
-
-        <strong> public </strong>
-
-        <img title="readonly" width="18" height="18" src="../assets/css/lock.png" />
-
-        <strong class="type">
-            &lt;<a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Boolean" class="crosslink external" target="_blank">Boolean</a>&gt;
-        </strong>
-
-    <strong class="name" style="color:orange;">
-        <code>isValid</code>
-    </strong>
-
-    <em><code>&#x2F;* Extended from zebkit.layout.Layoutable *&#x2F;</code></em>
-    
-
-    <br>
-
-    Indicate a layoutable component validity
-
-</div>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td><a name="attrs_isVisible"></a>
-<div class="attrs item">
-
-        <strong> public </strong>
-
-        <img title="readonly" width="18" height="18" src="../assets/css/lock.png" />
-
-        <strong class="type">
-            &lt;<a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Boolean" class="crosslink external" target="_blank">Boolean</a>&gt;
-        </strong>
-
-    <strong class="name" style="color:orange;">
-        <code>isVisible</code>
-    </strong>
-
-    <em><code>&#x2F;* Extended from zebkit.layout.Layoutable *&#x2F;</code></em>
-    
-
-    <br>
-
-    Indicate a layoutable component visibility
-
-</div>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td><a name="attrs_kids"></a>
-<div class="attrs item">
-
-        <strong> public </strong>
-
-        <img title="readonly" width="18" height="18" src="../assets/css/lock.png" />
-
-        <strong class="type">
-            &lt;<a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array" class="crosslink external" target="_blank">Array</a>&gt;
-        </strong>
-
-    <strong class="name" style="color:orange;">
-        <code>kids</code>
-    </strong>
-
-    <em><code>&#x2F;* Extended from zebkit.layout.Layoutable *&#x2F;</code></em>
-    
-
-    <br>
-
-    Reference to children components
-
-</div>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td><a name="attrs_layout"></a>
-<div class="attrs item">
-
-        <strong> public </strong>
-
-        <img title="readonly" width="18" height="18" src="../assets/css/lock.png" />
-
-        <strong class="type">
-            &lt;<a href="../classes/zebkit.layout.Layout.html" class="crosslink">zebkit.layout.Layout</a>&gt;
-        </strong>
-
-    <strong class="name" style="color:orange;">
-        <code>layout</code>
-    </strong>
-
-    <em><code>&#x2F;* Extended from zebkit.layout.Layoutable *&#x2F;</code></em>
-    
-
-    <br>
-
-    Layout manager that is used to order children layoutable components
-
-</div>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td><a name="attrs_leftCaption"></a>
-<div class="attrs item">
-
-        <strong> public </strong>
-
-        <img title="readonly" width="18" height="18" src="../assets/css/lock.png" />
-
-        <strong class="type">
-            &lt;<a href="../classes/zebkit.ui.grid.GridCaption.html" class="crosslink">zebkit.ui.grid.GridCaption</a> | <a href="../classes/zebkit.ui.grid.CompGridCaption.html" class="crosslink">zebkit.ui.grid.CompGridCaption</a>&gt;
-        </strong>
-
-    <strong class="name" style="color:orange;">
-        <code>leftCaption</code>
-    </strong>
-
-    <em><code>&#x2F;* Extended from zebkit.ui.grid.Grid *&#x2F;</code></em>
-    
-
-    <br>
-
-    Reference to left caption component
-
-</div>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td><a name="attrs_lineColor"></a>
-<div class="attrs item">
-
-        <strong> public </strong>
-
-        <img title="readonly" width="18" height="18" src="../assets/css/lock.png" />
-
-        <strong class="type">
-            &lt;<a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String" class="crosslink external" target="_blank">String</a>&gt;
-        </strong>
-
-    <strong class="name" style="color:orange;">
-        <code>lineColor</code>
-    </strong>
-
-    <em><code>&#x2F;* Extended from zebkit.ui.grid.Grid *&#x2F;</code></em>
-    
-
-    <br>
-
-    Line color
-
-</div>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td><a name="attrs_lineSize"></a>
-<div class="attrs item">
-
-        <strong> public </strong>
-
-
-        <strong class="type">
-            &lt;Integer&gt;
-        </strong>
-
-    <strong class="name" style="color:orange;">
-        <code>lineSize</code>
-    </strong>
-
-    <em><code>&#x2F;* Extended from zebkit.ui.grid.Grid *&#x2F;</code></em>
-    <em><code>&#x2F;* Overwritten from lineSize *&#x2F;</code></em>
-
-    <br>
-
-    Grid line size
-
-</div>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td><a name="attrs_navigationMode"></a>
-<div class="attrs item">
-
-        <strong> public </strong>
-
-
-        <strong class="type">
-            &lt;<a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String" class="crosslink external" target="_blank">String</a>&gt;
-        </strong>
-
-    <strong class="name" style="color:orange;">
-        <code>navigationMode</code>
-    </strong>
-
-    <em><code>&#x2F;* Extended from zebkit.ui.grid.Grid *&#x2F;</code></em>
-    
-
-    <br>
-
-    Grid navigation mode
-
-</div>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td><a name="attrs_paintPosMarkerOver"></a>
-<div class="attrs item">
-
-        <strong> public </strong>
-
-
-        <strong class="type">
-            &lt;<a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Boolean" class="crosslink external" target="_blank">Boolean</a>&gt;
-        </strong>
-
-    <strong class="name" style="color:orange;">
-        <code>paintPosMarkerOver</code>
-    </strong>
-
-    <em><code>&#x2F;* Extended from zebkit.ui.grid.Grid *&#x2F;</code></em>
-    
-
-    <br>
-
-    Defines if the pos marker has to be renederd over rendered data
-
-</div>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td><a name="attrs_parent"></a>
-<div class="attrs item">
-
-        <strong> public </strong>
-
-        <img title="readonly" width="18" height="18" src="../assets/css/lock.png" />
-
-        <strong class="type">
-            &lt;<a href="../classes/zebkit.layout.Layoutable.html" class="crosslink">zebkit.layout.Layoutable</a>&gt;
-        </strong>
-
-    <strong class="name" style="color:orange;">
-        <code>parent</code>
-    </strong>
-
-    <em><code>&#x2F;* Extended from zebkit.layout.Layoutable *&#x2F;</code></em>
-    
-
-    <br>
-
-    Reference to a parent layoutable component
-
-</div>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td><a name="attrs_position"></a>
-<div class="attrs item">
-
-        <strong> public </strong>
-
-        <img title="readonly" width="18" height="18" src="../assets/css/lock.png" />
-
-        <strong class="type">
-            &lt;<a href="../classes/zebkit.util.Position.html" class="crosslink">zebkit.util.Position</a>&gt;
-        </strong>
-
-    <strong class="name" style="color:orange;">
-        <code>position</code>
-    </strong>
-
-    <em><code>&#x2F;* Extended from zebkit.ui.grid.Grid *&#x2F;</code></em>
-    
-
-    <br>
-
-    Virtual cursor position controller
-
-</div>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td><a name="attrs_topCaption"></a>
-<div class="attrs item">
-
-        <strong> public </strong>
-
-        <img title="readonly" width="18" height="18" src="../assets/css/lock.png" />
-
-        <strong class="type">
-            &lt;<a href="../classes/zebkit.ui.grid.GridCaption.html" class="crosslink">zebkit.ui.grid.GridCaption</a> | <a href="../classes/zebkit.ui.grid.CompGridCaption.html" class="crosslink">zebkit.ui.grid.CompGridCaption</a>&gt;
-        </strong>
-
-    <strong class="name" style="color:orange;">
-        <code>topCaption</code>
-    </strong>
-
-    <em><code>&#x2F;* Extended from zebkit.ui.grid.Grid *&#x2F;</code></em>
-    
-
-    <br>
-
-    Reference to top caption component
-
-</div>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td><a name="attrs_width"></a>
-<div class="attrs item">
-
-        <strong> public </strong>
-
-        <img title="readonly" width="18" height="18" src="../assets/css/lock.png" />
-
-        <strong class="type">
-            &lt;Integer&gt;
-        </strong>
-
-    <strong class="name" style="color:orange;">
-        <code>width</code>
-    </strong>
-
-    <em><code>&#x2F;* Extended from zebkit.layout.Layoutable *&#x2F;</code></em>
-    
-
-    <br>
-
-    Width of rectangular area
-
-</div>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td><a name="attrs_x"></a>
-<div class="attrs item">
-
-        <strong> public </strong>
-
-        <img title="readonly" width="18" height="18" src="../assets/css/lock.png" />
-
-        <strong class="type">
-            &lt;Integer&gt;
-        </strong>
-
-    <strong class="name" style="color:orange;">
-        <code>x</code>
-    </strong>
-
-    <em><code>&#x2F;* Extended from zebkit.layout.Layoutable *&#x2F;</code></em>
-    
-
-    <br>
-
-    x coordinate
-
-</div>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td><a name="attrs_y"></a>
-<div class="attrs item">
-
-        <strong> public </strong>
-
-        <img title="readonly" width="18" height="18" src="../assets/css/lock.png" />
-
-        <strong class="type">
-            &lt;Integer&gt;
-        </strong>
-
-    <strong class="name" style="color:orange;">
-        <code>y</code>
-    </strong>
-
-    <em><code>&#x2F;* Extended from zebkit.layout.Layoutable *&#x2F;</code></em>
-    
-
-    <br>
-
-    y coordinate
-
-</div>
-                            </td>
-                        </tr>
-                </table>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>
+                                </td>
+                            </tr>
+                    </table>
             </div>
 
 
             <div id="events">
-                    <ul style="list-style:none;">
-                            <li>
-                                <a class="name" href="#events_childEventName"><b>childEventName</b>
-                                    (
-                                        e
-                                    )
-                                </a>
-                            </li>
-                            <li>
-                                <a class="name" href="#events_clipCopy"><b>clipCopy</b>
-                                    (
-                                        
-                                    )
-                                </a>
-                            </li>
-                            <li>
-                                <a class="name" href="#events_clipPaste"><b>clipPaste</b>
-                                    (
-                                        s
-                                    )
-                                </a>
-                            </li>
-                            <li>
-                                <a class="name" href="#events_compAdded"><b>compAdded</b>
-                                    (
-                                        e
-                                    )
-                                </a>
-                            </li>
-                            <li>
-                                <a class="name" href="#events_compEnabled"><b>compEnabled</b>
-                                    (
-                                        e
-                                    )
-                                </a>
-                            </li>
-                            <li>
-                                <a class="name" href="#events_compMoved"><b>compMoved</b>
-                                    (
-                                        e
-                                    )
-                                </a>
-                            </li>
-                            <li>
-                                <a class="name" href="#events_compRemoved"><b>compRemoved</b>
-                                    (
-                                        e
-                                    )
-                                </a>
-                            </li>
-                            <li>
-                                <a class="name" href="#events_compShown"><b>compShown</b>
-                                    (
-                                        e
-                                    )
-                                </a>
-                            </li>
-                            <li>
-                                <a class="name" href="#events_compSized"><b>compSized</b>
-                                    (
-                                        e
-                                    )
-                                </a>
-                            </li>
-                            <li>
-                                <a class="name" href="#events_focusGained"><b>focusGained</b>
-                                    (
-                                        e
-                                    )
-                                </a>
-                            </li>
-                            <li>
-                                <a class="name" href="#events_focusLost"><b>focusLost</b>
-                                    (
-                                        e
-                                    )
-                                </a>
-                            </li>
-                            <li>
-                                <a class="name" href="#events_keyPressed"><b>keyPressed</b>
-                                    (
-                                        e
-                                    )
-                                </a>
-                            </li>
-                            <li>
-                                <a class="name" href="#events_keyReleased"><b>keyReleased</b>
-                                    (
-                                        e
-                                    )
-                                </a>
-                            </li>
-                            <li>
-                                <a class="name" href="#events_keyTyped"><b>keyTyped</b>
-                                    (
-                                        e
-                                    )
-                                </a>
-                            </li>
-                            <li>
-                                <a class="name" href="#events_pointerClicked"><b>pointerClicked</b>
-                                    (
-                                        e
-                                    )
-                                </a>
-                            </li>
-                            <li>
-                                <a class="name" href="#events_pointerDragEnded"><b>pointerDragEnded</b>
-                                    (
-                                        e
-                                    )
-                                </a>
-                            </li>
-                            <li>
-                                <a class="name" href="#events_pointerDragged"><b>pointerDragged</b>
-                                    (
-                                        e
-                                    )
-                                </a>
-                            </li>
-                            <li>
-                                <a class="name" href="#events_pointerDragStarted"><b>pointerDragStarted</b>
-                                    (
-                                        e
-                                    )
-                                </a>
-                            </li>
-                            <li>
-                                <a class="name" href="#events_pointerEntered"><b>pointerEntered</b>
-                                    (
-                                        e
-                                    )
-                                </a>
-                            </li>
-                            <li>
-                                <a class="name" href="#events_pointerExited"><b>pointerExited</b>
-                                    (
-                                        e
-                                    )
-                                </a>
-                            </li>
-                            <li>
-                                <a class="name" href="#events_pointerMoved"><b>pointerMoved</b>
-                                    (
-                                        e
-                                    )
-                                </a>
-                            </li>
-                            <li>
-                                <a class="name" href="#events_pointerPressed"><b>pointerPressed</b>
-                                    (
-                                        e
-                                    )
-                                </a>
-                            </li>
-                            <li>
-                                <a class="name" href="#events_pointerReleased"><b>pointerReleased</b>
-                                    (
-                                        e
-                                    )
-                                </a>
-                            </li>
-                            <li>
-                                <a class="name" href="#events_rowSelected"><b>rowSelected</b>
-                                    (
-                                        grid, row, count, status
-                                    )
-                                </a>
-                            </li>
-                    </ul>
+
+                    <br/><br/>
+                    <div class="event">
+                        <strong>Inherited events:</strong>
+                        <br/>
+                        <div style="padding:6px;">
+                                    <small style="white-space: nowrap;">
+                                        <a href="zebkit.ui.Panel.html#events_childEventName">
+                                            <b>childEventName(</b>e<b>)</b>
+                                        </a>
+                                    </small>
+                                    &nbsp;&nbsp;
+                                    <small style="white-space: nowrap;">
+                                        <a href="zebkit.ui.Panel.html#events_clipCopy">
+                                            <b>clipCopy(</b><b>)</b>
+                                        </a>
+                                    </small>
+                                    &nbsp;&nbsp;
+                                    <small style="white-space: nowrap;">
+                                        <a href="zebkit.ui.Panel.html#events_clipPaste">
+                                            <b>clipPaste(</b>s<b>)</b>
+                                        </a>
+                                    </small>
+                                    &nbsp;&nbsp;
+                                    <small style="white-space: nowrap;">
+                                        <a href="zebkit.ui.Panel.html#events_compAdded">
+                                            <b>compAdded(</b>e<b>)</b>
+                                        </a>
+                                    </small>
+                                    &nbsp;&nbsp;
+                                    <small style="white-space: nowrap;">
+                                        <a href="zebkit.ui.Panel.html#events_compEnabled">
+                                            <b>compEnabled(</b>e<b>)</b>
+                                        </a>
+                                    </small>
+                                    &nbsp;&nbsp;
+                                    <small style="white-space: nowrap;">
+                                        <a href="zebkit.ui.Panel.html#events_compMoved">
+                                            <b>compMoved(</b>e<b>)</b>
+                                        </a>
+                                    </small>
+                                    &nbsp;&nbsp;
+                                    <small style="white-space: nowrap;">
+                                        <a href="zebkit.ui.Panel.html#events_compRemoved">
+                                            <b>compRemoved(</b>e<b>)</b>
+                                        </a>
+                                    </small>
+                                    &nbsp;&nbsp;
+                                    <small style="white-space: nowrap;">
+                                        <a href="zebkit.ui.Panel.html#events_compShown">
+                                            <b>compShown(</b>e<b>)</b>
+                                        </a>
+                                    </small>
+                                    &nbsp;&nbsp;
+                                    <small style="white-space: nowrap;">
+                                        <a href="zebkit.ui.Panel.html#events_compSized">
+                                            <b>compSized(</b>e<b>)</b>
+                                        </a>
+                                    </small>
+                                    &nbsp;&nbsp;
+                                    <small style="white-space: nowrap;">
+                                        <a href="zebkit.ui.Panel.html#events_focusGained">
+                                            <b>focusGained(</b>e<b>)</b>
+                                        </a>
+                                    </small>
+                                    &nbsp;&nbsp;
+                                    <small style="white-space: nowrap;">
+                                        <a href="zebkit.ui.Panel.html#events_focusLost">
+                                            <b>focusLost(</b>e<b>)</b>
+                                        </a>
+                                    </small>
+                                    &nbsp;&nbsp;
+                                    <small style="white-space: nowrap;">
+                                        <a href="zebkit.ui.Panel.html#events_keyPressed">
+                                            <b>keyPressed(</b>e<b>)</b>
+                                        </a>
+                                    </small>
+                                    &nbsp;&nbsp;
+                                    <small style="white-space: nowrap;">
+                                        <a href="zebkit.ui.Panel.html#events_keyReleased">
+                                            <b>keyReleased(</b>e<b>)</b>
+                                        </a>
+                                    </small>
+                                    &nbsp;&nbsp;
+                                    <small style="white-space: nowrap;">
+                                        <a href="zebkit.ui.Panel.html#events_keyTyped">
+                                            <b>keyTyped(</b>e<b>)</b>
+                                        </a>
+                                    </small>
+                                    &nbsp;&nbsp;
+                                    <small style="white-space: nowrap;">
+                                        <a href="zebkit.ui.Panel.html#events_pointerClicked">
+                                            <b>pointerClicked(</b>e<b>)</b>
+                                        </a>
+                                    </small>
+                                    &nbsp;&nbsp;
+                                    <small style="white-space: nowrap;">
+                                        <a href="zebkit.ui.Panel.html#events_pointerDragEnded">
+                                            <b>pointerDragEnded(</b>e<b>)</b>
+                                        </a>
+                                    </small>
+                                    &nbsp;&nbsp;
+                                    <small style="white-space: nowrap;">
+                                        <a href="zebkit.ui.Panel.html#events_pointerDragged">
+                                            <b>pointerDragged(</b>e<b>)</b>
+                                        </a>
+                                    </small>
+                                    &nbsp;&nbsp;
+                                    <small style="white-space: nowrap;">
+                                        <a href="zebkit.ui.Panel.html#events_pointerDragStarted">
+                                            <b>pointerDragStarted(</b>e<b>)</b>
+                                        </a>
+                                    </small>
+                                    &nbsp;&nbsp;
+                                    <small style="white-space: nowrap;">
+                                        <a href="zebkit.ui.Panel.html#events_pointerEntered">
+                                            <b>pointerEntered(</b>e<b>)</b>
+                                        </a>
+                                    </small>
+                                    &nbsp;&nbsp;
+                                    <small style="white-space: nowrap;">
+                                        <a href="zebkit.ui.Panel.html#events_pointerExited">
+                                            <b>pointerExited(</b>e<b>)</b>
+                                        </a>
+                                    </small>
+                                    &nbsp;&nbsp;
+                                    <small style="white-space: nowrap;">
+                                        <a href="zebkit.ui.Panel.html#events_pointerMoved">
+                                            <b>pointerMoved(</b>e<b>)</b>
+                                        </a>
+                                    </small>
+                                    &nbsp;&nbsp;
+                                    <small style="white-space: nowrap;">
+                                        <a href="zebkit.ui.Panel.html#events_pointerPressed">
+                                            <b>pointerPressed(</b>e<b>)</b>
+                                        </a>
+                                    </small>
+                                    &nbsp;&nbsp;
+                                    <small style="white-space: nowrap;">
+                                        <a href="zebkit.ui.Panel.html#events_pointerReleased">
+                                            <b>pointerReleased(</b>e<b>)</b>
+                                        </a>
+                                    </small>
+                                    &nbsp;&nbsp;
+                                    <small style="white-space: nowrap;">
+                                        <a href="zebkit.ui.TextField.html#events_posChanged">
+                                            <b>posChanged(</b>src<b>)</b>
+                                        </a>
+                                    </small>
+                                    &nbsp;&nbsp;
+                                    <small style="white-space: nowrap;">
+                                        <a href="zebkit.ui.TextField.html#events_selected">
+                                            <b>selected(</b>src<b>)</b>
+                                        </a>
+                                    </small>
+                                    &nbsp;&nbsp;
+                                    <small style="white-space: nowrap;">
+                                        <a href="zebkit.ui.TextField.html#events_updated">
+                                            <b>updated(</b>src<b>)</b>
+                                        </a>
+                                    </small>
+                                    &nbsp;&nbsp;
+                        </div>
+                        <br/><br/>
+                    </div>
+
                 <br/>
                 <table>
-                        <tr>
-                            <td><a name="events_childEventName"></a>
-<div class="events item">
-    <strong>
-        <code>childEventName</code>
-    </strong>
-
-
-    <em><code>&#x2F;* Extended from zebkit.ui.Panel *&#x2F;&lt;&#x2F;em&gt;</code>
-    
-
-    It is also possible to listen all the listed above event for children component. To handle
-the event register listener method following the pattern below:
-
-
-    var p = new zebkit.ui.Panel();
-    p.childPointerPressed = function(e) { ... }; // add event handler
-
-        <br/>
-        <strong>Parameters:</strong>
-        <ul>
-                <li>
-                        <span class="name"><code>e</code></span>
-                        <strong class="type">
-                            &lt;<a href="../classes/zebkit.ui.event.KeyEvent.html" class="crosslink">zebkit.ui.event.KeyEvent</a> | <a href="../classes/zebkit.ui.event.PointerEvent.html" class="crosslink">zebkit.ui.event.PointerEvent</a> | <a href="../classes/zebkit.ui.event.CompEvent.html" class="crosslink">zebkit.ui.event.CompEvent</a> | <a href="../classes/zebkit.ui.event.FocusEvent.html" class="crosslink">zebkit.ui.event.FocusEvent</a>&gt;
-                        </strong>
-                    an UI event fired by a child component.
-
-                </li>
-        </ul>
-</div>
-
-                            </td>
-                        </tr>
-                        <tr>
-                            <td><a name="events_clipCopy"></a>
-<div class="events item">
-    <strong>
-        <code>clipCopy</code>
-    </strong>
-
-
-    <em><code>&#x2F;* Extended from zebkit.ui.Panel *&#x2F;&lt;&#x2F;em&gt;</code>
-    
-
-    The method is called for focusable UI components (components that can hold input focus) to ask
-a string to be saved in native clipboard
-
-</div>
-
-                            </td>
-                        </tr>
-                        <tr>
-                            <td><a name="events_clipPaste"></a>
-<div class="events item">
-    <strong>
-        <code>clipPaste</code>
-    </strong>
-
-
-    <em><code>&#x2F;* Extended from zebkit.ui.Panel *&#x2F;&lt;&#x2F;em&gt;</code>
-    
-
-    The method is called to pass string from clipboard to a focusable (a component that can hold
-input focus) UI component
-
-        <br/>
-        <strong>Parameters:</strong>
-        <ul>
-                <li>
-                        <span class="name"><code>s</code></span>
-                        <strong class="type">
-                            &lt;<a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String" class="crosslink external" target="_blank">String</a>&gt;
-                        </strong>
-                    a string from native clipboard
-
-                </li>
-        </ul>
-</div>
-
-                            </td>
-                        </tr>
-                        <tr>
-                            <td><a name="events_compAdded"></a>
-<div class="events item">
-    <strong>
-        <code>compAdded</code>
-    </strong>
-
-
-    <em><code>&#x2F;* Extended from zebkit.ui.Panel *&#x2F;&lt;&#x2F;em&gt;</code>
-    
-
-    Implement the event handler method to catch component added event
-The event is triggered every time the component has been inserted into
-another one.
-
-    var p = new zebkit.ui.Panel();
-    p.compAdded = function(e) { ... }; // add event handler
-
-        <br/>
-        <strong>Parameters:</strong>
-        <ul>
-                <li>
-                        <span class="name"><code>e</code></span>
-                        <strong class="type">
-                            &lt;<a href="../classes/zebkit.ui.event.CompEvent.html" class="crosslink">zebkit.ui.event.CompEvent</a>&gt;
-                        </strong>
-                    a component event. The source of the passed event
-is set to a container component.
-
-                </li>
-        </ul>
-</div>
-
-                            </td>
-                        </tr>
-                        <tr>
-                            <td><a name="events_compEnabled"></a>
-<div class="events item">
-    <strong>
-        <code>compEnabled</code>
-    </strong>
-
-
-    <em><code>&#x2F;* Extended from zebkit.ui.Panel *&#x2F;&lt;&#x2F;em&gt;</code>
-    
-
-    Implement the event handler method to catch component enabled event
-The event is triggered every time a component enabled state has been
-updated.
-
-    var p = new zebkit.ui.Panel();
-    p.compEnabled = function(e) { ... }; // add event handler
-
-        <br/>
-        <strong>Parameters:</strong>
-        <ul>
-                <li>
-                        <span class="name"><code>e</code></span>
-                        <strong class="type">
-                            &lt;<a href="../classes/zebkit.ui.event.CompEvent.html" class="crosslink">zebkit.ui.event.CompEvent</a>&gt;
-                        </strong>
-                    a component event.
-
-                </li>
-        </ul>
-</div>
-
-                            </td>
-                        </tr>
-                        <tr>
-                            <td><a name="events_compMoved"></a>
-<div class="events item">
-    <strong>
-        <code>compMoved</code>
-    </strong>
-
-
-    <em><code>&#x2F;* Extended from zebkit.ui.Panel *&#x2F;&lt;&#x2F;em&gt;</code>
-    
-
-    Implement the event handler method to catch component moved event
-The event is triggered every time the component location has been
-updated.
-
-     var p = new zebkit.ui.Panel();
-     p.compMoved = function(e) { ... }; // add event handler
-
-        <br/>
-        <strong>Parameters:</strong>
-        <ul>
-                <li>
-                        <span class="name"><code>e</code></span>
-                        <strong class="type">
-                            &lt;<a href="../classes/zebkit.ui.event.CompEvent.html" class="crosslink">zebkit.ui.event.CompEvent</a>&gt;
-                        </strong>
-                    a component event. Source of the event
-is a component that has been moved.
-
-                </li>
-        </ul>
-</div>
-
-                            </td>
-                        </tr>
-                        <tr>
-                            <td><a name="events_compRemoved"></a>
-<div class="events item">
-    <strong>
-        <code>compRemoved</code>
-    </strong>
-
-
-    <em><code>&#x2F;* Extended from zebkit.ui.Panel *&#x2F;&lt;&#x2F;em&gt;</code>
-    
-
-    Implement the event handler method to catch component removed event
-The event is triggered every time the component has been removed from
-its parent UI component.
-
-    var p = new zebkit.ui.Panel();
-    p.compRemoved = function(e) { ... }; // add event handler
-
-        <br/>
-        <strong>Parameters:</strong>
-        <ul>
-                <li>
-                        <span class="name"><code>e</code></span>
-                        <strong class="type">
-                            &lt;<a href="../classes/zebkit.ui.event.CompEvent.html" class="crosslink">zebkit.ui.event.CompEvent</a>&gt;
-                        </strong>
-                    a component event. The source of the passed event
-is set to the container component.
-
-                </li>
-        </ul>
-</div>
-
-                            </td>
-                        </tr>
-                        <tr>
-                            <td><a name="events_compShown"></a>
-<div class="events item">
-    <strong>
-        <code>compShown</code>
-    </strong>
-
-
-    <em><code>&#x2F;* Extended from zebkit.ui.Panel *&#x2F;&lt;&#x2F;em&gt;</code>
-    
-
-    Implement the event handler method to catch component shown event
-The event is triggered every time a component visibility state has
-been updated.
-
-    var p = new zebkit.ui.Panel();
-    p.compShown = function(e) { ... }; // add event handler
-
-        <br/>
-        <strong>Parameters:</strong>
-        <ul>
-                <li>
-                        <span class="name"><code>e</code></span>
-                        <strong class="type">
-                            &lt;<a href="../classes/zebkit.ui.event.CompEvent.html" class="crosslink">zebkit.ui.event.CompEvent</a>&gt;
-                        </strong>
-                    a component event.
-
-                </li>
-        </ul>
-</div>
-
-                            </td>
-                        </tr>
-                        <tr>
-                            <td><a name="events_compSized"></a>
-<div class="events item">
-    <strong>
-        <code>compSized</code>
-    </strong>
-
-
-    <em><code>&#x2F;* Extended from zebkit.ui.Panel *&#x2F;&lt;&#x2F;em&gt;</code>
-    
-
-    Implement the event handler method to catch the component sized event
-The event is triggered every time the component has been re-sized.
-
-    var p = new zebkit.ui.Panel();
-    p.compSized = function(e) { ... }; // add event handler
-
-        <br/>
-        <strong>Parameters:</strong>
-        <ul>
-                <li>
-                        <span class="name"><code>e</code></span>
-                        <strong class="type">
-                            &lt;<a href="../classes/zebkit.ui.event.CompEvent.html" class="crosslink">zebkit.ui.event.CompEvent</a>&gt;
-                        </strong>
-                    a component event. Source of the event
-is a component that has been sized, "prevWidth" and "prevHeight" fields
-keep a previous size the component had.
-
-                </li>
-        </ul>
-</div>
-
-                            </td>
-                        </tr>
-                        <tr>
-                            <td><a name="events_focusGained"></a>
-<div class="events item">
-    <strong>
-        <code>focusGained</code>
-    </strong>
-
-
-    <em><code>&#x2F;* Extended from zebkit.ui.Panel *&#x2F;&lt;&#x2F;em&gt;</code>
-    
-
-    Implement the event handler method to catch component focus gained event
-The event is triggered every time a component has gained focus.
-
-    var p = new zebkit.ui.Panel();
-    p.focusGained = function(e) { ... }; // add event handler
-
-        <br/>
-        <strong>Parameters:</strong>
-        <ul>
-                <li>
-                        <span class="name"><code>e</code></span>
-                        <strong class="type">
-                            &lt;<a href="../classes/zebkit.ui.event.FocusEvent.html" class="crosslink">zebkit.ui.event.FocusEvent</a>&gt;
-                        </strong>
-                    an input event
-
-                </li>
-        </ul>
-</div>
-
-                            </td>
-                        </tr>
-                        <tr>
-                            <td><a name="events_focusLost"></a>
-<div class="events item">
-    <strong>
-        <code>focusLost</code>
-    </strong>
-
-
-    <em><code>&#x2F;* Extended from zebkit.ui.Panel *&#x2F;&lt;&#x2F;em&gt;</code>
-    
-
-    Implement the event handler method to catch component focus lost event
-The event is triggered every time a component has lost focus
-
-    var p = new zebkit.ui.Panel();
-    p.focusLost = function(e) { ... }; // add event handler
-
-        <br/>
-        <strong>Parameters:</strong>
-        <ul>
-                <li>
-                        <span class="name"><code>e</code></span>
-                        <strong class="type">
-                            &lt;<a href="../classes/zebkit.ui.event.FocusEvent.html" class="crosslink">zebkit.ui.event.FocusEvent</a>&gt;
-                        </strong>
-                    an input event
-
-                </li>
-        </ul>
-</div>
-
-                            </td>
-                        </tr>
-                        <tr>
-                            <td><a name="events_keyPressed"></a>
-<div class="events item">
-    <strong>
-        <code>keyPressed</code>
-    </strong>
-
-
-    <em><code>&#x2F;* Extended from zebkit.ui.Panel *&#x2F;&lt;&#x2F;em&gt;</code>
-    
-
-    Implement the event handler method to catch key pressed event The event is triggered every
-time a key has been pressed.
-
-   var p = new zebkit.ui.Panel();
-   p.keyPressed = function(e) { ... }; // add event handler
-
-        <br/>
-        <strong>Parameters:</strong>
-        <ul>
-                <li>
-                        <span class="name"><code>e</code></span>
-                        <strong class="type">
-                            &lt;<a href="../classes/zebkit.ui.event.KeyEvent.html" class="crosslink">zebkit.ui.event.KeyEvent</a>&gt;
-                        </strong>
-                    a key event
-
-                </li>
-        </ul>
-</div>
-
-                            </td>
-                        </tr>
-                        <tr>
-                            <td><a name="events_keyReleased"></a>
-<div class="events item">
-    <strong>
-        <code>keyReleased</code>
-    </strong>
-
-
-    <em><code>&#x2F;* Extended from zebkit.ui.Panel *&#x2F;&lt;&#x2F;em&gt;</code>
-    
-
-    Implement the event handler method to catch key released event
-The event is triggered every time a key has been released.
-
-    var p = new zebkit.ui.Panel();
-    p.keyReleased = function(e) { ... }; // add event handler
-
-        <br/>
-        <strong>Parameters:</strong>
-        <ul>
-                <li>
-                        <span class="name"><code>e</code></span>
-                        <strong class="type">
-                            &lt;<a href="../classes/zebkit.ui.event.KeyEvent.html" class="crosslink">zebkit.ui.event.KeyEvent</a>&gt;
-                        </strong>
-                    a key event
-
-                </li>
-        </ul>
-</div>
-
-                            </td>
-                        </tr>
-                        <tr>
-                            <td><a name="events_keyTyped"></a>
-<div class="events item">
-    <strong>
-        <code>keyTyped</code>
-    </strong>
-
-
-    <em><code>&#x2F;* Extended from zebkit.ui.Panel *&#x2F;&lt;&#x2F;em&gt;</code>
-    
-
-    Implement the event handler method to catch key types event The event is triggered every
-time a key has been typed.
-
-    var p = new zebkit.ui.Panel();
-    p.keyTyped = function(e) { ... }; // add event handler
-
-        <br/>
-        <strong>Parameters:</strong>
-        <ul>
-                <li>
-                        <span class="name"><code>e</code></span>
-                        <strong class="type">
-                            &lt;<a href="../classes/zebkit.ui.event.KeyEvent.html" class="crosslink">zebkit.ui.event.KeyEvent</a>&gt;
-                        </strong>
-                    a key event
-
-                </li>
-        </ul>
-</div>
-
-                            </td>
-                        </tr>
-                        <tr>
-                            <td><a name="events_pointerClicked"></a>
-<div class="events item">
-    <strong>
-        <code>pointerClicked</code>
-    </strong>
-
-
-    <em><code>&#x2F;* Extended from zebkit.ui.Panel *&#x2F;&lt;&#x2F;em&gt;</code>
-    
-
-    Implement the event handler method to catch pointer clicked event. The event is triggered every
-time a pointer button has been clicked. Click events are generated only if no one pointer moved
-or drag events has been generated in between pointer pressed -> pointer released events sequence.
-
-    var p = new zebkit.ui.Panel();
-    p.pointerClicked = function(e) { ... }; // add event handler
-
-        <br/>
-        <strong>Parameters:</strong>
-        <ul>
-                <li>
-                        <span class="name"><code>e</code></span>
-                        <strong class="type">
-                            &lt;<a href="../classes/zebkit.ui.event.PointerEvent.html" class="crosslink">zebkit.ui.event.PointerEvent</a>&gt;
-                        </strong>
-                    a pointer event
-
-                </li>
-        </ul>
-</div>
-
-                            </td>
-                        </tr>
-                        <tr>
-                            <td><a name="events_pointerDragEnded"></a>
-<div class="events item">
-    <strong>
-        <code>pointerDragEnded</code>
-    </strong>
-
-
-    <em><code>&#x2F;* Extended from zebkit.ui.Panel *&#x2F;&lt;&#x2F;em&gt;</code>
-    
-
-    Implement the event handler method to catch pointer drag ended event. The event is triggered
-every time a pointer cursor has been moved last time when a pointer button has been pressed.
-Or when a finger has been moved last time over a touch screen.
-
-    var p = new zebkit.ui.Panel();
-    p.pointerDragEnded = function(e) { ... }; // add event handler
-
-        <br/>
-        <strong>Parameters:</strong>
-        <ul>
-                <li>
-                        <span class="name"><code>e</code></span>
-                        <strong class="type">
-                            &lt;<a href="../classes/zebkit.ui.event.PointerEvent.html" class="crosslink">zebkit.ui.event.PointerEvent</a>&gt;
-                        </strong>
-                    a pointer event
-
-                </li>
-        </ul>
-</div>
-
-                            </td>
-                        </tr>
-                        <tr>
-                            <td><a name="events_pointerDragged"></a>
-<div class="events item">
-    <strong>
-        <code>pointerDragged</code>
-    </strong>
-
-
-    <em><code>&#x2F;* Extended from zebkit.ui.Panel *&#x2F;&lt;&#x2F;em&gt;</code>
-    
-
-    Implement the event handler method to catch pointer dragged event. The event is triggered every
-time a pointer cursor has been moved when a pointer button has been pressed. Or when a finger
-has been moved over a touch screen.
-
-    var p = new zebkit.ui.Panel();
-    p.pointerDragged = function(e) { ... }; // add event handler
-
-        <br/>
-        <strong>Parameters:</strong>
-        <ul>
-                <li>
-                        <span class="name"><code>e</code></span>
-                        <strong class="type">
-                            &lt;<a href="../classes/zebkit.ui.event.PointerEvent.html" class="crosslink">zebkit.ui.event.PointerEvent</a>&gt;
-                        </strong>
-                    a pointer event
-
-                </li>
-        </ul>
-</div>
-
-                            </td>
-                        </tr>
-                        <tr>
-                            <td><a name="events_pointerDragStarted"></a>
-<div class="events item">
-    <strong>
-        <code>pointerDragStarted</code>
-    </strong>
-
-
-    <em><code>&#x2F;* Extended from zebkit.ui.Panel *&#x2F;&lt;&#x2F;em&gt;</code>
-    
-
-    Implement the event handler method to catch pointer drag started event. The event is triggered
-every time a pointer cursor has been moved first time when a pointer button has been pressed.
-Or when a finger has been moved first time over a touch screen.
-
-    var p = new zebkit.ui.Panel();
-    p.pointerDragStarted = function(e) { ... }; // add event handler
-
-        <br/>
-        <strong>Parameters:</strong>
-        <ul>
-                <li>
-                        <span class="name"><code>e</code></span>
-                        <strong class="type">
-                            &lt;<a href="../classes/zebkit.ui.event.PointerEvent.html" class="crosslink">zebkit.ui.event.PointerEvent</a>&gt;
-                        </strong>
-                    a pointer event
-
-                </li>
-        </ul>
-</div>
-
-                            </td>
-                        </tr>
-                        <tr>
-                            <td><a name="events_pointerEntered"></a>
-<div class="events item">
-    <strong>
-        <code>pointerEntered</code>
-    </strong>
-
-
-    <em><code>&#x2F;* Extended from zebkit.ui.Panel *&#x2F;&lt;&#x2F;em&gt;</code>
-    
-
-    Implement the event handler method to catch pointer entered event. The event is triggered every
-time a pointer cursor entered the given component.
-
-    var p = new zebkit.ui.Panel();
-    p.pointerEntered = function(e) { ... }; // add event handler
-
-        <br/>
-        <strong>Parameters:</strong>
-        <ul>
-                <li>
-                        <span class="name"><code>e</code></span>
-                        <strong class="type">
-                            &lt;<a href="../classes/zebkit.ui.event.PointerEvent.html" class="crosslink">zebkit.ui.event.PointerEvent</a>&gt;
-                        </strong>
-                    a pointer event
-
-                </li>
-        </ul>
-</div>
-
-                            </td>
-                        </tr>
-                        <tr>
-                            <td><a name="events_pointerExited"></a>
-<div class="events item">
-    <strong>
-        <code>pointerExited</code>
-    </strong>
-
-
-    <em><code>&#x2F;* Extended from zebkit.ui.Panel *&#x2F;&lt;&#x2F;em&gt;</code>
-    
-
-    Implement the event handler method to catch pointer exited event. The event is triggered every
-time a pointer cursor exited the given component.
-
-    var p = new zebkit.ui.Panel();
-    p.pointerExited = function(e) { ... }; // add event handler
-
-        <br/>
-        <strong>Parameters:</strong>
-        <ul>
-                <li>
-                        <span class="name"><code>e</code></span>
-                        <strong class="type">
-                            &lt;<a href="../classes/zebkit.ui.event.PointerEvent.html" class="crosslink">zebkit.ui.event.PointerEvent</a>&gt;
-                        </strong>
-                    a pointer event
-
-                </li>
-        </ul>
-</div>
-
-                            </td>
-                        </tr>
-                        <tr>
-                            <td><a name="events_pointerMoved"></a>
-<div class="events item">
-    <strong>
-        <code>pointerMoved</code>
-    </strong>
-
-
-    <em><code>&#x2F;* Extended from zebkit.ui.Panel *&#x2F;&lt;&#x2F;em&gt;</code>
-    
-
-    Implement the event handler method  to catch pointer moved event. The event is triggered every time
-a pointer cursor has been moved with no a pointer button pressed.
-
-    var p = new zebkit.ui.Panel();
-    p.pointerMoved = function(e) { ... }; // add event handler
-
-        <br/>
-        <strong>Parameters:</strong>
-        <ul>
-                <li>
-                        <span class="name"><code>e</code></span>
-                        <strong class="type">
-                            &lt;<a href="../classes/zebkit.ui.event.PointerEvent.html" class="crosslink">zebkit.ui.event.PointerEvent</a>&gt;
-                        </strong>
-                    a pointer event
-
-                </li>
-        </ul>
-</div>
-
-                            </td>
-                        </tr>
-                        <tr>
-                            <td><a name="events_pointerPressed"></a>
-<div class="events item">
-    <strong>
-        <code>pointerPressed</code>
-    </strong>
-
-
-    <em><code>&#x2F;* Extended from zebkit.ui.Panel *&#x2F;&lt;&#x2F;em&gt;</code>
-    
-
-    Implement the event handler method to catch pointer pressed event. The event is triggered every time
-a pointer button has been pressed or a finger has touched a touch screen.
-
-    var p = new zebkit.ui.Panel();
-    p.pointerPressed = function(e) { ... }; // add event handler
-
-        <br/>
-        <strong>Parameters:</strong>
-        <ul>
-                <li>
-                        <span class="name"><code>e</code></span>
-                        <strong class="type">
-                            &lt;<a href="../classes/zebkit.ui.event.PointerEvent.html" class="crosslink">zebkit.ui.event.PointerEvent</a>&gt;
-                        </strong>
-                    a pointer event
-
-                </li>
-        </ul>
-</div>
-
-                            </td>
-                        </tr>
-                        <tr>
-                            <td><a name="events_pointerReleased"></a>
-<div class="events item">
-    <strong>
-        <code>pointerReleased</code>
-    </strong>
-
-
-    <em><code>&#x2F;* Extended from zebkit.ui.Panel *&#x2F;&lt;&#x2F;em&gt;</code>
-    
-
-    Implement the event handler method to catch pointer released event. The event is triggered every time
-a pointer button has been released or a finger has untouched a touch screen.
-
-    var p = new zebkit.ui.Panel();
-    p.pointerReleased = function(e) { ... }; // add event handler
-
-        <br/>
-        <strong>Parameters:</strong>
-        <ul>
-                <li>
-                        <span class="name"><code>e</code></span>
-                        <strong class="type">
-                            &lt;<a href="../classes/zebkit.ui.event.PointerEvent.html" class="crosslink">zebkit.ui.event.PointerEvent</a>&gt;
-                        </strong>
-                    a pointer event
-
-                </li>
-        </ul>
-</div>
-
-                            </td>
-                        </tr>
-                        <tr>
-                            <td><a name="events_rowSelected"></a>
-<div class="events item">
-    <strong>
-        <code>rowSelected</code>
-    </strong>
-
-
-    <em><code>&#x2F;* Extended from zebkit.ui.grid.Grid *&#x2F;&lt;&#x2F;em&gt;</code>
-    
-
-    Fire when a grid row selection state has been changed
-
-           grid.on(function(grid, row, count, status) {
-               ...
-           });
-
-        <br/>
-        <strong>Parameters:</strong>
-        <ul>
-                <li>
-                        <span class="name"><code>grid</code></span>
-                        <strong class="type">
-                            &lt;<a href="../classes/zebkit.ui.grid.Grid.html" class="crosslink">zebkit.ui.grid.Grid</a>&gt;
-                        </strong>
-                    a grid that triggers the event
-
-                </li>
-                <li>
-                        <span class="name"><code>row</code></span>
-                        <strong class="type">
-                            &lt;Integer&gt;
-                        </strong>
-                    a first row whose selection state has been updated. The row is
--1 if all selected rows have been unselected
-
-                </li>
-                <li>
-                        <span class="name"><code>count</code></span>
-                        <strong class="type">
-                            &lt;Integer&gt;
-                        </strong>
-                    a number of rows whose selection state has been updated
-
-                </li>
-                <li>
-                        <span class="name"><code>status</code></span>
-                        <strong class="type">
-                            &lt;<a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Boolean" class="crosslink external" target="_blank">Boolean</a>&gt;
-                        </strong>
-                    a status. true means rows have been selected
-
-                </li>
-        </ul>
-</div>
-
-                            </td>
-                        </tr>
                 </table>
             </div>
 

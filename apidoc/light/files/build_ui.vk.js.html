@@ -516,9 +516,44 @@
                                                <a href="../classes/zebkit.ui.Cursor.html">zebkit.ui.Cursor</a>
                                             </td>
                                         </tr>
-                                        <tr class="classNameCell" className="zebkit.ui.date.DaysGrid" name="allClassesItem">
+                                        <tr class="classNameCell" className="zebkit.ui.date.Calendar" name="allClassesItem">
                                             <td>
-                                               <a href="../classes/zebkit.ui.date.DaysGrid.html">zebkit.ui.date.DaysGrid</a>
+                                               <a href="../classes/zebkit.ui.date.Calendar.html">zebkit.ui.date.Calendar</a>
+                                            </td>
+                                        </tr>
+                                        <tr class="classNameCell" className="zebkit.ui.date.Calendar.MonthsCombo" name="allClassesItem">
+                                            <td>
+                                               <a href="../classes/zebkit.ui.date.Calendar.MonthsCombo.html">zebkit.ui.date.Calendar.MonthsCombo</a>
+                                            </td>
+                                        </tr>
+                                        <tr class="classNameCell" className="zebkit.ui.date.DateInputField" name="allClassesItem">
+                                            <td>
+                                               <a href="../classes/zebkit.ui.date.DateInputField.html">zebkit.ui.date.DateInputField</a>
+                                            </td>
+                                        </tr>
+                                        <tr class="classNameCell" className="zebkit.ui.date.DateRangeInput" name="allClassesItem">
+                                            <td>
+                                               <a href="../classes/zebkit.ui.date.DateRangeInput.html">zebkit.ui.date.DateRangeInput</a>
+                                            </td>
+                                        </tr>
+                                        <tr class="classNameCell" className="zebkit.ui.date.DateTextField" name="allClassesItem">
+                                            <td>
+                                               <a href="../classes/zebkit.ui.date.DateTextField.html">zebkit.ui.date.DateTextField</a>
+                                            </td>
+                                        </tr>
+                                        <tr class="classNameCell" className="zebkit.ui.date.MonthDaysGrid" name="allClassesItem">
+                                            <td>
+                                               <a href="../classes/zebkit.ui.date.MonthDaysGrid.html">zebkit.ui.date.MonthDaysGrid</a>
+                                            </td>
+                                        </tr>
+                                        <tr class="classNameCell" className="zebkit.ui.date.MonthDaysGrid.DayPan" name="allClassesItem">
+                                            <td>
+                                               <a href="../classes/zebkit.ui.date.MonthDaysGrid.DayPan.html">zebkit.ui.date.MonthDaysGrid.DayPan</a>
+                                            </td>
+                                        </tr>
+                                        <tr class="classNameCell" className="zebkit.ui.date.PopupCalendarMix" name="allClassesItem">
+                                            <td>
+                                               <a href="../classes/zebkit.ui.date.PopupCalendarMix.html">zebkit.ui.date.PopupCalendarMix</a>
                                             </td>
                                         </tr>
                                         <tr class="classNameCell" className="zebkit.ui.DecorationViews" name="allClassesItem">
@@ -631,9 +666,19 @@
                                                <a href="../classes/zebkit.ui.grid.CaptionViewProvider.html">zebkit.ui.grid.CaptionViewProvider</a>
                                             </td>
                                         </tr>
+                                        <tr class="classNameCell" className="zebkit.ui.grid.CellSelectMode" name="allClassesItem">
+                                            <td>
+                                               <a href="../classes/zebkit.ui.grid.CellSelectMode.html">zebkit.ui.grid.CellSelectMode</a>
+                                            </td>
+                                        </tr>
                                         <tr class="classNameCell" className="zebkit.ui.grid.CellsVisibility" name="allClassesItem">
                                             <td>
                                                <a href="../classes/zebkit.ui.grid.CellsVisibility.html">zebkit.ui.grid.CellsVisibility</a>
+                                            </td>
+                                        </tr>
+                                        <tr class="classNameCell" className="zebkit.ui.grid.ColSelectMode" name="allClassesItem">
+                                            <td>
+                                               <a href="../classes/zebkit.ui.grid.ColSelectMode.html">zebkit.ui.grid.ColSelectMode</a>
                                             </td>
                                         </tr>
                                         <tr class="classNameCell" className="zebkit.ui.grid.CompGridCaption" name="allClassesItem">
@@ -684,6 +729,11 @@
                                         <tr class="classNameCell" className="zebkit.ui.grid.Metrics" name="allClassesItem">
                                             <td>
                                                <a href="../classes/zebkit.ui.grid.Metrics.html">zebkit.ui.grid.Metrics</a>
+                                            </td>
+                                        </tr>
+                                        <tr class="classNameCell" className="zebkit.ui.grid.RowSelectMode" name="allClassesItem">
+                                            <td>
+                                               <a href="../classes/zebkit.ui.grid.RowSelectMode.html">zebkit.ui.grid.RowSelectMode</a>
                                             </td>
                                         </tr>
                                         <tr class="classNameCell" className="zebkit.ui.grid.StrippedRows" name="allClassesItem">
@@ -1211,7 +1261,7 @@ zebkit.package(&quot;ui.vk&quot;, function(pkg, Class) {
                     }
 
                     if (k.isVisible === true) {
-                        if (typeof ctr.size === &#x27;undefined&#x27; || ctr.size === null) {
+                        if (ctr.size === undefined || ctr.size === null) {
                             k.setSize(m.fixKeyWidth, m.rowHeight);
                         } else {
                             var ps = k.getPreferredSize();
@@ -1307,7 +1357,7 @@ zebkit.package(&quot;ui.vk&quot;, function(pkg, Class) {
                     if (ctr.row === row &amp;&amp; k.isVisible === true) {
                         var ps = k.getPreferredSize();
 
-                        if (typeof ctr.size === &#x27;undefined&#x27; || ctr.size === null) {
+                        if (ctr.size === undefined || ctr.size === null) {
                             if (fixKeyMaxWidth &lt; ps.width) {
                                 fixKeyMaxWidth = ps.width;
                             }
@@ -1347,21 +1397,10 @@ zebkit.package(&quot;ui.vk&quot;, function(pkg, Class) {
         }
     ]);
 
-    pkg.ShiftKeyArrow = zebkit.Class(zebkit.draw.View, [
-        function(bg, lnCol) {
-            if (arguments.length &gt; 1) {
-                this.lineColor = lnCol;
-            }
-
-            if (arguments.length &gt; 0) {
-                this.bg = bg;
-            }
-        },
-
+    pkg.ShiftKeyArrow = zebkit.Class(zebkit.draw.Shape, [
         function $prototype() {
             this.prefSize = 10;
-            this.lineColor = &quot;white&quot;;
-            this.bg = null;
+
 
             //       / \A
             //      /   \
@@ -1384,7 +1423,7 @@ zebkit.package(&quot;ui.vk&quot;, function(pkg, Class) {
                 var cx = x + Math.floor(w / 2),
                     ww = Math.floor(h / 2),
                     dw = Math.floor(h / 4),
-                    dt = g.lineWidth/2;
+                    dt = this.lineWidth / 2;
 
                 g.beginPath();
                 g.moveTo(cx, y);                      // A
@@ -1396,20 +1435,6 @@ zebkit.package(&quot;ui.vk&quot;, function(pkg, Class) {
                 g.lineTo(cx + ww - dt, y + ww + dt);  // G
                 g.lineTo(cx, y);                      // A
                 return true;
-            };
-
-            this.paint = function(g,x,y,w,h,d) {
-                this.outline(g,x,y,w,h,d);
-
-                if (this.lineColor !== null) {
-                    g.setColor(this.lineColor);
-                    g.stroke();
-                }
-
-                if (this.bg !== null) {
-                    g.setColor(this.bg);
-                    g.fill();
-                }
             };
 
             this.getPreferredSize = function() {
@@ -1457,7 +1482,7 @@ zebkit.package(&quot;ui.vk&quot;, function(pkg, Class) {
                 }
                 v = new ui.ViewPan().setView(v);
                 this.$super(v);
-                this.setLayout(new zebkit.layout.StackLayout());
+                this.setStackLayout();
             } else {
                 this.$super(v);
             }
@@ -1501,7 +1526,7 @@ zebkit.package(&quot;ui.vk&quot;, function(pkg, Class) {
 
             this.findVK = function(id) {
                 var p = this.parent;
-                while (p !== null &amp;&amp; typeof p[id] === &#x27;undefined&#x27;) {
+                while (p !== null &amp;&amp; p[id] === undefined) {
                     p = p.parent;
                 }
                 return p;
@@ -1558,11 +1583,11 @@ zebkit.package(&quot;ui.vk&quot;, function(pkg, Class) {
                 t = { ch : t };
             }
 
-            this.mask   = typeof t.mask   === &#x27;undefined&#x27; ? null  : t.mask;
-            this.ch     = typeof t.ch     === &#x27;undefined&#x27; ? null  : t.ch;
-            this.code   = typeof t.code   === &#x27;undefined&#x27; ? 0     : t.code;
-            this.hint   = typeof t.hint   === &#x27;undefined&#x27; ? null  : t.hint;
-            this.repeat = typeof t.repeat === &#x27;undefined&#x27; ? false : t.repeat;
+            this.mask   = t.mask   === undefined ? null  : t.mask;
+            this.ch     = t.ch     === undefined ? null  : t.ch;
+            this.code   = t.code   === undefined ? 0     : t.code;
+            this.hint   = t.hint   === undefined ? null  : t.hint;
+            this.repeat = t.repeat === undefined ? false : t.repeat;
 
             if (this.repeat !== false) {
                 this.setFireParams(true, t.repeat);
@@ -1669,7 +1694,6 @@ zebkit.package(&quot;ui.vk&quot;, function(pkg, Class) {
         function $prototype() {
             this.gap = 0;
             this.color = &quot;white&quot;;
-            this.height = this.width = 8;
         }
     ]);
 
@@ -1987,13 +2011,11 @@ zebkit.package(&quot;ui.vk&quot;, function(pkg, Class) {
             } else if (d.length &gt; 1) {
                 return new pkg.VKeys(d);
             }
-        } else {
-            if (Array.isArray(d)) {
-        		return d.length === 1 ? new pkg.VKey (d[0])
-                                      : new pkg.VKeys(d);
-            } else if (d.hasOwnProperty(&quot;vkey&quot;)) {
-                return d.vkey;
-            }
+        } else if (Array.isArray(d)) {
+    		return d.length === 1 ? new pkg.VKey (d[0])
+                                  : new pkg.VKeys(d);
+        } else if (d.hasOwnProperty(&quot;vkey&quot;)) {
+            return d.vkey;
         }
 
         return new pkg.VKey(d);
@@ -2008,10 +2030,6 @@ zebkit.package(&quot;ui.vk&quot;, function(pkg, Class) {
                 ctrlKey  : false,
                 altKey   : false
             };
-        },
-
-        function $clazz() {
-            this.Listeners = zebkit.ListenersClass(&quot;vkMaskUpdated&quot;, &quot;vkOptionSelected&quot;);
         },
 
         function $prototype() {
@@ -2079,7 +2097,7 @@ zebkit.package(&quot;ui.vk&quot;, function(pkg, Class) {
             };
 
             this.vkMaskUpdated = function(vkey, mask, value) {
-                if (typeof mask === &#x27;undefined&#x27; || mask === null) {
+                if (mask === undefined || mask === null) {
                     throw new Error();
                 }
 
@@ -2195,7 +2213,7 @@ zebkit.package(&quot;ui.vk&quot;, function(pkg, Class) {
 
             this.$super(p);
         }
-    ]);
+    ]).events(&quot;vkMaskUpdated&quot;, &quot;vkOptionSelected&quot;);
 
     pkg.activateVK = function() {
         pkg.$vk = new pkg.VK();
@@ -2212,7 +2230,7 @@ zebkit.package(&quot;ui.vk&quot;, function(pkg, Class) {
 
     ui.events.on({
         focusGained : function (e) {
-            if (pkg.$vk !== null &amp;&amp; $isVkElement(e.source) === false &amp;&amp; typeof e.source.vkMode !== &#x27;undefined&#x27;) {
+            if (pkg.$vk !== null &amp;&amp; $isVkElement(e.source) === false &amp;&amp; e.source.vkMode !== undefined) {
                 pkg.showVK(zebkit.instanceOf(e.source, ui.TextField) ? e.source : null);
             }
         },
@@ -2228,7 +2246,7 @@ zebkit.package(&quot;ui.vk&quot;, function(pkg, Class) {
 
                 // if input component holds focus, virtual keyboard is
                 // hidden and we press on the input component
-                if (pkg.$vk.parent === null &amp;&amp; typeof e.source.vkMode !== &#x27;undefined&#x27;) {
+                if (pkg.$vk.parent === null &amp;&amp; e.source.vkMode !== undefined) {
                     pkg.showVK(e.source);
                 }
             }

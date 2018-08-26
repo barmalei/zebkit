@@ -55,6 +55,15 @@ The latest version of previous generation of zebkit (zebra) can be found as "zeb
    - "c" value will be an instance of __Date__ class
    - "d" value will be set with the loaded JSON 
 
+   YAML can be also used if "js-yaml.min.js" will be included into your code:
+
+  ```yaml
+  a: 100,
+  b: "%{a}",           
+  c: { class : "Date" },
+  d: "%{../external.json}"  
+  ```   
+
 # Requirements 
 
 Zebkit works in MS Internet Explorer 10+, MS Edge, FireFox 3+, Safari 5+, Google Chrome. It should support iOS 7+ and Android 4+ mobile browsers.

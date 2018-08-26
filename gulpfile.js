@@ -104,13 +104,13 @@ var profile = {
                 "src/js/ui/ui.common.js",
                 "src/js/ui/ui.state.js",
                 "src/js/ui/ui.buttons.js",
-                "src/js/ui/ui.panels.js",
                 "src/js/ui/ui.scroll.js",
-                "src/js/ui/ui.Slider.js",
-                "src/js/ui/ui.Tabs.js",
                 "src/js/ui/ui.field.js",
                 "src/js/ui/ui.list.js",
                 "src/js/ui/ui.Combo.js",
+                "src/js/ui/ui.panels.js",
+                "src/js/ui/ui.Slider.js",
+                "src/js/ui/ui.Tabs.js",
                 "src/js/ui/ui.menu.js",
                 "src/js/ui/ui.window.js",
                 "src/js/ui/ui.tooltip.js",
@@ -540,7 +540,9 @@ function buildFS(files, base) {
 
     var data = {},
         binaries = [ ".jpg", ".jpeg", ".tiff", ".gif", ".png", ".ico", ".pdf" ],
-        txt      = [ ".txt", ".md", ".json", ".html", ".htm", ".properties", ".conf", ".xml", ".crt" ];
+        txt      = [ ".txt", ".md", ".json", ".html", ".htm", ".properties", ".conf", ".xml", ".crt", "yaml" ],
+        txtB64   = [ ];
+
     for(var i = 0; i < files.length; i++) {
         walk(path.join(__dirname, files[i]), (err, p) => {
             let pp  = path.relative(path.join(__dirname, base), p),
@@ -549,11 +551,20 @@ function buildFS(files, base) {
                 data[pp] = {
                     ext : ext,
                     path: pp,
+                    type: "binary",
                     data: fs.readFileSync(p).toString('base64')
                 };
             } else if (txt.indexOf(ext) >= 0) {
                 data[pp] = {
                     ext : ext,
+                    type: "text",
+                    path: pp,
+                    data: fs.readFileSync(p).toString()
+                };
+            } else if (txt.indexOf(ext) >= 0) {
+                data[pp] = {
+                    ext : ext,
+                    type: "textB64",
                     path: pp,
                     data: fs.readFileSync(p).toString()
                 };

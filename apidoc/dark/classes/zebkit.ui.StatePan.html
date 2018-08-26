@@ -456,11 +456,6 @@
                                                <a href="../classes/zebkit.ui.Button.html">zebkit.ui.Button</a>
                                             </td>
                                         </tr>
-                                        <tr class="classNameCell" className="zebkit.ui.ButtonRepeatMix" name="allClassesItem">
-                                            <td>
-                                               <a href="../classes/zebkit.ui.ButtonRepeatMix.html">zebkit.ui.ButtonRepeatMix</a>
-                                            </td>
-                                        </tr>
                                         <tr class="classNameCell" className="zebkit.ui.Checkbox" name="allClassesItem">
                                             <td>
                                                <a href="../classes/zebkit.ui.Checkbox.html">zebkit.ui.Checkbox</a>
@@ -556,11 +551,6 @@
                                                <a href="../classes/zebkit.ui.date.PopupCalendarMix.html">zebkit.ui.date.PopupCalendarMix</a>
                                             </td>
                                         </tr>
-                                        <tr class="classNameCell" className="zebkit.ui.DecorationViews" name="allClassesItem">
-                                            <td>
-                                               <a href="../classes/zebkit.ui.DecorationViews.html">zebkit.ui.DecorationViews</a>
-                                            </td>
-                                        </tr>
                                         <tr class="classNameCell" className="zebkit.ui.design.FormTreeModel" name="allClassesItem">
                                             <td>
                                                <a href="../classes/zebkit.ui.design.FormTreeModel.html">zebkit.ui.design.FormTreeModel</a>
@@ -574,6 +564,11 @@
                                         <tr class="classNameCell" className="zebkit.ui.design.ShaperPan" name="allClassesItem">
                                             <td>
                                                <a href="../classes/zebkit.ui.design.ShaperPan.html">zebkit.ui.design.ShaperPan</a>
+                                            </td>
+                                        </tr>
+                                        <tr class="classNameCell" className="zebkit.ui.DrawFocusMarker" name="allClassesItem">
+                                            <td>
+                                               <a href="../classes/zebkit.ui.DrawFocusMarker.html">zebkit.ui.DrawFocusMarker</a>
                                             </td>
                                         </tr>
                                         <tr class="classNameCell" className="zebkit.ui.event.Clipboard" name="allClassesItem">
@@ -606,11 +601,6 @@
                                                <a href="../classes/zebkit.ui.event.FocusManager.html">zebkit.ui.event.FocusManager</a>
                                             </td>
                                         </tr>
-                                        <tr class="classNameCell" className="zebkit.ui.event.InputEventState" name="allClassesItem">
-                                            <td>
-                                               <a href="../classes/zebkit.ui.event.InputEventState.html">zebkit.ui.event.InputEventState</a>
-                                            </td>
-                                        </tr>
                                         <tr class="classNameCell" className="zebkit.ui.event.KeyEvent" name="allClassesItem">
                                             <td>
                                                <a href="../classes/zebkit.ui.event.KeyEvent.html">zebkit.ui.event.KeyEvent</a>
@@ -641,6 +631,11 @@
                                                <a href="../classes/zebkit.ui.event.ShortcutManager.html">zebkit.ui.event.ShortcutManager</a>
                                             </td>
                                         </tr>
+                                        <tr class="classNameCell" className="zebkit.ui.event.TrackInputEventState" name="allClassesItem">
+                                            <td>
+                                               <a href="../classes/zebkit.ui.event.TrackInputEventState.html">zebkit.ui.event.TrackInputEventState</a>
+                                            </td>
+                                        </tr>
                                         <tr class="classNameCell" className="zebkit.ui.event.WinEvent" name="allClassesItem">
                                             <td>
                                                <a href="../classes/zebkit.ui.event.WinEvent.html">zebkit.ui.event.WinEvent</a>
@@ -651,9 +646,9 @@
                                                <a href="../classes/zebkit.ui.EvStatePan.html">zebkit.ui.EvStatePan</a>
                                             </td>
                                         </tr>
-                                        <tr class="classNameCell" className="zebkit.ui.FocusableComposite" name="allClassesItem">
+                                        <tr class="classNameCell" className="zebkit.ui.FireEventRepeatedly" name="allClassesItem">
                                             <td>
-                                               <a href="../classes/zebkit.ui.FocusableComposite.html">zebkit.ui.FocusableComposite</a>
+                                               <a href="../classes/zebkit.ui.FireEventRepeatedly.html">zebkit.ui.FireEventRepeatedly</a>
                                             </td>
                                         </tr>
                                         <tr class="classNameCell" className="zebkit.ui.grid.BaseCaption" name="allClassesItem">
@@ -744,6 +739,11 @@
                                         <tr class="classNameCell" className="zebkit.ui.Group" name="allClassesItem">
                                             <td>
                                                <a href="../classes/zebkit.ui.Group.html">zebkit.ui.Group</a>
+                                            </td>
+                                        </tr>
+                                        <tr class="classNameCell" className="zebkit.ui.HostDecorativeViews" name="allClassesItem">
+                                            <td>
+                                               <a href="../classes/zebkit.ui.HostDecorativeViews.html">zebkit.ui.HostDecorativeViews</a>
                                             </td>
                                         </tr>
                                         <tr class="classNameCell" className="zebkit.ui.ImageLabel" name="allClassesItem">
@@ -911,9 +911,9 @@
                                                <a href="../classes/zebkit.ui.StatePan.html">zebkit.ui.StatePan</a>
                                             </td>
                                         </tr>
-                                        <tr class="classNameCell" className="zebkit.ui.StatusBar" name="allClassesItem">
+                                        <tr class="classNameCell" className="zebkit.ui.StatusBarPan" name="allClassesItem">
                                             <td>
-                                               <a href="../classes/zebkit.ui.StatusBar.html">zebkit.ui.StatusBar</a>
+                                               <a href="../classes/zebkit.ui.StatusBarPan.html">zebkit.ui.StatusBarPan</a>
                                             </td>
                                         </tr>
                                         <tr class="classNameCell" className="zebkit.ui.Tabs" name="allClassesItem">
@@ -1211,13 +1211,13 @@ var p = new zebkit.ui.StatePan();
 // define border view that contains views for "state1" and "state2"
 p.setBorder({
     "state1": new zebkit.draw.Border("red", 1),
-    "state1": new zebkit.draw.Border("blue", 2)
+    "state2": new zebkit.draw.Border("blue", 2)
 });
 
 // define background view that contains views for "state1" and "state2"
 p.setBackground({
     "state1": "yellow",
-    "state1": "green"
+    "state2": "green"
 });
 
 // set component state
@@ -1511,7 +1511,7 @@ should react to a state changing.</p>
                                     &nbsp;&nbsp;
                                     <small style="white-space: nowrap;">
                                         <a href="zebkit.ui.Panel.html#methods_kidRemoved">
-                                            <b>kidRemoved(</b>i, l<b>)</b>
+                                            <b>kidRemoved(</b>i, l, ctr<b>)</b>
                                         </a>
                                     </small>
                                     &nbsp;&nbsp;
@@ -1536,6 +1536,12 @@ should react to a state changing.</p>
                                     <small style="white-space: nowrap;">
                                         <a href="zebkit.EventProducer.html#methods_on">
                                             <b>on(</b>[eventName], [path], cb<b>)</b>
+                                        </a>
+                                    </small>
+                                    &nbsp;&nbsp;
+                                    <small style="white-space: nowrap;">
+                                        <a href="zebkit.ui.Panel.html#methods_paintChildComponents">
+                                            <b>paintChildComponents(</b>g, clipChild<b>)</b>
                                         </a>
                                     </small>
                                     &nbsp;&nbsp;
@@ -1696,6 +1702,12 @@ should react to a state changing.</p>
                                     </small>
                                     &nbsp;&nbsp;
                                     <small style="white-space: nowrap;">
+                                        <a href="zebkit.ui.Panel.html#methods_setGrisLayout">
+                                            <b>setGrisLayout(</b> <b>)</b>
+                                        </a>
+                                    </small>
+                                    &nbsp;&nbsp;
+                                    <small style="white-space: nowrap;">
                                         <a href="zebkit.layout.Layoutable.html#methods_setId">
                                             <b>setId(</b>id<b>)</b>
                                         </a>
@@ -1744,8 +1756,20 @@ should react to a state changing.</p>
                                     </small>
                                     &nbsp;&nbsp;
                                     <small style="white-space: nowrap;">
+                                        <a href="zebkit.layout.Layoutable.html#methods_setPreferredHeigh">
+                                            <b>setPreferredHeigh(</b>h<b>)</b>
+                                        </a>
+                                    </small>
+                                    &nbsp;&nbsp;
+                                    <small style="white-space: nowrap;">
                                         <a href="zebkit.layout.Layoutable.html#methods_setPreferredSize">
                                             <b>setPreferredSize(</b>w, h<b>)</b>
+                                        </a>
+                                    </small>
+                                    &nbsp;&nbsp;
+                                    <small style="white-space: nowrap;">
+                                        <a href="zebkit.layout.Layoutable.html#methods_setPreferredWidth">
+                                            <b>setPreferredWidth(</b>w<b>)</b>
                                         </a>
                                     </small>
                                     &nbsp;&nbsp;
@@ -2035,6 +2059,20 @@ itself is used as a view id.</p>
                         <div style="padding:6px;">
                                     <small style="white-space: nowrap;">
 
+                                            <strong>protected </strong>
+
+
+                                            <strong class="type">
+                                                <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Function" class="crosslink external" target="_blank">Function</a>
+                                            </strong>
+
+                                        <a href="zebkit.PathSearch.html#atttrs_$matchPath">
+                                              $matchPath
+                                        </a>
+                                    </small>
+                                    &nbsp;&nbsp;
+                                    <small style="white-space: nowrap;">
+
                                             <strong> public </strong>
 
                                             <img title="readonly" width="14" height="14" src="../assets/css/lock.png" />
@@ -2263,6 +2301,10 @@ itself is used as a view id.</p>
 
                     <br/>
                     <table>
+                            <tr>
+                                <td>
+                                </td>
+                            </tr>
                             <tr>
                                 <td>
                                 </td>

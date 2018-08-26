@@ -456,11 +456,6 @@
                                                <a href="../classes/zebkit.ui.Button.html">zebkit.ui.Button</a>
                                             </td>
                                         </tr>
-                                        <tr class="classNameCell" className="zebkit.ui.ButtonRepeatMix" name="allClassesItem">
-                                            <td>
-                                               <a href="../classes/zebkit.ui.ButtonRepeatMix.html">zebkit.ui.ButtonRepeatMix</a>
-                                            </td>
-                                        </tr>
                                         <tr class="classNameCell" className="zebkit.ui.Checkbox" name="allClassesItem">
                                             <td>
                                                <a href="../classes/zebkit.ui.Checkbox.html">zebkit.ui.Checkbox</a>
@@ -556,11 +551,6 @@
                                                <a href="../classes/zebkit.ui.date.PopupCalendarMix.html">zebkit.ui.date.PopupCalendarMix</a>
                                             </td>
                                         </tr>
-                                        <tr class="classNameCell" className="zebkit.ui.DecorationViews" name="allClassesItem">
-                                            <td>
-                                               <a href="../classes/zebkit.ui.DecorationViews.html">zebkit.ui.DecorationViews</a>
-                                            </td>
-                                        </tr>
                                         <tr class="classNameCell" className="zebkit.ui.design.FormTreeModel" name="allClassesItem">
                                             <td>
                                                <a href="../classes/zebkit.ui.design.FormTreeModel.html">zebkit.ui.design.FormTreeModel</a>
@@ -574,6 +564,11 @@
                                         <tr class="classNameCell" className="zebkit.ui.design.ShaperPan" name="allClassesItem">
                                             <td>
                                                <a href="../classes/zebkit.ui.design.ShaperPan.html">zebkit.ui.design.ShaperPan</a>
+                                            </td>
+                                        </tr>
+                                        <tr class="classNameCell" className="zebkit.ui.DrawFocusMarker" name="allClassesItem">
+                                            <td>
+                                               <a href="../classes/zebkit.ui.DrawFocusMarker.html">zebkit.ui.DrawFocusMarker</a>
                                             </td>
                                         </tr>
                                         <tr class="classNameCell" className="zebkit.ui.event.Clipboard" name="allClassesItem">
@@ -606,11 +601,6 @@
                                                <a href="../classes/zebkit.ui.event.FocusManager.html">zebkit.ui.event.FocusManager</a>
                                             </td>
                                         </tr>
-                                        <tr class="classNameCell" className="zebkit.ui.event.InputEventState" name="allClassesItem">
-                                            <td>
-                                               <a href="../classes/zebkit.ui.event.InputEventState.html">zebkit.ui.event.InputEventState</a>
-                                            </td>
-                                        </tr>
                                         <tr class="classNameCell" className="zebkit.ui.event.KeyEvent" name="allClassesItem">
                                             <td>
                                                <a href="../classes/zebkit.ui.event.KeyEvent.html">zebkit.ui.event.KeyEvent</a>
@@ -641,6 +631,11 @@
                                                <a href="../classes/zebkit.ui.event.ShortcutManager.html">zebkit.ui.event.ShortcutManager</a>
                                             </td>
                                         </tr>
+                                        <tr class="classNameCell" className="zebkit.ui.event.TrackInputEventState" name="allClassesItem">
+                                            <td>
+                                               <a href="../classes/zebkit.ui.event.TrackInputEventState.html">zebkit.ui.event.TrackInputEventState</a>
+                                            </td>
+                                        </tr>
                                         <tr class="classNameCell" className="zebkit.ui.event.WinEvent" name="allClassesItem">
                                             <td>
                                                <a href="../classes/zebkit.ui.event.WinEvent.html">zebkit.ui.event.WinEvent</a>
@@ -651,9 +646,9 @@
                                                <a href="../classes/zebkit.ui.EvStatePan.html">zebkit.ui.EvStatePan</a>
                                             </td>
                                         </tr>
-                                        <tr class="classNameCell" className="zebkit.ui.FocusableComposite" name="allClassesItem">
+                                        <tr class="classNameCell" className="zebkit.ui.FireEventRepeatedly" name="allClassesItem">
                                             <td>
-                                               <a href="../classes/zebkit.ui.FocusableComposite.html">zebkit.ui.FocusableComposite</a>
+                                               <a href="../classes/zebkit.ui.FireEventRepeatedly.html">zebkit.ui.FireEventRepeatedly</a>
                                             </td>
                                         </tr>
                                         <tr class="classNameCell" className="zebkit.ui.grid.BaseCaption" name="allClassesItem">
@@ -744,6 +739,11 @@
                                         <tr class="classNameCell" className="zebkit.ui.Group" name="allClassesItem">
                                             <td>
                                                <a href="../classes/zebkit.ui.Group.html">zebkit.ui.Group</a>
+                                            </td>
+                                        </tr>
+                                        <tr class="classNameCell" className="zebkit.ui.HostDecorativeViews" name="allClassesItem">
+                                            <td>
+                                               <a href="../classes/zebkit.ui.HostDecorativeViews.html">zebkit.ui.HostDecorativeViews</a>
                                             </td>
                                         </tr>
                                         <tr class="classNameCell" className="zebkit.ui.ImageLabel" name="allClassesItem">
@@ -911,9 +911,9 @@
                                                <a href="../classes/zebkit.ui.StatePan.html">zebkit.ui.StatePan</a>
                                             </td>
                                         </tr>
-                                        <tr class="classNameCell" className="zebkit.ui.StatusBar" name="allClassesItem">
+                                        <tr class="classNameCell" className="zebkit.ui.StatusBarPan" name="allClassesItem">
                                             <td>
-                                               <a href="../classes/zebkit.ui.StatusBar.html">zebkit.ui.StatusBar</a>
+                                               <a href="../classes/zebkit.ui.StatusBarPan.html">zebkit.ui.StatusBarPan</a>
                                             </td>
                                         </tr>
                                         <tr class="classNameCell" className="zebkit.ui.Tabs" name="allClassesItem">
@@ -1270,7 +1270,7 @@ with what is stored in JSON:</li>
 </ul>
 <pre class="code prettyprint"><code>{
   "background": "red",
-  "layout"    : { "@zebkit.layout.BorderLayout": [] },
+  "borderLayout": 0,
   "border"    : { "@zebkit.draw.RoundBorder": [ "black", 2 ] }
 }
 
@@ -1362,6 +1362,25 @@ the given JSON configuration</p>
                 <div class="bd">
                         <br/>
                         <table border="0" style="width:auto;" cellpadding="2">
+                                    <tr style="background:none;">
+                                        <td>
+                                                <strong> <code>private</code> </strong>
+
+
+                                        </td>
+
+                                        <td>
+                                                    <span class="type">
+                                                        &lt;<a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object" class="crosslink external" target="_blank">Object</a> | <a href="../classes/zebkit.DoIt.html" class="crosslink">zebkit.DoIt</a>&gt;
+                                                    </span>
+                                        </td>
+
+                                        <td>
+                                            <b>
+                                                <a class="name" href="#methods_$buildClass">$buildClass (classname, args, props)</a>
+                                            </b>
+                                        </td>
+                                    </tr>
                                     <tr style="background:none;">
                                         <td>
                                                     <strong> public </strong>
@@ -1516,6 +1535,72 @@ the given JSON configuration</p>
 
 
                 <table>
+                            <tr>
+                                <td><a name="methods_$buildClass"></a>
+
+<div class="method item private">
+    <span class="foundat">
+    </span>
+
+        <strong> <code>private</code> </strong>
+
+
+
+                <span class="type">
+                    &lt;<a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object" class="crosslink external" target="_blank">Object</a> | <a href="../classes/zebkit.DoIt.html" class="crosslink">zebkit.DoIt</a>&gt;
+                </span>
+
+    <strong class="name"><code>$buildClass</code> (<code>classname, args, props</code>)</strong>
+
+    <br/>
+
+    <p>Build a class instance.</p>
+
+
+        <br/>
+        <strong>Parameters:</strong>
+        <ul class="params">
+                <li>
+                        <span class="name"><code>classname</code></span>
+                        <strong class="type">
+                            &lt;<a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String" class="crosslink external" target="_blank">String</a>&gt;
+                        </strong>
+                    <p>a class name</p>
+
+                </li>
+                <li>
+                        <span class="name"><code>args</code></span>
+                        <strong class="type">
+                            &lt;<a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array" class="crosslink external" target="_blank">Array</a> | Null | <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object" class="crosslink external" target="_blank">Object</a>&gt;
+                        </strong>
+                    <p>a class constructor arguments</p>
+
+                </li>
+                <li>
+                        <span class="name"><code>props</code></span>
+                        <strong class="type">
+                            &lt;<a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object" class="crosslink external" target="_blank">Object</a>&gt;
+                        </strong>
+                    <p>properties to be applied to class instance</p>
+
+                </li>
+        </ul>
+
+            <br/>
+            <div class="returns">
+                <strong>
+                    Returns:
+                </strong>
+                <span class="type">
+                        &lt;<a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object" class="crosslink external" target="_blank">Object</a> | <a href="../classes/zebkit.DoIt.html" class="crosslink">zebkit.DoIt</a>&gt;
+                </span>
+                
+            </div>
+
+
+</div>
+                                </td>
+                            </tr>
                             <tr>
                                 <td><a name="methods_addClassAliases"></a>
 

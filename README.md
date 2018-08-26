@@ -59,8 +59,8 @@ The latest version of previous generation of zebkit (zebra) can be found as "zeb
 
   ```yaml
   a: 100,
-  b: "%{a}",           
-  c: { class : "Date" },
+  b: "%{a}"         
+  c: { class : "Date" }
   d: "%{../external.json}"  
   ```   
 

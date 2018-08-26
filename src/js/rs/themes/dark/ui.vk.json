@@ -1,11 +1,11 @@
 {
     "HintPan" : {
         "Label" : {
-            "font"   : { "@zebkit.Font" : [ "Arial", "bold",  28] },
+            "font"   : [ "Arial", "bold",  28],
             "color"  : "#2222FF"
         },
 
-        "border"    : { "@zebkit.draw.Border": [ "#CCCCCC", 1, 16 ] },
+        "border"    : { ".border": [ "#CCCCCC", 1, 16 ] },
         "padding"   : 12,
         "background": "white",
         "flowLayout": [ "center", "top"]
@@ -14,7 +14,7 @@
     "VKeyBase" : {
     	"Label" : {
     		"@zebkit.ui.Label": [],
-    		"font": {"@zebkit.Font": ["Arial", "bold", 14] }
+    		"font": ["Arial", "bold", 14]
     	 }
     },
 
@@ -24,12 +24,12 @@
         },
 
         "border" : {
-            "out" : { "@zebkit.draw.Border": [ "white", 1, 6] },
-            "pressed.over" : { "@zebkit.draw.Border" : [ "orange", 1, 6] }
+            "out" : { ".border": [ "white", 1, 6] },
+            "pressed.over" : { ".border" : [ "orange", 1, 6] }
         },
 
         "background" : {
-            "out"  :{ "@zebkit.draw.Gradient" : [ "red", "orange" ] },
+            "out"  :{ ".gradient" : [ "red", "orange" ] },
             "over" :"orange",
             "pressed.over" : "red"
         }
@@ -45,8 +45,8 @@
 
     "VKeys" : {
     	"KeysPopupPan" : {
-    		"border" : { "@zebkit.draw.Border" : [ "orange", 10, 10] },
-    		"layout" : { "@zebkit.layout.GridLayout" : [ 6, 4 ] }
+    		"border" : { ".border" : [ "orange", 10, 10] },
+    		"gridLayout" :  [ 6, 4 ]
     	},
 
         "SmallLabel" : {
@@ -54,7 +54,7 @@
         },
 
         "background" : {
-            "out" : { "@zebkit.draw.Gradient": [  "red", "orange", "horizontal" ] } ,
+            "out" : { ".gradient": [  "red", "orange", "horizontal" ] } ,
             "over" :"red",
             "pressed.over" : "orange"
         }

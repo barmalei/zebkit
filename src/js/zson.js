@@ -80,7 +80,7 @@
  *
  *     {
  *       "background": "red",
- *       "layout"    : { "@zebkit.layout.BorderLayout": [] },
+ *       "borderLayout": 0,
  *       "border"    : { "@zebkit.draw.RoundBorder": [ "black", 2 ] }
  *     }
  *
@@ -407,14 +407,21 @@ var Zson = Class([
             }
         };
 
-        this.$buildClass = function(k, d) {
-            var classname = k.substring(1).trim(),
-                args      = d[k],
-                clz       = null,
+        /**
+         * Build a class instance.
+         * @param  {String} classname a class name
+         * @param  {Array|null|Object} args  a class constructor arguments
+         * @param  {Object} props properties to be applied to class instance
+         * @return {Object|zebkit.DoIt}
+         * @method $buildClass
+         * @private
+         */
+        this.$buildClass = function(classname, args, props) {
+            var clz       = null,
                 busy      = this.$runner.$busy,
                 tasks     = this.$runner.$tasks.length;
 
-            delete d[k]; // delete class name
+            classname = classname.trim();
 
             // '?' means optional class instance.
             if (classname[0] === '?') {
@@ -443,7 +450,7 @@ var Zson = Class([
                 })(clz, args);
             }
 
-            var props = this.buildValue(d);
+            var props = this.buildValue(props);
 
             // let's do optimization to avoid unnecessary overhead
             // equality means nor arguments neither properties has got async call
@@ -608,8 +615,8 @@ var Zson = Class([
          */
         this.buildValue = function(d) {
             if (d === undefined || d === null || d instanceof DoIt ||
-                (typeof d === "number"   || d.constructor === Number)       ||
-                (typeof d === "boolean"  || d.constructor === Boolean)        )
+                (typeof d === "number"   || d.constructor === Number)  ||
+                (typeof d === "boolean"  || d.constructor === Boolean)    )
             {
                 return d;
             }
@@ -628,11 +635,26 @@ var Zson = Class([
 
             var k = null;
 
+            if (d.hasOwnProperty("class") === true) {
+                k = d["class"];
+                delete d["class"];
+
+                if (isString(k) === false) {
+                    var kk = null;
+                    for (kk in k) {
+                        return this.$buildClass(kk, k[kk], d);
+                    }
+                }
+                return this.$buildClass(k, [], d);
+            }
+
             // test whether we have a class definition
             for (k in d) {
                 // handle class definition
                 if (k[0] === '@' && d.hasOwnProperty(k) === true) {
-                    return this.$buildClass(k, d);
+                    var args = d[k];
+                    delete d[k]; // delete class name
+                    return this.$buildClass(k.substring(1), args, d);
                 }
 
                 //!!!!  trust the name of class occurs first what in general
@@ -852,7 +874,16 @@ var Zson = Class([
             }).then(function(json) { // populate JSON content
                 if (isString(json)) {
                     try {
-                        $this.content = $zenv.parseJSON(json);
+                        if ($this.uri !== null && typeof jsyaml !== 'undefined') {
+                            var uri = new URI($this.uri);
+                            if (uri.path !== null && uri.path.toLowerCase().indexOf(".yaml") === uri.path.length - 5) {
+                                $this.content = jsyaml.load(json.trim());
+                            }
+                        }
+
+                        if ($this.content === null) {
+                            $this.content = $zenv.parseJSON(json.trim());
+                        }
                     } catch(e) {
                         throw new Error("JSON format error: " + e);
                     }

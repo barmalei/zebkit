@@ -24,6 +24,6 @@
             "font" : "bold"
         },
 
-        "border": { "@zebkit.draw.Border" : ["gray", 1, 3] }
+        "border": { ".border" : ["gray", 1, 3] }
     }
 }

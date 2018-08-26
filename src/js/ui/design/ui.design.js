@@ -81,42 +81,45 @@ zebkit.package("ui.design", function(pkg, Class) {
              * @type {Number}
              * @default 7
              */
-            this.gap = 7;
+            this.gap = 8;
 
             function contains(x, y, gx, gy, ww, hh) {
                 return gx <= x && (gx + ww) > x && gy <= y && (gy + hh) > y;
             }
 
-            this.paint = function(g,x,y,w,h,d){
-                var cx = Math.floor((w - this.gap)/2),
-                    cy = Math.floor((h - this.gap)/2);
+            this.paint = function(g,x,y,w,h,d) {
+                if (this.color !== null) {
 
-                g.setColor(this.color);
-                g.beginPath();
-                g.rect(x, y, this.gap, this.gap);
-                g.rect(x + cx, y, this.gap, this.gap);
-                g.rect(x, y + cy, this.gap, this.gap);
-                g.rect(x + w - this.gap, y, this.gap, this.gap);
-                g.rect(x, y + h - this.gap, this.gap, this.gap);
-                g.rect(x + cx, y + h - this.gap, this.gap, this.gap);
-                g.rect(x + w - this.gap, y + cy, this.gap, this.gap);
-                g.rect(x + w - this.gap, y + h - this.gap, this.gap, this.gap);
-                g.fill();
+                    var cx = Math.floor((w - this.gap)/2),
+                        cy = Math.floor((h - this.gap)/2);
 
-                g.beginPath();
+                    g.setColor(this.color);
+                    g.beginPath();
+                    g.rect(x, y, this.gap, this.gap);
+                    g.rect(x + cx, y, this.gap, this.gap);
+                    g.rect(x, y + cy, this.gap, this.gap);
+                    g.rect(x + w - this.gap, y, this.gap, this.gap);
+                    g.rect(x, y + h - this.gap, this.gap, this.gap);
+                    g.rect(x + cx, y + h - this.gap, this.gap, this.gap);
+                    g.rect(x + w - this.gap, y + cy, this.gap, this.gap);
+                    g.rect(x + w - this.gap, y + h - this.gap, this.gap, this.gap);
+                    g.fill();
 
-                // very strange thing with rect() method if it called with w or h
-                // without decreasing with gap it is ok, otherwise moving   a
-                // component with the border outside parent component area leaves
-                // traces !
-                //
-                // adding 0.5 (to center line) solves the problem with traces
-                g.rect(x + Math.floor(this.gap / 2) + 0.5,
-                       y + Math.floor(this.gap / 2) + 0.5,
-                       w - this.gap,
-                       h - this.gap );
+                    g.beginPath();
 
-                g.stroke();
+                    // very strange thing with rect() method if it called with w or h
+                    // without decreasing with gap it is ok, otherwise moving   a
+                    // component with the border outside parent component area leaves
+                    // traces !
+                    //
+                    // adding 0.5 (to center line) solves the problem with traces
+                    g.rect(x + Math.floor(this.gap / 2) + 0.5,
+                           y + Math.floor(this.gap / 2) + 0.5,
+                           w - this.gap,
+                           h - this.gap );
+
+                    g.stroke();
+                }
             };
 
             /**
@@ -158,14 +161,92 @@ zebkit.package("ui.design", function(pkg, Class) {
                     return "bottom";
                 }
 
-                var my = Math.floor((target.height - this.gap)/2);
+                var my = Math.floor((target.height - this.gap) / 2);
                 if (contains(x, y, 0, my, this.gap, this.gap)) {
                     return "left";
                 }
 
                 return contains(x, y, target.width - this.gap, my, this.gap, this.gap) ? "right"
-                                                                                       : "none";
+                                                                                       : null;
             };
+        }
+    ]);
+
+    pkg.DesignPan = Class(ui.Panel, [
+        function() {
+            this.statusBar    = new ui.StatusBarPan();
+            this.inspectorPan = new ui.Panel();
+            this.compsPan     = new ui.Panel([
+                function() {
+                    this.shaper = new pkg.ShaperPan();
+                    this.$super();
+
+                    var $this = this;
+                    this.shaper.on("moved", function(t, px, py) {
+                        $this.repaint();
+                    });
+                },
+
+                function catchInput(c) {
+                    return zebkit.instanceOf(c, pkg.ShaperPan) === false;
+                },
+
+                function getPopup(t, x, y) {
+                    var c = this.getComponentAt(x, y);
+                    if (c !== null && c !== this) {
+                        return new ui.Menu([
+                            "Remove ",
+                            "To preferred size",
+                            "-",
+                            "Properties"
+                        ]);
+                    }
+                    return null;
+                },
+
+                function pointerClicked(e) {
+                    var c = this.getComponentAt(e.x, e.y);
+                    if (c !== null && c !== this && zebkit.instanceOf(c.parent, pkg.ShaperPan) === false) {
+                        c = zebkit.layout.getDirectChild(this, c);
+                        this.shaper.setValue(c);
+                        this.shaper.setState("selected");
+                    }
+                },
+
+                function paintOnTop(g) {
+                    if (this.shaper.isSelected()) {
+                        var tx = this.shaper.getValue().x ,
+                            ty = this.shaper.getValue().y;
+
+                        for (var i = 0; i < this.kids.length; i++) {
+                            var kid = this.kids[i];
+
+                            if (this.shaper.getValue() !== kid && kid.x === tx) {
+                                g.setColor("blue");
+                                g.drawLine(tx, ty, tx, kid.y)
+                            }
+                        }
+                    }
+                }
+            ]);
+
+            this.statusBar.add(10, "(x,y) = 1");
+            this.statusBar.add("|");
+            this.statusBar.add(10, "(x,y) = 2");
+            this.statusBar.add("|");
+            this.statusBar.add(10, "(x,y) = 3");
+           // this.statusBar.add(10, new  this.statusBar.clazz.Combo([ "Item 1", "Item 2", "Item 3"]));
+            this.statusBar.addCombo(10, [ "Item 1", "Item 2", "Item 3"]);
+
+            this.$super();
+            this.setBorderLayout();
+            this.add(new ui.SplitPan(this.inspectorPan, this.compsPan));
+            this.add("bottom", this.statusBar);
+
+
+            for(var i = 0; i < arguments.length; i++) {
+                this.compsPan.add(arguments[i]);
+            }
         }
     ]);
 
@@ -198,46 +279,17 @@ zebkit.package("ui.design", function(pkg, Class) {
      * @param {zebkit.ui.Panel} [target] a target UI component whose size and location
      * has to be controlled
      */
-    pkg.ShaperPan = Class(ui.Panel, [
+    pkg.ShaperPan = Class(ui.StatePan, ui.ApplyStateProperties, [
         function(t) {
-            this.border = new this.clazz.ShaperBorderSet({
-                "focuson"  : new pkg.ShaperBorder("blue"),
-                "focusoff" : new pkg.ShaperBorder("lightGray")
-            });
-
-            this.$super(new zebkit.layout.BorderLayout());
+            this.border = new pkg.ShaperBorder();
+            this.$super();
             if (arguments.length > 0) {
-                this.add(t);
+                this.setValue(t);
             }
         },
 
-        function $clazz() {
-            this.ShaperBorderSet = Class(zebkit.draw.ViewSet, [
-                function() {
-                    this.$supera(arguments);
-                    this.activate("focusoff");
-                },
-
-                function $prototype() {
-                    this.detectAt = function(t, x, y) {
-                        if (this.activeView !== null && this.activeView.detectAt !== undefined) {
-                            return this.activeView.detectAt(t, x, y);
-                        } else {
-                            return "none";
-                        }
-                    };
-
-                    this.setBorderColor = function(id, color) {
-                        zebkit.util.validateValue(id, "focusoff", "focuson");
-                        this.views[id].color = color;
-                        return this;
-                    };
-                }
-            ]);
-        },
-
         function $prototype() {
-            this.px = this.py = 0;
+            this.layout = new zebkit.layout.BorderLayout();
 
            /**
             * Indicates if controlled component can be moved
@@ -261,7 +313,7 @@ zebkit.package("ui.design", function(pkg, Class) {
              * @type {Integer}
              * @default 12
              */
-             this.minHeight = 12;
+            this.minHeight = 12;
 
             /**
              * Minimal possible width or controlled component
@@ -271,9 +323,26 @@ zebkit.package("ui.design", function(pkg, Class) {
              */
             this.minWidth = 12;
 
-            this.canHaveFocus = true;
-            this.$state       = null;
-            this.catchInput   = true;
+
+            /**
+             * Resize aspect ratio (width/height). 0 value means no aspect ratio
+             * has been defined.
+             * @attribute aspectRatio
+             * @type {Number}
+             * @default 0
+             */
+            this.aspectRatio = 0; //2/3;
+
+
+            this.$cursorState     = null;
+            this.$dragCursorState = null;
+            this.$px = 0;
+            this.$py = 0;
+            this.$targetParent = null;
+
+            this.catchInput       = true;
+
+            this.canHaveFocus     = true;
 
             this.$detectAt = function(t, x, y) {
                 if (this.border !== null && this.border.detectAt !== undefined) {
@@ -284,12 +353,26 @@ zebkit.package("ui.design", function(pkg, Class) {
             };
 
             this.getCursorType = function (t, x ,y) {
-                var cur = this.$detectAt(t, x, y);
-                if (cur !== null) {
-                    return CURSORS[cur];
+                this.$cursorState = this.$detectAt(t, x, y);
+
+                if (this.$cursorState === null) {
+                    return null
+                } else if (this.$cursorState === "center")  {
+                    if (this.isMoveEnabled === false) {
+                        return null;
+                    }
                 } else {
-                    return null;
+                    if (this.isResizeEnabled === false) {
+                        return null;
+                    }
                 }
+
+                var cur = CURSORS[this.$cursorState];
+                return cur === undefined ? null : cur;
+            };
+
+            this.pointerExited = function() {
+                this.$dragCursorState = this.$cursorState = null;
             };
 
             /**
@@ -315,15 +398,13 @@ zebkit.package("ui.design", function(pkg, Class) {
                         if (this.isResizeEnabled === true && w > minW && h > minH) {
                             this.setSize(w, h);
                         }
-                    } else {
-                        if (this.isMoveEnabled) {
-                            if (x + this.width/2  > 0 &&
-                                y + this.height/2 > 0 &&
-                                x < this.parent.width  - this.width/2  &&
-                                y < this.parent.height - this.height/2    )
-                            {
-                                this.setLocation(x, y);
-                            }
+                    } else if (this.isMoveEnabled) {
+                        if (x + this.width/2  > 0 &&
+                            y + this.height/2 > 0 &&
+                            x < this.parent.width  - this.width/2  &&
+                            y < this.parent.height - this.height/2    )
+                        {
+                            this.setLocation(x, y);
                         }
                     }
                 }
@@ -335,19 +416,14 @@ zebkit.package("ui.design", function(pkg, Class) {
              * @method pointerDragStarted
              */
             this.pointerDragStarted = function(e) {
-                this.$state = null;
-                if (this.isResizeEnabled || this.isMoveEnabled) {
-                    var t = this.$detectAt(this, e.x, e.y);
-                    if ((this.isMoveEnabled   === true || t !== "center") ||
-                        (this.isResizeEnabled === true || t === "center")   )
+                this.$dragCursorState = null;
+                if (this.$cursorState !== null && (this.isResizeEnabled || this.isMoveEnabled)) {
+                    if ((this.isMoveEnabled   && this.$cursorState === "center") ||
+                        (this.isResizeEnabled && this.$cursorState !== "center")   )
                     {
-                        this.$state = { top    : (t === "top"    || t === "topLeft"     || t === "topRight"   ) ? 1 : 0,
-                                        left   : (t === "left"   || t === "topLeft"     || t === "bottomLeft" ) ? 1 : 0,
-                                        right  : (t === "right"  || t === "topRight"    || t === "bottomRight") ? 1 : 0,
-                                        bottom : (t === "bottom" || t === "bottomRight" || t === "bottomLeft" ) ? 1 : 0 };
-
-                        this.px = e.absX;
-                        this.py = e.absY;
+                        this.$px = e.absX;
+                        this.$py = e.absY;
+                        this.$dragCursorState = this.$cursorState;
                     }
                 }
             };
@@ -358,24 +434,32 @@ zebkit.package("ui.design", function(pkg, Class) {
              * @method pointerDragged
              */
             this.pointerDragged = function(e){
-                if (this.$state !== null) {
-                    var dy = (e.absY - this.py),
-                        dx = (e.absX - this.px),
-                        s  = this.$state,
-                        nw = this.width  - dx * s.left + dx * s.right,
-                        nh = this.height - dy * s.top  + dy * s.bottom;
+                if (this.$dragCursorState !== null) {
+                    var dy = (e.absY - this.$py),
+                        dx = (e.absX - this.$px),
+                        s  = this.$dragCursorState;
 
-                    if (nw >= this.minWidth && nh >= this.minHeight) {
-                        this.px = e.absX;
-                        this.py = e.absY;
-                        if ((s.top + s.right + s.bottom + s.left) === 0) {
-                            this.setLocation(this.x + dx, this.y + dy);
-                        } else {
-                            this.setBounds(this.x + dx * s.left, this.y + dy * s.top, nw, nh);
-                     //       this.invalidateLayout();
-                        }
+                    this.$px = e.absX;
+                    this.$py = e.absY;
+
+                    if (s === "center") {
+                        this.setLocation(this.x + dx, this.y + dy);
+                    } else {
+                        var m = { top    : (s === "top"    || s === "topLeft"     || s === "topRight"   ) ? 1 : 0,
+                                  left   : (s === "left"   || s === "topLeft"     || s === "bottomLeft" ) ? 1 : 0,
+                                  right  : (s === "right"  || s === "topRight"    || s === "bottomRight") ? 1 : 0,
+                                  bottom : (s === "bottom" || s === "bottomRight" || s === "bottomLeft" ) ? 1 : 0 },
+                            nh = this.height - dy * m.top  + dy * m.bottom,
+                            nw = this.width  - dx * m.left + dx * m.right;
+
+                        this.setBounds(this.x + m.left * dx, this.y + m.top  * dy, nw, nh);
                     }
                 }
+            };
+
+            this.pointerDragEnded = function(e) {
+                this.$px = this.$py = 0;
+                this.$dragCursorState = null;
             };
 
             /**
@@ -386,48 +470,148 @@ zebkit.package("ui.design", function(pkg, Class) {
              * @method setBorderColor
              * @chainable
              */
-            this.setBorderColor = function (id, color) {
-                this.border.setBorderColor(id, color);
-                this.repaint();
+            this.setBorderColor = function(color) {
+                if (this.border !== null && this.border.color !== color) {
+                    this.border.color = color;
+                    this.repaint();
+                }
                 return this;
             };
 
             /**
-             * Set the border colors.
-             * @param {String} col1 a color the border has to have when the
-             * component doesn't hold focus.
-             * @param {String} [col2] a color the border has to have if the
-             * component is focus owner.
-             * @method setBorderColors
+             * Get a component whose shape is controlled
+             * @return {zebkit.ui.Panel} a controlled component
+             * @method getValue
+             */
+            this.getValue = function() {
+                if (this.kids.length > 0) {
+                    var t = this.byConstraints(null) || this.byConstraints("center");
+                    return t;
+                } else {
+                    return null;
+                }
+            };
+
+            /**
+             * Set the controlled with the shape controller component.
+             * @param {zebkit.ui.Panel} v a component to be controlled
+             * @method setValue
              * @chainable
              */
-            this.setBorderColors = function(col1, col2) {
-                this.setBorderColor("focusoff", col1);
-                if (arguments.length > 1) {
-                    this.setBorderColor("focuson", col2);
+            this.setValue = function(v) {
+                var ov = this.getValue();
+                if (ov !== v) {
+                    var top  = this.getTop(),
+                        left = this.getLeft();
+
+                    if (ov !== null) {
+                        ov.removeMe();
+
+                        // attach the target back to its parent
+                        if (this.$targetParent !== null) {
+                            this.removeMe();
+                            ov.setBounds(this.x + ov.x, this.y + ov.y, ov.width, ov.height);
+                            this.$targetParent.add(ov);
+                        }
+                    }
+
+                    this.$targetParent = null;
+                    if (v !== null) {
+                        if (v.parent !== null) {
+                            // detach the shaper from old parent
+                            if (this.parent !== null && this.parent !== v.parent) {
+                                this.removeMe();
+                            }
+
+                            // save target parent and detach it from it
+                            this.$targetParent = v.parent;
+                            v.removeMe();
+
+                            // add the shaper to the target parent
+                            this.$targetParent.add(this);
+                        }
+
+                        // calculate location and size the shaper requires
+                        // taking in account gaps
+                        if (v.width === 0 || v.height === 0) {
+                            v.toPreferredSize();
+                        }
+
+                        // set shaper bounds
+                        this.setBounds(v.x - left, v.y - top,
+                                       v.width + left + this.getRight(),
+                                       v.height + top + this.getBottom());
+
+                        this.add(v);
+                    }
                 }
                 return this;
             };
+
+            this.isSelected = function() {
+                return this.state === "selected";
+            };
         },
 
-        function insert(i, constr, d) {
-            if (this.kids.length > 0) {
-                this.removeAll();
+        function setSize(w, h) {
+            if (this.aspectRatio !== 0) {
+                w = Math.floor(h * this.aspectRatio);
             }
 
-            var top  = this.getTop(),
-                left = this.getLeft();
+            if (w >= this.minWidth && h >= this.minHeight && (this.width !== w || this.height !== h)) {
+                var pw = this.width,
+                    ph = this.height;
 
-            if (d.width === 0 || d.height === 0) {
-                d.toPreferredSize();
+                this.$super(w, h);
+                this.fire("sized", [ this, (w - pw), (h - ph) ]);
+            }
+            return this;
+        },
+
+        function setLocation(x, y) {
+            if (this.x !== x || this.y !== y) {
+                var px = this.x,
+                    py = this.y;
+
+                this.$super(x, y);
+                this.fire("moved", [ this, (x - px), (y - py) ]);
+            }
+            return this;
+        },
+
+        function setState(s) {
+            var prev = this.state;
+            this.$super(s);
+
+            if (prev !== this.state) {
+                if (this.state === "selected") {
+                    this.fire("selected", [ this, true ]);
+                } else if (prev === "selected") {
+                    this.fire("selected", [ this, false ]);
+                }
             }
 
-            this.setBounds(d.x - left, d.y - top,
-                           d.width + left + this.getRight(),
-                           d.height + top + this.getBottom());
-            this.$super(i, "center", d);
+            return this;
+        },
+
+        function focused() {
+            this.$super();
+            this.setState(this.hasFocus() ? "selected"
+                                          : "unselected" );
+        },
+
+        function kidRemoved(i, kid, ctr) {
+            if (ctr === null || ctr === "center") {
+                this.fire("detached", [this, kid]);
+            }
+        },
+
+        function kidAdded(i, constr, d) {
+            if (constr === null || constr === "center") {
+                this.fire("attached", [ this, d ]);
+            }
         }
-    ]);
+    ]).events("selected", "sized", "moved", "attached", "detached");
 
     /**
      * Special tree model implementation that represents zebkit UI component
@@ -500,5 +684,6 @@ zebkit.package("ui.design", function(pkg, Class) {
                 return item;
             };
         }
-    ]);
-});
+    ])
+
+}, true);

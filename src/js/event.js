@@ -372,7 +372,6 @@ var $NewListener = function() {
  */
 var Listeners = $NewListener();
 
-
 /**
  * Event producer interface. This interface provides number of methods
  * to register, un-register, fire events. It follows on/off notion like
@@ -528,12 +527,20 @@ var EventProducer = Interface([
                 nm = null;  // event name or listener
 
             if (arguments.length === 0) {
-                return this._.remove();
+                if (this._ !== undefined) {
+                    return this._.remove();
+                } else {
+                    return;
+                }
             } else if (arguments.length === 1) {
                 if (isString(arguments[0]) && (arguments[0][0] === '.' || arguments[0][0] === '/' || arguments[0][0] === '#')) {
                     pt = arguments[0];
                 } else {
-                    return this._.remove(arguments[0]);
+                    if (this._ !== undefined) {
+                        return this._.remove(arguments[0]);
+                    } else {
+                        return;
+                    }
                 }
             } else if (arguments.length === 2) {
                 if (isString(arguments[1])) { // detect path
@@ -612,6 +619,7 @@ var EventProducer = Interface([
     }
 ]);
 
+// class instance method
 classTemplateProto.isEventFired = function(name) {
     if (this.clazz.Listeners === undefined) {
         return false;
@@ -648,6 +656,7 @@ classTemplateFields.events = function() {
     var args = Array.prototype.slice.call(arguments),
         c    = args.length;
 
+    // collect events the class already declared
     if (this.Listeners !== undefined) {
         for (var i = 0; i < this.Listeners.eventNames.length; i++) {
             var en = this.Listeners.eventNames[i];

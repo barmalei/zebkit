@@ -47,11 +47,6 @@ function $ProxyMethod(name, f, clazz) {
  * @method  $cache
  */
 function $cache(key) {
-    // don't cache global objects
-    if ($global.hasOwnProperty(key)) {
-        return $global[key];
-    }
-
     if ($cachedO.hasOwnProperty(key) === true) {
         // read cached entry
         var e = $cachedO[key];
@@ -64,6 +59,11 @@ function $cache(key) {
             $cachedO[pn].i--;
         }
         return e.o;
+    }
+
+    // don't cache global objects
+    if ($global.hasOwnProperty(key)) {
+        return $global[key];
     }
 
     var ctx = $global, i = 0, j = 0;
@@ -642,7 +642,7 @@ function $mixing(clazz, methods) {
     }
 }
 
-
+// Class methods to be populated in all classes
 var classTemplateFields = {
     /**
      * Makes the class hashable. Hashable class instances are automatically
@@ -682,12 +682,13 @@ var classTemplateFields = {
      * @param {zebkit.Interface} [interfaces]*  number of interfaces the class has to implement.
      * @param {Array} methods set of methods the given class has to be extended.
      * @method extend
-     * @for  zebkit.Class
+     * @chainable
+     * @for zebkit.Class
      */
     // add extend method later to avoid the method be inherited as a class static field
     extend : function() {
-        var methods    = arguments[arguments.length - 1],
-            hasMethod  = Array.isArray(methods);
+        var methods   = arguments[arguments.length - 1],
+            hasMethod = Array.isArray(methods);
 
         // inject class
         if (hasMethod && this.$isExtended !== true) {
@@ -738,11 +739,13 @@ var classTemplateFields = {
             $cpMethods(I.prototype, this.prototype, this);
             this.$parents[I.$hash$] = I;
         }
+
+        return this;
     },
 
     /**
      * Tests if the class inherits the given class or interface.
-     * @param  {zebkit.Class | zebkit.Interface}  clazz a class or interface.
+     * @param  {zebkit.Class | zebkit.Interface} clazz a class or interface.
      * @return {Boolean} true if the class or interface is inherited with
      * the class.
      * @method  isInherit
@@ -764,6 +767,30 @@ var classTemplateFields = {
             }
         }
         return false;
+    },
+
+    /**
+     * Create an instance of the class
+     * @param  {Object} [arguments]* arguments to be passed to the class constructor
+     * @return {Object} an instance of the class.
+     * @method newInstance
+     * @for  zebkit.Class
+     */
+    newInstance : function() {
+        return arguments.length === 0 ? newInstance(this)
+                                      : newInstance(this, arguments);
+    },
+
+    /**
+     * Create an instance of the class
+     * @param  {Array} args an arguments array
+     * @return {Object} an instance of the class.
+     * @method newInstancea
+     * @for  zebkit.Class
+     */
+    newInstancea : function(args) {
+        return arguments.length === 0 ? newInstance(this)
+                                      : newInstance(this, args);
     }
 };
 
@@ -1093,7 +1120,7 @@ var Class = $make_template(null, function() {
 
     /**
      *  Internal attribute that caches properties setter references.
-     *  @attribute $propertyInfo
+     *  @attribute $propertySetterInfo
      *  @type {Object}
      *  @private
      *  @for zebkit.Class
@@ -1102,7 +1129,11 @@ var Class = $make_template(null, function() {
 
     // prepare fields that caches the class properties. existence of the property
     // force getPropertySetter method to cache the method
-    classTemplate.$propertyInfo = {};
+    classTemplate.$propertySetterInfo = {};
+
+
+    classTemplate.$propertyGetterInfo = {};
+
 
     /**
      *  Reference to a parent class
@@ -1223,16 +1254,6 @@ Class.forName = function(name) {
     return $cache(name);
 };
 
-/**
- * Create an instance of the class
- * @param  {Object} [arguments]* arguments to be passed to the class constructor
- * @return {Object} an instance of the class.
- * @method newInstance
- * @for  zebkit.Class
- */
-Class.newInstance = function() {
-    return newInstance(this, arguments);
-};
 
 /**
  * Test if the given object is instance of the specified class or interface. It is preferable
@@ -1251,7 +1272,7 @@ function instanceOf(obj, clazz) {
         } else if (obj.clazz === undefined) {
             return (obj instanceof clazz);
         } else {
-            return obj.clazz !== undefined && obj.clazz !== null &&
+            return obj.clazz !== null &&
                    (obj.clazz === clazz ||
                     obj.clazz.$parents[clazz.$hash$] !== undefined);
         }

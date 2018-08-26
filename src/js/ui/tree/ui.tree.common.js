@@ -212,7 +212,7 @@ zebkit.package("ui.tree", function(pkg, Class) {
 
      * @param {Boolean} [nodeState] a default tree nodes state (expanded or collapsed)
      * @extends zebkit.ui.Panel
-     * @uses  zebkit.ui.DecorationViews
+     * @uses  zebkit.ui.HostDecorativeViews
      */
 
      /**
@@ -268,7 +268,7 @@ zebkit.package("ui.tree", function(pkg, Class) {
       * @param  {Boolean} isApplied flag that indicates if the edited value has been
       * applied to the given tree item
       */
-    pkg.BaseTree = Class(ui.Panel, ui.DecorationViews, [
+    pkg.BaseTree = Class(ui.Panel, ui.HostDecorativeViews, [
         function (d, b) {
             if (arguments.length < 2) {
                 b = true;

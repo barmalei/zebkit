@@ -112,9 +112,6 @@ zebkit.package("ui", function(pkg, Class) {
         },
 
         function $install(child) {
-            console.log("$install() : " + child.clazz.$name  + ","  + child.isEventFired("fired"));
-
-
             if (child.isEventFired("fired")) {
                 child.on(this);
             } else if (zebkit.instanceOf(child, pkg.TextField)) {

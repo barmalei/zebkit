@@ -56,8 +56,8 @@
 
 
         "border": {
-            "focuson" :  { "@zebkit.draw.Border" : [ "#66CCFF", 2, 8 ] },
-            "focusoff":  { "@zebkit.draw.Border" : [ "#DDDDDD", 2, 8 ] }
+            "focuson" :  { ".border" : [ "#66CCFF", 2, 8 ] },
+            "focusoff":  { ".border" : [ "#DDDDDD", 2, 8 ] }
         },
 
         "background"    : "rgb(248, 250, 255)",

@@ -764,12 +764,12 @@ zebkit.package("ui.web", function(pkg, Class) {
             this.$super(i, constr, c);
         },
 
-        function kidRemoved(i, c){
+        function kidRemoved(i, c, ctr) {
             delete this.$layers[c.id];
             if (c.id === "root") {
                 this.root = null;
             }
-            this.$super(i, c);
+            this.$super(i, c, ctr);
         }
     ]);
 

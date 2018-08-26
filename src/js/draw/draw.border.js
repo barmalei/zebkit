@@ -223,6 +223,11 @@ zebkit.package("draw", function(pkg, Class) {
                     this.width = this.gap = w;
                     if (arguments.length > 2) {
                         this.radius = r;
+                        if (arguments.length > 3) {
+                            for (var i = 3; i < arguments.length; i++) {
+                                this.setSides(arguments[i]);
+                            }
+                        }
                     }
                 }
             }
@@ -266,7 +271,7 @@ zebkit.package("draw", function(pkg, Class) {
              * @method  setSides
              * @chainable
              */
-            this.setSides = function(top, left, bottom, right) {
+            this.setSides = function() {
                 this.sides = 0;
                 for(var i = 0; i < arguments.length; i++) {
                     if (arguments[i] === "top") {

@@ -241,7 +241,7 @@ zebkit.package("ui.grid", function(pkg, Class) {
      * @param {Integer} [columns] a number of columns
      * @extends zebkit.ui.Panel
      * @uses zebkit.ui.grid.Metrics
-     * @uses zebkit.ui.DecorationViews
+     * @uses zebkit.ui.HostDecorativeViews
      */
 
     /**
@@ -257,7 +257,7 @@ zebkit.package("ui.grid", function(pkg, Class) {
      * @param  {Integer} col a selected column
      * @param {Boolean} status a selection status. true means rows have been selected
      */
-    pkg.Grid = Class(ui.Panel, zebkit.util.Position.Metric, pkg.Metrics, ui.DecorationViews, [
+    pkg.Grid = Class(ui.Panel, zebkit.util.Position.Metric, pkg.Metrics, ui.HostDecorativeViews, [
         function(model) {
             if (arguments.length === 0) {
                 model = new this.clazz.Matrix(5, 5);
@@ -2612,8 +2612,8 @@ zebkit.package("ui.grid", function(pkg, Class) {
             }
         },
 
-        function kidRemoved(index, c) {
-            this.$super(index, c);
+        function kidRemoved(index, c, ctr) {
+            this.$super(index, c, ctr);
             if (c === this.editor) {
                 this.editor = null;
             } else if (c === this.topCaption) {

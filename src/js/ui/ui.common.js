@@ -185,9 +185,15 @@ zebkit.package("ui", function(pkg, Class) {
      * Shortcut to create a UI component by the given description. Depending on the description type
      * the following components are created:
      *
-     *    - **String** zebkit.ui.Label
+     *    - **String**
+     *       - String encoded as "[x] Text" or "[] Text" will considered as checkbox component
+     *       - String encoded as "@(image_path:WxH) Text" will considered as image or image label component
+     *       - All other strings will be considered as label component
      *    - **Array** zebkit.ui.Combobox
      *    - **2D Array** zebkit.ui.grid.Grid
+     *    - **Image** will be embedded with zebkit.ui.ImagePan component
+     *    - **zebkit.ui.View instance** will be embedded with zebkit.ui.ViewPan component
+     *    - **zebkit.ui.Panel instance** will be returned as is
      *
      * @method $component
      * @protected
@@ -200,8 +206,9 @@ zebkit.package("ui", function(pkg, Class) {
 
         if (zebkit.isString(desc)) {
             //  [x] Text
-            //  @(image-path:wxh) Text
-            //  Text
+            //  @(image-path:WxH) label
+            //  %{<json> json-path}  !!! not supported
+            //  { "zebkit.ui.Panel" }
 
             var m   = desc.match(/^(\[[x ]?\])/),
                 txt = null;
@@ -278,17 +285,19 @@ zebkit.package("ui", function(pkg, Class) {
                                                                         : new pkg.ViewPan();
             v.setView(desc);
             return v;
+        } else if (zebkit.instanceOf(desc, pkg.Panel)) {
+            return desc;
+        } else {
+            throw new Error("Invalid component description '" +  desc + "'");
         }
-
-        return desc;
     };
 
     /**
      * Named views holder interface.
-     * @class  zebkit.ui.DecorationViews
-     * @interface  zebkit.ui.DecorationViews
+     * @class  zebkit.ui.HostDecorativeViews
+     * @interface  zebkit.ui.HostDecorativeViews
      */
-    pkg.DecorationViews = zebkit.Interface([
+    pkg.HostDecorativeViews = zebkit.Interface([
         function $prototype() {
             /**
              * Set views set.
@@ -446,7 +455,6 @@ zebkit.package("ui", function(pkg, Class) {
                             }
                         }
                     }).catch(function(e) {
-                        console.log(img);
                         zebkit.dumpError(e);
                         $this.$runner = null;
                         $this.setView(null);
@@ -471,6 +479,7 @@ zebkit.package("ui", function(pkg, Class) {
      * depending on the line component size: if height is greater than width than vertical
      * line will be rendered.
      * @constructor
+     * @param {String} [colors]* line colors
      * @class zebkit.ui.Line
      * @extends zebkit.ui.Panel
      */
@@ -491,6 +500,13 @@ zebkit.package("ui", function(pkg, Class) {
         },
 
         function $prototype() {
+            /**
+             * Line colors set.
+             * @attribute colors
+             * @type {Array}
+             * @readOnly
+             * @default [ "gray" ]
+             */
             this.colors = [ "gray" ];
 
             /**
@@ -502,10 +518,19 @@ zebkit.package("ui", function(pkg, Class) {
             this.lineWidth = 1;
 
             /**
-             * Set line color
+             * Line direction attribute. Can be "vertical" or "horizontal" or null value.
+             * @attribute direction
+             * @type {String}
+             * @default null
+             */
+            this.direction = null;
+
+            /**
+             * Set line color.
              * @param {String} c a color
              * @method  setColor
              * @chainable
+             * @readOnly
              */
             this.setColor = function(c) {
                 this.setColors(c);
@@ -527,8 +552,23 @@ zebkit.package("ui", function(pkg, Class) {
                 return this;
             };
 
+            /**
+             * Set the given line direction.
+             * @param {String} d a line direction. Can be "vertical" or "horizontal" or null value.
+             * null means auto detected direction.
+             * @method setDirection
+             */
+            this.setDirection = function(d) {
+                if (d !== this.direction) {
+                    this.direction = d;
+                    this.vrp();
+                }
+                return this;
+            };
+
             this.paint = function(g) {
-                var isHor  = this.width > this.height,
+                var isHor  = this.direction === null ? this.width > this.height
+                                                     : this.direction === "horizontal",
                     left   = this.getLeft(),
                     right  = this.getRight(),
                     top    = this.getTop(),
@@ -558,16 +598,16 @@ zebkit.package("ui", function(pkg, Class) {
     /**
      * Label UI component class. The label can be used to visualize simple string or multi lines text or
      * the given text render implementation:
-
-            // render simple string
-            var l = new zebkit.ui.Label("Simple string");
-
-            // render multi lines text
-            var l = new zebkit.ui.Label(new zebkit.data.Text("Multiline\ntext"));
-
-            // render password text
-            var l = new zebkit.ui.Label(new zebkit.draw.PasswordText("password"));
-
+     *
+     *       // render simple string
+     *       var l = new zebkit.ui.Label("Simple string");
+     *
+     *       // render multi lines text
+     *       var l = new zebkit.ui.Label(new zebkit.data.Text("Multiline\ntext"));
+     *
+     *       // render password text
+     *       var l = new zebkit.ui.Label(new zebkit.draw.PasswordText("password"));
+     *
      * @param  {String|zebkit.data.TextModel|zebkit.draw.TextRender} [r] a text to be shown with the label.
      * You can pass a simple string or an instance of a text model or an instance of text render as the
      * text value.
@@ -585,7 +625,7 @@ zebkit.package("ui", function(pkg, Class) {
                     this.setView(r.length === 0 || r.indexOf('\n') >= 0 ? new zebkit.draw.TextRender(new zebkit.data.Text(r))
                                                                         : new zebkit.draw.StringRender(r));
                 } else if (r.clazz         !== undefined &&
-                           r.getTextLength !== undefined &&   // a bit faster tnan instanceOf checking if
+                           r.getTextLength !== undefined &&   // a bit faster than instanceOf checking if
                            r.getLines      !== undefined   )  // test if this is an instance of zebkit.data.TextModel
                 {
                     this.setView(new zebkit.draw.TextRender(r));
@@ -697,6 +737,7 @@ zebkit.package("ui", function(pkg, Class) {
         }
     ]);
 
+
     /**
      * Shortcut class to render bold text in Label
      * @param {String|zebkit.draw.TextRender|zebkit.data.TextModel} [t] a text string,
@@ -726,12 +767,11 @@ zebkit.package("ui", function(pkg, Class) {
                 lab = null;
 
             if (arguments.length > 0) {
-                lab = zebkit.instanceOf(txt, pkg.Panel) ? txt : new this.clazz.Label(txt);
-                lab.constraints = "label";
+                lab = zebkit.instanceOf(txt, pkg.Panel) ? txt
+                                                        : new this.clazz.Label(txt);
                 if (arguments.length > 1) {
-                    img = zebkit.instanceOf(path, pkg.ImagePan) ? path : new this.clazz.ImagePan(path);
-                    img.constraints = "image";
-
+                    img = zebkit.instanceOf(path, pkg.ImagePan) ? path
+                                                                : new this.clazz.ImagePan(path);
                     if (arguments.length > 2) {
                         img.setPreferredSize(w, (arguments.length > 3 ? h : w));
                     }
@@ -774,7 +814,7 @@ zebkit.package("ui", function(pkg, Class) {
              * @chainable
              */
             this.setValue = function(c) {
-                var lab = this.byConstraints("label");
+                var lab = this.getLabel();
 
                 if (zebkit.instanceOf(c, pkg.Label)) {
                     var i = -1;
@@ -782,7 +822,6 @@ zebkit.package("ui", function(pkg, Class) {
                         i = this.indexOf(lab);
                     }
 
-                    c.constraints = "label";
                     if (i >= 0) {
                         this.setAt(i, c);
                     }
@@ -801,10 +840,28 @@ zebkit.package("ui", function(pkg, Class) {
              * @chainable
              */
             this.setImage = function(p) {
-                var image = this.byConstraints("image");
+                var image = this.getImagePan();
                 image.setImage(p);
                 image.setVisible(p !== null);
                 return this;
+            };
+
+            /**
+             * Get image panel.
+             * @return  {zebkit.ui.ImagePan} an image panel.
+             * @method getImagePan
+             */
+            this.getImagePan = function() {
+                return this.byPath("/~zebkit.ui.ImagePan");
+            };
+
+            /**
+             * Get label component.
+             * @return  {zebkit.ui.ImagePan} a label component.
+             * @method getLabel
+             */
+            this.getLabel = function(p) {
+                return this.byPath("/~zebkit.ui.Label");
             };
 
             /**
@@ -814,7 +871,7 @@ zebkit.package("ui", function(pkg, Class) {
              * @chainable
              */
             this.setFont = function() {
-                var lab = this.byConstraints("label");
+                var lab = this.getLabel();
                 if (lab !== null) {
                     lab.setFont.apply(lab, arguments);
                 }
@@ -828,7 +885,7 @@ zebkit.package("ui", function(pkg, Class) {
              * @chainable
              */
             this.setColor = function (c) {
-                var lab = this.byConstraints("label");
+                var lab = this.getLabel();
                 if (lab !== null) {
                     lab.setColor(c);
                 }
@@ -841,7 +898,7 @@ zebkit.package("ui", function(pkg, Class) {
              * @method getValue
              */
             this.getValue = function () {
-                var lab = this.byConstraints("label");
+                var lab = this.getLabel();
                 return lab === null ? null : lab.getValue();
             };
 
@@ -859,7 +916,7 @@ zebkit.package("ui", function(pkg, Class) {
              */
             this.setImgAlignment = function(a) {
                 var b   = false,
-                    img = this.byConstraints("image"),
+                    img = this.getImagePan(),
                     i   = this.indexOf(img);
 
                 if (a === "top" || a === "bottom") {
@@ -885,10 +942,10 @@ zebkit.package("ui", function(pkg, Class) {
                 }
 
                 if ((a === "top" || a === "left") && i !== 0 ) {
-                    this.insert("image", 0, this.removeAt(i));
+                    this.insert(null, 0, this.removeAt(i));
                     b = false;
                 } else if ((a === "bottom"  || a === "right") && i !== 1) {
-                    this.add("image", this.removeAt(i));
+                    this.add(null, this.removeAt(i));
                     b = false;
                 }
 
@@ -910,7 +967,7 @@ zebkit.package("ui", function(pkg, Class) {
                 if (arguments.length === 1) {
                     h = w;
                 }
-                this.byConstraints("image").setPreferredSize(w, h);
+                this.getImagePan().setPreferredSize(w, h);
                 return this;
             };
         }

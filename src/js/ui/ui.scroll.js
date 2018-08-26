@@ -487,8 +487,8 @@ zebkit.package("ui", function(pkg, Class) {
             }
         },
 
-        function kidRemoved(index,lw) {
-            this.$super(index, lw);
+        function kidRemoved(index, lw, ctr) {
+            this.$super(index, lw, ctr);
             if (lw === this.thumb) {
                 this.thumb = null;
             } else if (lw === this.incBt) {
@@ -984,8 +984,8 @@ zebkit.package("ui", function(pkg, Class) {
             return this.$super(i, ctr, c);
         },
 
-        function kidRemoved(index, comp){
-            this.$super(index, comp);
+        function kidRemoved(index, comp, ctr){
+            this.$super(index, comp, ctr);
             if (comp === this.scrollObj){
                 this.scrollObj.scrollManager.off(this);
                 this.scrollObj = null;

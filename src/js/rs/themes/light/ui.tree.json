@@ -7,14 +7,14 @@
     "BaseTree" : {
         "lineColor" : null,
         "views": {
-            "collapsedSign"   : { "@zebkit.draw.Picture": [ "%{zebkit.ui.pictures.zebkit}", 61 ,20 ,16, 14, true ] },
-            "expandedSign"    : { "@zebkit.draw.Picture": [ "%{zebkit.ui.pictures.zebkit}", 49 ,34, 16, 14, true ] },
-            "leafSign"        : { "@zebkit.draw.Picture": [ "%{zebkit.ui.pictures.zebkit}", 49 ,20 ,16, 14, true ] },
+            "collapsedSign"   : { ".pic": [ "%{zebkit.ui.pictures.zebkit}", 61 ,20 ,16, 14, true ] },
+            "expandedSign"    : { ".pic": [ "%{zebkit.ui.pictures.zebkit}", 49 ,34, 16, 14, true ] },
+            "leafSign"        : { ".pic": [ "%{zebkit.ui.pictures.zebkit}", 49 ,20 ,16, 14, true ] },
 
             "collapsedToggle"     : { "@zebkit.draw.ArrowView":  [  "right", null, "#66CCFF" ], "width": 10, "height": 14 },
             "expandedToggle"      : { "@zebkit.draw.ArrowView":  [ "bottom", null, "#66CCFF" ],  "width": 14, "height": 10 },
 
-            "focusOnSelect" : [ [ "rgb(228, 244, 252)", { "@zebkit.draw.Border": "rgb(200,180,200)" } ] ]
+            "focusOnSelect" : [ [ "rgb(228, 244, 252)", { ".border": "rgb(200,180,200)" } ] ]
         }
     },
 

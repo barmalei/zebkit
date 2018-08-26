@@ -13,13 +13,13 @@ zebkit.package("ui", function(pkg, Class) {
      *     // define border view that contains views for "state1" and "state2"
      *     p.setBorder({
      *         "state1": new zebkit.draw.Border("red", 1),
-     *         "state1": new zebkit.draw.Border("blue", 2)
+     *         "state2": new zebkit.draw.Border("blue", 2)
      *     });
      *
      *     // define background view that contains views for "state1" and "state2"
      *     p.setBackground({
      *         "state1": "yellow",
-     *         "state1": "green"
+     *         "state2": "green"
      *     });
      *
      *     // set component state
@@ -106,6 +106,11 @@ zebkit.package("ui", function(pkg, Class) {
                         this.repaint();
                     }
                 }
+
+                // TODO: code to support potential future state update listener support
+                if (this._ !== undefined && this._.stateUpdated !== undefined) {
+                    this._.stateUpdated(this, o, n, id);
+                }
             };
 
             /**
@@ -139,8 +144,8 @@ zebkit.package("ui", function(pkg, Class) {
             return this;
         },
 
-        function setBackground(v){
-            if (v !== this.bg){
+        function setBackground(v) {
+            if (v !== this.bg) {
                 this.$super(v);
                 this.syncState(this.state, this.state);
             }
@@ -159,39 +164,20 @@ zebkit.package("ui", function(pkg, Class) {
      * Input events state panel.
      * @class zebkit.ui.EvStatePan
      * @extends zebkit.ui.StatePan
-     * @uses zebkit.ui.event.InputEventState
+     * @uses zebkit.ui.event.TrackInputEventState
      * @uses zebkit.ui.StatePan
      * @constructor
      */
-    pkg.EvStatePan = Class(pkg.StatePan, pkg.event.InputEventState, []);
+    pkg.EvStatePan = Class(pkg.StatePan, pkg.event.TrackInputEventState, []);
 
     /**
-     * Composite focusable interface. the interface adds support for focus marker
-     * view and anchor focus component.
-     * @class  zebkit.ui.FocusableComposite
-     * @interface  zebkit.ui.FocusableComposite
+     * Interface to add focus marker rendering. Focus marker is drawn either over
+     * the component space or around the specified anchor child component.
+     * @class  zebkit.ui.DrawFocusMarker
+     * @interface  zebkit.ui.DrawFocusMarker
      */
-    pkg.FocusableComposite = zebkit.Interface([
+    pkg.DrawFocusMarker = zebkit.Interface([
         function $prototype() {
-            /**
-             * Indicates if the component can have focus
-             * @attribute canHaveFocus
-             * @readOnly
-             * @type {Boolean}
-             * @default true
-             */
-            this.canHaveFocus = true;
-
-            /**
-             * Indicates this composite component can make its children components
-             * event transparent.
-             * @attribute catchInput
-             * @readOnly
-             * @type {Boolean}
-             * @default true
-             */
-            this.catchInput = true;
-
             /**
              * Component that has to be used as focus indicator anchor
              * @attribute focusComponent
@@ -205,14 +191,14 @@ zebkit.package("ui", function(pkg, Class) {
              * Reference to an anchor focus marker component
              * @attribute focusMarkerView
              * @readOnly
-             * @type {zebkit.ui.Panel}
+             * @type {zebkit.draw.View}
              */
             this.focusMarkerView = null;
 
             /**
-             * Focus marker verical and horizontal gaps.
+             * Focus marker vertical and horizontal gaps.
              * @attribute focusMarkerGaps
-             * @type {Number}
+             * @type {Integer}
              * @default 2
              */
             this.focusMarkerGaps = 2;
@@ -220,11 +206,19 @@ zebkit.package("ui", function(pkg, Class) {
             this.paintOnTop = function(g) {
                 var fc = this.focusComponent;
                 if (this.focusMarkerView !== null && fc !== null && this.hasFocus()) {
-                    this.focusMarkerView.paint(g, fc.x - this.focusMarkerGaps,
-                                                  fc.y - this.focusMarkerGaps,
-                                                  this.focusMarkerGaps * 2 + fc.width,
-                                                  this.focusMarkerGaps * 2 + fc.height,
-                                                  this);
+                    if (fc === this) {
+                        this.focusMarkerView.paint(g, this.focusMarkerGaps,
+                                                      this.focusMarkerGaps,
+                                                      fc.width  - this.focusMarkerGaps * 2,
+                                                      fc.height - this.focusMarkerGaps * 2,
+                                                      this);
+                    } else {
+                        this.focusMarkerView.paint(g, fc.x - this.focusMarkerGaps,
+                                                      fc.y - this.focusMarkerGaps,
+                                                      this.focusMarkerGaps * 2 + fc.width,
+                                                      this.focusMarkerGaps * 2 + fc.height,
+                                                      this);
+                    }
                 }
             };
 
@@ -270,7 +264,7 @@ zebkit.package("ui", function(pkg, Class) {
              */
             this.setFocusAnchorComponent = function(c) {
                 if (this.focusComponent !== c) {
-                    if (c !== null && this.kids.indexOf(c) < 0) {
+                    if (c !== this && c !== null && this.kids.indexOf(c) < 0) {
                         throw new Error("Focus component doesn't exist");
                     }
                     this.focusComponent = c;
@@ -285,11 +279,11 @@ zebkit.package("ui", function(pkg, Class) {
             this.repaint();
         },
 
-        function kidRemoved(i,l){
+        function kidRemoved(i, l, ctr){
             if (l === this.focusComponent) {
                 this.focusComponent = null;
             }
-            this.$super(i, l);
+            this.$super(i, l, ctr);
         }
     ]);
 });

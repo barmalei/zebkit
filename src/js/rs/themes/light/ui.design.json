@@ -1,0 +1,10 @@
+{
+    "ShaperPan" : {
+        "padding": 0,
+        "border" : {  "@ * zebkit.ui.design.ShaperBorder": "blue" },
+        "stateProperties" : {
+            "selected" : { "borderColor" : "blue" },
+            "*"        : { "borderColor" : null }
+        }
+    }
+}

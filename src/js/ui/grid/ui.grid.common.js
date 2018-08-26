@@ -569,7 +569,7 @@ zebkit.package("ui.grid", function(pkg, Class) {
              * @param  {zebkit.ui.event.PointerEvent} e a pointer event
              * @method pointerDragStarted
              */
-            this.pointerDragStarted = function(e){
+            this.pointerDragStarted = function(e) {
                 if (this.metrics !== null &&
                     this.isResizable      &&
                     this.metrics.isUsePsMetric === false)
@@ -690,7 +690,7 @@ zebkit.package("ui.grid", function(pkg, Class) {
              * @return {Integer}  a row or column
              * @method calcRowColAt
              */
-            this.getCaptionAt = function (x,y,f){
+            this.getCaptionAt = function(x,y,f) {
                 if (this.metrics !== null &&
                     x >= 0                &&
                     y >= 0                &&

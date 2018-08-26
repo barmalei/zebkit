@@ -23,6 +23,10 @@ function $lsall(fn) {
             if (v.$name === undefined) {
                 v.$name = fn + k;
                 v.$pkg  = getPropertyValue($global, fn.substring(0, fn.length - 1));
+
+                if (v.$pkg === undefined) {
+                    throw new ReferenceError(fn);
+                }
             }
             return $lsall.call(v, v.$name + ".");
         }
@@ -234,21 +238,14 @@ Package.prototype.packages = function(callback, recursively) {
 Package.prototype.byName = function(name) {
     if (this.fullname() === name) {
         return this;
-    }
-
-    var i = name.indexOf('.');
-    if (i > 0) {
-        try {
-            return getPropertyValue(this, name.substring(i + 1), false);
-        } catch(e) {
-            if (e instanceof ReferenceError) {
-                return null;
-            } else {
-                throw e;
-            }
+    } else  {
+        var i = name.indexOf('.');
+        if (i > 0) {
+            var vv = getPropertyValue(this, name.substring(i + 1), false);
+            return vv === undefined ? null : vv;
+        } else {
+            return null;
         }
-    } else {
-        return null;
     }
 };
 

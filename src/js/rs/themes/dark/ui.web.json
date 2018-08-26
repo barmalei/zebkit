@@ -56,7 +56,7 @@
         },
         "padding" : 6,
         "border" : {
-            "@zebkit.draw.Border" : [ "orange", 2, 6 ]
+            ".border" : [ "orange", 2, 6 ]
         }
     },
 
@@ -68,11 +68,11 @@
         },
 
         "border" : {
-            "focuson" :  { "@zebkit.draw.Border" : [ "orange", 2 ] },
-            "focusoff":  { "@zebkit.draw.Border" : [ "orange", 1 ] }
+            "focuson" :  { ".border" : [ "orange", 2 ] },
+            "focusoff":  { ".border" : [ "orange", 1 ] }
         },
 
-        "background"    : { "@zebkit.draw.Gradient" : [ "black", "#444444" ]},
+        "background"    : { ".gradient" : [ "black", "#444444" ]},
         "color"   : "white",
         "style"   : [ "outline", "none"],
         "padding" : [4,4,4,4]

@@ -68,7 +68,7 @@ zebkit.package("ui", function(pkg, Class) {
      *  @access package
      */
 
-    // extend Zson with special method to fill prederfined views set
+    // extend Zson with special method to fill predefined views set
     zebkit.Zson.prototype.views = function(v) {
         for (var k in v) {
             if (v.hasOwnProperty(k)) {
@@ -76,7 +76,6 @@ zebkit.package("ui", function(pkg, Class) {
             }
         }
     };
-
 
     function testCondition(target, cond) {
         for(var k in cond) {
@@ -145,6 +144,38 @@ zebkit.package("ui", function(pkg, Class) {
         }
     };
 
+    zebkit.Zson.prototype.font = function() {
+        return zebkit.$font.apply(this, arguments);
+    };
+
+    zebkit.Zson.prototype.gradient = function() {
+        if (arguments.length === 1) {
+            if (zebkit.instanceOf(arguments[0], zebkit.draw.Gradient)) {
+                return arguments[0];
+            } else {
+                return new zebkit.draw.Gradient(arguments[0]);
+            }
+        } else {
+            return zebkit.draw.Gradient.newInstancea(arguments);
+        }
+    };
+
+    zebkit.Zson.prototype.border = function() {
+        if (arguments.length === 1 && zebkit.instanceOf(arguments[0], zebkit.draw.Border)) {
+            return arguments[0];
+        } else {
+            return zebkit.draw.Border.newInstancea(arguments);
+        }
+    };
+
+    zebkit.Zson.prototype.pic = function() {
+        if (arguments.length === 1 && zebkit.instanceOf(arguments[0], zebkit.draw.Picture)) {
+            return arguments[0];
+        } else {
+            return zebkit.draw.Picture.newInstancea(arguments);
+        }
+    };
+
     // TODO: prototype of zClass, too simple to say something
     pkg.zCanvas = Class([]);
 
@@ -168,17 +199,18 @@ zebkit.package("ui", function(pkg, Class) {
      * @private
      * @param  {zebkit.ui.Panel} c  a component
      * @param  {Object} r a variable to store visible area
-
-            { x: {Integer}, y: {Integer}, width: {Integer}, height: {Integer} }
-
+     *
+     *       { x: {Integer}, y: {Integer}, width: {Integer}, height: {Integer} }
+     *
      * @method $cvp
      * @for zebkit.ui
      */
     pkg.$cvp = function(c, r) {
         if (c.width > 0 && c.height > 0 && c.isVisible === true){
             var p  = c.parent,
-                px = -c.x,
-                py = -c.y;
+                px = -c.x,  // transform parent coordinates to
+                py = -c.y;  // children component coordinate system
+                            // since the result has to be in
 
             if (arguments.length < 2) {
                 r = { x:0, y:0, width : c.width, height : c.height };
@@ -201,14 +233,15 @@ zebkit.package("ui", function(pkg, Class) {
                 r.x = xx;
                 r.y = yy;
 
-                px -= p.x;
-                py -= p.y;
+                px -= p.x;  // transform next parent coordinates to
+                py -= p.y;  // children component coordinate system
                 p = p.parent;
             }
 
             return r.width > 0 && r.height > 0 ? r : null;
+        } else {
+            return null;
         }
-        return null;
     };
 
     /**
@@ -328,8 +361,6 @@ zebkit.package("ui", function(pkg, Class) {
                         // in visual artifacts are left on the screen. The code below tries
                         // to correct cleaning area to take in account the round effect.
                         if (canvas.$context.$scaleRatioIsInt === false) {
-
-
 
                             // Clear canvas scaling and calculate dirty area bounds.
                             // Bounds are calculated taking in account the fact that float
@@ -926,12 +957,13 @@ zebkit.package("ui", function(pkg, Class) {
              * @method paintComponent
              */
             this.paintComponent = function(g) {
-                var ts = g.$states[g.$curState];
+                var ts  = g.$states[g.$curState]; // current state including clip area
+
                 if (ts.width  > 0  &&
                     ts.height > 0  &&
                     this.isVisible === true)
                 {
-                    // !!!
+                    // !!! TODO: WTF
                     // calling setSize in the case of raster layout doesn't
                     // cause hierarchy layout invalidation
                     if (this.isLayoutValid === false) {
@@ -959,6 +991,8 @@ zebkit.package("ui", function(pkg, Class) {
                         }
 
                         g.restore();
+
+                        this.border.paint(g, 0, 0, this.width, this.height, this);
                     } else {
                         if (b === true) {
                             this.bg.paint(g, 0, 0, this.width, this.height, this);
@@ -967,10 +1001,10 @@ zebkit.package("ui", function(pkg, Class) {
                         if (this.update !== undefined) {
                             this.update(g);
                         }
-                    }
 
-                    if (this.border !== null) {
-                        this.border.paint(g, 0, 0, this.width, this.height, this);
+                        if (this.border !== null) {
+                            this.border.paint(g, 0, 0, this.width, this.height, this);
+                        }
                     }
 
                     if (this.paint !== undefined) {
@@ -980,39 +1014,94 @@ zebkit.package("ui", function(pkg, Class) {
                             right  = this.getRight();
 
                         if (left > 0 || right > 0 || top > 0 || bottom > 0) {
-                            if (ts.width > 0 && ts.height > 0) {
-                                var x1   = (ts.x > left ? ts.x : left),
-                                    y1   = (ts.y > top  ? ts.y : top),
-                                    cxcw = ts.x + ts.width,
-                                    cych = ts.y + ts.height,
-                                    cright = this.width - right,
-                                    cbottom = this.height - bottom;
+                            var tsxx = ts.x + ts.width,
+                                tsyy = ts.y + ts.height,
+                                cright     = this.width - right,
+                                cbottom    = this.height - bottom,
+                                x1         = (ts.x > left ? ts.x : left), // max
+                                y1         = (ts.y > top  ? ts.y : top),  // max
+                                w1         = (tsxx < cright  ? tsxx : cright)  - x1, // min
+                                h1         = (tsyy < cbottom ? tsyy : cbottom) - y1; // min
 
+                            if (x1 !== ts.x || y1 !== ts.y || w1 !== ts.width || h1 !== ts.height) {
                                 g.save();
-                                g.clipRect(x1, y1, (cxcw < cright  ? cxcw : cright)  - x1,
-                                                   (cych < cbottom ? cych : cbottom) - y1);
+                                g.clipRect(x1, y1, w1, h1);
 
                                 this.paint(g);
-                                g.restore();
+                                if (this.$doNotClipChildComponents === true) {
+                                    g.restore();
+                                    this.paintChildComponents(g, false);
+                                } else {
+                                    this.paintChildComponents(g, false);
+                                    g.restore();
+                                }
+                            } else {
+                                // It has been checked that the optimization works for some components
+                                this.paint(g);
+                                this.paintChildComponents(g, this.$doNotClipChildComponents !== true);
                             }
                         } else {
                             this.paint(g);
+                            this.paintChildComponents(g, this.$doNotClipChildComponents !== true);
+                        }
+                    } else {
+                        this.paintChildComponents(g, this.$doNotClipChildComponents !== true);
+                    }
+
+                    if (this.paintOnTop !== undefined) {
+                        this.paintOnTop(g);
+                    }
+                }
+            };
+
+            /**
+             * Paint child components.
+             * @param  {CanvasRenderingContext2D} g a canvas 2D context
+             * @param {Boolean}  clipChild true if child components have to be clipped with
+             * the parent component paddings.
+             * @method paintChildComponents
+             */
+            this.paintChildComponents = function(g, clipChild) {
+                var ts = g.$states[g.$curState]; // current state including clip area
+
+                if (ts.width > 0 && ts.height > 0 && this.kids.length > 0) {
+                    var shouldClip = false,
+                        tsxx       = ts.x + ts.width,
+                        tsyy       = ts.y + ts.height;;
+
+                    if (clipChild === true) {
+                        var left   = this.getLeft(),
+                            top    = this.getTop(),
+                            bottom = this.getBottom(),
+                            right  = this.getRight();
+
+                        if (left > 0 || right > 0 || top > 0 || bottom > 0) {
+                            var x1         = (ts.x > left ? ts.x : left), // max
+                                y1         = (ts.y > top  ? ts.y : top),  // max
+                                cright     = this.width - right,
+                                cbottom    = this.height - bottom,
+                                w1         = (tsxx < cright  ? tsxx : cright)  - x1, // min
+                                h1         = (tsyy < cbottom ? tsyy : cbottom) - y1; // min
+
+                            shouldClip = (x1 !== ts.x || y1 !== ts.y || w1 !== ts.width || h1 !== ts.height);
+
+                            if (shouldClip === true) {
+                                g.save();
+                                g.clipRect(x1, y1, w1, h1);
+                            }
                         }
                     }
 
-                    var count = this.kids.length;
-                    for(var i = 0; i < count; i++) {
+                    for(var i = 0; i < this.kids.length; i++) {
                         var kid = this.kids[i];
                         // ignore invisible components and components that declare own 2D context
                         if (kid.isVisible === true && kid.$context === undefined) {
                             // calculate if the given component area has intersection
                             // with current clipping area
-                            var kidXW = kid.x + kid.width,
-                                c_xw  = ts.x + ts.width,
-                                kidYH = kid.y + kid.height,
-                                c_yh  = ts.y + ts.height,
-                                iw = (kidXW < c_xw ? kidXW : c_xw) - (kid.x > ts.x ? kid.x : ts.x),
-                                ih = (kidYH < c_yh ? kidYH : c_yh) - (kid.y > ts.y ? kid.y : ts.y);
+                            var kidxx = kid.x + kid.width,
+                                kidyy = kid.y + kid.height,
+                                iw = (kidxx < tsxx ? kidxx : tsxx) - (kid.x > ts.x ? kid.x : ts.x),
+                                ih = (kidyy < tsyy ? kidyy : tsyy) - (kid.y > ts.y ? kid.y : ts.y);
 
                             if (iw > 0 && ih > 0) {
                                 g.save();
@@ -1024,8 +1113,8 @@ zebkit.package("ui", function(pkg, Class) {
                         }
                     }
 
-                    if (this.paintOnTop !== undefined) {
-                        this.paintOnTop(g);
+                    if (shouldClip === true) {
+                        g.restore();
                     }
                 }
             };
@@ -1093,8 +1182,7 @@ zebkit.package("ui", function(pkg, Class) {
              * @chainable
              */
             this.setBorderLayout = function() {
-                this.setLayout(arguments.length > 0 ? new zebkit.layout.BorderLayout(arguments[0])
-                                                    : new zebkit.layout.BorderLayout());
+                this.setLayout(zebkit.layout.BorderLayout.newInstancea(arguments));
                 return this;
             };
 
@@ -1123,33 +1211,23 @@ zebkit.package("ui", function(pkg, Class) {
              * @chainable
              */
             this.setFlowLayout = function() {
-                if (arguments.length === 0) {
-                    this.setLayout(new zebkit.layout.FlowLayout());
-                } else if (arguments.length === 1) {
-                    this.setLayout(new zebkit.layout.FlowLayout(arguments[0]));
-                } else if (arguments.length === 2) {
-                    this.setLayout(new zebkit.layout.FlowLayout(arguments[0], arguments[1]));
-                } else {
-                    this.setLayout(new zebkit.layout.FlowLayout(arguments[0], arguments[1], arguments[2], arguments[3]));
-                }
-
+                this.setLayout(zebkit.layout.FlowLayout.newInstancea(arguments));
                 return this;
             };
 
             /**
-             * Set stack layout shortcut mathod
+             * Set stack layout shortcut method
              * @param {Integer} [gap] a gap
              * @method setStackLayout
              * @chainable
              */
             this.setStackLayout = function() {
-                this.setLayout(arguments.length > 0 ? new zebkit.layout.StackLayout(arguments[0])
-                                                    : new zebkit.layout.StackLayout());
+                this.setLayout(zebkit.layout.StackLayout.newInstancea(arguments));
                 return this;
             };
 
             /**
-             * Set list layout shortcut mathod
+             * Set list layout shortcut method
              * @param {String} [ax] horizontal list item alignment:
              *
              *    "left"
@@ -1162,46 +1240,36 @@ zebkit.package("ui", function(pkg, Class) {
              * @chainable
              */
             this.setListLayout = function() {
-                if (arguments.length === 0) {
-                    this.setLayout(new zebkit.layout.ListLayout());
-                } else if (arguments.length === 1) {
-                    this.setLayout(new zebkit.layout.ListLayout(arguments[0]));
-                } else if (arguments.length === 2) {
-                    this.setLayout(new zebkit.layout.ListLayout(arguments[0], arguments[1]));
-                }
+                this.setLayout(zebkit.layout.ListLayout.newInstancea(arguments));
                 return this;
             };
 
             /**
-             * Set raster layout shortcut mathod
+             * Set raster layout shortcut method
              * @param {Boolean} [usePsSize] flag to add extra rule to set components size to its preferred
              * sizes.
              * @method setRasterLayout
              * @chainable
              */
             this.setRasterLayout = function() {
-                if (arguments.length === 0) {
-                    this.setLayout(new zebkit.layout.RasterLayout());
-                } else if (arguments.length === 1) {
-                    this.setLayout(new zebkit.layout.RasterLayout(arguments[0]));
-                }
+                this.setLayout(zebkit.layout.RasterLayout.newInstancea(arguments));
                 return this;
             };
 
             /**
-             * Shortcut method to register the specific to the concrete component
-             * events listener. For instance "zebkit.ui.Button" component fires event
-             * when it is pressed:
-
-            var b = new zebkit.ui.Button("Test");
-            b.on(function() {
-                // button has been pressed
-            });
-
+             * Set raster layout shortcut method
+             * sizes.
+             * @method setGrisLayout
+             * @chainable
+             */
+            this.setGridLayout = function() {
+                this.setLayout(zebkit.layout.GridLayout.newInstancea(arguments));
+                return this;
+            };
 
             /**
              * Load content of the panel UI components from the specified JSON file.
-             * @param  {String|Object} JSON URL, JSON string or JS object tthat describes UI
+             * @param  {String|Object} JSON URL, JSON string or JS object that describes UI
              * to be loaded into the panel
              * @return {zebkit.DoIt} a runner to track JSON loading
              * @method load
@@ -1328,9 +1396,10 @@ zebkit.package("ui", function(pkg, Class) {
              * The method is implemented to be aware about a children component removal.
              * @param  {Integer} i an index of a removed component
              * @param  {zebkit.ui.Panel} l a removed children component
+             * @param  {Object} ctr a constraints the kid component had
              * @method kidRemoved
              */
-            this.kidRemoved = function(i,l){
+            this.kidRemoved = function(i, l, ctr){
                 COMP_EVENT.source = this;
                 COMP_EVENT.index  = i;
                 COMP_EVENT.kid    = l;
@@ -1903,7 +1972,11 @@ zebkit.package("ui", function(pkg, Class) {
                 this.properties(this.clazz);
 
                 if (arguments.length > 0) {
-                    if (l.constructor === Object) {  // TODO: not 100% method to detetect "{}" dictionary
+                    if (l === undefined || l === null) {
+                        throw new Error("Undefined arguments. Properties set (Object) or layout manager instance is expected as Panel constructor input");
+                    }
+
+                    if (l.constructor === Object) {  // TODO: not 100% method to detect "{}" dictionary
                         this.properties(l);
                     } else {
                         this.setLayout(l);

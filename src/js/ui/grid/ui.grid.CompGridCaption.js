@@ -165,11 +165,11 @@ zebkit.package("ui.grid", function(pkg, Class) {
                     }
                 },
 
-                function kidRemoved(index, kid) {
+                function kidRemoved(index, kid, ctr) {
                     if (kid.isEventFired()) {
                         kid.off(this);
                     }
-                    this.$super(index, kid);
+                    this.$super(index, kid, ctr);
                 },
 
                 function kidAdded(index, constr, kid) {

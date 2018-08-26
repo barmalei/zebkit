@@ -46,7 +46,7 @@ zebkit.package("ui", function(pkg, Class) {
      *     "right"
      *
      * @class zebkit.ui.Tabs
-     * @uses  zebkit.ui.DecorationViews
+     * @uses  zebkit.ui.HostDecorativeViews
      * @uses  zebkit.EventProducer
      * @constructor
      * @extends zebkit.ui.Panel
@@ -63,7 +63,7 @@ zebkit.package("ui", function(pkg, Class) {
      * @param {zebkit.ui.Tabs} src a tabs component that triggers the event
      * @param {Integer} selectedIndex a tab page index that has been selected
      */
-    pkg.Tabs = Class(pkg.Panel, pkg.DecorationViews, [
+    pkg.Tabs = Class(pkg.Panel, pkg.HostDecorativeViews, [
         function(o) {
             /**
              * Selected tab page index
@@ -136,8 +136,8 @@ zebkit.package("ui", function(pkg, Class) {
 
                     r2.setColor(this.clazz.fontColor);
                     r1.setColor(this.clazz.selectedFontColor);
-                    r2.setFont (this.clazz.font);
-                    r1.setFont (this.clazz.selectedFont);
+                    r2.setFont (zebkit.$font(this.clazz.font));
+                    r1.setFont (zebkit.$font(this.clazz.selectedFont));
 
                     this.getCaptionPan().setView(
                         new zebkit.draw.ViewSet(
@@ -149,7 +149,7 @@ zebkit.package("ui", function(pkg, Class) {
                                 function setFont(id, f) {
                                     var v = this.views[id];
                                     if (v) {
-                                        v.setFont(f);
+                                        v.setFont(zebkit.$font(f));
                                         this.recalc();
                                     }
                                     return this;
@@ -272,7 +272,7 @@ zebkit.package("ui", function(pkg, Class) {
                             this.setFont(true, b);
                             this.setFont(false, b);
                         } else {
-                            this.getCaptionPan().view.setFont(this.$toId(b), f);
+                            this.getCaptionPan().view.setFont(this.$toId(b), zebkit.$font(f));
                             this.vrp();
                         }
                         return this;

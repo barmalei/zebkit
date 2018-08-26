@@ -755,12 +755,12 @@ zebkit.package("ui", function(pkg, Class) {
             this.$getSuper("insert").call(this, this.kids.length, null, c);
         },
 
-        function kidRemoved(i, c) {
+        function kidRemoved(i, c, ctr) {
             if (c.$$isDecorative !== undefined) {
                 delete c.$$isDecorative;
             }
             this.setMenuAt(i, null);
-            this.$super(i, c);
+            this.$super(i, c, ctr);
         },
 
         function isItemSelectable(i) {

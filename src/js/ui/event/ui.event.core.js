@@ -512,8 +512,8 @@ zebkit.package("ui.event", function(pkg, Class) {
                 // TODO: not stable concept. the idea to suppress event
                 // distribution to global listeners (managers) and child
                 // components
-                if (e.source.suppressEvent !== undefined &&
-                    e.source.suppressEvent(e) === true)
+                if (e.source.$suppressEvent !== undefined &&
+                    e.source.$suppressEvent(e) === true)
                 {
                     return true;
                 }
@@ -526,7 +526,7 @@ zebkit.package("ui.event", function(pkg, Class) {
                     }
 
                     // call parents listeners
-                    for(var t = e.source.parent; t !== null; t = t.parent){
+                    for(var t = e.source.parent; t !== null && t !== undefined; t = t.parent) {
                         if (t[childEvent] !== undefined) {
                             t[childEvent].call(t, e);
                         }
@@ -621,7 +621,7 @@ zebkit.package("ui.event", function(pkg, Class) {
      *
      *     // let's track the panel input events state and update
      *     // the component background view depending the state
-     *     pan.extend(zebkit.ui.event.InputEventState, [
+     *     pan.extend(zebkit.ui.event.TrackInputEventState, [
      *         function stateUpdate(o, n) {
      *             if (n === "over") {
      *                 this.setBackround("orange");
@@ -634,8 +634,8 @@ zebkit.package("ui.event", function(pkg, Class) {
      *     ]);
      *
      *
-     * @class zebkit.ui.event.InputEventState
-     * @interface zebkit.ui.event.InputEventState
+     * @class zebkit.ui.event.TrackInputEventState
+     * @interface zebkit.ui.event.TrackInputEventState
      */
 
     var OVER         = "over",
@@ -643,7 +643,7 @@ zebkit.package("ui.event", function(pkg, Class) {
         OUT          = "out",
         PRESSED_OUT  = "pressed.out";
 
-    pkg.InputEventState = zebkit.Interface([
+    pkg.TrackInputEventState = zebkit.Interface([
         function $prototype() {
             this.state = OUT;
             this.$isIn = false;

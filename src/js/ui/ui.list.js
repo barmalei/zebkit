@@ -11,7 +11,7 @@ zebkit.package("ui", function(pkg, Class) {
      * pointer cursor moving
      * @extends zebkit.ui.Panel
      * @uses zebkit.util.Position.Metric
-     * @uses zebkit.ui.DecorationViews
+     * @uses zebkit.ui.HostDecorativeViews
      */
 
     /**
@@ -25,7 +25,7 @@ zebkit.package("ui", function(pkg, Class) {
      * @param {zebkit.ui.BaseList} src a list that triggers the event
      * @param {Integer|Object} prev a previous selected index, return null if the selected item has been re-selected
      */
-    pkg.BaseList = Class(pkg.Panel, zebkit.util.Position.Metric, pkg.DecorationViews, [
+    pkg.BaseList = Class(pkg.Panel, zebkit.util.Position.Metric, pkg.HostDecorativeViews, [
         function (m, b) {
             if (arguments.length === 0) {
                 m = [];
@@ -582,7 +582,7 @@ zebkit.package("ui", function(pkg, Class) {
              * @chainable
              */
             this.setModel = function (m){
-                if (m !== this.model){
+                if (m !== this.model) {
                     if (m !== null && Array.isArray(m)) {
                         m = new zebkit.data.ListModel(m);
                     }
@@ -721,44 +721,44 @@ zebkit.package("ui", function(pkg, Class) {
      * is customized by defining a view provider.
      *
      * The general use case:
-
-            // create list component that contains three item
-            var list = new zebkit.ui.List([
-                "Item 1",
-                "Item 2",
-                "Item 3"
-            ]);
-
-            ...
-            // add new item
-            list.model.add("Item 4");
-
-            ...
-            // remove first item
-            list.model.removeAt(0);
-
-
+     *
+     *       // create list component that contains three item
+     *       var list = new zebkit.ui.List([
+     *           "Item 1",
+     *           "Item 2",
+     *           "Item 3"
+     *       ]);
+     *
+     *       ...
+     *       // add new item
+     *       list.model.add("Item 4");
+     *
+     *       ...
+     *       // remove first item
+     *       list.model.removeAt(0);
+     *
+     *
      * To customize list items views you can redefine item view provider as following:
-
-            // suppose every model item is an array that contains two elements,
-            // first element points to the item icon and the second element defines
-            // the list item text
-            var list = new zebkit.ui.List([
-                [ "icon1.gif", "Caption 1" ],
-                [ "icon2.gif", "Caption 1" ],
-                [ "icon3.gif", "Caption 1" ]
-            ]);
-
-            // define new list item views provider that represents every
-            // list model item as icon with a caption
-            list.setViewProvider(new zebkit.ui.List.ViewProvider([
-                function getView(target, i, value) {
-                    var caption = value[1];
-                    var icon    = value[0];
-                    return new zebkit.ui.CompRender(new zebkit.ui.ImageLabel(caption, icon));
-                }
-            ]));
-
+     *
+     *       // suppose every model item is an array that contains two elements,
+     *       // first element points to the item icon and the second element defines
+     *       // the list item text
+     *       var list = new zebkit.ui.List([
+     *           [ "icon1.gif", "Caption 1" ],
+     *           [ "icon2.gif", "Caption 1" ],
+     *           [ "icon3.gif", "Caption 1" ]
+     *       ]);
+     *
+     *       // define new list item views provider that represents every
+     *       // list model item as icon with a caption
+     *       list.setViewProvider(new zebkit.ui.List.ViewProvider([
+     *           function getView(target, i, value) {
+     *               var caption = value[1];
+     *               var icon    = value[0];
+     *               return new zebkit.ui.CompRender(new zebkit.ui.ImageLabel(caption, icon));
+     *           }
+     *       ]));
+     *
      * @class  zebkit.ui.List
      * @extends zebkit.ui.BaseList
      * @constructor
@@ -838,7 +838,6 @@ zebkit.package("ui", function(pkg, Class) {
                     }
                     return this.$super(t, i, v);
                 }
-
             ]);
 
             /**
@@ -914,6 +913,16 @@ zebkit.package("ui", function(pkg, Class) {
                 }
             };
 
+            this.setColor = function(c) {
+                this.provider.setColor(c);
+                return this;
+            };
+
+            this.setFont = function(f) {
+                this.provider.setFont(f);
+                return this;
+            };
+
             this.recalc = function(){
                 this.psWidth_ = this.psHeight_ = 0;
                 if (this.model !== null) {
@@ -928,7 +937,7 @@ zebkit.package("ui", function(pkg, Class) {
 
                     var provider = this.provider;
                     if (provider !== null) {
-                        var dg = 2*this.gap;
+                        var dg = 2 * this.gap;
                         for(var i = 0;i < count; i++){
                             var ps = provider.getView(this, i, this.model.get(i)).getPreferredSize();
                             this.heights[i] = ps.height + dg;
@@ -1065,13 +1074,11 @@ zebkit.package("ui", function(pkg, Class) {
      * @class zebkit.ui.CompList
      * @constructor
      * @extends zebkit.ui.BaseList
-     * @param {zebkit.data.ListModel|Array} [model] a list model that should be passed as an instance
-     * of zebkit.data.ListModel or as an array.
      * @param {Boolean} [isComboMode] true if the list navigation has to be triggered by
      * pointer cursor moving
      */
     pkg.CompList = Class(pkg.BaseList, [
-        function (m, b) {
+        function (b) {
             this.model = this;
 
             this.setViewProvider(new zebkit.Dummy([
@@ -1090,6 +1097,33 @@ zebkit.package("ui", function(pkg, Class) {
         function $clazz() {
             this.Label      = Class(pkg.Label, []);
             this.ImageLabel = Class(pkg.ImageLabel, []);
+            this.ScrollableLayout = Class(pkg.ScrollManager, [
+                function(layout, target) {
+                    this.layout = layout;
+                    this.$super(target);
+                },
+
+                function $prototype() {
+                    this.calcPreferredSize = function(t) {
+                        return this.layout.calcPreferredSize(t);
+                    };
+
+                    this.doLayout = function(t){
+                        this.layout.doLayout(t);
+                        for(var i = 0; i < t.kids.length; i++){
+                            var kid = t.kids[i];
+                            if (kid.isVisible === true) {
+                                kid.setLocation(kid.x + this.getSX(),
+                                                kid.y + this.getSY());
+                            }
+                        }
+                    };
+
+                    this.scrollStateUpdated = function(sx,sy,px,py){
+                        this.target.vrp();
+                    };
+                }
+            ]);
         },
 
         function $prototype() {
@@ -1118,7 +1152,8 @@ zebkit.package("ui", function(pkg, Class) {
 
             this.getItemSize = function(i) {
                 return this.kids[i].isVisible === false ? { width:0, height: 0 }
-                                                        : { width:this.kids[i].width, height:this.kids[i].height};
+                                                        : { width:this.kids[i].width,
+                                                            height:this.kids[i].height};
             };
 
             this.recalc = function (){
@@ -1139,7 +1174,7 @@ zebkit.package("ui", function(pkg, Class) {
                        this.model.get(i).isEnabled === true;
             };
 
-            this.catchInput = function (child){
+            this.catchInput = function(child){
                 if (this.isComboMode !== true) {
                     var p = child;
                     while (p !== this) {
@@ -1152,54 +1187,41 @@ zebkit.package("ui", function(pkg, Class) {
                 return true;
             };
 
-            this.setModel = function(m){
-                if (Array.isArray(m)) {
-                    for(var i = 0; i < m.length; i++) {
-                        this.add(m[i]);
-                    }
-                } else {
-                    throw new Error("Invalid comp list model");
-                }
-
-                return this;
+            this.makeComponent = function(e) {
+                return new pkg.Label(e.toString());
             };
         },
 
-        function setPosition(c){
+        function setModel(m) {
+            if (Array.isArray(m)) {
+                for(var i = 0; i < m.length; i++) {
+                    this.add(m[i]);
+                }
+            } else {
+                throw new Error("Model cannot be updated");
+            }
+
+            return this;
+        },
+
+        function elementInserted(target, e, index) {
+            this.insert(index, null, this.makeComponent(e));
+            this.$super(target, e, index);
+        },
+
+        function setPosition(c) {
             if (c !== this.position){
+                this.$super(c);
                 if (zebkit.instanceOf(this.layout, zebkit.util.Position.Metric)) {
                     c.setMetric(this.layout);
                 }
-                this.$super(c);
             }
             return this;
         },
 
         function setLayout(layout){
             if (layout !== this.layout){
-                this.scrollManager = new pkg.ScrollManager(this, [
-                    function $prototype() {
-                        this.calcPreferredSize = function(t) {
-                            return layout.calcPreferredSize(t);
-                        };
-
-                        this.doLayout = function(t){
-                            layout.doLayout(t);
-                            for(var i = 0; i < t.kids.length; i++){
-                                var kid = t.kids[i];
-                                if (kid.isVisible === true) {
-                                    kid.setLocation(kid.x + this.getSX(),
-                                                    kid.y + this.getSY());
-                                }
-                            }
-                        };
-
-                        this.scrollStateUpdated = function(sx,sy,px,py){
-                            this.target.vrp();
-                        };
-                    }
-                ]);
-
+                this.scrollManager = new this.clazz.ScrollableLayout(layout, this);
                 this.$super(this.scrollManager);
                 if (this.position !== null) {
                     this.position.setMetric(zebkit.instanceOf(layout, zebkit.util.Position.Metric) ? layout : this);
@@ -1225,17 +1247,22 @@ zebkit.package("ui", function(pkg, Class) {
             if (i < 0 || i > this.kids.length) {
                 throw new RangeError(i);
             }
-            return this.$super(i, constr, zebkit.instanceOf(e, pkg.Panel) ? e : new this.clazz.Label("" + e));
+
+            return this.$super(i, constr, pkg.$component(e, this));
         },
 
-        function kidAdded(index,constr,e){
-            this.$super(index,constr,e);
-            this.model.fire("elementInserted", [this, e, index]);
+        function kidAdded(index,constr,comp){
+            this.$super(index, constr, comp);
+            if (this.model === this) {
+                this.model.fire("elementInserted", [this, comp, index]);
+            }
         },
 
-        function kidRemoved(index,e) {
-            this.$super(index,e);
-            this.model.fire("elementRemoved", [this, e, index]);
+        function kidRemoved(index, e, xtr) {
+            this.$super(index, e, ctr);
+            if (this.model === this) {
+                this.model.fire("elementRemoved", [this, e, index]);
+            }
         }
     ]).events("elementInserted", "elementRemoved", "elementSet");
 });

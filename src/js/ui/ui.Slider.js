@@ -1152,10 +1152,10 @@ zebkit.package("ui", function(pkg, Class) {
      * @param {String} [o]  a slider orientation ("vertical or "horizontal")
      * @constructor
      * @extends zebkit.ui.Panel
-     * @uses   zebkit.ui.DecorationViews
+     * @uses   zebkit.ui.HostDecorativeViews
      * @uses   zebkit.EvenetProducer
      */
-    pkg.Slider = Class(pkg.Panel, pkg.DecorationViews, [
+    pkg.Slider = Class(pkg.Panel, pkg.HostDecorativeViews, [
         function(o) {
             this.views = {
                 marker: null,

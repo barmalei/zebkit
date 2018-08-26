@@ -17,8 +17,8 @@
             "collapsedToggle"     : { "@zebkit.draw.ArrowView":  [ "right",  null, "orange"], "width":10 , "height":14 },
             "expandedToggle"      : { "@zebkit.draw.ArrowView":  [ "bottom", null, "orange"], "width":14, "height":10  },
 
-            "focusOnSelect"  : { "@zebkit.draw.Border" : [ "orange", 2, 6 ] },
-            "focusOffSelect" : { "@zebkit.draw.Border" : [ "gray", 2, 6 ]   }
+            "focusOnSelect"  : { ".border" : [ "orange", 2, 6 ] },
+            "focusOffSelect" : { ".border" : [ "gray", 2, 6 ]   }
         }
     },
 
@@ -51,9 +51,9 @@
                 },
 
                 "views" :  {
-                    "select"    : { "@zebkit.draw.Border" : ["white", 2, 6 ] },
+                    "select"    : { ".border" : ["white", 2, 6 ] },
                     "topMarker" : null,
-                    "marker"    : [  [ { "@zebkit.draw.Border" : [ null, 0, 6 ] }, { "@zebkit.draw.Gradient" : ["white", "lightGray" ] } ] ]
+                    "marker"    : [  [ { ".border" : [ null, 0, 6 ] }, { ".gradient" : ["white", "lightGray" ] } ] ]
                 }
 
             },

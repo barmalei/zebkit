@@ -346,37 +346,64 @@ Number.isInteger = Number.isInteger || function(value) {
  * @param  {String} path property path.
  * @param  {Boolean} [useGetter] says too try getter method when it exists.
  * By default the parameter is false
- * @return {Object} a property value
+ * @return {Object} a property value, return undefined if property cannot
+ * be found
  * @method  getPropertyValue
  * @for  zebkit
  */
 function getPropertyValue(obj, path, useGetter) {
-    if (arguments.length < 3) {
-        useGetter = false;
-    }
+    // if (arguments.length < 3) {
+    //     useGetter = false;
+    // }
 
-    if (path === undefined || path.trim().length === 0) {
+    path = path.trim();
+    if (path === undefined || path.length === 0) {
         throw new Error("Invalid field path: '" + path + "'");
     }
 
-    var paths = path.trim().split('.');
-    for(var i = 0; i < paths.length; i++) {
-        var p = paths[i], m = null;
-        if (obj !== undefined && obj !== null &&
-            ((useGetter === true && (m = getPropertyGetter(obj, p))) || obj.hasOwnProperty(p)))
-        {
-            if (useGetter === true && m !== null) {
-                obj = m.call(obj);
+    // if (obj === undefined || obj === null) {
+    //     throw new Error("Undefined target object");
+    // }
+
+    var paths = null,
+        m     = null,
+        p     = null;
+
+    if (path.indexOf('.') > 0) {
+        paths = path.split('.');
+
+        for(var i = 0; i < paths.length; i++) {
+            p = paths[i];
+
+            if (obj !== undefined && obj !== null &&
+                ((useGetter === true && (m = getPropertyGetter(obj, p))) || obj.hasOwnProperty(p)))
+            {
+                if (useGetter === true && m !== null) {
+                    obj = m.call(obj);
+                } else {
+                    obj = obj[p];
+                }
             } else {
-                obj = obj[p];
+                return undefined;
             }
+        }
+    } else {
+        if (useGetter === true) {
+            m = getPropertyGetter(obj, path);
+            if (m !== null) {
+                return m.call(obj);
+            }
+        }
+
+        if (obj.hasOwnProperty(path) === true) {
+            obj = obj[path];
         } else {
-            throw new ReferenceError("Property path '" + p + "' cannot be resolved");
+            return undefined;
         }
     }
 
     // detect object value factory
-    if (obj !== null && obj !== undefined && typeof obj.$new === 'function') {
+    if (obj !== null && obj !== undefined && obj.$new !== undefined) {
         return obj.$new();
     } else {
         return obj;
@@ -395,7 +422,7 @@ function getPropertyValue(obj, path, useGetter) {
  * @for zebkit
  */
 function getPropertySetter(obj, name) {
-    var pi = obj.constructor.$propertyInfo,
+    var pi = obj.constructor.$propertySetterInfo,
         m  = null;
 
     if (pi !== undefined) {
@@ -423,12 +450,28 @@ function getPropertySetter(obj, name) {
  * @for zebkit
  */
 function getPropertyGetter(obj, name) {
-    var suffix = name[0].toUpperCase() + name.substring(1),
+    var pi = obj.constructor.$propertyGetterInfo,
+        m  = null,
+        suffix = null;
+
+    if (pi !== undefined) {
+        if (pi[name] === undefined) {
+            suffix = name[0].toUpperCase() + name.substring(1);
+            m  = obj[ "get" + suffix];
+            if (typeof m !== 'function') {
+                m = obj[ "is" + suffix];
+            }
+            pi[name] = (typeof m  === "function") ? m : null;
+        }
+        return pi[name];
+    } else {
+        suffix = name[0].toUpperCase() + name.substring(1);
         m      = obj[ "get" + suffix];
-    if (typeof m !== 'function') {
-        m = obj[ "is" + suffix];
+        if (typeof m !== 'function') {
+            m = obj[ "is" + suffix];
+        }
+        return (typeof m === 'function') ? m : null;
     }
-    return (typeof m === 'function') ? m : null;
 }
 
 /**

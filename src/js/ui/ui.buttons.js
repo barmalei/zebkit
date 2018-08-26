@@ -2,10 +2,10 @@ zebkit.package("ui", function(pkg, Class) {
     /**
      * Special interface that provides set of method for state components to implement repeatable
      * state.
-     * @class zebkit.ui.ButtonRepeatMix
-     * @interface zebkit.ui.ButtonRepeatMix
+     * @class zebkit.ui.FireEventRepeatedly
+     * @interface zebkit.ui.FireEventRepeatedly
      */
-    pkg.ButtonRepeatMix = zebkit.Interface([  // TODO: rename
+    pkg.FireEventRepeatedly = zebkit.Interface([
         function $prototype() {
             /**
              * Indicate if the button should
@@ -129,8 +129,8 @@ zebkit.package("ui", function(pkg, Class) {
      *  @param {String|zebkit.ui.Panel|zebkit.draw.View} [t] a button label.
      *  The label can be a simple text or an UI component.
      *  @extends zebkit.ui.EvStatePan
-     *  @uses  zebkit.ui.ButtonRepeatMix
-     *  @uses  zebkit.ui.FocusableComposite
+     *  @uses  zebkit.ui.FireEventRepeatedly
+     *  @uses  zebkit.ui.DrawFocusMarker
      */
 
     /**
@@ -148,7 +148,7 @@ zebkit.package("ui", function(pkg, Class) {
      * @param {zebkit.ui.Button} src a button that has been pressed
      *
      */
-    pkg.Button = Class(pkg.EvStatePan, pkg.FocusableComposite, pkg.ButtonRepeatMix, [
+    pkg.Button = Class(pkg.EvStatePan, pkg.DrawFocusMarker, pkg.FireEventRepeatedly, [
         function(t) {
             this.$super();
 
@@ -188,6 +188,9 @@ zebkit.package("ui", function(pkg, Class) {
              * @default true
              */
             this.canHaveFocus = true;
+
+
+            this.catchInput = true;
         }
     ]).events("fired");
 
@@ -359,11 +362,11 @@ zebkit.package("ui", function(pkg, Class) {
      *
      * @class  zebkit.ui.Checkbox
      * @extends zebkit.ui.EvStatePan
-     * @uses zebkit.ui.FocusableComposite
+     * @uses zebkit.ui.DrawFocusMarker
      * @constructor
      * @param {String|zebkit.ui.Panel} [label] a label
      */
-    pkg.Checkbox = Class(pkg.EvStatePan, pkg.FocusableComposite, [
+    pkg.Checkbox = Class(pkg.EvStatePan, pkg.DrawFocusMarker, [
         function (c) {
             if (arguments.length > 0 && c !== null && zebkit.isString(c)) {
                 c = new this.clazz.Label(c);
@@ -412,6 +415,8 @@ zebkit.package("ui", function(pkg, Class) {
             this.value = false;
 
             this.$group = null;
+
+            this.catchInput = true;
 
             /**
              *  Called every time the check box state has been updated
@@ -503,7 +508,7 @@ zebkit.package("ui", function(pkg, Class) {
             this.$super(o, n);
         },
 
-        function kidRemoved(index,c) {
+        function kidRemoved(index, c, ctr) {
             if (this.box === c) {
                 this.box = null;
             }
@@ -835,6 +840,45 @@ zebkit.package("ui", function(pkg, Class) {
         }
     ]).events("fired");
 
+
+    pkg.ApplyStateProperties = zebkit.Interface([
+        function $prototype() {
+            this.stateProperties = null;
+
+            /**
+             * Set properties set for the states
+             * @param {Object} s a states
+             * @method setStateProperties
+             * @chainable
+             */
+            this.setStateProperties = function(s) {
+                this.stateProperties = zebkit.clone(s);
+                this.syncState();
+                this.vrp();
+                return this;
+            };
+        },
+
+        function stateUpdated(o, n) {
+            this.$super(o, n);
+            if (this.stateProperties !== undefined &&
+                this.stateProperties !== null        )
+            {
+                if (this.stateProperties[n] !== undefined &&
+                    this.stateProperties[n] !== null        )
+                {
+                    zebkit.properties(this,
+                                      this.stateProperties[n]);
+                } else if (this.stateProperties["*"] !== undefined &&
+                           this.stateProperties["*"] !== null        )
+                {
+                    zebkit.properties(this,
+                                      this.stateProperties["*"]);
+                }
+            }
+        }
+    ]);
+
     /**
      * Arrow button component.
      * @class zebkit.ui.ArrowButton
@@ -843,7 +887,7 @@ zebkit.package("ui", function(pkg, Class) {
      * the parameter value.
      * @extends zebkit.ui.Button
      */
-    pkg.ArrowButton = Class(pkg.Button, [
+    pkg.ArrowButton = Class(pkg.Button, pkg.ApplyStateProperties, [
         function(direction) {
             this.view = new zebkit.draw.ArrowView();
             this.$super();
@@ -854,8 +898,6 @@ zebkit.package("ui", function(pkg, Class) {
             this.cursorType = pkg.Cursor.HAND;
 
             this.canHaveFocus = false;
-
-            this.statesToProps = null;
 
             /**
              * Set arrow direction. Use one of the following values: "top",
@@ -890,6 +932,7 @@ zebkit.package("ui", function(pkg, Class) {
                     this.view.height = h;
                     this.vrp();
                 }
+
                 return this;
             };
 
@@ -916,30 +959,6 @@ zebkit.package("ui", function(pkg, Class) {
                 }
                 return this;
             };
-
-            /**
-             * Set properties set for the states
-             * @param {Object} s a states
-             * @method setStatesToProps
-             * @chainable
-             */
-            this.setStatesToProps = function(s) {
-                this.statesToProps = zebkit.clone(s);
-                this.syncState();
-                this.vrp();
-                return this;
-            };
-        },
-
-        function stateUpdated(o, n) {
-            this.$super(o, n);
-            if (this.statesToProps    !== undefined &&
-                this.statesToProps    !== null &&
-                this.statesToProps[n] !== undefined &&
-                this.statesToProps[n] !== null         )
-            {
-                zebkit.properties(this, this.statesToProps[n], true);
-            }
         }
     ]);
 });

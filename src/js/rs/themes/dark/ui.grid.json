@@ -13,12 +13,12 @@
         "Checkbox": {
             "inheritProperties" : true,
             "flowLayout": [ "center", "center" ],
-            "border": {"@zebkit.draw.Border":  "blue" }
+            "border": {".border":  "blue" }
         }
     },
 
     "BaseCaption": {
-        "background" : { "@zebkit.draw.Gradient": [ "red", "orange" ] }
+        "background" : { ".gradient": [ "red", "orange" ] }
     },
 
     "CompGridCaption" :{
@@ -49,7 +49,7 @@
 
     "LeftCompGridCaption" :{
         "inheritProperties" : true,
-        "background": { "@zebkit.draw.Gradient" : [ "red", "orange", "horizontal"] }
+        "background": { ".gradient" : [ "red", "orange", "horizontal"] }
     },
 
     "GridCaption" :{
@@ -72,7 +72,7 @@
 
         "CornerPan" : {
             "inheritProperties" : true,
-            "background": { "@zebkit.draw.Gradient": [ "red", "orange", "horizontal"] }
+            "background": { ".gradient": [ "red", "orange", "horizontal"] }
         },
 
         "views" : {

@@ -156,7 +156,7 @@ zebkit.package("draw", function(pkg, Class) {
              * @method setFont
              */
             this.setFont = function(f) {
-                if (zebkit.instanceOf(f, zebkit.Font) === false && f !== null) {
+                if ((f instanceof zebkit.Font) === false && f !== null) {
                     f = zebkit.newInstance(zebkit.Font, arguments);
                 }
 
@@ -287,6 +287,9 @@ zebkit.package("draw", function(pkg, Class) {
                  * @type {zebkit.Font}
                  */
                 this.font = arguments.length > 1 ? font : this.clazz.font;
+                if ((this.font instanceof zebkit.Font) === false) {
+                    this.font = zebkit.$font(this.font);
+                }
 
                 /**
                  * Color to be used to render the target string
@@ -1142,8 +1145,9 @@ zebkit.package("draw", function(pkg, Class) {
             };
         },
 
-        function getLine(r){
-            var buf = [], ln = this.$super(r);
+        function getLine(r) {
+            var buf = [],
+                ln  = this.$super(r);
 
             for(var i = 0;i < ln.length; i++) {
                 buf[i] = this.echo;

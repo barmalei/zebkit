@@ -8,7 +8,7 @@
     "DefEditors" : {
         "TextField": {
             "inheritProperties" : true,
-            "border": {"@zebkit.draw.Border":  "blue" },
+            "border": {".border":  "blue" },
             "background": null
         },
 
@@ -20,12 +20,12 @@
         "Checkbox": {
             "inheritProperties" : true,
             "flowLayout": [ "center", "center" ],
-            "border": { "@zebkit.draw.Border":  "blue" }
+            "border": { ".border":  "blue" }
         }
     },
 
     "BaseCaption": {
-        "background" : { "@zebkit.draw.Gradient" : [ "white", "lightGray" ] }
+        "background" : { ".gradient" : [ "white", "lightGray" ] }
     },
 
     "CompGridCaption" :{
@@ -74,14 +74,14 @@
     "Grid": {
         "CornerPan" : {
             "inheritProperties" : true,
-            "background" : { "@zebkit.draw.Gradient" : [ "white", "lightGray" ] }
+            "background" : { ".gradient" : [ "white", "lightGray" ] }
         },
 
         "views" : {
             "focusOnSelect"  :"#D0EAFF",
             "focusOffSelect" :"#ADC1D6",
             "marker"         : {
-                "@zebkit.draw.Border" : ["red", 2]
+                ".border" : ["red", 2]
             }
         },
 

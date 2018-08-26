@@ -58,9 +58,9 @@
                 "background": null,
                 "padding" : 0,
                 "textDecorations" : [],
-                "font"  : { "@zebkit.Font" : [ "Arial", "bold", "14" ] }
+                "font"  : [ "Arial", "bold", "14" ]
               },
-          
+
             "border": null,
             "background": null,
             "preferredSize" : [32, -1]
@@ -100,7 +100,7 @@
         "views": {
             "offmarker"           : "rgba(234, 243, 119, 0.5)",
             "marker"              : "rgba(234, 243, 119, 0.5)",
-            "notSelectableMarker" : { "@zebkit.draw.Border": "lightGray" }
+            "notSelectableMarker" : { ".border": "lightGray" }
         }
     },
 
@@ -135,7 +135,7 @@
 
         "Link" : {
             "id"      : "nowLink",
-            "font":  { "@zebkit.Font" : ["Arial", 11]},
+            "font":  ["Arial", 11],
             "visible" : false
         },
 
@@ -154,7 +154,7 @@
 
         "MonthsCombo" : {
             "Label": {
-                "font" : { "@zebkit.Font" : [ "Arial", "bold", "14" ] },
+                "font" : [ "Arial", "bold", "14" ],
                 "padding" : 4,
                 "inheritProperties" : true
             },
@@ -179,7 +179,7 @@
 
         "YearField" : {
             "id"    : "yearField",
-            "font" : { "@zebkit.Font" : [ "Arial", "bold", "14" ] },
+            "font" : [ "Arial", "bold", "14" ],
             "editable"   : false,
             "background" : null,
             "cursorView" : null,
@@ -223,7 +223,7 @@
             "inheritProperties" : true
         },
 
-        "border" : { "@zebkit.draw.Border": "gray" },
+        "border" : { ".border": "gray" },
         "format" : "${date}/${month2}/${fullYear}"
     },
 
@@ -266,11 +266,11 @@
 
         "tags" : {
             "startDate" : {
-                "border" : { "@zebkit.draw.Border": [ "gray", 1, 4 ] }
+                "border" : { ".border": [ "gray", 1, 4 ] }
             },
 
             "endDate" : {
-                "border" : { "@zebkit.draw.Border": ["gray", 1, 4 ] }
+                "border" : { ".border": ["gray", 1, 4 ] }
             }
         },
 

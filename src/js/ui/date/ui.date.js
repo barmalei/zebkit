@@ -933,6 +933,7 @@ zebkit.package("ui.date", function(pkg, Class) {
      * @param  {Date} [date] a date to be set
      * @class zebkit.ui.date.Calendar
      * @extends zebkit.ui.Panel
+     * @uses zebkit.ui.FireEventRepeatedly
      * @constructor
      */
 
@@ -1073,7 +1074,7 @@ zebkit.package("ui.date", function(pkg, Class) {
             this.RightArrowButton  = Class(ui.ArrowButton, []);
             this.Link              = Class(ui.Link, []);
 
-            this.DotButton = Class(ui.EvStatePan, ui.ButtonRepeatMix, []).events("fired");
+            this.DotButton = Class(ui.EvStatePan, ui.FireEventRepeatedly, []).events("fired");
 
             /**
              * Combo box component to render and host selectable list of months.

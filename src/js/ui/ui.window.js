@@ -338,8 +338,8 @@ zebkit.package("ui", function(pkg, Class) {
             }
         },
 
-        function kidRemoved(index, lw){
-            this.$getSuper("kidRemoved").call(this, index, lw);
+        function kidRemoved(index, lw, ctr){
+            this.$getSuper("kidRemoved").call(this, index, lw, ctr);
 
             if (this.activeWin === lw) {
                 this.activeWin = null;
@@ -767,6 +767,7 @@ zebkit.package("ui", function(pkg, Class) {
                         kid.off();
                     }
                 }
+
                 this.buttons.removeAll();
 
                 // add new buttons set

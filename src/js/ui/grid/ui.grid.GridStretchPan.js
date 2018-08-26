@@ -21,7 +21,7 @@ zebkit.package("ui.grid", function(pkg, Class) {
      * @extends zebkit.ui.Panel
      */
     pkg.GridStretchPan = Class(ui.Panel, [
-        function (grid){
+        function (grid) {
             this.$super(this);
 
             this.grid = grid;
@@ -119,7 +119,7 @@ zebkit.package("ui.grid", function(pkg, Class) {
                 }
             };
 
-            this.recalcPS = function (){
+            this.recalcPS = function() {
                 var grid = this.grid;
                 if (grid !== null && grid.isVisible === true) {
                     // calculate size excluding padding where
@@ -159,7 +159,7 @@ zebkit.package("ui.grid", function(pkg, Class) {
                                 this.$propW += w;
                             }
 
-                            for(i = 0; i < cols; i++){
+                            for(i = 0; i < cols; i++) {
                                 w = grid.getColWidth(i);
                                 if (w === 0) {
                                     w = grid.getColPSWidth(i);
@@ -204,13 +204,13 @@ zebkit.package("ui.grid", function(pkg, Class) {
             this.$super(index, constr, l);
         },
 
-        function kidRemoved(i,l){
+        function kidRemoved(i, l, ctr){
             this.$propsW = -1;
             if (l.topCaption !== null) {
                 l.topCaption.off(this);
             }
             this.scrollManager = null;
-            this.$super(i, l);
+            this.$super(i, l, ctr);
         },
 
         function invalidate(){

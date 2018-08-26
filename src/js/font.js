@@ -228,4 +228,20 @@ var Font = Class([
     }
 ]);
 
-$export( { "Font" : Font } );
+function $font() {
+    if (arguments.length === 1) {
+        if (instanceOf(arguments[0], Font)) {
+            return arguments[0];
+        } if (Array.isArray(arguments[0])) {
+            return Font.newInstance.apply(Font, arguments[0]);
+        } else {
+            return new Font(arguments[0]);
+        }
+    } else if (arguments.length > 1) {
+        return Font.newInstance.apply(Font, arguments);
+    } else {
+        throw Error("No an argument has been defined");
+    }
+}
+
+$export( { "Font" : Font }, $font );

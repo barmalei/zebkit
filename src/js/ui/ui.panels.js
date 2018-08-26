@@ -251,8 +251,8 @@ zebkit.package("ui", function(pkg, Class) {
             }
         },
 
-        function kidRemoved(index,lw){
-            this.$super(index, lw);
+        function kidRemoved(index, lw, ctr){
+            this.$super(index, lw, ctr);
             if (lw === this.label) {
                 this.label = null;
             } else if (this.content === lw) {
@@ -265,19 +265,19 @@ zebkit.package("ui", function(pkg, Class) {
      * Splitter panel UI component class. The component splits its area horizontally or vertically into two areas.
      * Every area hosts an UI component. A size of the parts can be controlled by pointer cursor dragging. Gripper
      * element is children UI component that can be customized. For instance:
-
-          // create split panel
-          var sp = new zebkit.ui.SplitPan(new zebkit.ui.Label("Left panel"),
-                                          new zebkit.ui.Label("Right panel"));
-
-          // customize gripper background color depending on its state
-          sp.gripper.setBackground(new zebkit.draw.ViewSet({
-               "over" : "yellow"
-               "out" : null,
-               "pressed.over" : "red"
-          }));
-
-
+     *
+     *     // create split panel
+     *     var sp = new zebkit.ui.SplitPan(new zebkit.ui.Label("Left panel"),
+     *                                     new zebkit.ui.Label("Right panel"));
+     *
+     *     // customize gripper background color depending on its state
+     *     sp.gripper.setBackground(new zebkit.draw.ViewSet({
+     *          "over" : "yellow"
+     *          "out" : null,
+     *          "pressed.over" : "red"
+     *     }));
+     *
+     *
      * @param {zebkit.ui.Panel} [first] a first UI component in splitter panel
      * @param {zebkit.ui.Panel} [second] a second UI component in splitter panel
      * @param {String} [o] an orientation of splitter element: "vertical" or "horizontal"
@@ -618,16 +618,14 @@ zebkit.package("ui", function(pkg, Class) {
             }
         },
 
-        function kidRemoved(index,c){
-            this.$super(index, c);
+        function kidRemoved(index, c, ctr){
+            this.$super(index, c, ctr);
             if (c === this.leftComp) {
                 this.leftComp = null;
-            } else {
-                if (c === this.rightComp) {
-                    this.rightComp = null;
-                } else if (c === this.gripper) {
-                    this.gripper = null;
-                }
+            } else if (c === this.rightComp) {
+                this.rightComp = null;
+            } else if (c === this.gripper) {
+                this.gripper = null;
             }
         },
 
@@ -648,15 +646,15 @@ zebkit.package("ui", function(pkg, Class) {
      * Extendable  UI panel class. Implement collapsible panel where
      * a user can hide of show content by pressing special control
      * element:
-
-            // create extendable panel that contains list as its content
-            var ext = zebkit.ui.CollapsiblePan("Title", new zebkit.ui.List([
-                "Item 1",
-                "Item 2",
-                "Item 3"
-            ]));
-
-
+     *
+     *       // create extendable panel that contains list as its content
+     *       var ext = zebkit.ui.CollapsiblePan("Title", new zebkit.ui.List([
+     *           "Item 1",
+     *           "Item 2",
+     *           "Item 3"
+     *       ]));
+     *
+     *
      * @constructor
      * @class zebkit.ui.CollapsiblePan
      * @extends zebkit.ui.Panel
@@ -667,12 +665,12 @@ zebkit.package("ui", function(pkg, Class) {
 
      /**
       * Fired when extender is collapsed or extended
-
-             var ex = new zebkit.ui.CollapsiblePan("Title", pan);
-             ex.on(function (src, isCollapsed) {
-                 ...
-             });
-
+      *
+      *       var ex = new zebkit.ui.CollapsiblePan("Title", pan);
+      *       ex.on(function (src, isCollapsed) {
+      *           ...
+      *       });
+      *
       * @event fired
       * @param {zebkit.ui.CollapsiblePan} src an extender UI component that generates the event
       * @param {Boolean} isCollapsed a state of the extender UI component
@@ -865,22 +863,29 @@ zebkit.package("ui", function(pkg, Class) {
 
     /**
      * Status bar UI component class
-     * @class zebkit.ui.StatusBar
+     * @class zebkit.ui.StatusBarPan
      * @constructor
      * @param {Integer} [gap] a gap between status bar children elements
      * @extends zebkit.ui.Panel
      */
     pkg.StatusBarPan = Class(pkg.Panel, [
         function (gap){
-            if (arguments.length === 0) {
-                gap = 2;
-            }
+            this.$super(new zebkit.layout.PercentLayout("horizontal", (arguments.length === 0 ? 2 : gap)));
+        },
 
-            this.setPadding(gap, 0, 0, 0);
-            this.$super(new zebkit.layout.PercentLayout("horizontal", gap));
+        function $clazz() {
+            this.Label    = Class(pkg.Label, []);
+            this.Line     = Class(pkg.Line,  []);
+
+            this.Combo = Class(pkg.Combo, []);
+            this.Combo.inheritProperties = true;
+
+            this.Checkbox = Class(pkg.Checkbox, []);
         },
 
         function $prototype() {
+            this.borderView = null;
+
             /**
              * Set the specified border to be applied for status bar children components
              * @param {zebkit.draw.View} v a border
@@ -888,20 +893,50 @@ zebkit.package("ui", function(pkg, Class) {
              * @chainable
              */
             this.setBorderView = function(v){
-                if (v != this.borderView){
+                if (v !== this.borderView){
                     this.borderView = v;
-                    for(var i = 0; i < this.kids.length; i++) {
+                    for (var i = 0; i < this.kids.length; i++) {
                         this.kids[i].setBorder(this.borderView);
                     }
                     this.repaint();
                 }
                 return this;
             };
+
+            this.addCombo = function(ctr, data) {
+                if (arguments.length === 1) {
+                    data = ctr;
+                    ctr = null;
+                }
+
+                return this.add(ctr, new this.clazz.Combo(data));
+            };
+
+            this.addCheckbox = function(ctr, data) {
+                if (arguments.length === 1) {
+                    data = ctr;
+                    ctr = null;
+                }
+
+                return this.add(ctr, new this.clazz.Checkbox(data));
+            };
         },
 
-        function insert(i,s,d){
-            d.setBorder(this.borderView);
-            this.$super(i, s, d);
+        function insert(i, s, d) {
+            if (zebkit.isString(d)) {
+                if (d === "|") {
+                    if (s !== null) {
+                        s = { ay: "stretch" };
+                    }
+                    d = new this.clazz.Line();
+                    d.direction   = "vertical";
+                    d.constraints = { ay : "stretch" };
+                } else {
+                    d = new this.clazz.Label(d);
+                }
+            }
+
+            return this.$super(i, s, d.setBorder(this.borderView));
         }
     ]);
 

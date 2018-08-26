@@ -734,7 +734,7 @@ zebkit.package("ui", function(pkg, Class) {
             this.$super(index, s, c);
         },
 
-        function kidRemoved(index,l) {
+        function kidRemoved(index, l, ctr) {
             if (l.isEventFired()) {
                 l.off(this);
             }
@@ -745,7 +745,7 @@ zebkit.package("ui", function(pkg, Class) {
                 this.button = null;
             }
 
-            this.$super(index, l);
+            this.$super(index, l, ctr);
         },
 
         function setVisible(b) {

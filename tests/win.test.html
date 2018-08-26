@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<META http-equiv="X-UA-Compatible" content="IE=9">
+
+		<script src='../build/zebkit.js' type='text/javascript'></script>
+
+		<script type='text/javascript'>
+		    zebkit.require("ui", "layout", function(ui, layout) {
+
+				ui.Panel.extend([
+					function getTooltip(target, x, y) {
+						if (this.tooltip != null) {
+							return this.tooltip;
+						}
+						return null;
+					}
+				]);
+
+				var x = 10, y = 10;
+
+				function makeWin() {
+					var w1 = new ui.Window();
+
+					w1.root.setLayout(new layout.BorderLayout(4));
+
+					var buttons = new ui.Panel();
+					buttons.setLayout(new layout.FlowLayout());
+					var b1 = new ui.Button("mdi");
+					var b2 = new ui.Button("modal");
+					buttons.add(b1);
+					buttons.add(b2);
+
+					w1.setSize(200,200);
+					w1.setLocation(x,y);
+					x += 30;
+					y += 30;
+
+					b1.on(function() {
+						ui.showWindow(c, "mdi", makeWin());
+					});
+
+					b2.on(function() {
+						ui.showWindow(c, "modal", makeWin());
+					});
+
+					w1.root.add("top", buttons);
+					//w1.root.add("center", new ui.ScrollPan(new TextArea()));
+
+					return w1;
+				}
+
+				// create canvas
+			    var c = new ui.zCanvas(400, 300);
+
+				ui.showModalWindow(c, makeWin());
+			    ui.showModalWindow(c, makeWin());
+
+
+			    c.root.setLayout(new layout.FlowLayout());
+			  //  c.root.add(new ui.ImagePan("../samples/images/gripens.jpg"));
+
+			    var ta = new ui.TextArea("Test \n test 2")
+			    c.root.add(ta);
+
+
+			    c.setBackground("rgba(200, 200, 200, 0.2)");
+			    //c.setBackground(null);
+
+
+	 		});
+
+		</script>
+	</head>
+
+	<body bgcolor="#EEEEEE" align="center" style="padding:15px;">
+
+	</body>
+</html>

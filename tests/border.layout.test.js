@@ -145,6 +145,5 @@ zebkit.runTests("BorderLayout test",
         }
 
         tbl(200,200,0,0);
-
     }
 );

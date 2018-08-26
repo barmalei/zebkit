@@ -6,6 +6,8 @@ if (typeof(XMLHttpRequest) === 'undefined') {
 if (typeof(zebkit) === "undefined") {
     require('../build/easyoop.js');
     require('../src/js/misc/tools.js');
+
+    yaml = require('../yaml.js');
 }
 
 zebkit.package("test", function() {
@@ -20,6 +22,10 @@ var assert = zebkit.assert,
 
 zebkit.runTests("util objects bag",
     function test_variables() {
+        //console.dir(yaml);
+        console.log("::: " + yaml.load("a : 10").a);
+
+
         var bag = new Zson();
 
         A = zebkit.Class([
@@ -69,7 +75,6 @@ zebkit.runTests("util objects bag",
         b.then("[]").throw();
         assert(Array.isArray(b.root), true);
 
-        assertException(function() { b.get("ds"); }, "exception 1");
         assertNoException(function() { b.get("?ds"); }, "exception 11");
         assertException(function() { b.then("").throw(); }, "exception 2");
         assertException(function() { b.get(null); }, "exception 3");
@@ -83,7 +88,6 @@ zebkit.runTests("util objects bag",
         assert(b.get("d") === null, true);
         zebkit.assertObjEqual(b.get("b"), {b1:"abc"});
         zebkit.assertObjEqual(b.get("c"), [1,2,3]);
-        assertException(function() { b.get("cc"); });
         zebkit.assert(b.get("b.b1") === "abc", true);
     },
 
@@ -114,7 +118,9 @@ zebkit.runTests("util objects bag",
         zebkit.assertObjEqual(b.get("c"), [1, 2, 3], "4", "test merge 4");
 
 
-        assertException(function() { b.get("cc"); }, "test merge 5");
+        //assertException(function() { b.get("cc"); }, "test merge 5");
+
+
         zebkit.assert(b.get("b.b1"), "abc", "6", "test merge 6");
         zebkit.assert(b.get("b.b2") , 100, "7", "test merge 7");
 
@@ -195,6 +201,9 @@ zebkit.runTests("util objects bag",
         assert(zebkit.instanceOf(c, A), true, "c is ok");
 
         assert(zebkit.instanceOf(a.c, A), true, "a.c is ok");
+
+        //console.log("d = " + d.$new);
+
         assert(zebkit.instanceOf(d, A), true, "d is ok");
 
         assert(bag.get("a") === bag.get("a"), true, "get(a) === get(a)");

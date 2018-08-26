@@ -3353,6 +3353,7 @@ if (typeof(zebkit) === "undefined") {
             assert(a.fire, undefined, "test event 5");
             assert(a.on, undefined, "test event 6");
             assert(a.off, undefined, "test event 7");
+            assert(a.isEventFired("dsd"), false, "test event 71");
 
             var AA = A.events("fired"), aa = new AA();
             assert(AA, A, "test event 8");
@@ -3369,6 +3370,8 @@ if (typeof(zebkit) === "undefined") {
             assert(typeof a.on === 'function', true, "test event 19");
             assert(typeof a.off === 'function', true, "test event 20");
             assert(typeof aa._  === 'undefined', true, "test event 21");
+            assert(aa.isEventFired("fired"), true, "test event 211");
+            assert(aa.isEventFired("fired2"), false, "test event 212");
 
             var t = -1;
             aa.on(function(a) { t = a; });
@@ -3388,6 +3391,8 @@ if (typeof(zebkit) === "undefined") {
                 t = a + 2;
                 c++;
             });
+
+            assert(aaa.isEventFired("test"), true, "test event 231");
 
             aaa.fire("fired", [3]);
             assert(t, 5, "test event 24");
@@ -3544,7 +3549,6 @@ if (typeof(zebkit) === "undefined") {
             assert(r.complex.c, 10, "test_properties 44");
             assert(typeof r.setC === 'function', true, "test_properties 5");
 
-
             var r = zebkit.properties(target, props);
             assert(r.a, 70, "test_properties 6");
             assert(r.b, 90, "test_properties 7");
@@ -3552,6 +3556,127 @@ if (typeof(zebkit) === "undefined") {
             assert(r.d, 2, "test_properties 9");
             assert(r.e, undefined, "test_properties 91");
             assert(typeof r.setC === 'function', true, "test_properties 10");
+
+            var  o = {
+                a: 10,
+                b: {
+                    c: 20,
+                    getD: function() { return 30; }
+                },
+                isE:  function() { return false; },
+                setE: function(b) {  }
+            };
+
+            assert(zebkit.getPropertySetter(o, "a"), null, "test_properties 11");
+            assert(zebkit.getPropertySetter(o, "b"), null, "test_properties 12");
+            assert(zebkit.getPropertySetter(o.b, "c"), null, "test_properties 13");
+            assert(zebkit.getPropertySetter(o.b, "d"), null, "test_properties 14");
+            assert(zebkit.getPropertySetter(o, "e"), o.setE, "test_properties 141");
+            assert(zebkit.getPropertySetter(o, "eeee"), null, "test_properties 142");
+
+            assert(zebkit.getPropertyGetter(o, "a"), null, "test_properties 15");
+            assert(zebkit.getPropertyGetter(o, "b"), null, "test_properties 16");
+            assert(zebkit.getPropertyGetter(o.b, "c"), null, "test_properties 17");
+            assert(zebkit.getPropertyGetter(o.b, "d"), o.b.getD, "test_properties 18");
+            assert(zebkit.getPropertyGetter(o, "e"), o.isE, "test_properties 19");
+            assert(zebkit.getPropertyGetter(o, "eee"), null, "test_properties 20");
+
+            assert(zebkit.getPropertyValue(o, "a"), 10, "test_properties 21");
+            assert(zebkit.getPropertyValue(o, "b.c"), 20, "test_properties 22");
+            assert(zebkit.getPropertyValue(o, "b.d"), undefined, "test_properties 23");
+            assert(zebkit.getPropertyValue(o, "e"), undefined, "test_properties 24");
+            assert(zebkit.getPropertyValue(o, "e", true), false, "test_properties 25");
+            assert(zebkit.getPropertyValue(o, "b.d", true), 30, "test_properties 26");
+
+            var A = Class([
+                function() { this.a = 11; this.b = 10; },
+
+                function getA() {
+                    return  this.a;
+                },
+
+                function setA(a) {
+                    this.a = a;
+                },
+            ]), a = new A();
+
+            assertObjEqual(A.$propertySetterInfo, {}, "test_properties 27");
+            assertObjEqual(A.$propertyGetterInfo, {}, "test_properties 28");
+            assert(zebkit.getPropertyValue(a, "a"), 11, "test_properties 29");
+            assert(zebkit.getPropertyValue(a, "b"), 10, "test_properties 291");
+            assertObjEqual(A.$propertySetterInfo, {}, "test_properties 30");
+            assertObjEqual(A.$propertyGetterInfo, {}, "test_properties 31");
+            assert(zebkit.getPropertyValue(a, "a", true), 11, "test_properties 32");
+            assertObjEqual(A.$propertySetterInfo, {}, "test_properties 33");
+            assertObjEqual(A.$propertyGetterInfo, { a : a.getA }, "test_properties 34");
+            zebkit.properties(a, { "a": 222 });
+            assert(zebkit.getPropertyValue(a, "a"), 222, "test_properties 35");
+            assert(zebkit.getPropertyValue(a, "a", true), 222, "test_properties 36");
+            assertObjEqual(A.$propertySetterInfo, { a:  a.setA }, "test_properties 37");
+            assertObjEqual(A.$propertyGetterInfo, { a : a.getA }, "test_properties 38");
+        },
+
+        function test_supera() {
+            var res = [];
+            var A = Class([
+                function() {
+                    res.push("A");
+                }
+            ]);
+            var B = Class(A, [
+                function() {
+                    res.push("B");
+                    this.$super();
+                    this.setV();
+                },
+                function $prototype() {
+                    this.setV = function() {
+                        res.push("B.setV");
+                    };
+                }
+            ]);
+            var C = Class(B, [
+                function() {
+                    res.push("C");
+                    this.$supera(arguments);
+                },
+                function setV() {
+                    res.push("C.setV");
+                    this.$supera(arguments);
+                }
+            ]);
+            var c = new C(10);
+            assertObjEqual(res, [ "C", "B", "A", "C.setV", "B.setV" ]);
+
+            var treeLikeRoot = {
+                value : "A",
+                m : 300,
+                a : 11,
+
+                subtree: {
+                    value: "AA",
+                    kids: [
+                        { value: "AAA", getD: function() { return "YES"; }, k : { a: 9999, b:32323 }  }
+
+                    ]
+                },
+
+                kids : [
+                    { value: "B", a:11, kids: null },
+                    {
+                        value: "C",
+                        kids: [
+                            { value: "D", a:"aa1" },
+                            { value: "E", a:"aa2" },
+                            { value: "E", a:12, kids: [
+                                { value: "E1" },
+                                { value: "E2", kids: [ { value: "EE" } ] },
+                                { value: "E3" }
+                              ] },
+                        ]
+                    }
+                ]
+            };
         }
     );
 })();

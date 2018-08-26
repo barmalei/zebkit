@@ -32,7 +32,7 @@
     <!-- RSS -->
     <link rel="alternate" type="application/rss+xml" title="RSS" href="/atom.xml">
 
-    <script type="text/javascript" src="/build/zebkit.js?11072017">  </script>
+    <script type="text/javascript" src="/build/zebkit.js?25082018">  </script>
 
     <script type="text/javascript">
         zebkit.ui.config("theme", "light");
@@ -356,7 +356,7 @@
 
             <tr>
                 <td align="right" colspan="2" style="border-width: 0px; border-top: 1px solid orange;">
-                    <small><a href="mailto:ask@zebkit.org">Andrei Vishneuski (c), 2017</a></small>
+                    <small><a href="mailto:ask@zebkit.org">Andrei Vishneuski (c), 2018</a></small>
                 </td>
             </tr>
 
@@ -469,7 +469,7 @@ zebkit.require("draw","ui", function(draw, ui) {
 });
 </script>
 
-<div class="highlighter-rouge"><pre class="highlight"><code><span class="nx">zebkit</span><span class="p">.</span><span class="nx">require</span><span class="p">(</span><span class="s2">"draw"</span><span class="p">,</span><span class="s2">"ui"</span><span class="p">,</span> <span class="kd">function</span><span class="p">(</span><span class="nx">draw</span><span class="p">,</span> <span class="nx">ui</span><span class="p">)</span> <span class="p">{</span>
+<div class="language-js highlighter-rouge"><pre class="highlight"><code><span class="nx">zebkit</span><span class="p">.</span><span class="nx">require</span><span class="p">(</span><span class="s2">"draw"</span><span class="p">,</span><span class="s2">"ui"</span><span class="p">,</span> <span class="kd">function</span><span class="p">(</span><span class="nx">draw</span><span class="p">,</span> <span class="nx">ui</span><span class="p">)</span> <span class="p">{</span>
     <span class="kd">var</span> <span class="nx">ColorBoardView</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">zebkit</span><span class="p">.</span><span class="nx">Class</span><span class="p">(</span><span class="nx">draw</span><span class="p">.</span><span class="nx">View</span><span class="p">,[</span>
         <span class="c1">// implement "paint" method</span>
         <span class="kd">function</span> <span class="nx">paint</span><span class="p">(</span><span class="nx">g</span><span class="p">,</span><span class="nx">x</span><span class="p">,</span><span class="nx">y</span><span class="p">,</span><span class="nx">w</span><span class="p">,</span><span class="nx">h</span><span class="p">,</span><span class="nx">c</span><span class="p">)</span> <span class="p">{</span>
@@ -549,7 +549,7 @@ zebkit.require("draw","ui", function(draw, ui) {
 });
 </script>
 
-<div class="highlighter-rouge"><pre class="highlight"><code>  <span class="nx">zebkit</span><span class="p">.</span><span class="nx">require</span><span class="p">(</span><span class="s2">"draw"</span><span class="p">,</span> <span class="s2">"ui"</span><span class="p">,</span><span class="kd">function</span><span class="p">(</span><span class="nx">draw</span><span class="p">,</span> <span class="nx">ui</span><span class="p">)</span> <span class="p">{</span>
+<div class="language-js highlighter-rouge"><pre class="highlight"><code>  <span class="nx">zebkit</span><span class="p">.</span><span class="nx">require</span><span class="p">(</span><span class="s2">"draw"</span><span class="p">,</span> <span class="s2">"ui"</span><span class="p">,</span><span class="kd">function</span><span class="p">(</span><span class="nx">draw</span><span class="p">,</span> <span class="nx">ui</span><span class="p">)</span> <span class="p">{</span>
     <span class="kd">var</span> <span class="nx">FunctionRender</span> <span class="o">=</span> <span class="nx">zebkit</span><span class="p">.</span><span class="nx">Class</span><span class="p">(</span><span class="nx">draw</span><span class="p">.</span><span class="nx">Render</span><span class="p">,</span> <span class="p">[</span>
         <span class="kd">function</span><span class="p">(</span><span class="nx">fn</span><span class="p">,</span> <span class="nx">x1</span><span class="p">,</span> <span class="nx">x2</span><span class="p">)</span> <span class="p">{</span> <span class="c1">// fn is target rendered object</span>
             <span class="k">this</span><span class="p">.</span><span class="nx">$super</span><span class="p">(</span><span class="nx">fn</span><span class="p">);</span>
@@ -696,7 +696,7 @@ zebkit.require("draw","ui", function(draw, ui) {
 });
 </script>
 
-<div class="highlighter-rouge"><pre class="highlight"><code><span class="nx">zebkit</span><span class="p">.</span><span class="nx">require</span><span class="p">(</span><span class="s2">"draw"</span><span class="p">,</span><span class="s2">"ui"</span><span class="p">,</span> <span class="kd">function</span><span class="p">(</span><span class="nx">draw</span><span class="p">,</span> <span class="nx">ui</span><span class="p">)</span> <span class="p">{</span>
+<div class="language-js highlighter-rouge"><pre class="highlight"><code><span class="nx">zebkit</span><span class="p">.</span><span class="nx">require</span><span class="p">(</span><span class="s2">"draw"</span><span class="p">,</span><span class="s2">"ui"</span><span class="p">,</span> <span class="kd">function</span><span class="p">(</span><span class="nx">draw</span><span class="p">,</span> <span class="nx">ui</span><span class="p">)</span> <span class="p">{</span>
     <span class="kd">var</span> <span class="nx">canvas</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">ui</span><span class="p">.</span><span class="nx">zCanvas</span><span class="p">(</span><span class="s2">"roundView1"</span><span class="p">,</span> <span class="mi">600</span><span class="p">,</span> <span class="mi">200</span><span class="p">);</span>
     <span class="nx">canvas</span><span class="p">.</span><span class="nx">root</span><span class="p">.</span><span class="nx">setFlowLayout</span><span class="p">(</span><span class="mi">32</span><span class="p">);</span>
 
@@ -804,7 +804,7 @@ zebkit.require("draw","ui", function(draw, ui) {
 });
 </script>
 
-<div class="highlighter-rouge"><pre class="highlight"><code><span class="nx">zebkit</span><span class="p">.</span><span class="nx">require</span><span class="p">(</span><span class="s2">"draw"</span><span class="p">,</span><span class="s2">"ui"</span><span class="p">,</span> <span class="kd">function</span><span class="p">(</span><span class="nx">draw</span><span class="p">,</span> <span class="nx">ui</span><span class="p">)</span> <span class="p">{</span>
+<div class="language-js highlighter-rouge"><pre class="highlight"><code><span class="nx">zebkit</span><span class="p">.</span><span class="nx">require</span><span class="p">(</span><span class="s2">"draw"</span><span class="p">,</span><span class="s2">"ui"</span><span class="p">,</span> <span class="kd">function</span><span class="p">(</span><span class="nx">draw</span><span class="p">,</span> <span class="nx">ui</span><span class="p">)</span> <span class="p">{</span>
     <span class="kd">var</span> <span class="nx">c</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">ui</span><span class="p">.</span><span class="nx">zCanvas</span><span class="p">(</span><span class="s2">"gradientView1"</span><span class="p">,</span> <span class="mi">600</span><span class="p">,</span> <span class="mi">200</span><span class="p">);</span>
     <span class="nx">c</span><span class="p">.</span><span class="nx">root</span><span class="p">.</span><span class="nx">setFlowLayout</span><span class="p">(</span><span class="mi">32</span><span class="p">);</span>
 
@@ -847,7 +847,7 @@ zebkit.require("draw","ui", function(draw, ui) {
   });
 </script>
 
-<div class="highlighter-rouge"><pre class="highlight"><code>  <span class="nx">zebkit</span><span class="p">.</span><span class="nx">require</span><span class="p">(</span><span class="s2">"draw"</span><span class="p">,</span><span class="s2">"ui"</span><span class="p">,</span><span class="kd">function</span><span class="p">(</span><span class="nx">draw</span><span class="p">,</span> <span class="nx">ui</span><span class="p">)</span> <span class="p">{</span>
+<div class="language-js highlighter-rouge"><pre class="highlight"><code>  <span class="nx">zebkit</span><span class="p">.</span><span class="nx">require</span><span class="p">(</span><span class="s2">"draw"</span><span class="p">,</span><span class="s2">"ui"</span><span class="p">,</span><span class="kd">function</span><span class="p">(</span><span class="nx">draw</span><span class="p">,</span> <span class="nx">ui</span><span class="p">)</span> <span class="p">{</span>
       <span class="kd">var</span> <span class="nx">c</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">ui</span><span class="p">.</span><span class="nx">zCanvas</span><span class="p">(</span><span class="s2">"patternView1"</span><span class="p">,</span> <span class="mi">300</span><span class="p">,</span> <span class="mi">320</span><span class="p">);</span>
       <span class="c1">// pass Image to be used as a pattern </span>
       <span class="nx">c</span><span class="p">.</span><span class="nx">root</span><span class="p">.</span><span class="nx">setBackground</span><span class="p">(</span><span class="k">new</span> <span class="nx">draw</span><span class="p">.</span><span class="nx">Pattern</span><span class="p">(</span><span class="nx">img</span><span class="p">));</span> 
@@ -882,7 +882,7 @@ zebkit.require("draw","ui",function(draw, ui) {
 });
 </script>
 
-<div class="highlighter-rouge"><pre class="highlight"><code><span class="nx">zebkit</span><span class="p">.</span><span class="nx">require</span><span class="p">(</span><span class="s2">"draw"</span><span class="p">,</span><span class="s2">"ui"</span><span class="p">,</span><span class="kd">function</span><span class="p">(</span><span class="nx">draw</span><span class="p">,</span> <span class="nx">ui</span><span class="p">)</span> <span class="p">{</span>
+<div class="language-js highlighter-rouge"><pre class="highlight"><code><span class="nx">zebkit</span><span class="p">.</span><span class="nx">require</span><span class="p">(</span><span class="s2">"draw"</span><span class="p">,</span><span class="s2">"ui"</span><span class="p">,</span><span class="kd">function</span><span class="p">(</span><span class="nx">draw</span><span class="p">,</span> <span class="nx">ui</span><span class="p">)</span> <span class="p">{</span>
     <span class="kd">var</span> <span class="nx">c</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">ui</span><span class="p">.</span><span class="nx">zCanvas</span><span class="p">(</span><span class="s2">"pictureView1"</span><span class="p">,</span> <span class="mi">300</span><span class="p">,</span> <span class="mi">380</span><span class="p">);</span>
     <span class="c1">// pass Image as a target </span>
     <span class="nx">c</span><span class="p">.</span><span class="nx">root</span><span class="p">.</span><span class="nx">setBackground</span><span class="p">(</span><span class="k">new</span> <span class="nx">draw</span><span class="p">.</span><span class="nx">Picture</span><span class="p">(</span><span class="nx">img</span><span class="p">));</span>
@@ -933,7 +933,7 @@ zebkit.require("draw","ui","layout",function(draw, ui, lay) {
 });
 </script>
 
-<div class="highlighter-rouge"><pre class="highlight"><code><span class="nx">zebkit</span><span class="p">.</span><span class="nx">require</span><span class="p">(</span><span class="s2">"draw"</span><span class="p">,</span><span class="s2">"ui"</span><span class="p">,</span><span class="s2">"layout"</span><span class="p">,</span><span class="kd">function</span><span class="p">(</span><span class="nx">draw</span><span class="p">,</span> <span class="nx">ui</span><span class="p">,</span> <span class="nx">lay</span><span class="p">)</span> <span class="p">{</span>
+<div class="language-js highlighter-rouge"><pre class="highlight"><code><span class="nx">zebkit</span><span class="p">.</span><span class="nx">require</span><span class="p">(</span><span class="s2">"draw"</span><span class="p">,</span><span class="s2">"ui"</span><span class="p">,</span><span class="s2">"layout"</span><span class="p">,</span><span class="kd">function</span><span class="p">(</span><span class="nx">draw</span><span class="p">,</span> <span class="nx">ui</span><span class="p">,</span> <span class="nx">lay</span><span class="p">)</span> <span class="p">{</span>
     <span class="kd">var</span> <span class="nx">c</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">ui</span><span class="p">.</span><span class="nx">zCanvas</span><span class="p">(</span><span class="s2">"compositeView1"</span><span class="p">,</span> <span class="mi">300</span><span class="p">,</span> <span class="mi">370</span><span class="p">);</span>
     <span class="c1">// implement moustache view </span>
     <span class="kd">var</span> <span class="nx">Moustache</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">zebkit</span><span class="p">.</span><span class="nx">Class</span><span class="p">(</span><span class="nx">draw</span><span class="p">.</span><span class="nx">View</span><span class="p">,</span> <span class="p">[</span>
@@ -1111,7 +1111,7 @@ zebkit.require("draw","ui",function(draw, ui) {
 });
 </script>
 
-<div class="highlighter-rouge"><pre class="highlight"><code><span class="nx">zebkit</span><span class="p">.</span><span class="nx">require</span><span class="p">(</span><span class="s2">"draw"</span><span class="p">,</span><span class="s2">"ui"</span><span class="p">,</span><span class="kd">function</span><span class="p">(</span><span class="nx">draw</span><span class="p">,</span> <span class="nx">ui</span><span class="p">)</span> <span class="p">{</span>
+<div class="language-js highlighter-rouge"><pre class="highlight"><code><span class="nx">zebkit</span><span class="p">.</span><span class="nx">require</span><span class="p">(</span><span class="s2">"draw"</span><span class="p">,</span><span class="s2">"ui"</span><span class="p">,</span><span class="kd">function</span><span class="p">(</span><span class="nx">draw</span><span class="p">,</span> <span class="nx">ui</span><span class="p">)</span> <span class="p">{</span>
     <span class="kd">var</span> <span class="nx">c</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">ui</span><span class="p">.</span><span class="nx">zCanvas</span><span class="p">(</span><span class="s2">"setView1"</span><span class="p">,</span> <span class="mi">300</span><span class="p">,</span> <span class="mi">300</span><span class="p">);</span>
     <span class="nx">c</span><span class="p">.</span><span class="nx">root</span><span class="p">.</span><span class="nx">setBorderLayout</span><span class="p">(</span><span class="mi">8</span><span class="p">);</span>
     <span class="c1">// set view set as a background view</span>
@@ -1179,7 +1179,7 @@ zebkit.require("draw","ui",function(draw, ui) {
 
 <p>The code below implements and sets the cloud shape to a root component:</p>
 
-<div class="highlighter-rouge"><pre class="highlight"><code><span class="nx">zebkit</span><span class="p">.</span><span class="nx">require</span><span class="p">(</span><span class="s2">"draw"</span><span class="p">,</span> <span class="s2">"ui"</span><span class="p">,</span> <span class="kd">function</span><span class="p">(</span><span class="nx">draw</span><span class="p">,</span> <span class="nx">ui</span><span class="p">)</span> <span class="p">{</span>
+<div class="language-js highlighter-rouge"><pre class="highlight"><code><span class="nx">zebkit</span><span class="p">.</span><span class="nx">require</span><span class="p">(</span><span class="s2">"draw"</span><span class="p">,</span> <span class="s2">"ui"</span><span class="p">,</span> <span class="kd">function</span><span class="p">(</span><span class="nx">draw</span><span class="p">,</span> <span class="nx">ui</span><span class="p">)</span> <span class="p">{</span>
     <span class="kd">var</span> <span class="nx">c</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">ui</span><span class="p">.</span><span class="nx">zCanvas</span><span class="p">(</span><span class="s2">"shapeView1"</span><span class="p">,</span> <span class="mi">400</span><span class="p">,</span> <span class="mi">300</span><span class="p">);</span>
     <span class="c1">// let's create shape view</span>
     <span class="kd">var</span> <span class="nx">Cloud</span> <span class="o">=</span> <span class="nx">zebkit</span><span class="p">.</span><span class="nx">Class</span><span class="p">(</span><span class="nx">zebkit</span><span class="p">.</span><span class="nx">draw</span><span class="p">.</span><span class="nx">Shape</span><span class="p">,</span> <span class="p">[</span>
@@ -1210,7 +1210,7 @@ zebkit.require("draw","ui",function(draw, ui) {
 
 <p>To let know which preferred size the given view wants to have implement “getPreferredSize” method. The expected outcome of the method is { width:intValue, height:intValue } structure:</p>
 
-<div class="highlighter-rouge"><pre class="highlight"><code>    <span class="kd">var</span> <span class="nx">MyView</span> <span class="o">=</span> <span class="nx">zebkit</span><span class="p">.</span><span class="nx">Class</span><span class="p">(</span><span class="nx">zebkit</span><span class="p">.</span><span class="nx">draw</span><span class="p">.</span><span class="nx">View</span><span class="p">,</span> <span class="p">[</span>
+<div class="language-js highlighter-rouge"><pre class="highlight"><code>    <span class="kd">var</span> <span class="nx">MyView</span> <span class="o">=</span> <span class="nx">zebkit</span><span class="p">.</span><span class="nx">Class</span><span class="p">(</span><span class="nx">zebkit</span><span class="p">.</span><span class="nx">draw</span><span class="p">.</span><span class="nx">View</span><span class="p">,</span> <span class="p">[</span>
         <span class="kd">function</span> <span class="nx">paint</span><span class="p">(</span><span class="nx">g</span><span class="p">,</span><span class="nx">x</span><span class="p">,</span><span class="nx">y</span><span class="p">,</span><span class="nx">w</span><span class="p">,</span><span class="nx">h</span><span class="p">,</span><span class="nx">c</span><span class="p">)</span> <span class="p">{</span>
             <span class="p">...</span> <span class="c1">// paint something</span>
         <span class="p">},</span> 
@@ -1226,7 +1226,7 @@ zebkit.require("draw","ui",function(draw, ui) {
 
 <p>View gaps are important what the given view or render is going to be used as a border view for an UI component. In this case the gaps the given view provides adds extra paddings to the UI component metrics. View gaps have to be defined by implementing “getLeft()”, “getRight()”, “getBottom()”, “getTop()” method or methods:</p>
 
-<div class="highlighter-rouge"><pre class="highlight"><code>    <span class="kd">var</span> <span class="nx">MyView</span> <span class="o">=</span> <span class="nx">zebkit</span><span class="p">.</span><span class="nx">Class</span><span class="p">(</span><span class="nx">zebkit</span><span class="p">.</span><span class="nx">draw</span><span class="p">.</span><span class="nx">View</span><span class="p">,</span> <span class="p">[</span>
+<div class="language-js highlighter-rouge"><pre class="highlight"><code>    <span class="kd">var</span> <span class="nx">MyView</span> <span class="o">=</span> <span class="nx">zebkit</span><span class="p">.</span><span class="nx">Class</span><span class="p">(</span><span class="nx">zebkit</span><span class="p">.</span><span class="nx">draw</span><span class="p">.</span><span class="nx">View</span><span class="p">,</span> <span class="p">[</span>
         <span class="kd">function</span> <span class="nx">paint</span><span class="p">(</span><span class="nx">g</span><span class="p">,</span><span class="nx">x</span><span class="p">,</span><span class="nx">y</span><span class="p">,</span><span class="nx">w</span><span class="p">,</span><span class="nx">h</span><span class="p">,</span><span class="nx">c</span><span class="p">)</span> <span class="p">{</span>
             <span class="p">...</span> <span class="c1">// paint something</span>
         <span class="p">},</span>

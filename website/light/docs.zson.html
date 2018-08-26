@@ -32,7 +32,7 @@
     <!-- RSS -->
     <link rel="alternate" type="application/rss+xml" title="RSS" href="/atom.xml">
 
-    <script type="text/javascript" src="/build/zebkit.js?11072017">  </script>
+    <script type="text/javascript" src="/build/zebkit.js?25082018">  </script>
 
     <script type="text/javascript">
         zebkit.ui.config("theme", "light");
@@ -356,7 +356,7 @@
 
             <tr>
                 <td align="right" colspan="2" style="border-width: 0px; border-top: 1px solid orange;">
-                    <small><a href="mailto:ask@zebkit.org">Andrei Vishneuski (c), 2017</a></small>
+                    <small><a href="mailto:ask@zebkit.org">Andrei Vishneuski (c), 2018</a></small>
                 </td>
             </tr>
 
@@ -426,7 +426,7 @@
   <li><strong>Class instantiation.</strong> A JSON field value can be fulfilled with an instance of a class. Imagine we have “a” field. Let’s set the field with an instance of JS “RegExp” (<code class="highlighter-rouge">a = new RegExp("[a-z]+","i")</code>) class:</li>
 </ul>
 
-<div class="highlighter-rouge"><pre class="highlight"><code><span class="w">    </span><span class="p">{</span><span class="w"> </span><span class="nt">"a"</span><span class="w"> </span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nt">"@RegExp"</span><span class="w"> </span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="w"> </span><span class="s2">"[a-z]+"</span><span class="p">,</span><span class="w"> </span><span class="s2">"i"</span><span class="w"> </span><span class="p">]</span><span class="w"> </span><span class="p">}</span><span class="w"> </span><span class="p">}</span><span class="w">
+<div class="language-json highlighter-rouge"><pre class="highlight"><code><span class="w">    </span><span class="p">{</span><span class="w"> </span><span class="nt">"a"</span><span class="w"> </span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nt">"@RegExp"</span><span class="w"> </span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="w"> </span><span class="s2">"[a-z]+"</span><span class="p">,</span><span class="w"> </span><span class="s2">"i"</span><span class="w"> </span><span class="p">]</span><span class="w"> </span><span class="p">}</span><span class="w"> </span><span class="p">}</span><span class="w">
 </span></code></pre>
 </div>
 
@@ -434,7 +434,7 @@
   <li><strong>Properties.</strong> Loading a JS object with a JSON takes in account the target object can define setter methods for a dedicated properties. For the following JSON zebkit tries to call <strong>“setTest(100)”</strong> method of the target object if the method is available:</li>
 </ul>
 
-<div class="highlighter-rouge"><pre class="highlight"><code><span class="w">    </span><span class="p">{</span><span class="w"> </span><span class="nt">"test"</span><span class="p">:</span><span class="w"> </span><span class="mi">100</span><span class="w"> </span><span class="p">}</span><span class="w">
+<div class="language-json highlighter-rouge"><pre class="highlight"><code><span class="w">    </span><span class="p">{</span><span class="w"> </span><span class="nt">"test"</span><span class="p">:</span><span class="w"> </span><span class="mi">100</span><span class="w"> </span><span class="p">}</span><span class="w">
 </span></code></pre>
 </div>
 
@@ -442,7 +442,7 @@
   <li><strong>References.</strong> A value can be set as reference to other JSON value. For instance in example below “b” field value will be set to 12:</li>
 </ul>
 
-<div class="highlighter-rouge"><pre class="highlight"><code><span class="w">    </span><span class="p">{</span><span class="w">  </span><span class="nt">"a"</span><span class="p">:</span><span class="w"> </span><span class="mi">12</span><span class="p">,</span><span class="w"> </span><span class="nt">"b"</span><span class="p">:</span><span class="w"> </span><span class="s2">"%{a}"</span><span class="w"> </span><span class="p">}</span><span class="w"> 
+<div class="language-json highlighter-rouge"><pre class="highlight"><code><span class="w">    </span><span class="p">{</span><span class="w">  </span><span class="nt">"a"</span><span class="p">:</span><span class="w"> </span><span class="mi">12</span><span class="p">,</span><span class="w"> </span><span class="nt">"b"</span><span class="p">:</span><span class="w"> </span><span class="s2">"%{a}"</span><span class="w"> </span><span class="p">}</span><span class="w"> 
 </span></code></pre>
 </div>
 
@@ -450,7 +450,7 @@
   <li><strong>Expressions.</strong> Expression is JS code that is evaluated and then assigned to a JSON field. For instance the value of “a” field below will be resolved as JS expression and set to 20:</li>
 </ul>
 
-<div class="highlighter-rouge"><pre class="highlight"><code><span class="w">    </span><span class="p">{</span><span class="w">  </span><span class="nt">"a"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nt">".expr"</span><span class="w"> </span><span class="p">:</span><span class="w"> </span><span class="s2">"10 + 10"</span><span class="w"> </span><span class="p">}</span><span class="w"> </span><span class="p">}</span><span class="w">
+<div class="language-json highlighter-rouge"><pre class="highlight"><code><span class="w">    </span><span class="p">{</span><span class="w">  </span><span class="nt">"a"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nt">".expr"</span><span class="w"> </span><span class="p">:</span><span class="w"> </span><span class="s2">"10 + 10"</span><span class="w"> </span><span class="p">}</span><span class="w"> </span><span class="p">}</span><span class="w">
 </span></code></pre>
 </div>
 
@@ -472,7 +472,7 @@
   </li>
 </ul>
 
-<div class="highlighter-rouge"><pre class="highlight"><code><span class="w">    </span><span class="p">{</span><span class="w">  </span><span class="nt">"a"</span><span class="w"> </span><span class="p">:</span><span class="w"> </span><span class="mi">100</span><span class="p">,</span><span class="w">
+<div class="language-json highlighter-rouge"><pre class="highlight"><code><span class="w">    </span><span class="p">{</span><span class="w">  </span><span class="nt">"a"</span><span class="w"> </span><span class="p">:</span><span class="w"> </span><span class="mi">100</span><span class="p">,</span><span class="w">
        </span><span class="nt">"b"</span><span class="w"> </span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nt">"c"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nt">"@Date"</span><span class="w"> </span><span class="p">:</span><span class="w"> </span><span class="p">[]</span><span class="w"> </span><span class="p">}</span><span class="w"> </span><span class="p">},</span><span class="w"> 
        </span><span class="nt">"d"</span><span class="w"> </span><span class="p">:</span><span class="w"> </span><span class="s2">"%{a}"</span><span class="p">,</span><span class="w">
        </span><span class="nt">"e"</span><span class="w"> </span><span class="p">:</span><span class="w"> </span><span class="s2">"%{&lt;json&gt; http://test.com/embedded.json}"</span><span class="p">,</span><span class="w">
@@ -483,7 +483,7 @@
 
 <p>Where “embedded.json” is the following:</p>
 
-<div class="highlighter-rouge"><pre class="highlight"><code><span class="p">{</span><span class="w">  </span><span class="nt">"m"</span><span class="w"> </span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w">  </span><span class="nt">"k"</span><span class="w"> </span><span class="p">:</span><span class="w"> </span><span class="s2">"Hello"</span><span class="w"> </span><span class="p">}</span><span class="w"> </span><span class="p">}</span><span class="w">
+<div class="language-json highlighter-rouge"><pre class="highlight"><code><span class="p">{</span><span class="w">  </span><span class="nt">"m"</span><span class="w"> </span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w">  </span><span class="nt">"k"</span><span class="w"> </span><span class="p">:</span><span class="w"> </span><span class="s2">"Hello"</span><span class="w"> </span><span class="p">}</span><span class="w"> </span><span class="p">}</span><span class="w">
 </span></code></pre>
 </div>
 
@@ -499,7 +499,7 @@
 
 <p>The code that load the Zson us shown below:</p>
 
-<div class="highlighter-rouge"><pre class="highlight"><code><span class="k">new</span> <span class="nx">Zson</span><span class="p">().</span><span class="nx">then</span><span class="p">(</span><span class="kd">function</span><span class="p">(</span><span class="s2">"config.json"</span><span class="p">,</span> <span class="nx">zson</span><span class="p">)</span> <span class="p">{</span>
+<div class="language-js highlighter-rouge"><pre class="highlight"><code><span class="k">new</span> <span class="nx">Zson</span><span class="p">().</span><span class="nx">then</span><span class="p">(</span><span class="kd">function</span><span class="p">(</span><span class="s2">"config.json"</span><span class="p">,</span> <span class="nx">zson</span><span class="p">)</span> <span class="p">{</span>
     <span class="nx">zson</span><span class="p">.</span><span class="nx">root</span> <span class="c1">// handle fully loaded json </span>
 <span class="p">});</span>  
 </code></pre>
@@ -513,7 +513,7 @@
   <li>Imagine we declare simple class “A”:</li>
 </ul>
 
-<div class="highlighter-rouge"><pre class="highlight"><code><span class="kd">var</span> <span class="nx">A</span> <span class="o">=</span> <span class="nx">zebkit</span><span class="p">.</span><span class="nx">Class</span><span class="p">([</span>
+<div class="language-js highlighter-rouge"><pre class="highlight"><code><span class="kd">var</span> <span class="nx">A</span> <span class="o">=</span> <span class="nx">zebkit</span><span class="p">.</span><span class="nx">Class</span><span class="p">([</span>
     <span class="kd">function</span><span class="p">()</span> <span class="p">{</span>  <span class="c1">// constructor</span>
         <span class="k">this</span><span class="p">.</span><span class="nx">b</span> <span class="o">=</span> <span class="k">this</span><span class="p">.</span><span class="nx">a</span> <span class="o">=</span> <span class="kc">null</span><span class="p">;</span>
     <span class="p">},</span>
@@ -529,7 +529,7 @@
   <li>Then we declare JSON  (“config.json”) to configure the class instance:</li>
 </ul>
 
-<div class="highlighter-rouge"><pre class="highlight"><code><span class="p">{</span><span class="w">  
+<div class="language-json highlighter-rouge"><pre class="highlight"><code><span class="p">{</span><span class="w">  
     </span><span class="nt">"a"</span><span class="w"> </span><span class="p">:</span><span class="w"> </span><span class="s2">"value of property 'a'"</span><span class="p">,</span><span class="w">
     </span><span class="nt">"b"</span><span class="w"> </span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nt">"@Date"</span><span class="p">:</span><span class="w"> </span><span class="p">[]</span><span class="w"> </span><span class="p">},</span><span class="w">
     </span><span class="nt">"c"</span><span class="w"> </span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">,</span><span class="mi">3</span><span class="w"> </span><span class="p">]</span><span class="w">
@@ -541,7 +541,7 @@
   <li>Then we instantiate the class and configure the instance with JSON:</li>
 </ul>
 
-<div class="highlighter-rouge"><pre class="highlight"><code><span class="kd">var</span> <span class="nx">a</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">A</span><span class="p">();</span>
+<div class="language-js highlighter-rouge"><pre class="highlight"><code><span class="kd">var</span> <span class="nx">a</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">A</span><span class="p">();</span>
 <span class="c1">// configure instance of class "A" with JSON</span>
 <span class="nx">zebkit</span><span class="p">.</span><span class="nx">Zson</span><span class="p">.</span><span class="nx">then</span><span class="p">(</span><span class="s2">"config.json"</span><span class="p">,</span> <span class="nx">a</span><span class="p">);</span>  
 </code></pre>

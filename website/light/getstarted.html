@@ -32,7 +32,7 @@
     <!-- RSS -->
     <link rel="alternate" type="application/rss+xml" title="RSS" href="/atom.xml">
 
-    <script type="text/javascript" src="/build/zebkit.js?11072017">  </script>
+    <script type="text/javascript" src="/build/zebkit.js?25082018">  </script>
 
     <script type="text/javascript">
         zebkit.ui.config("theme", "light");
@@ -335,7 +335,7 @@
 
             <tr>
                 <td align="right" colspan="2" style="border-width: 0px; border-top: 1px solid orange;">
-                    <small><a href="mailto:ask@zebkit.org">Andrei Vishneuski (c), 2017</a></small>
+                    <small><a href="mailto:ask@zebkit.org">Andrei Vishneuski (c), 2018</a></small>
                 </td>
             </tr>
 
@@ -397,7 +397,7 @@
   <li><strong>Take existent or create a new HTML:</strong></li>
 </ul>
 
-<div class="highlighter-rouge"><pre class="highlight"><code><span class="cp">&lt;!DOCTYPE html&gt;</span>
+<div class="language-html highlighter-rouge"><pre class="highlight"><code><span class="cp">&lt;!DOCTYPE html&gt;</span>
 <span class="nt">&lt;html&gt;</span>
     <span class="nt">&lt;head&gt;</span>
        ...
@@ -411,7 +411,7 @@
   <li><strong>Add meta to HTML head tag for single page / mobile applications</strong></li>
 </ul>
 
-<div class="highlighter-rouge"><pre class="highlight"><code>...
+<div class="language-html highlighter-rouge"><pre class="highlight"><code>...
 <span class="nt">&lt;meta</span> <span class="na">name=</span><span class="s">"viewport"</span> 
    <span class="na">content=</span><span class="s">"user-scalable=no,width=device-width,initial-scale=1,maximum-scale=1"</span><span class="nt">&gt;</span>
 <span class="nt">&lt;meta</span> <span class="na">name=</span><span class="s">"msapplication-tap-highlight"</span> <span class="na">content=</span><span class="s">"no"</span><span class="nt">&gt;</span>
@@ -423,7 +423,7 @@
   <li><strong>Include zebkit JS in script section:</strong></li>
 </ul>
 
-<div class="highlighter-rouge"><pre class="highlight"><code><span class="nt">&lt;html&gt;</span>
+<div class="language-html highlighter-rouge"><pre class="highlight"><code><span class="nt">&lt;html&gt;</span>
     <span class="nt">&lt;head&gt;</span>
         <span class="nt">&lt;script </span><span class="na">type=</span><span class="s">"text/javascript"</span>
                 <span class="na">src=</span><span class="s">"http://zebkit.org/ver/latest/zebkit.min.js"</span><span class="nt">&gt;</span>
@@ -436,7 +436,7 @@
   <li><strong>Write application code:</strong></li>
 </ul>
 
-<div class="highlighter-rouge"><pre class="highlight"><code><span class="c1">// wrap zebkit code with require method to make sure everything</span>
+<div class="language-js highlighter-rouge"><pre class="highlight"><code><span class="c1">// wrap zebkit code with require method to make sure everything</span>
 <span class="c1">// has been initialized </span>
 <span class="nx">zebkit</span><span class="p">.</span><span class="nx">require</span><span class="p">(</span><span class="s2">"ui"</span><span class="p">,</span> <span class="s2">"layout"</span><span class="p">,</span> <span class="kd">function</span><span class="p">(</span><span class="nx">ui</span><span class="p">,</span> <span class="nx">layout</span><span class="p">)</span> <span class="p">{</span>
     <span class="kd">var</span> <span class="nx">root</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">ui</span><span class="p">.</span><span class="nx">zCanvas</span><span class="p">(</span><span class="mi">300</span><span class="p">,</span> <span class="mi">300</span><span class="p">).</span><span class="nx">root</span><span class="p">;</span>
@@ -490,7 +490,7 @@ zebkit.require("ui", "layout", function(ui, layout) {
 
 <h3 id="add-events-handling">Add events handling</h3>
 
-<div class="highlighter-rouge"><pre class="highlight"><code><span class="nx">zebkit</span><span class="p">.</span><span class="nx">require</span><span class="p">(</span><span class="kd">function</span><span class="p">()</span> <span class="p">{</span>
+<div class="language-js highlighter-rouge"><pre class="highlight"><code><span class="nx">zebkit</span><span class="p">.</span><span class="nx">require</span><span class="p">(</span><span class="kd">function</span><span class="p">()</span> <span class="p">{</span>
     <span class="p">...</span>
     <span class="c1">// find first component whose class is zebkit.ui.Button</span>
     <span class="nx">root</span><span class="p">.</span><span class="nx">on</span><span class="p">(</span><span class="s2">"//zebkit.ui.Button"</span><span class="p">,</span> <span class="kd">function</span><span class="p">()</span> <span class="p">{</span>
@@ -539,7 +539,7 @@ zebkit.require("ui", "layout", function(ui, layout) {
 
 <h3 id="load-required-resources">Load required resources</h3>
 
-<div class="highlighter-rouge"><pre class="highlight"><code><span class="nx">zebkit</span><span class="p">.</span><span class="nx">resources</span><span class="p">(</span><span class="s2">"myimage.jpg"</span><span class="p">,</span> <span class="s2">"mytext.txt"</span><span class="p">,</span> <span class="kd">function</span><span class="p">(</span><span class="nx">image</span><span class="p">,</span> <span class="nx">text</span><span class="p">)</span> <span class="p">{</span>
+<div class="language-js highlighter-rouge"><pre class="highlight"><code><span class="nx">zebkit</span><span class="p">.</span><span class="nx">resources</span><span class="p">(</span><span class="s2">"myimage.jpg"</span><span class="p">,</span> <span class="s2">"mytext.txt"</span><span class="p">,</span> <span class="kd">function</span><span class="p">(</span><span class="nx">image</span><span class="p">,</span> <span class="nx">text</span><span class="p">)</span> <span class="p">{</span>
     <span class="c1">// here you get completely loaded image and textual data  </span>
     <span class="p">...</span>
 <span class="p">});</span>

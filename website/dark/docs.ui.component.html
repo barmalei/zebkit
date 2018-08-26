@@ -32,7 +32,7 @@
     <!-- RSS -->
     <link rel="alternate" type="application/rss+xml" title="RSS" href="/atom.xml">
 
-    <script type="text/javascript" src="/build/zebkit.js?11072017">  </script>
+    <script type="text/javascript" src="/build/zebkit.js?25082018">  </script>
 
     <script type="text/javascript">
         zebkit.ui.config("theme", "dark");
@@ -356,7 +356,7 @@
 
             <tr>
                 <td align="right" colspan="2" style="border-width: 0px; border-top: 1px solid orange;">
-                    <small><a href="mailto:ask@zebkit.org">Andrei Vishneuski (c), 2017</a></small>
+                    <small><a href="mailto:ask@zebkit.org">Andrei Vishneuski (c), 2018</a></small>
                 </td>
             </tr>
 
@@ -412,7 +412,7 @@
 
     <h2 id="zebkituipanel">zebkit.ui.Panel</h2>
 
-<div class="highlighter-rouge"><pre class="highlight"><code>                zebkit.layout.Layoutable 
+<div class="language-bash highlighter-rouge"><pre class="highlight"><code>                zebkit.layout.Layoutable 
                           |
                     zebkit.ui.Panel
                           |
@@ -429,7 +429,7 @@ zebkit.ui.web.HTMLElement      zebkit.ui.Button    Many others
   <li><strong>Container</strong> Panel is a container that can host other zebkit UI components as its child components. The child components are ordered inside the container with a layout manager the container is set. In most cases zebkit UI applications are multi-levels hierarchy of various UI components that are ordered with different layout manages:</li>
 </ul>
 
-<div class="highlighter-rouge"><pre class="highlight"><code>    <span class="nx">zebkit</span><span class="p">.</span><span class="nx">require</span><span class="p">(</span><span class="s2">"ui"</span><span class="p">,</span> <span class="s2">"layout"</span><span class="p">,</span> <span class="kd">function</span><span class="p">(</span><span class="nx">ui</span><span class="p">,</span> <span class="nx">layout</span><span class="p">)</span> <span class="p">{</span>
+<div class="language-js highlighter-rouge"><pre class="highlight"><code>    <span class="nx">zebkit</span><span class="p">.</span><span class="nx">require</span><span class="p">(</span><span class="s2">"ui"</span><span class="p">,</span> <span class="s2">"layout"</span><span class="p">,</span> <span class="kd">function</span><span class="p">(</span><span class="nx">ui</span><span class="p">,</span> <span class="nx">layout</span><span class="p">)</span> <span class="p">{</span>
         <span class="p">...</span>
         <span class="c1">// create panel with border layout manager</span>
         <span class="kd">var</span> <span class="nx">panel</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">ui</span><span class="p">.</span><span class="nx">Panel</span><span class="p">(</span><span class="k">new</span> <span class="nx">layout</span><span class="p">.</span><span class="nx">BorderLayout</span><span class="p">());</span>
@@ -447,7 +447,7 @@ zebkit.ui.web.HTMLElement      zebkit.ui.Button    Many others
   <li><strong>Rendering</strong> Panel participates in zebkit UI application rendering process. By overriding appropriate panel method(s) - <strong>“paint(g)”</strong> or/and <strong>“update(g)”</strong> or/and <strong>“paintOnTop(g)”</strong> - developers can paint desired visual content using passed 2D graphical context:</li>
 </ul>
 
-<div class="highlighter-rouge"><pre class="highlight"><code>    <span class="nx">zebkit</span><span class="p">.</span><span class="nx">require</span><span class="p">(</span><span class="s2">"ui"</span><span class="p">,</span> <span class="kd">function</span><span class="p">(</span><span class="nx">ui</span><span class="p">)</span> <span class="p">{</span>
+<div class="language-js highlighter-rouge"><pre class="highlight"><code>    <span class="nx">zebkit</span><span class="p">.</span><span class="nx">require</span><span class="p">(</span><span class="s2">"ui"</span><span class="p">,</span> <span class="kd">function</span><span class="p">(</span><span class="nx">ui</span><span class="p">)</span> <span class="p">{</span>
         <span class="p">...</span>
         <span class="c1">// instantiate anonymous panel class that implements </span>
         <span class="c1">// "paint(g)" method to draw red circle in the panel </span>
@@ -471,7 +471,7 @@ zebkit.ui.web.HTMLElement      zebkit.ui.Button    Many others
   <li><strong>Input events handling</strong> Panel is designed to catch number of input events via implementing appropriate events handler methods (<strong>pointerPressed(e)</strong>, <strong>“pointerReleased(e)”</strong>, <strong>“keyPressed(e)”</strong> and many others).</li>
 </ul>
 
-<div class="highlighter-rouge"><pre class="highlight"><code>    <span class="nx">zebkit</span><span class="p">.</span><span class="nx">require</span><span class="p">(</span><span class="s2">"ui"</span><span class="p">,</span> <span class="kd">function</span><span class="p">(</span><span class="nx">ui</span><span class="p">)</span> <span class="p">{</span>
+<div class="language-js highlighter-rouge"><pre class="highlight"><code>    <span class="nx">zebkit</span><span class="p">.</span><span class="nx">require</span><span class="p">(</span><span class="s2">"ui"</span><span class="p">,</span> <span class="kd">function</span><span class="p">(</span><span class="nx">ui</span><span class="p">)</span> <span class="p">{</span>
         <span class="p">...</span>
         <span class="c1">// Handle pointer entered and exited events</span>
         <span class="kd">var</span> <span class="nx">panel</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">ui</span><span class="p">.</span><span class="nx">Panel</span><span class="p">([</span>
@@ -503,7 +503,7 @@ zebkit.ui.web.HTMLElement      zebkit.ui.Button    Many others
 
 <p>For example:</p>
 
-<div class="highlighter-rouge"><pre class="highlight"><code><span class="nx">zebkit</span><span class="p">.</span><span class="nx">require</span><span class="p">(</span><span class="s2">"ui"</span><span class="p">,</span> <span class="kd">function</span><span class="p">(</span><span class="nx">ui</span><span class="p">)</span> <span class="p">{</span>
+<div class="language-js highlighter-rouge"><pre class="highlight"><code><span class="nx">zebkit</span><span class="p">.</span><span class="nx">require</span><span class="p">(</span><span class="s2">"ui"</span><span class="p">,</span> <span class="kd">function</span><span class="p">(</span><span class="nx">ui</span><span class="p">)</span> <span class="p">{</span>
     <span class="c1">// create HTML Canvas element where zebkit UI to host</span>
     <span class="c1">// zebkit UI components hierarchy </span>
     <span class="kd">var</span> <span class="nx">htmlCanvas</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">ui</span><span class="p">.</span><span class="nx">zCanvas</span><span class="p">(</span><span class="mi">500</span><span class="p">,</span> <span class="mi">400</span><span class="p">);</span>
@@ -529,7 +529,7 @@ zebkit.ui.web.HTMLElement      zebkit.ui.Button    Many others
 <table>
 <tr><td>
 
-      <div class="highlighter-rouge"><pre class="highlight"><code><span class="c"># HTML5 Canvas surface</span>
+      <div class="language-bash highlighter-rouge"><pre class="highlight"><code><span class="c"># HTML5 Canvas surface</span>
 zebkit.ui.zCanvas 
   +-root  <span class="c"># root layer </span>
      |
@@ -608,7 +608,7 @@ zebkit.require("ui","layout","draw",function(ui,layout,draw) {
 
 <p>The application code is shown below:</p>
 
-<div class="highlighter-rouge"><pre class="highlight"><code><span class="nx">zebkit</span><span class="p">.</span><span class="nx">require</span><span class="p">(</span><span class="s2">"ui"</span><span class="p">,</span><span class="s2">"layout"</span><span class="p">,</span><span class="s2">"draw"</span><span class="p">,</span><span class="kd">function</span><span class="p">(</span><span class="nx">ui</span><span class="p">,</span><span class="nx">layout</span><span class="p">,</span><span class="nx">draw</span><span class="p">)</span> <span class="p">{</span>
+<div class="language-js highlighter-rouge"><pre class="highlight"><code><span class="nx">zebkit</span><span class="p">.</span><span class="nx">require</span><span class="p">(</span><span class="s2">"ui"</span><span class="p">,</span><span class="s2">"layout"</span><span class="p">,</span><span class="s2">"draw"</span><span class="p">,</span><span class="kd">function</span><span class="p">(</span><span class="nx">ui</span><span class="p">,</span><span class="nx">layout</span><span class="p">,</span><span class="nx">draw</span><span class="p">)</span> <span class="p">{</span>
     <span class="p">(</span><span class="k">new</span> <span class="nx">ui</span><span class="p">.</span><span class="nx">zCanvas</span><span class="p">(</span><span class="s2">"layoutSample"</span><span class="p">,</span> <span class="mi">300</span><span class="p">,</span> <span class="mi">420</span><span class="p">)).</span><span class="nx">root</span><span class="p">.</span><span class="nx">properties</span><span class="p">({</span>
         <span class="na">layout</span><span class="p">:</span> <span class="k">new</span> <span class="nx">layout</span><span class="p">.</span><span class="nx">BorderLayout</span><span class="p">(),</span>
         <span class="na">kids</span>  <span class="p">:</span> <span class="p">{</span>
@@ -736,7 +736,7 @@ Setup layout manager, find child components by its constraints.
 
 <p>Let’s imagine we have the following UI hierarchy:</p>
 
-<div class="highlighter-rouge"><pre class="highlight"><code>zcan <span class="o">(</span><span class="s2">"zebkit.ui.zCanvas"</span><span class="o">)</span>
+<div class="language-bash highlighter-rouge"><pre class="highlight"><code>zcan <span class="o">(</span><span class="s2">"zebkit.ui.zCanvas"</span><span class="o">)</span>
   |
   +-- root <span class="o">(</span><span class="s2">"zebkit.ui.Panel"</span><span class="o">)</span>
        +-- pan1 <span class="o">(</span><span class="s2">"zebkit.ui.Panel"</span><span class="o">)</span>
@@ -805,21 +805,21 @@ pan1, lab1, tf1
 
 <p>It is possible to use id shortcut path to find a component by its id (if the id has been set with <strong>“setId(id)”</strong> method). The shortcut path expression starts form <strong>”#”</strong> prefix that precedes an id value:</p>
 
-<div class="highlighter-rouge"><pre class="highlight"><code><span class="c1">// found component in hierarchy by its id </span>
+<div class="language-js highlighter-rouge"><pre class="highlight"><code><span class="c1">// found component in hierarchy by its id </span>
 <span class="kd">var</span> <span class="nx">foundComp</span> <span class="o">=</span> <span class="nx">root</span><span class="p">.</span><span class="nx">byPath</span><span class="p">(</span><span class="s2">"#test"</span><span class="p">);</span>
 </code></pre>
 </div>
 
 <p>Optionally path part can include property value filter that defines a property value traversing component have to match:</p>
 
-<div class="highlighter-rouge"><pre class="highlight"><code><span class="c1">// find all visible labels component </span>
+<div class="language-js highlighter-rouge"><pre class="highlight"><code><span class="c1">// find all visible labels component </span>
 <span class="nx">root</span><span class="p">.</span><span class="nx">byPath</span><span class="p">(</span><span class="s2">"//zebkit.ui.Label[@isVisible=true]"</span><span class="p">,</span><span class="kd">function</span><span class="p">(</span><span class="nx">found</span><span class="p">)</span> <span class="p">{</span>
     <span class="p">...</span>
 <span class="p">});</span>
 </code></pre>
 </div>
 
-<div class="highlighter-rouge"><pre class="highlight"><code><span class="c1">// find all labels component that defines id property</span>
+<div class="language-js highlighter-rouge"><pre class="highlight"><code><span class="c1">// find all labels component that defines id property</span>
 <span class="nx">root</span><span class="p">.</span><span class="nx">byPath</span><span class="p">(</span><span class="s2">"//zebkit.ui.Label[@id]"</span><span class="p">,</span> <span class="kd">function</span><span class="p">(</span><span class="nx">foundComp</span><span class="p">)</span> <span class="p">{</span>
     <span class="p">...</span>
 <span class="p">});</span>
@@ -832,7 +832,7 @@ pan1, lab1, tf1
   <li><strong>properties(…)</strong> to apply the given properties set to UI components that match the passed xpath-like expression:</li>
 </ul>
 
-<div class="highlighter-rouge"><pre class="highlight"><code>    <span class="c1">// Make visible all child text field components on ll level  </span>
+<div class="language-js highlighter-rouge"><pre class="highlight"><code>    <span class="c1">// Make visible all child text field components on ll level  </span>
     <span class="c1">// for the root  </span>
     <span class="nx">root</span><span class="p">.</span><span class="nx">properties</span><span class="p">(</span><span class="s2">"//zebkit.ui.TextField"</span><span class="p">,</span> <span class="p">{</span> <span class="na">visisble</span><span class="p">:</span> <span class="kc">true</span> <span class="p">});</span>
 </code></pre>
@@ -842,7 +842,7 @@ pan1, lab1, tf1
   <li><strong>on(…)</strong> and <strong>off(…)</strong>  to register or un-register events listener handler for UI components that match the passed xpath-like expression:</li>
 </ul>
 
-<div class="highlighter-rouge"><pre class="highlight"><code>    <span class="c1">// Register listener for all found button components </span>
+<div class="language-js highlighter-rouge"><pre class="highlight"><code>    <span class="c1">// Register listener for all found button components </span>
     <span class="c1">// that are child of the root recursively  </span>
     <span class="nx">root</span><span class="p">.</span><span class="nx">on</span><span class="p">(</span><span class="s2">"//zebkit.ui.Button"</span><span class="p">,</span> <span class="kd">function</span><span class="p">(</span><span class="nx">button</span><span class="p">)</span> <span class="p">{</span>
         <span class="p">...</span>

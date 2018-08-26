@@ -32,7 +32,7 @@
     <!-- RSS -->
     <link rel="alternate" type="application/rss+xml" title="RSS" href="/atom.xml">
 
-    <script type="text/javascript" src="/build/zebkit.js?11072017">  </script>
+    <script type="text/javascript" src="/build/zebkit.js?25082018">  </script>
 
     <script type="text/javascript">
         zebkit.ui.config("theme", "dark");
@@ -356,7 +356,7 @@
 
             <tr>
                 <td align="right" colspan="2" style="border-width: 0px; border-top: 1px solid orange;">
-                    <small><a href="mailto:ask@zebkit.org">Andrei Vishneuski (c), 2017</a></small>
+                    <small><a href="mailto:ask@zebkit.org">Andrei Vishneuski (c), 2018</a></small>
                 </td>
             </tr>
 
@@ -414,7 +414,7 @@
 
 <p>Components (visual and not-visual) often fire specific to its business events. For instance text model fires text updated event, button UI component fires fired event every time the button has been pressed, list component fires selected event when a new item in the list has been selected and so on. To handle such sort of events a listener or listeners registration pattern have to be applied. A listener can be registered or removed with calling <strong>“on()/off()”</strong> methods that are part of zebkit component API:</p>
 
-<div class="highlighter-rouge"><pre class="highlight"><code><span class="nx">comp</span><span class="p">.</span><span class="nx">on</span><span class="p">([</span><span class="nx">eventName</span><span class="p">,][</span><span class="nx">path</span><span class="p">,],</span> <span class="nx">callback</span><span class="p">);</span>
+<div class="language-js highlighter-rouge"><pre class="highlight"><code><span class="nx">comp</span><span class="p">.</span><span class="nx">on</span><span class="p">([</span><span class="nx">eventName</span><span class="p">,][</span><span class="nx">path</span><span class="p">,],</span> <span class="nx">callback</span><span class="p">);</span>
 </code></pre>
 </div>
 
@@ -432,7 +432,7 @@
 
 <p>To stop handling event or events use the following pattern:</p>
 
-<div class="highlighter-rouge"><pre class="highlight"><code><span class="nx">comp</span><span class="p">.</span><span class="nx">off</span><span class="p">([</span><span class="nx">eventName</span><span class="p">,][</span><span class="nx">path</span><span class="p">]);</span>
+<div class="language-js highlighter-rouge"><pre class="highlight"><code><span class="nx">comp</span><span class="p">.</span><span class="nx">off</span><span class="p">([</span><span class="nx">eventName</span><span class="p">,][</span><span class="nx">path</span><span class="p">]);</span>
 </code></pre>
 </div>
 
@@ -440,7 +440,7 @@
 
 <p>To develop a custom component that fires an event or events can be simplified with implementing special <strong>“zebkit.EventProducer”</strong> interface to add  “on()/off()/fire()” methods implementations. Additionally listeners container class has to be declared in <strong>“_“</strong> class static variable:</p>
 
-<div class="highlighter-rouge"><pre class="highlight"><code><span class="c1">// implement  "zebkit.EventProducer" to add event listening and </span>
+<div class="language-js highlighter-rouge"><pre class="highlight"><code><span class="c1">// implement  "zebkit.EventProducer" to add event listening and </span>
 <span class="c1">// firing API in the class </span>
 <span class="kd">var</span> <span class="nx">MyClassThatFiresEvents</span> <span class="o">=</span> <span class="nx">zebkit</span><span class="p">.</span><span class="nx">Class</span><span class="p">(</span><span class="nx">zebkit</span><span class="p">.</span><span class="nx">EventProducer</span><span class="p">,</span> <span class="p">[</span>
     <span class="kd">function</span> <span class="nx">$clazz</span><span class="p">()</span> <span class="p">{</span>
@@ -490,7 +490,7 @@
 
 <p>Overriding pattern means that events catching have to be done by overriding desired UI events handler methods. For instance, if to handle pointer released event do it as follow:</p>
 
-<div class="highlighter-rouge"><pre class="highlight"><code><span class="p">...</span>
+<div class="language-js highlighter-rouge"><pre class="highlight"><code><span class="p">...</span>
 <span class="kd">var</span> <span class="nx">comp</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">zebkit</span><span class="p">.</span><span class="nx">ui</span><span class="p">.</span><span class="nx">Panel</span><span class="p">();</span>
 <span class="p">...</span>
 <span class="nx">comp</span><span class="p">.</span><span class="nx">pointerReleased</span> <span class="o">=</span> <span class="kd">function</span><span class="p">(</span><span class="nx">e</span><span class="p">)</span> <span class="p">{</span>
@@ -502,7 +502,7 @@
 
 <p>or the same with anonymous class paradigm:</p>
 
-<div class="highlighter-rouge"><pre class="highlight"><code><span class="p">...</span>
+<div class="language-js highlighter-rouge"><pre class="highlight"><code><span class="p">...</span>
 <span class="kd">var</span> <span class="nx">comp</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">zebkit</span><span class="p">.</span><span class="nx">ui</span><span class="p">.</span><span class="nx">Panel</span><span class="p">([</span>
     <span class="kd">function</span> <span class="nx">pointerReleased</span><span class="p">(</span><span class="nx">e</span><span class="p">)</span> <span class="p">{</span>
         <span class="c1">// here you will get pointer released event </span>
@@ -514,7 +514,7 @@
 
 <p>Pay attention that zebkit UI components can have own implementations of appropriate UI events handlers. In this case don’t forget to call super implementation:</p>
 
-<div class="highlighter-rouge"><pre class="highlight"><code><span class="p">...</span>
+<div class="language-js highlighter-rouge"><pre class="highlight"><code><span class="p">...</span>
 <span class="kd">var</span> <span class="nx">comp</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">zebkit</span><span class="p">.</span><span class="nx">ui</span><span class="p">.</span><span class="nx">Button</span><span class="p">(</span><span class="s2">"Button"</span><span class="p">,</span> <span class="p">[</span>
     <span class="kd">function</span> <span class="nx">pointerReleased</span><span class="p">(</span><span class="nx">e</span><span class="p">)</span> <span class="p">{</span>
         <span class="c1">// here you will get pointer released event </span>
@@ -649,7 +649,7 @@ zebkit.require("ui", function(ui) {
 });  
 </script>
 
-<div class="highlighter-rouge"><pre class="highlight"><code><span class="nx">zebkit</span><span class="p">.</span><span class="nx">require</span><span class="p">(</span><span class="s2">"ui"</span><span class="p">,</span> <span class="kd">function</span><span class="p">(</span><span class="nx">ui</span><span class="p">)</span> <span class="p">{</span>
+<div class="language-js highlighter-rouge"><pre class="highlight"><code><span class="nx">zebkit</span><span class="p">.</span><span class="nx">require</span><span class="p">(</span><span class="s2">"ui"</span><span class="p">,</span> <span class="kd">function</span><span class="p">(</span><span class="nx">ui</span><span class="p">)</span> <span class="p">{</span>
     <span class="kd">var</span> <span class="nx">root</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">ui</span><span class="p">.</span><span class="nx">zCanvas</span><span class="p">(</span><span class="mi">400</span><span class="p">,</span> <span class="mi">300</span><span class="p">).</span><span class="nx">root</span><span class="p">;</span>
     <span class="nx">root</span><span class="p">.</span><span class="nx">setListLayout</span><span class="p">(</span><span class="mi">8</span><span class="p">);</span>
     <span class="nx">root</span><span class="p">.</span><span class="nx">setPadding</span><span class="p">(</span><span class="mi">8</span><span class="p">);</span>
@@ -712,7 +712,7 @@ zebkit.require("ui", "layout", function(ui, layout) {
 });  
 </script>
 
-<div class="highlighter-rouge"><pre class="highlight"><code><span class="nx">zebkit</span><span class="p">.</span><span class="nx">require</span><span class="p">(</span><span class="s2">"ui"</span><span class="p">,</span> <span class="s2">"layout"</span><span class="p">,</span> <span class="kd">function</span><span class="p">(</span><span class="nx">ui</span><span class="p">,</span> <span class="nx">layout</span><span class="p">)</span> <span class="p">{</span>
+<div class="language-js highlighter-rouge"><pre class="highlight"><code><span class="nx">zebkit</span><span class="p">.</span><span class="nx">require</span><span class="p">(</span><span class="s2">"ui"</span><span class="p">,</span> <span class="s2">"layout"</span><span class="p">,</span> <span class="kd">function</span><span class="p">(</span><span class="nx">ui</span><span class="p">,</span> <span class="nx">layout</span><span class="p">)</span> <span class="p">{</span>
     <span class="kd">var</span> <span class="nx">root</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">ui</span><span class="p">.</span><span class="nx">zCanvas</span><span class="p">(</span><span class="s2">"compositeComp1"</span><span class="p">,</span> <span class="mi">400</span><span class="p">,</span> <span class="mi">250</span><span class="p">).</span><span class="nx">root</span><span class="p">;</span>
     <span class="nx">root</span><span class="p">.</span><span class="nx">properties</span><span class="p">({</span>
         <span class="na">padding</span><span class="p">:</span> <span class="mi">8</span><span class="p">,</span> <span class="na">border</span><span class="p">:</span> <span class="s2">"plain"</span><span class="p">,</span>
@@ -766,7 +766,7 @@ zebkit.require("ui", "layout", function(ui, layout) {
 });  
 </script>
 
-<div class="highlighter-rouge"><pre class="highlight"><code><span class="nx">zebkit</span><span class="p">.</span><span class="nx">require</span><span class="p">(</span><span class="s2">"ui"</span><span class="p">,</span> <span class="s2">"layout"</span><span class="p">,</span> <span class="kd">function</span><span class="p">(</span><span class="nx">ui</span><span class="p">,</span> <span class="nx">layout</span><span class="p">)</span> <span class="p">{</span>
+<div class="language-js highlighter-rouge"><pre class="highlight"><code><span class="nx">zebkit</span><span class="p">.</span><span class="nx">require</span><span class="p">(</span><span class="s2">"ui"</span><span class="p">,</span> <span class="s2">"layout"</span><span class="p">,</span> <span class="kd">function</span><span class="p">(</span><span class="nx">ui</span><span class="p">,</span> <span class="nx">layout</span><span class="p">)</span> <span class="p">{</span>
     <span class="kd">var</span> <span class="nx">root</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">ui</span><span class="p">.</span><span class="nx">zCanvas</span><span class="p">(</span><span class="s2">"compositeComp2"</span><span class="p">,</span> <span class="mi">400</span><span class="p">,</span> <span class="mi">300</span><span class="p">).</span><span class="nx">root</span><span class="p">;</span>
     <span class="nx">root</span><span class="p">.</span><span class="nx">properties</span><span class="p">({</span>
         <span class="na">padding</span><span class="p">:</span> <span class="mi">8</span><span class="p">,</span> <span class="na">border</span><span class="p">:</span> <span class="s2">"plain"</span><span class="p">,</span>
@@ -792,7 +792,7 @@ zebkit.require("ui", "layout", function(ui, layout) {
 
 <p>The manager is accessible via <strong>“zebkit.ui.events”</strong> variable and provides possibility to register global events listeners. Global means the handlers  are getting all UI event or events that have happened. To register and unregister global UI events handlers follow the standard pattern:</p>
 
-<div class="highlighter-rouge"><pre class="highlight"><code><span class="c1">// listen all pointer pressed events for all actiev UI components</span>
+<div class="language-js highlighter-rouge"><pre class="highlight"><code><span class="c1">// listen all pointer pressed events for all actiev UI components</span>
 <span class="nx">zebkit</span><span class="p">.</span><span class="nx">ui</span><span class="p">.</span><span class="nx">events</span><span class="p">.</span><span class="nx">on</span><span class="p">(</span><span class="s2">"pointerPressed"</span><span class="p">,</span> <span class="kd">function</span><span class="p">(</span><span class="nx">e</span><span class="p">)</span> <span class="p">{</span>
     <span class="p">...</span>
 <span class="p">});</span>
@@ -847,7 +847,7 @@ zebkit.require("ui", function(ui) {
 });  
 </script>
 
-<div class="highlighter-rouge"><pre class="highlight"><code><span class="nx">zebkit</span><span class="p">.</span><span class="nx">require</span><span class="p">(</span><span class="s2">"ui"</span><span class="p">,</span> <span class="kd">function</span><span class="p">(</span><span class="nx">ui</span><span class="p">)</span> <span class="p">{</span>
+<div class="language-js highlighter-rouge"><pre class="highlight"><code><span class="nx">zebkit</span><span class="p">.</span><span class="nx">require</span><span class="p">(</span><span class="s2">"ui"</span><span class="p">,</span> <span class="kd">function</span><span class="p">(</span><span class="nx">ui</span><span class="p">)</span> <span class="p">{</span>
     <span class="kd">var</span> <span class="nx">root</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">ui</span><span class="p">.</span><span class="nx">zCanvas</span><span class="p">(</span><span class="s2">"globalEvents"</span><span class="p">,</span> <span class="mi">400</span><span class="p">,</span> <span class="mi">300</span><span class="p">).</span><span class="nx">root</span><span class="p">;</span>
     <span class="nx">root</span><span class="p">.</span><span class="nx">setRasterLayout</span><span class="p">(</span><span class="kc">true</span><span class="p">);</span>
     <span class="nx">root</span><span class="p">.</span><span class="nx">setPadding</span><span class="p">(</span><span class="mi">8</span><span class="p">);</span>

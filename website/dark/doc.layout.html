@@ -32,7 +32,7 @@
     <!-- RSS -->
     <link rel="alternate" type="application/rss+xml" title="RSS" href="/atom.xml">
 
-    <script type="text/javascript" src="/build/zebkit.js?11072017">  </script>
+    <script type="text/javascript" src="/build/zebkit.js?25082018">  </script>
 
     <script type="text/javascript">
         zebkit.ui.config("theme", "dark");
@@ -335,7 +335,7 @@
 
             <tr>
                 <td align="right" colspan="2" style="border-width: 0px; border-top: 1px solid orange;">
-                    <small><a href="mailto:ask@zebkit.org">Andrei Vishneuski (c), 2017</a></small>
+                    <small><a href="mailto:ask@zebkit.org">Andrei Vishneuski (c), 2018</a></small>
                 </td>
             </tr>
 
@@ -422,7 +422,7 @@
 
 <p>A layout manager can be applied to any Zebra UI component by calling “setLayout(layout)” method. Additionally children UI components can specify extra parameter called constraints that is specific for a particular layout manager. It is can be done either by setting a children component “constraints” field or during insertion of the component to the parent component:</p>
 
-<div class="highlighter-rouge"><pre class="highlight"><code><span class="nx">zebkit</span><span class="p">.</span><span class="nx">require</span><span class="p">(</span><span class="s2">"ui"</span><span class="p">,</span> <span class="kd">function</span><span class="p">(</span><span class="nx">ui</span><span class="p">)</span> <span class="p">{</span>
+<div class="language-js highlighter-rouge"><pre class="highlight"><code><span class="nx">zebkit</span><span class="p">.</span><span class="nx">require</span><span class="p">(</span><span class="s2">"ui"</span><span class="p">,</span> <span class="kd">function</span><span class="p">(</span><span class="nx">ui</span><span class="p">)</span> <span class="p">{</span>
     <span class="c1">// create panel</span>
     <span class="kd">var</span> <span class="nx">p</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">ui</span><span class="p">.</span><span class="nx">Panel</span><span class="p">();</span>
     <span class="c1">// set layout manager for the panel</span>
@@ -444,7 +444,7 @@
 
 <p>Nevertheless zebkit provides rich set of different predefined layout managers, it makes sense for better understanding to start from developing an own Zebra layout manager. It should help to discover how simple the idea is. As an example, let’s develop layout manager that orders components along parent component diagonal:</p>
 
-<div class="highlighter-rouge"><pre class="highlight"><code><span class="nx">zebkit</span><span class="p">.</span><span class="kr">package</span><span class="p">(</span><span class="s2">"ui.demo"</span><span class="p">,</span> <span class="kd">function</span><span class="p">(</span><span class="nx">pkg</span><span class="p">,</span> <span class="nx">Class</span><span class="p">)</span> <span class="p">{</span>
+<div class="language-js highlighter-rouge"><pre class="highlight"><code><span class="nx">zebkit</span><span class="p">.</span><span class="kr">package</span><span class="p">(</span><span class="s2">"ui.demo"</span><span class="p">,</span> <span class="kd">function</span><span class="p">(</span><span class="nx">pkg</span><span class="p">,</span> <span class="nx">Class</span><span class="p">)</span> <span class="p">{</span>
     <span class="c1">// declare layout manager class</span>
     <span class="nx">pkg</span><span class="p">.</span><span class="nx">DiagLayout</span> <span class="o">=</span> <span class="nx">Class</span><span class="p">(</span><span class="nx">zebkit</span><span class="p">.</span><span class="nx">layout</span><span class="p">.</span><span class="nx">Layout</span><span class="p">,[</span>
         <span class="c1">// define what preferred size the given "target" component </span>
@@ -536,7 +536,7 @@ zebkit.package("ui.demo", function(pkg, Class) {
     </tr>
 </table>
 
-<div class="highlighter-rouge"><pre class="highlight"><code><span class="nx">zebkit</span><span class="p">.</span><span class="nx">require</span><span class="p">(</span><span class="s2">"ui"</span><span class="p">,</span> <span class="s2">"ui.demo"</span><span class="p">,</span> <span class="kd">function</span><span class="p">(</span><span class="nx">ui</span><span class="p">,</span> <span class="nx">demo</span><span class="p">)</span> <span class="p">{</span>
+<div class="language-js highlighter-rouge"><pre class="highlight"><code><span class="nx">zebkit</span><span class="p">.</span><span class="nx">require</span><span class="p">(</span><span class="s2">"ui"</span><span class="p">,</span> <span class="s2">"ui.demo"</span><span class="p">,</span> <span class="kd">function</span><span class="p">(</span><span class="nx">ui</span><span class="p">,</span> <span class="nx">demo</span><span class="p">)</span> <span class="p">{</span>
     <span class="kd">var</span> <span class="nx">r</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">ui</span><span class="p">.</span><span class="nx">zCanvas</span><span class="p">(</span><span class="s2">"layoutSampleDiag"</span><span class="p">,</span> <span class="mi">200</span><span class="p">,</span><span class="mi">200</span><span class="p">).</span><span class="nx">root</span><span class="p">;</span>
     <span class="c1">// set developed above diagonal layout manager</span>
     <span class="nx">r</span><span class="p">.</span><span class="nx">setLayout</span><span class="p">(</span><span class="k">new</span> <span class="nx">demo</span><span class="p">.</span><span class="nx">DiagLayout</span><span class="p">());</span>
@@ -585,7 +585,7 @@ zebkit.package("ui.demo", function(pkg, Class) {
     </tr>
 </table>
 
-<div class="highlighter-rouge"><pre class="highlight"><code><span class="nx">zebkit</span><span class="p">.</span><span class="nx">require</span><span class="p">(</span><span class="s2">"ui"</span><span class="p">,</span> <span class="kd">function</span><span class="p">(</span><span class="nx">ui</span><span class="p">)</span> <span class="p">{</span>
+<div class="language-js highlighter-rouge"><pre class="highlight"><code><span class="nx">zebkit</span><span class="p">.</span><span class="nx">require</span><span class="p">(</span><span class="s2">"ui"</span><span class="p">,</span> <span class="kd">function</span><span class="p">(</span><span class="nx">ui</span><span class="p">)</span> <span class="p">{</span>
     <span class="kd">var</span> <span class="nx">r</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">ui</span><span class="p">.</span><span class="nx">zCanvas</span><span class="p">(</span><span class="s2">"layoutSample1"</span><span class="p">,</span> <span class="mi">300</span><span class="p">,</span> <span class="mi">300</span><span class="p">).</span><span class="nx">root</span><span class="p">;</span>
     <span class="nx">r</span><span class="p">.</span><span class="nx">setBorder</span><span class="p">(</span><span class="s2">"plain"</span><span class="p">);</span>
     <span class="c1">// set stack layout manager</span>
@@ -644,7 +644,7 @@ zebkit.require("ui", function(ui) {
     </tr>
 </table>
 
-<div class="highlighter-rouge"><pre class="highlight"><code><span class="nx">zebkit</span><span class="p">.</span><span class="nx">require</span><span class="p">(</span><span class="s2">"ui"</span><span class="p">,</span> <span class="kd">function</span><span class="p">(</span><span class="nx">ui</span><span class="p">)</span> <span class="p">{</span>
+<div class="language-js highlighter-rouge"><pre class="highlight"><code><span class="nx">zebkit</span><span class="p">.</span><span class="nx">require</span><span class="p">(</span><span class="s2">"ui"</span><span class="p">,</span> <span class="kd">function</span><span class="p">(</span><span class="nx">ui</span><span class="p">)</span> <span class="p">{</span>
     <span class="kd">var</span> <span class="nx">r</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">ui</span><span class="p">.</span><span class="nx">zCanvas</span><span class="p">(</span><span class="s2">"layoutSampleBorder"</span><span class="p">,</span> <span class="mi">600</span><span class="p">,</span><span class="mi">350</span><span class="p">).</span><span class="nx">root</span><span class="p">;</span>
     <span class="c1">// set border layout manager</span>
     <span class="nx">r</span><span class="p">.</span><span class="nx">setBorderLayout</span><span class="p">();</span>
@@ -681,7 +681,7 @@ zebkit.require("ui", function(ui) {
     </tr>
 </table>
 
-<div class="highlighter-rouge"><pre class="highlight"><code><span class="nx">zebkit</span><span class="p">.</span><span class="nx">require</span><span class="p">(</span><span class="s2">"ui"</span><span class="p">,</span><span class="s2">"layout"</span><span class="p">,</span><span class="kd">function</span><span class="p">(</span><span class="nx">ui</span><span class="p">,</span> <span class="nx">lay</span><span class="p">)</span> <span class="p">{</span>
+<div class="language-js highlighter-rouge"><pre class="highlight"><code><span class="nx">zebkit</span><span class="p">.</span><span class="nx">require</span><span class="p">(</span><span class="s2">"ui"</span><span class="p">,</span><span class="s2">"layout"</span><span class="p">,</span><span class="kd">function</span><span class="p">(</span><span class="nx">ui</span><span class="p">,</span> <span class="nx">lay</span><span class="p">)</span> <span class="p">{</span>
     <span class="kd">var</span> <span class="nx">r</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">ui</span><span class="p">.</span><span class="nx">zCanvas</span><span class="p">(</span><span class="s2">"percentLayout1"</span><span class="p">,</span> <span class="mi">400</span><span class="p">,</span> <span class="mi">250</span><span class="p">).</span><span class="nx">root</span><span class="p">;</span>
     <span class="nx">r</span><span class="p">.</span><span class="nx">setBorder</span><span class="p">(</span><span class="s2">"plain"</span><span class="p">);</span>
 
@@ -729,7 +729,7 @@ zebkit.require("ui", function(ui) {
     </tr>
 </table>
 
-<div class="highlighter-rouge"><pre class="highlight"><code><span class="nx">zebkit</span><span class="p">.</span><span class="nx">require</span><span class="p">(</span><span class="s2">"ui"</span><span class="p">,</span><span class="s2">"layout"</span><span class="p">,</span><span class="kd">function</span><span class="p">(</span><span class="nx">ui</span><span class="p">,</span> <span class="nx">lay</span><span class="p">)</span> <span class="p">{</span>
+<div class="language-js highlighter-rouge"><pre class="highlight"><code><span class="nx">zebkit</span><span class="p">.</span><span class="nx">require</span><span class="p">(</span><span class="s2">"ui"</span><span class="p">,</span><span class="s2">"layout"</span><span class="p">,</span><span class="kd">function</span><span class="p">(</span><span class="nx">ui</span><span class="p">,</span> <span class="nx">lay</span><span class="p">)</span> <span class="p">{</span>
     <span class="kd">var</span> <span class="nx">r</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">ui</span><span class="p">.</span><span class="nx">zCanvas</span><span class="p">(</span><span class="s2">"percentLayout2"</span><span class="p">,</span> <span class="mi">400</span><span class="p">,</span> <span class="mi">200</span><span class="p">).</span><span class="nx">root</span><span class="p">;</span>
     <span class="nx">r</span><span class="p">.</span><span class="nx">setBorder</span><span class="p">(</span><span class="s2">"plain"</span><span class="p">);</span>
 
@@ -777,7 +777,7 @@ zebkit.require("ui", function(ui) {
     </tr>
 </table>
 
-<div class="highlighter-rouge"><pre class="highlight"><code><span class="nx">zebkit</span><span class="p">.</span><span class="nx">require</span><span class="p">(</span><span class="s2">"ui"</span><span class="p">,</span><span class="s2">"layout"</span><span class="p">,</span><span class="kd">function</span><span class="p">(</span><span class="nx">ui</span><span class="p">,</span> <span class="nx">lay</span><span class="p">)</span> <span class="p">{</span>
+<div class="language-js highlighter-rouge"><pre class="highlight"><code><span class="nx">zebkit</span><span class="p">.</span><span class="nx">require</span><span class="p">(</span><span class="s2">"ui"</span><span class="p">,</span><span class="s2">"layout"</span><span class="p">,</span><span class="kd">function</span><span class="p">(</span><span class="nx">ui</span><span class="p">,</span> <span class="nx">lay</span><span class="p">)</span> <span class="p">{</span>
   <span class="kd">var</span> <span class="nx">r</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">ui</span><span class="p">.</span><span class="nx">zCanvas</span><span class="p">(</span><span class="s2">"percentLayout3"</span><span class="p">,</span> <span class="mi">400</span><span class="p">,</span><span class="mi">200</span><span class="p">).</span><span class="nx">root</span><span class="p">;</span>
   <span class="nx">r</span><span class="p">.</span><span class="nx">setBorder</span><span class="p">(</span><span class="s2">"plain"</span><span class="p">);</span>
 
@@ -825,7 +825,7 @@ zebkit.require("ui", function(ui) {
     </tr>
 </table>
 
-<div class="highlighter-rouge"><pre class="highlight"><code><span class="nx">zebkit</span><span class="p">.</span><span class="nx">require</span><span class="p">(</span><span class="s2">"ui"</span><span class="p">,</span><span class="s2">"layout"</span><span class="p">,</span><span class="kd">function</span><span class="p">(</span><span class="nx">ui</span><span class="p">,</span> <span class="nx">lay</span><span class="p">)</span> <span class="p">{</span>
+<div class="language-js highlighter-rouge"><pre class="highlight"><code><span class="nx">zebkit</span><span class="p">.</span><span class="nx">require</span><span class="p">(</span><span class="s2">"ui"</span><span class="p">,</span><span class="s2">"layout"</span><span class="p">,</span><span class="kd">function</span><span class="p">(</span><span class="nx">ui</span><span class="p">,</span> <span class="nx">lay</span><span class="p">)</span> <span class="p">{</span>
     <span class="kd">var</span> <span class="nx">r</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">ui</span><span class="p">.</span><span class="nx">zCanvas</span><span class="p">(</span><span class="s2">"percentLayout4"</span><span class="p">,</span> <span class="mi">400</span><span class="p">,</span><span class="mi">200</span><span class="p">).</span><span class="nx">root</span><span class="p">;</span>
     <span class="nx">r</span><span class="p">.</span><span class="nx">setBorder</span><span class="p">(</span><span class="s2">"plain"</span><span class="p">);</span>
 
@@ -877,7 +877,7 @@ zebkit.require("ui", function(ui) {
     </tr>
 </table>
 
-<div class="highlighter-rouge"><pre class="highlight"><code><span class="nx">zebkit</span><span class="p">.</span><span class="nx">require</span><span class="p">(</span><span class="s2">"ui"</span><span class="p">,</span> <span class="kd">function</span><span class="p">(</span><span class="nx">ui</span><span class="p">)</span> <span class="p">{</span>
+<div class="language-js highlighter-rouge"><pre class="highlight"><code><span class="nx">zebkit</span><span class="p">.</span><span class="nx">require</span><span class="p">(</span><span class="s2">"ui"</span><span class="p">,</span> <span class="kd">function</span><span class="p">(</span><span class="nx">ui</span><span class="p">)</span> <span class="p">{</span>
     <span class="kd">var</span> <span class="nx">r</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">ui</span><span class="p">.</span><span class="nx">zCanvas</span><span class="p">(</span><span class="s2">"flowLayout1"</span><span class="p">,</span> <span class="mi">400</span><span class="p">,</span> <span class="mi">200</span><span class="p">).</span><span class="nx">root</span><span class="p">;</span>
     <span class="nx">r</span><span class="p">.</span><span class="nx">setBorder</span><span class="p">(</span><span class="s2">"plain"</span><span class="p">);</span>
 
@@ -922,7 +922,7 @@ zebkit.require("ui", function(ui) {
     </tr>
 </table>
 
-<div class="highlighter-rouge"><pre class="highlight"><code><span class="nx">zebkit</span><span class="p">.</span><span class="nx">require</span><span class="p">(</span><span class="s2">"ui"</span><span class="p">,</span> <span class="kd">function</span><span class="p">(</span><span class="nx">ui</span><span class="p">)</span> <span class="p">{</span>
+<div class="language-js highlighter-rouge"><pre class="highlight"><code><span class="nx">zebkit</span><span class="p">.</span><span class="nx">require</span><span class="p">(</span><span class="s2">"ui"</span><span class="p">,</span> <span class="kd">function</span><span class="p">(</span><span class="nx">ui</span><span class="p">)</span> <span class="p">{</span>
     <span class="kd">var</span> <span class="nx">r</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">ui</span><span class="p">.</span><span class="nx">zCanvas</span><span class="p">(</span><span class="s2">"flowLayout2"</span><span class="p">,</span> <span class="mi">400</span><span class="p">,</span><span class="mi">200</span><span class="p">).</span><span class="nx">root</span><span class="p">;</span>
     <span class="nx">r</span><span class="p">.</span><span class="nx">setBorder</span><span class="p">(</span><span class="s2">"plain"</span><span class="p">);</span>
     <span class="c1">// set flow layout with vertical components</span>
@@ -966,7 +966,7 @@ zebkit.require("ui", function(ui) {
     </tr>
 </table>
 
-<div class="highlighter-rouge"><pre class="highlight"><code><span class="nx">zebkit</span><span class="p">.</span><span class="nx">require</span><span class="p">(</span><span class="s2">"ui"</span><span class="p">,</span> <span class="kd">function</span><span class="p">(</span><span class="nx">ui</span><span class="p">)</span> <span class="p">{</span>
+<div class="language-js highlighter-rouge"><pre class="highlight"><code><span class="nx">zebkit</span><span class="p">.</span><span class="nx">require</span><span class="p">(</span><span class="s2">"ui"</span><span class="p">,</span> <span class="kd">function</span><span class="p">(</span><span class="nx">ui</span><span class="p">)</span> <span class="p">{</span>
     <span class="kd">var</span> <span class="nx">r</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">ui</span><span class="p">.</span><span class="nx">zCanvas</span><span class="p">(</span><span class="s2">"flowLayout3"</span><span class="p">,</span> <span class="mi">400</span><span class="p">,</span><span class="mi">200</span><span class="p">).</span><span class="nx">root</span><span class="p">;</span>
     <span class="nx">r</span><span class="p">.</span><span class="nx">setBorder</span><span class="p">(</span><span class="s2">"plain"</span><span class="p">);</span>
     <span class="c1">// set flow layout with vertical components</span>
@@ -1010,7 +1010,7 @@ zebkit.require("ui", function(ui) {
     </tr>
 </table>
 
-<div class="highlighter-rouge"><pre class="highlight"><code><span class="nx">zebkit</span><span class="p">.</span><span class="nx">require</span><span class="p">(</span><span class="s2">"ui"</span><span class="p">,</span> <span class="kd">function</span><span class="p">(</span><span class="nx">ui</span><span class="p">)</span> <span class="p">{</span>
+<div class="language-js highlighter-rouge"><pre class="highlight"><code><span class="nx">zebkit</span><span class="p">.</span><span class="nx">require</span><span class="p">(</span><span class="s2">"ui"</span><span class="p">,</span> <span class="kd">function</span><span class="p">(</span><span class="nx">ui</span><span class="p">)</span> <span class="p">{</span>
     <span class="kd">var</span> <span class="nx">r</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">ui</span><span class="p">.</span><span class="nx">zCanvas</span><span class="p">(</span><span class="s2">"flowLayout4"</span><span class="p">,</span> <span class="mi">200</span><span class="p">,</span><span class="mi">200</span><span class="p">).</span><span class="nx">root</span><span class="p">;</span>
     <span class="nx">r</span><span class="p">.</span><span class="nx">setBorder</span><span class="p">(</span><span class="s2">"plain"</span><span class="p">);</span>
     <span class="c1">// set flow layout with vertical components</span>
@@ -1054,7 +1054,7 @@ zebkit.require("ui", function(ui) {
     </tr>
 </table>
 
-<div class="highlighter-rouge"><pre class="highlight"><code><span class="nx">zebkit</span><span class="p">.</span><span class="nx">require</span><span class="p">(</span><span class="s2">"ui"</span><span class="p">,</span> <span class="kd">function</span><span class="p">(</span><span class="nx">ui</span><span class="p">)</span> <span class="p">{</span>
+<div class="language-js highlighter-rouge"><pre class="highlight"><code><span class="nx">zebkit</span><span class="p">.</span><span class="nx">require</span><span class="p">(</span><span class="s2">"ui"</span><span class="p">,</span> <span class="kd">function</span><span class="p">(</span><span class="nx">ui</span><span class="p">)</span> <span class="p">{</span>
     <span class="kd">var</span> <span class="nx">r</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">ui</span><span class="p">.</span><span class="nx">zCanvas</span><span class="p">(</span><span class="s2">"flowLayout5"</span><span class="p">,</span> <span class="mi">600</span><span class="p">,</span><span class="mi">120</span><span class="p">).</span><span class="nx">root</span><span class="p">;</span>
     <span class="nx">r</span><span class="p">.</span><span class="nx">setBorder</span><span class="p">(</span><span class="s2">"plain"</span><span class="p">);</span>
     <span class="c1">// set flow layout with horizontal components</span>
@@ -1098,7 +1098,7 @@ zebkit.require("ui", function(ui) {
     </tr>
 </table>
 
-<div class="highlighter-rouge"><pre class="highlight"><code><span class="nx">zebkit</span><span class="p">.</span><span class="nx">require</span><span class="p">(</span><span class="s2">"ui"</span><span class="p">,</span> <span class="kd">function</span><span class="p">(</span><span class="nx">ui</span><span class="p">)</span> <span class="p">{</span>
+<div class="language-js highlighter-rouge"><pre class="highlight"><code><span class="nx">zebkit</span><span class="p">.</span><span class="nx">require</span><span class="p">(</span><span class="s2">"ui"</span><span class="p">,</span> <span class="kd">function</span><span class="p">(</span><span class="nx">ui</span><span class="p">)</span> <span class="p">{</span>
     <span class="kd">var</span> <span class="nx">r</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">ui</span><span class="p">.</span><span class="nx">zCanvas</span><span class="p">(</span><span class="s2">"flowLayout6"</span><span class="p">,</span> <span class="mi">600</span><span class="p">,</span><span class="mi">120</span><span class="p">).</span><span class="nx">root</span><span class="p">;</span>
     <span class="nx">r</span><span class="p">.</span><span class="nx">setBorder</span><span class="p">(</span><span class="s2">"plain"</span><span class="p">);</span>
     <span class="c1">// set flow layout with horizontal components</span>
@@ -1142,7 +1142,7 @@ zebkit.require("ui", function(ui) {
     </tr>
 </table>
 
-<div class="highlighter-rouge"><pre class="highlight"><code><span class="nx">zebkit</span><span class="p">.</span><span class="nx">require</span><span class="p">(</span><span class="s2">"ui"</span><span class="p">,</span> <span class="kd">function</span><span class="p">(</span><span class="nx">ui</span><span class="p">)</span> <span class="p">{</span>
+<div class="language-js highlighter-rouge"><pre class="highlight"><code><span class="nx">zebkit</span><span class="p">.</span><span class="nx">require</span><span class="p">(</span><span class="s2">"ui"</span><span class="p">,</span> <span class="kd">function</span><span class="p">(</span><span class="nx">ui</span><span class="p">)</span> <span class="p">{</span>
     <span class="kd">var</span> <span class="nx">r</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">ui</span><span class="p">.</span><span class="nx">zCanvas</span><span class="p">(</span><span class="s2">"flowLayout7"</span><span class="p">,</span> <span class="mi">600</span><span class="p">,</span><span class="mi">120</span><span class="p">).</span><span class="nx">root</span><span class="p">;</span>
     <span class="nx">r</span><span class="p">.</span><span class="nx">setBorder</span><span class="p">(</span><span class="s2">"plain"</span><span class="p">);</span>
     <span class="c1">// set flow layout with horizontal components</span>
@@ -1186,7 +1186,7 @@ zebkit.require("ui", function(ui) {
     </tr>
 </table>
 
-<div class="highlighter-rouge"><pre class="highlight"><code><span class="nx">zebkit</span><span class="p">.</span><span class="nx">require</span><span class="p">(</span><span class="s2">"ui"</span><span class="p">,</span> <span class="kd">function</span><span class="p">(</span><span class="nx">ui</span><span class="p">)</span> <span class="p">{</span>
+<div class="language-js highlighter-rouge"><pre class="highlight"><code><span class="nx">zebkit</span><span class="p">.</span><span class="nx">require</span><span class="p">(</span><span class="s2">"ui"</span><span class="p">,</span> <span class="kd">function</span><span class="p">(</span><span class="nx">ui</span><span class="p">)</span> <span class="p">{</span>
     <span class="kd">var</span> <span class="nx">r</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">ui</span><span class="p">.</span><span class="nx">zCanvas</span><span class="p">(</span><span class="s2">"flowLayout8"</span><span class="p">,</span> <span class="mi">600</span><span class="p">,</span><span class="mi">120</span><span class="p">).</span><span class="nx">root</span><span class="p">;</span>
     <span class="nx">r</span><span class="p">.</span><span class="nx">setBorder</span><span class="p">(</span><span class="s2">"plain"</span><span class="p">);</span>
     <span class="c1">// set flow layout with horizontal components</span>
@@ -1230,7 +1230,7 @@ zebkit.require("ui", function(ui) {
     </tr>
 </table>
 
-<div class="highlighter-rouge"><pre class="highlight"><code><span class="nx">zebkit</span><span class="p">.</span><span class="nx">require</span><span class="p">(</span><span class="s2">"ui"</span><span class="p">,</span> <span class="kd">function</span><span class="p">(</span><span class="nx">ui</span><span class="p">)</span> <span class="p">{</span>
+<div class="language-js highlighter-rouge"><pre class="highlight"><code><span class="nx">zebkit</span><span class="p">.</span><span class="nx">require</span><span class="p">(</span><span class="s2">"ui"</span><span class="p">,</span> <span class="kd">function</span><span class="p">(</span><span class="nx">ui</span><span class="p">)</span> <span class="p">{</span>
     <span class="kd">var</span> <span class="nx">r</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">ui</span><span class="p">.</span><span class="nx">zCanvas</span><span class="p">(</span><span class="s2">"flowLayout9"</span><span class="p">,</span> <span class="mi">600</span><span class="p">,</span><span class="mi">120</span><span class="p">).</span><span class="nx">root</span><span class="p">;</span>
     <span class="nx">r</span><span class="p">.</span><span class="nx">setBorder</span><span class="p">(</span><span class="s2">"plain"</span><span class="p">);</span>
     <span class="c1">// set flow layout with horizontal components</span>

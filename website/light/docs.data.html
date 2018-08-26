@@ -32,7 +32,7 @@
     <!-- RSS -->
     <link rel="alternate" type="application/rss+xml" title="RSS" href="/atom.xml">
 
-    <script type="text/javascript" src="/build/zebkit.js?11072017">  </script>
+    <script type="text/javascript" src="/build/zebkit.js?25082018">  </script>
 
     <script type="text/javascript">
         zebkit.ui.config("theme", "light");
@@ -356,7 +356,7 @@
 
             <tr>
                 <td align="right" colspan="2" style="border-width: 0px; border-top: 1px solid orange;">
-                    <small><a href="mailto:ask@zebkit.org">Andrei Vishneuski (c), 2017</a></small>
+                    <small><a href="mailto:ask@zebkit.org">Andrei Vishneuski (c), 2018</a></small>
                 </td>
             </tr>
 
@@ -441,7 +441,7 @@ zebkit.data.SingleLineTxt
 <tr><td>
 zebkit.data.Matrix
 </td><td>
-      <div class="highlighter-rouge"><pre class="highlight"><code><span class="c1">// 2 rows 3 cols matrix</span>
+      <div class="language-js highlighter-rouge"><pre class="highlight"><code><span class="c1">// 2 rows 3 cols matrix</span>
 <span class="p">[</span> 
   <span class="p">[</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">,</span><span class="mi">3</span><span class="p">],</span>
   <span class="p">[</span><span class="mi">3</span><span class="p">,</span><span class="mi">4</span><span class="p">,</span><span class="mi">5</span><span class="p">]</span>
@@ -453,7 +453,7 @@ zebkit.data.Matrix
 <tr><td>
 zebkit.data.TreeModel
 </td><td>
-      <div class="highlighter-rouge"><pre class="highlight"><code><span class="p">{</span><span class="w">
+      <div class="language-json highlighter-rouge"><pre class="highlight"><code><span class="p">{</span><span class="w">
   </span><span class="nt">"value"</span><span class="p">:</span><span class="w"> </span><span class="s2">"tree item"</span><span class="p">,</span><span class="w">
   </span><span class="nt">"kids"</span><span class="w"> </span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s2">"Subitem 1"</span><span class="p">,</span><span class="w"> </span><span class="s2">"Subitem 2"</span><span class="w"> </span><span class="p">]</span><span class="w">
 </span><span class="p">}</span><span class="w">
@@ -466,7 +466,7 @@ zebkit.data.TreeModel
 
 <h2 id="listmodel-zebkitdatalistmodel">ListModel (zebkit.data.ListModel)</h2>
 
-<div class="highlighter-rouge"><pre class="highlight"><code><span class="c1">// create list model</span>
+<div class="language-js highlighter-rouge"><pre class="highlight"><code><span class="c1">// create list model</span>
 <span class="kd">var</span> <span class="nx">l</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">zebkit</span><span class="p">.</span><span class="nx">data</span><span class="p">.</span><span class="nx">ListModel</span><span class="p">();</span>
  
 <span class="c1">// add three elements into the list</span>
@@ -483,7 +483,7 @@ zebkit.data.TreeModel
 
 <h2 id="matrix-zebkitdatamatrix">Matrix (zebkit.data.Matrix)</h2>
 
-<div class="highlighter-rouge"><pre class="highlight"><code><span class="c1">// create 2 x 2 matrix model</span>
+<div class="language-js highlighter-rouge"><pre class="highlight"><code><span class="c1">// create 2 x 2 matrix model</span>
 <span class="kd">var</span> <span class="nx">m</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">zebkit</span><span class="p">.</span><span class="nx">data</span><span class="p">.</span><span class="nx">Matrix</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span><span class="mi">2</span><span class="p">);</span>
  
 <span class="c1">// fill all cells of the matrix with values</span>
@@ -507,7 +507,7 @@ zebkit.data.TreeModel
 
 <p>JavaScript tree model:</p>
 
-<div class="highlighter-rouge"><pre class="highlight"><code><span class="p">{</span><span class="w">
+<div class="language-json highlighter-rouge"><pre class="highlight"><code><span class="p">{</span><span class="w">
    </span><span class="nt">"value"</span><span class="p">:</span><span class="w"> </span><span class="s2">"Root"</span><span class="p">,</span><span class="w">
    </span><span class="nt">"kids"</span><span class="w"> </span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="w">
       </span><span class="s2">"Item 1"</span><span class="p">,</span><span class="w">
@@ -522,7 +522,7 @@ zebkit.data.TreeModel
 
 <p>Tree model structure:</p>
 
-<div class="highlighter-rouge"><pre class="highlight"><code>Root
+<div class="language-bash highlighter-rouge"><pre class="highlight"><code>Root
  |
  +-- Item 1
  +-- Item 2
@@ -534,7 +534,7 @@ zebkit.data.TreeModel
 
 <p>Find simple example of tree model usage:</p>
 
-<div class="highlighter-rouge"><pre class="highlight"><code><span class="c1">// create tree model</span>
+<div class="language-js highlighter-rouge"><pre class="highlight"><code><span class="c1">// create tree model</span>
 <span class="c1">// Root</span>
 <span class="c1">//  +-- Item 1</span>
 <span class="c1">//  +-- Item 2</span>
@@ -573,7 +573,7 @@ zebkit.data.TreeModel
 
 <p>Simple example of tree model usage:</p>
 
-<div class="highlighter-rouge"><pre class="highlight"><code><span class="c1">// create three lines text model</span>
+<div class="language-js highlighter-rouge"><pre class="highlight"><code><span class="c1">// create three lines text model</span>
 <span class="kd">var</span> <span class="nx">t</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">zebkit</span><span class="p">.</span><span class="nx">data</span><span class="p">.</span><span class="nx">Text</span><span class="p">(</span><span class="s2">"One\nTwo\nThree"</span><span class="p">);</span>
  
 <span class="c1">// list text model lines</span>

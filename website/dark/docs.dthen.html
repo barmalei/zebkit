@@ -32,7 +32,7 @@
     <!-- RSS -->
     <link rel="alternate" type="application/rss+xml" title="RSS" href="/atom.xml">
 
-    <script type="text/javascript" src="/build/zebkit.js?11072017">  </script>
+    <script type="text/javascript" src="/build/zebkit.js?25082018">  </script>
 
     <script type="text/javascript">
         zebkit.ui.config("theme", "dark");
@@ -356,7 +356,7 @@
 
             <tr>
                 <td align="right" colspan="2" style="border-width: 0px; border-top: 1px solid orange;">
-                    <small><a href="mailto:ask@zebkit.org">Andrei Vishneuski (c), 2017</a></small>
+                    <small><a href="mailto:ask@zebkit.org">Andrei Vishneuski (c), 2018</a></small>
                 </td>
             </tr>
 
@@ -418,7 +418,7 @@
 
 <p><strong>Simply run a sequence of methods.</strong> No “reject” or “resolve” callbacks are expected to be called:</p>
 
-<div class="highlighter-rouge"><pre class="highlight"><code><span class="k">new</span> <span class="nx">zebkit</span><span class="p">.</span><span class="nx">DoIt</span><span class="p">().</span><span class="nx">then</span><span class="p">(</span><span class="kd">function</span><span class="p">()</span> <span class="p">{</span>
+<div class="language-js highlighter-rouge"><pre class="highlight"><code><span class="k">new</span> <span class="nx">zebkit</span><span class="p">.</span><span class="nx">DoIt</span><span class="p">().</span><span class="nx">then</span><span class="p">(</span><span class="kd">function</span><span class="p">()</span> <span class="p">{</span>
     <span class="c1">// first executed method</span>
     <span class="k">return</span> <span class="mi">10</span><span class="p">;</span>
 <span class="p">}).</span><span class="nx">then</span><span class="p">(</span><span class="kd">function</span><span class="p">(</span><span class="nx">arg</span><span class="p">)</span> <span class="p">{</span>
@@ -435,7 +435,7 @@
 
 <p><strong>Run methods in an order you add it.</strong> Synchronous or asynchronous methods can be combined in the executed sequence where every next step is run only when previous one has been completed:</p>
 
-<div class="highlighter-rouge"><pre class="highlight"><code><span class="kd">var</span> <span class="nx">rn</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">zebkit</span><span class="p">.</span><span class="nx">DoIt</span><span class="p">().</span><span class="nx">then</span><span class="p">(</span><span class="kd">function</span><span class="p">()</span> <span class="p">{</span>
+<div class="language-js highlighter-rouge"><pre class="highlight"><code><span class="kd">var</span> <span class="nx">rn</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">zebkit</span><span class="p">.</span><span class="nx">DoIt</span><span class="p">().</span><span class="nx">then</span><span class="p">(</span><span class="kd">function</span><span class="p">()</span> <span class="p">{</span>
     <span class="c1">// first executed method</span>
     <span class="p">...</span>
 <span class="p">}).</span><span class="nx">then</span><span class="p">(</span><span class="kd">function</span><span class="p">(</span><span class="nx">arg</span><span class="p">)</span> <span class="p">{</span> <span class="c1">// run asynchronous method</span>
@@ -457,7 +457,7 @@
 
 <p><strong>Embedded sequences are possible.</strong> Embedded execution methods sequences can be useful to make your code more readable. Embedded sequences don’t share its result with outer sequence:</p>
 
-<div class="highlighter-rouge"><pre class="highlight"><code><span class="k">new</span> <span class="nx">zebkit</span><span class="p">.</span><span class="nx">DoIt</span><span class="p">().</span><span class="nx">then</span><span class="p">(</span><span class="kd">function</span><span class="p">()</span> <span class="p">{</span>
+<div class="language-js highlighter-rouge"><pre class="highlight"><code><span class="k">new</span> <span class="nx">zebkit</span><span class="p">.</span><span class="nx">DoIt</span><span class="p">().</span><span class="nx">then</span><span class="p">(</span><span class="kd">function</span><span class="p">()</span> <span class="p">{</span>
     <span class="k">return</span> <span class="mi">10</span><span class="p">;</span> 
 <span class="p">}).</span><span class="nx">then</span><span class="p">(</span><span class="kd">function</span><span class="p">(</span><span class="nx">arg</span><span class="p">)</span> <span class="p">{</span>
     <span class="k">this</span><span class="p">.</span><span class="nx">then</span><span class="p">(</span><span class="kd">function</span><span class="p">()</span> <span class="p">{</span>
@@ -473,7 +473,7 @@
 
 <p><strong>Synchronizing multiple sequences.</strong> A sequence can be run as a part of other sequence:</p>
 
-<div class="highlighter-rouge"><pre class="highlight"><code><span class="kd">var</span> <span class="nx">doit1</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">zebkit</span><span class="p">.</span><span class="nx">DoIt</span><span class="p">().</span><span class="nx">then</span><span class="p">(</span><span class="kd">function</span><span class="p">()</span> <span class="p">{</span>
+<div class="language-js highlighter-rouge"><pre class="highlight"><code><span class="kd">var</span> <span class="nx">doit1</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">zebkit</span><span class="p">.</span><span class="nx">DoIt</span><span class="p">().</span><span class="nx">then</span><span class="p">(</span><span class="kd">function</span><span class="p">()</span> <span class="p">{</span>
     <span class="p">...</span>  <span class="c1">// first executed method</span>
 <span class="p">}).</span><span class="nx">then</span><span class="p">(</span><span class="kd">function</span><span class="p">()</span> <span class="p">{</span>
     <span class="k">return</span> <span class="mi">111</span><span class="p">;</span>
@@ -487,7 +487,7 @@
 
 <p>or</p>
 
-<div class="highlighter-rouge"><pre class="highlight"><code><span class="kd">var</span> <span class="nx">doit1</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">zebkit</span><span class="p">.</span><span class="nx">DoIt</span><span class="p">().</span><span class="nx">then</span><span class="p">(</span><span class="kd">function</span><span class="p">()</span> <span class="p">{</span>
+<div class="language-js highlighter-rouge"><pre class="highlight"><code><span class="kd">var</span> <span class="nx">doit1</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">zebkit</span><span class="p">.</span><span class="nx">DoIt</span><span class="p">().</span><span class="nx">then</span><span class="p">(</span><span class="kd">function</span><span class="p">()</span> <span class="p">{</span>
     <span class="p">...</span>
 <span class="p">}).</span><span class="nx">then</span><span class="p">(</span><span class="kd">function</span><span class="p">()</span> <span class="p">{</span>
     <span class="k">return</span> <span class="mi">111</span><span class="p">;</span>
@@ -501,7 +501,7 @@
 
 <p><strong>Simple error handling.</strong> An exception a method of a sequence throws will be exposed in the nearest “catch” method call:</p>
 
-<div class="highlighter-rouge"><pre class="highlight"><code><span class="k">new</span> <span class="nx">zebkit</span><span class="p">.</span><span class="nx">DoIt</span><span class="p">().</span><span class="nx">then</span><span class="p">(</span><span class="kd">function</span><span class="p">()</span> <span class="p">{</span>
+<div class="language-js highlighter-rouge"><pre class="highlight"><code><span class="k">new</span> <span class="nx">zebkit</span><span class="p">.</span><span class="nx">DoIt</span><span class="p">().</span><span class="nx">then</span><span class="p">(</span><span class="kd">function</span><span class="p">()</span> <span class="p">{</span>
     <span class="p">...</span>
     <span class="k">throw</span> <span class="k">new</span> <span class="nb">Error</span><span class="p">(</span><span class="s2">"My Error"</span><span class="p">);</span>
 <span class="p">}).</span><span class="k">catch</span><span class="p">(</span><span class="kd">function</span><span class="p">(</span><span class="nx">e</span><span class="p">)</span> <span class="p">{</span>
@@ -516,7 +516,7 @@
 
 <p><strong>Asynchronous are easy to control.</strong>:</p>
 
-<div class="highlighter-rouge"><pre class="highlight"><code><span class="k">new</span> <span class="nx">zebkit</span><span class="p">.</span><span class="nx">DoIt</span><span class="p">().</span><span class="nx">then</span><span class="p">(</span><span class="kd">function</span><span class="p">()</span> <span class="p">{</span>
+<div class="language-js highlighter-rouge"><pre class="highlight"><code><span class="k">new</span> <span class="nx">zebkit</span><span class="p">.</span><span class="nx">DoIt</span><span class="p">().</span><span class="nx">then</span><span class="p">(</span><span class="kd">function</span><span class="p">()</span> <span class="p">{</span>
     <span class="c1">// three asynchronous results in one method</span>
     <span class="nx">ajax</span><span class="p">(</span><span class="s2">"http://test.com/file1.txt"</span><span class="p">,</span> <span class="k">this</span><span class="p">.</span><span class="nx">join</span><span class="p">());</span> 
     <span class="nx">ajax</span><span class="p">(</span><span class="s2">"http://test.com/file2.txt"</span><span class="p">,</span> <span class="k">this</span><span class="p">.</span><span class="nx">join</span><span class="p">());</span> 

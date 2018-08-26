@@ -32,7 +32,7 @@
     <!-- RSS -->
     <link rel="alternate" type="application/rss+xml" title="RSS" href="/atom.xml">
 
-    <script type="text/javascript" src="/build/zebkit.js?11072017">  </script>
+    <script type="text/javascript" src="/build/zebkit.js?25082018">  </script>
 
     <script type="text/javascript">
         zebkit.ui.config("theme", "dark");
@@ -356,7 +356,7 @@
 
             <tr>
                 <td align="right" colspan="2" style="border-width: 0px; border-top: 1px solid orange;">
-                    <small><a href="mailto:ask@zebkit.org">Andrei Vishneuski (c), 2017</a></small>
+                    <small><a href="mailto:ask@zebkit.org">Andrei Vishneuski (c), 2018</a></small>
                 </td>
             </tr>
 
@@ -422,7 +422,7 @@
   <li>Method with empty name is reserved for constructor</li>
 </ul>
 
-<div class="highlighter-rouge"><pre class="highlight"><code><span class="c1">// Declare "MyClass" class</span>
+<div class="language-js highlighter-rouge"><pre class="highlight"><code><span class="c1">// Declare "MyClass" class</span>
 <span class="kd">var</span> <span class="nx">MyClass</span> <span class="o">=</span> <span class="nx">zebkit</span><span class="p">.</span><span class="nx">Class</span><span class="p">([</span>
     <span class="c1">// Declare class constructor</span>
     <span class="kd">function</span> <span class="p">()</span> <span class="p">{</span>
@@ -449,7 +449,7 @@
   <li><strong>$super(…)</strong> works correct for deep hierarchy tracking properly an order of methods execution</li>
 </ul>
 
-<div class="highlighter-rouge"><pre class="highlight"><code><span class="kd">var</span> <span class="nx">A</span> <span class="o">=</span> <span class="nx">zebkit</span><span class="p">.</span><span class="nx">Class</span><span class="p">([</span>
+<div class="language-js highlighter-rouge"><pre class="highlight"><code><span class="kd">var</span> <span class="nx">A</span> <span class="o">=</span> <span class="nx">zebkit</span><span class="p">.</span><span class="nx">Class</span><span class="p">([</span>
     <span class="kd">function</span><span class="p">(</span><span class="nx">a</span><span class="p">)</span> <span class="p">{</span> <span class="k">this</span><span class="p">.</span><span class="nx">varA</span> <span class="o">=</span> <span class="nx">a</span><span class="p">;</span> <span class="p">},</span>
     <span class="kd">function</span> <span class="nx">abc</span><span class="p">()</span> <span class="p">{</span> <span class="k">return</span> <span class="mi">2</span><span class="p">;</span> <span class="p">}</span>
 <span class="p">]);</span>
@@ -482,7 +482,7 @@
   <li>Use <strong>“zebkit.instanceOf()</strong> operator instead of standard JS <strong>“instanceof”</strong></li>
 </ul>
 
-<div class="highlighter-rouge"><pre class="highlight"><code><span class="c1">// Define class A with class method  "abc()"</span>
+<div class="language-js highlighter-rouge"><pre class="highlight"><code><span class="c1">// Define class A with class method  "abc()"</span>
 <span class="kd">var</span> <span class="nx">A</span> <span class="o">=</span> <span class="nx">zebkit</span><span class="p">.</span><span class="nx">Class</span><span class="p">([</span>
     <span class="kd">function</span> <span class="nx">abc</span><span class="p">()</span> <span class="p">{</span> <span class="p">...</span> <span class="p">}</span>
 <span class="p">]);</span>
@@ -508,7 +508,7 @@
   <li>Interface cannot inherit other interfaces and classes</li>
 </ul>
 
-<div class="highlighter-rouge"><pre class="highlight"><code><span class="c1">// Declare Mix1 and Mix2 interfaces  x§</span>
+<div class="language-js highlighter-rouge"><pre class="highlight"><code><span class="c1">// Declare Mix1 and Mix2 interfaces  x§</span>
 <span class="kd">var</span> <span class="nx">Mix1</span> <span class="o">=</span> <span class="nx">zebkit</span><span class="p">.</span><span class="nx">Interface</span><span class="p">([</span>
     <span class="kd">function</span> <span class="nx">abc</span><span class="p">()</span> <span class="p">{</span> <span class="p">...</span> <span class="p">}</span>
 <span class="p">]);</span> 
@@ -533,7 +533,7 @@
 
 <p><strong>Parametrized interfaces</strong> A declared interface can be parametrized. Parametrization is a declaration of the same interface (with the identical set of methods) but with another default properties set.</p>
 
-<div class="highlighter-rouge"><pre class="highlight"><code><span class="c1">// Declare an interface that renders rectangle </span>
+<div class="language-js highlighter-rouge"><pre class="highlight"><code><span class="c1">// Declare an interface that renders rectangle </span>
 <span class="kd">var</span> <span class="nx">DrawRect</span> <span class="o">=</span> <span class="nx">zebkit</span><span class="p">.</span><span class="nx">Interface</span><span class="p">([</span>
     <span class="kd">function</span> <span class="nx">paint</span><span class="p">(</span><span class="nx">g</span><span class="p">)</span> <span class="p">{</span>
         <span class="k">if</span> <span class="p">(</span><span class="k">this</span><span class="p">.</span><span class="nx">color</span> <span class="o">!==</span> <span class="kc">undefined</span><span class="p">)</span> <span class="p">{</span>
@@ -565,7 +565,7 @@
   <li>Super context is accessible from an anonymous class methods</li>
 </ul>
 
-<div class="highlighter-rouge"><pre class="highlight"><code><span class="c1">// Declare class A</span>
+<div class="language-js highlighter-rouge"><pre class="highlight"><code><span class="c1">// Declare class A</span>
 <span class="kd">var</span> <span class="nx">A</span> <span class="o">=</span> <span class="nx">zebkit</span><span class="p">.</span><span class="nx">Class</span><span class="p">([</span>
     <span class="kd">function</span><span class="p">(</span><span class="nx">p</span><span class="p">)</span> <span class="p">{</span>  <span class="c1">// Constructor</span>
         <span class="k">this</span><span class="p">.</span><span class="nx">v</span> <span class="o">=</span> <span class="nx">p</span><span class="p">;</span>
@@ -596,7 +596,7 @@
   <li>Static variables whose names start from “$” character are not inheritable</li>
 </ul>
 
-<div class="highlighter-rouge"><pre class="highlight"><code><span class="kd">var</span> <span class="nx">A</span> <span class="o">=</span> <span class="nx">zebkit</span><span class="p">.</span><span class="nx">Class</span><span class="p">([</span>
+<div class="language-js highlighter-rouge"><pre class="highlight"><code><span class="kd">var</span> <span class="nx">A</span> <span class="o">=</span> <span class="nx">zebkit</span><span class="p">.</span><span class="nx">Class</span><span class="p">([</span>
     <span class="c1">// Declare static stuff inside the  method</span>
     <span class="kd">function</span> <span class="nx">$clazz</span><span class="p">()</span> <span class="p">{</span>  
        <span class="k">this</span><span class="p">.</span><span class="nx">staticVar</span>    <span class="o">=</span> <span class="mi">10</span><span class="p">;</span>
@@ -626,7 +626,7 @@
   <li>Use dot notation to access package stuff</li>
 </ul>
 
-<div class="highlighter-rouge"><pre class="highlight"><code><span class="c1">// Define stuff in "test" package </span>
+<div class="language-js highlighter-rouge"><pre class="highlight"><code><span class="c1">// Define stuff in "test" package </span>
 <span class="nx">zebkit</span><span class="p">.</span><span class="kr">package</span><span class="p">(</span><span class="s2">"test"</span><span class="p">,</span> <span class="kd">function</span><span class="p">()</span> <span class="p">{</span>
     <span class="k">this</span><span class="p">.</span><span class="nx">v</span> <span class="o">=</span> <span class="s2">"Hello 1"</span><span class="p">;</span> 
 <span class="p">});</span> 
@@ -645,7 +645,7 @@
 
 <p><strong>Import package stuff in your scope</strong> Not always handy to access classes and variables by pointing full path to its (<strong>“zebkit.ui.grid.Grid”</strong>). Zebkit helps importing fields from the given package(s) into a local scope by using <strong>zebkit.import()</strong> method that should be used in combination with JS “eval()” standard method. Pay attention that using JS “eval()” method is bad practice. It is recommended to use <strong>“zebkit.require(…)”</strong> method.</p>
 
-<div class="highlighter-rouge"><pre class="highlight"><code><span class="c1">// Define variables in "test" package </span>
+<div class="language-js highlighter-rouge"><pre class="highlight"><code><span class="c1">// Define variables in "test" package </span>
 <span class="nx">zebkit</span><span class="p">.</span><span class="kr">package</span><span class="p">(</span><span class="s2">"test"</span><span class="p">,</span> <span class="kd">function</span><span class="p">()</span> <span class="p">{</span>
     <span class="k">this</span><span class="p">.</span><span class="nx">variable</span> <span class="o">=</span> <span class="s2">"Hello 1"</span><span class="p">;</span> 
     <span class="k">this</span><span class="p">.</span><span class="nx">A</span> <span class="o">=</span> <span class="nx">zebkit</span><span class="p">.</span><span class="nx">Class</span><span class="p">([...]);</span>
@@ -676,7 +676,7 @@
   <li>Extending an instance of a class has effect only for the given class instance</li>
 </ul>
 
-<div class="highlighter-rouge"><pre class="highlight"><code><span class="kd">var</span> <span class="nx">A</span> <span class="o">=</span> <span class="nx">zebkit</span><span class="p">.</span><span class="nx">Class</span><span class="p">([</span>
+<div class="language-js highlighter-rouge"><pre class="highlight"><code><span class="kd">var</span> <span class="nx">A</span> <span class="o">=</span> <span class="nx">zebkit</span><span class="p">.</span><span class="nx">Class</span><span class="p">([</span>
     <span class="kd">function</span> <span class="nx">abc</span><span class="p">()</span> <span class="p">{</span> <span class="k">return</span> <span class="mi">10</span><span class="p">;</span> <span class="p">}</span>
 <span class="p">]);</span>
 <span class="c1">// Extend class "A" with "cba()" method and override "abc()" method </span>

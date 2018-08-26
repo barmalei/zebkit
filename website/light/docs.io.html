@@ -32,7 +32,7 @@
     <!-- RSS -->
     <link rel="alternate" type="application/rss+xml" title="RSS" href="/atom.xml">
 
-    <script type="text/javascript" src="/build/zebkit.js?11072017">  </script>
+    <script type="text/javascript" src="/build/zebkit.js?25082018">  </script>
 
     <script type="text/javascript">
         zebkit.ui.config("theme", "light");
@@ -356,7 +356,7 @@
 
             <tr>
                 <td align="right" colspan="2" style="border-width: 0px; border-top: 1px solid orange;">
-                    <small><a href="mailto:ask@zebkit.org">Andrei Vishneuski (c), 2017</a></small>
+                    <small><a href="mailto:ask@zebkit.org">Andrei Vishneuski (c), 2018</a></small>
                 </td>
             </tr>
 
@@ -414,7 +414,7 @@
 
     <p>Zebkit <strong>“io”</strong> package collects different communication classes and methods to perform HTTP requests and do JRPC and XRPC services calls. Requests according to WEB recommendations works in asynchronous mode and return promise-like structure to track response and handle error.</p>
 
-<div class="highlighter-rouge"><pre class="highlight"><code><span class="c1">// get data synchronously</span>
+<div class="language-js highlighter-rouge"><pre class="highlight"><code><span class="c1">// get data synchronously</span>
 <span class="nx">zebkit</span><span class="p">.</span><span class="nx">io</span><span class="p">.</span><span class="nx">GET</span><span class="p">(</span><span class="nx">url</span><span class="p">).</span><span class="nx">then</span><span class="p">(</span><span class="kd">function</span><span class="p">(</span><span class="nx">request</span><span class="p">)</span> <span class="p">{</span>
     <span class="c1">// handle  HTTP GET response</span>
 <span class="p">}).</span><span class="k">catch</span><span class="p">(</span><span class="kd">function</span><span class="p">(</span><span class="nx">error</span><span class="p">)</span> <span class="p">{</span>
@@ -426,7 +426,7 @@
 
 <p>Calling XRPC and JRPC service methods is also trivial thing:</p>
 
-<div class="highlighter-rouge"><pre class="highlight"><code><span class="c1">// Connector to a XML-RPC server that has three methods</span>
+<div class="language-js highlighter-rouge"><pre class="highlight"><code><span class="c1">// Connector to a XML-RPC server that has three methods</span>
 <span class="kd">var</span> <span class="nx">s</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">zebkit</span><span class="p">.</span><span class="nx">io</span><span class="p">.</span><span class="nx">XRPC</span><span class="p">(</span><span class="nx">url</span><span class="p">,</span> <span class="p">[</span> <span class="s2">"method1"</span><span class="p">,</span> <span class="s2">"method2"</span><span class="p">,</span> <span class="s2">"method3"</span> <span class="p">]);</span>
  
 
@@ -443,7 +443,7 @@
 
 <p>The same manner works JRPC service communication:</p>
 
-<div class="highlighter-rouge"><pre class="highlight"><code><span class="c1">// Connector to a JSON-RPC server that has three methods</span>
+<div class="language-js highlighter-rouge"><pre class="highlight"><code><span class="c1">// Connector to a JSON-RPC server that has three methods</span>
 <span class="kd">var</span> <span class="nx">s</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">zebkit</span><span class="p">.</span><span class="nx">io</span><span class="p">.</span><span class="nx">JRPC</span><span class="p">(</span><span class="nx">url</span><span class="p">,</span> <span class="p">[</span> <span class="s2">"method1"</span><span class="p">,</span> <span class="s2">"method2"</span><span class="p">,</span> <span class="s2">"method3"</span> <span class="p">]);</span>
  
 

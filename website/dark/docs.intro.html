@@ -32,7 +32,7 @@
     <!-- RSS -->
     <link rel="alternate" type="application/rss+xml" title="RSS" href="/atom.xml">
 
-    <script type="text/javascript" src="/build/zebkit.js?11072017">  </script>
+    <script type="text/javascript" src="/build/zebkit.js?25082018">  </script>
 
     <script type="text/javascript">
         zebkit.ui.config("theme", "dark");
@@ -356,7 +356,7 @@
 
             <tr>
                 <td align="right" colspan="2" style="border-width: 0px; border-top: 1px solid orange;">
-                    <small><a href="mailto:ask@zebkit.org">Andrei Vishneuski (c), 2017</a></small>
+                    <small><a href="mailto:ask@zebkit.org">Andrei Vishneuski (c), 2018</a></small>
                 </td>
             </tr>
 
@@ -428,7 +428,7 @@
 
 <p>All zebkit artifacts are published on web site. They are applicable either for remote usage or can be downloaded and hosted in a local environment. The artifacts are hosted on zebkit web site as follow:</p>
 
-<div class="highlighter-rouge"><pre class="highlight"><code>http://www.zebkit.org/ver        <span class="c"># root zebkit versions URL</span>
+<div class="language-sh highlighter-rouge"><pre class="highlight"><code>http://www.zebkit.org/ver        <span class="c"># root zebkit versions URL</span>
    |
    +-- latest/                   <span class="c"># latest hot updated stable version</span>
    |     +-- zebkit[.min].js     <span class="c"># zebkit JS code</span>
@@ -481,7 +481,7 @@
 
 <p>Add meta (optionally, for mobile devices only) and script to an HTML page as follow:</p>
 
-<div class="highlighter-rouge"><pre class="highlight"><code><span class="cp">&lt;!DOCTYPE html&gt;</span>
+<div class="language-html highlighter-rouge"><pre class="highlight"><code><span class="cp">&lt;!DOCTYPE html&gt;</span>
 <span class="nt">&lt;html&gt;</span>
 <span class="nt">&lt;head&gt;</span>
 <span class="c">&lt;!-- The following meta is required for mobile devices --&gt;</span>
@@ -510,7 +510,7 @@
 
 <p>Including zebkit into an HTML page adds “zebkit” variable to the global space. This variable points to root - “zebkit” - package to start with:</p>
 
-<div class="highlighter-rouge"><pre class="highlight"><code><span class="c1">// request "zebkit.ui","zebkit.layout" and "zebkit.ui.grid" packages  </span>
+<div class="language-js highlighter-rouge"><pre class="highlight"><code><span class="c1">// request "zebkit.ui","zebkit.layout" and "zebkit.ui.grid" packages  </span>
 <span class="nx">zebkit</span><span class="p">.</span><span class="nx">require</span><span class="p">(</span><span class="s2">"ui"</span><span class="p">,</span><span class="s2">"layout"</span><span class="p">,</span><span class="s2">"ui.grid"</span><span class="p">,</span> <span class="kd">function</span><span class="p">(</span><span class="nx">ui</span><span class="p">,</span> <span class="nx">layout</span><span class="p">,</span> <span class="nx">grid</span><span class="p">)</span> <span class="p">{</span>
     <span class="kd">var</span> <span class="nx">button</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">ui</span><span class="p">.</span><span class="nx">Button</span><span class="p">(</span><span class="s2">"My Button"</span><span class="p">);</span>
     <span class="p">...</span>
@@ -531,7 +531,7 @@
 
 <p>Developing a custom zebkit code should be done within zebkit package concept. Re-usable components, classes and other entities should be placed in zebkit package or packages. Creation of a new zebkit package is simple:</p>
 
-<div class="highlighter-rouge"><pre class="highlight"><code><span class="c1">// create new package </span>
+<div class="language-js highlighter-rouge"><pre class="highlight"><code><span class="c1">// create new package </span>
 <span class="nx">zebkit</span><span class="p">.</span><span class="kr">package</span><span class="p">(</span><span class="s2">"mypackage"</span><span class="p">,</span> <span class="kd">function</span><span class="p">(</span><span class="nx">pkg</span><span class="p">,</span> <span class="nx">Class</span><span class="p">)</span> <span class="p">{</span>
     <span class="c1">// define package class </span>
     <span class="nx">pkg</span><span class="p">.</span><span class="nx">MyClass</span> <span class="o">=</span> <span class="nx">Class</span><span class="p">([</span>
@@ -550,7 +550,7 @@
 
 <p>Then you can use the created package as follow:</p>
 
-<div class="highlighter-rouge"><pre class="highlight"><code><span class="c1">// create new package </span>
+<div class="language-js highlighter-rouge"><pre class="highlight"><code><span class="c1">// create new package </span>
 <span class="nx">zebkit</span><span class="p">.</span><span class="nx">require</span><span class="p">(</span><span class="s2">"mypackage"</span><span class="p">,</span> <span class="kd">function</span><span class="p">(</span><span class="nx">mypkg</span><span class="p">)</span> <span class="p">{</span>
     <span class="c1">// instantiate class declared in your package </span>
     <span class="kd">var</span> <span class="nx">myClassInstance</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">mypkg</span><span class="p">.</span><span class="nx">MyClass</span><span class="p">();</span>
@@ -563,7 +563,7 @@
 
 <p>Package entities can be configured with a JSON. The most simple way to initiate the configuration is to pass true as last parameter of <strong>“zebkit.package(…)”</strong> method:</p>
 
-<div class="highlighter-rouge"><pre class="highlight"><code><span class="c1">// create new package configured with JSON configuration</span>
+<div class="language-js highlighter-rouge"><pre class="highlight"><code><span class="c1">// create new package configured with JSON configuration</span>
 <span class="nx">zebkit</span><span class="p">.</span><span class="nx">require</span><span class="p">(</span><span class="s2">"mypackage"</span><span class="p">,</span> <span class="kd">function</span><span class="p">(</span><span class="nx">mypkg</span><span class="p">)</span> <span class="p">{</span>
     <span class="p">...</span>
 <span class="p">},</span> <span class="kc">true</span><span class="p">);</span>

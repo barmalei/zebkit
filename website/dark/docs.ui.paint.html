@@ -32,7 +32,7 @@
     <!-- RSS -->
     <link rel="alternate" type="application/rss+xml" title="RSS" href="/atom.xml">
 
-    <script type="text/javascript" src="/build/zebkit.js?11072017">  </script>
+    <script type="text/javascript" src="/build/zebkit.js?25082018">  </script>
 
     <script type="text/javascript">
         zebkit.ui.config("theme", "dark");
@@ -356,7 +356,7 @@
 
             <tr>
                 <td align="right" colspan="2" style="border-width: 0px; border-top: 1px solid orange;">
-                    <small><a href="mailto:ask@zebkit.org">Andrei Vishneuski (c), 2017</a></small>
+                    <small><a href="mailto:ask@zebkit.org">Andrei Vishneuski (c), 2018</a></small>
                 </td>
             </tr>
 
@@ -449,7 +449,7 @@ Painting procedure starts traversing UI hierarchy (where every UI component is i
 
 <p>Secondly painting procedure is initiated on-demand. UI components are provided with <strong>“repaint()”</strong>  or <strong>“repaint(z, y, width, height)”</strong> panel API method that is supposed to request a component re-painting. If a component changes its visual state, the component has to inform zebkit that the component or a part of the component have to be re-painted. To do it the component has to call <strong>“repaint(…)”</strong> method. For example:</p>
 
-<div class="highlighter-rouge"><pre class="highlight"><code><span class="nx">zebkit</span><span class="p">.</span><span class="nx">require</span><span class="p">(</span><span class="s2">"ui"</span><span class="p">,</span> <span class="s2">"layout"</span><span class="p">,</span> <span class="kd">function</span><span class="p">(</span><span class="nx">ui</span><span class="p">,</span> <span class="nx">layout</span><span class="p">)</span> <span class="p">{</span>
+<div class="language-js highlighter-rouge"><pre class="highlight"><code><span class="nx">zebkit</span><span class="p">.</span><span class="nx">require</span><span class="p">(</span><span class="s2">"ui"</span><span class="p">,</span> <span class="s2">"layout"</span><span class="p">,</span> <span class="kd">function</span><span class="p">(</span><span class="nx">ui</span><span class="p">,</span> <span class="nx">layout</span><span class="p">)</span> <span class="p">{</span>
     <span class="kd">var</span> <span class="nx">MyUIComponent</span> <span class="o">=</span> <span class="nx">zebkit</span><span class="p">.</span><span class="nx">Class</span><span class="p">(</span><span class="nx">ui</span><span class="p">.</span><span class="nx">Panel</span><span class="p">,</span> <span class="p">[</span>
         <span class="kd">function</span> <span class="nx">paint</span><span class="p">(</span><span class="nx">g</span><span class="p">)</span> <span class="p">{</span>
             <span class="c1">// draw something with the given color</span>
@@ -556,7 +556,7 @@ Painting procedure starts traversing UI hierarchy (where every UI component is i
 </tr>
 </table>
 
-<div class="highlighter-rouge"><pre class="highlight"><code><span class="nx">zebkit</span><span class="p">.</span><span class="nx">require</span><span class="p">(</span><span class="s2">"ui"</span><span class="p">,</span> <span class="kd">function</span><span class="p">(</span><span class="nx">ui</span><span class="p">)</span> <span class="p">{</span>
+<div class="language-js highlighter-rouge"><pre class="highlight"><code><span class="nx">zebkit</span><span class="p">.</span><span class="nx">require</span><span class="p">(</span><span class="s2">"ui"</span><span class="p">,</span> <span class="kd">function</span><span class="p">(</span><span class="nx">ui</span><span class="p">)</span> <span class="p">{</span>
     <span class="c1">// inherit "zebkit.ui.Panel" and implement "paint()"</span>
     <span class="nx">ui</span><span class="p">.</span><span class="nx">PaintComponent</span><span class="o">=</span><span class="nx">zebkit</span><span class="p">.</span><span class="nx">Class</span><span class="p">(</span><span class="nx">ui</span><span class="p">.</span><span class="nx">Panel</span><span class="p">,[</span>
         <span class="kd">function</span> <span class="nx">paint</span><span class="p">(</span><span class="nx">g</span><span class="p">)</span> <span class="p">{</span>
@@ -619,7 +619,7 @@ zebkit.require("ui", function(ui) {
 
 <p>Inherit developed on previous step “PaintComponent” class and extend it with “update(g)” method that fills the component background with red color:</p>
 
-<div class="highlighter-rouge"><pre class="highlight"><code><span class="nx">zebkit</span><span class="p">.</span><span class="nx">require</span><span class="p">(</span><span class="s2">"ui"</span><span class="p">,</span> <span class="kd">function</span><span class="p">(</span><span class="nx">ui</span><span class="p">)</span> <span class="p">{</span>
+<div class="language-js highlighter-rouge"><pre class="highlight"><code><span class="nx">zebkit</span><span class="p">.</span><span class="nx">require</span><span class="p">(</span><span class="s2">"ui"</span><span class="p">,</span> <span class="kd">function</span><span class="p">(</span><span class="nx">ui</span><span class="p">)</span> <span class="p">{</span>
     <span class="c1">// extend "PaintComponent" class with "update" method</span>
     <span class="nx">ui</span><span class="p">.</span><span class="nx">UpdateComponent</span><span class="o">=</span><span class="nx">zebra</span><span class="p">.</span><span class="nx">Class</span><span class="p">(</span><span class="nx">ui</span><span class="p">.</span><span class="nx">PaintComponent</span><span class="p">,[</span>
         <span class="kd">function</span> <span class="nx">update</span><span class="p">(</span><span class="nx">g</span><span class="p">)</span> <span class="p">{</span>
@@ -639,7 +639,7 @@ zebkit.require("ui", function(ui) {
 
 <p>Inherit developed on previous step “UpdateComponent” class and extend it with “paintOnTop(g)” method that draws white rectangle over gray cross:</p>
 
-<div class="highlighter-rouge"><pre class="highlight"><code><span class="nx">zebkit</span><span class="p">.</span><span class="nx">require</span><span class="p">(</span><span class="s2">"ui"</span><span class="p">,</span> <span class="kd">function</span><span class="p">(</span><span class="nx">ui</span><span class="p">)</span> <span class="p">{</span>
+<div class="language-js highlighter-rouge"><pre class="highlight"><code><span class="nx">zebkit</span><span class="p">.</span><span class="nx">require</span><span class="p">(</span><span class="s2">"ui"</span><span class="p">,</span> <span class="kd">function</span><span class="p">(</span><span class="nx">ui</span><span class="p">)</span> <span class="p">{</span>
     <span class="c1">// extend "UpdateComponent" class with "paintOnTop"</span>
     <span class="c1">// method</span>
     <span class="nx">ui</span><span class="p">.</span><span class="nx">PaintOnTopComponent</span><span class="o">=</span><span class="nx">zebkit</span><span class="p">.</span><span class="nx">Class</span><span class="p">(</span><span class="nx">ui</span><span class="p">.</span><span class="nx">UpdateComponent</span><span class="p">,[</span>
@@ -687,7 +687,7 @@ zebkit.require("ui", function(ui) {
 
 <p>For instance let’s create round zebkit UI component. As the first step let’s implement a view that setups round 2D path:</p>
 
-<div class="highlighter-rouge"><pre class="highlight"><code><span class="nx">zebkit</span><span class="p">.</span><span class="nx">require</span><span class="p">(</span><span class="s2">"ui"</span><span class="p">,</span> <span class="s2">"draw"</span><span class="p">,</span> <span class="s2">"layout"</span><span class="p">,</span> <span class="kd">function</span><span class="p">(</span><span class="nx">ui</span><span class="p">,</span> <span class="nx">draw</span><span class="p">,</span> <span class="nx">layout</span><span class="p">)</span> <span class="p">{</span>
+<div class="language-js highlighter-rouge"><pre class="highlight"><code><span class="nx">zebkit</span><span class="p">.</span><span class="nx">require</span><span class="p">(</span><span class="s2">"ui"</span><span class="p">,</span> <span class="s2">"draw"</span><span class="p">,</span> <span class="s2">"layout"</span><span class="p">,</span> <span class="kd">function</span><span class="p">(</span><span class="nx">ui</span><span class="p">,</span> <span class="nx">draw</span><span class="p">,</span> <span class="nx">layout</span><span class="p">)</span> <span class="p">{</span>
     <span class="kd">var</span> <span class="nx">RoundShape</span> <span class="o">=</span> <span class="nx">zebkit</span><span class="p">.</span><span class="nx">Class</span><span class="p">(</span><span class="nx">draw</span><span class="p">.</span><span class="nx">View</span><span class="p">,</span> <span class="p">[</span>
         <span class="kd">function</span> <span class="nx">outline</span><span class="p">(</span><span class="nx">g</span><span class="p">,</span><span class="nx">x</span><span class="p">,</span><span class="nx">y</span><span class="p">,</span><span class="nx">w</span><span class="p">,</span><span class="nx">h</span><span class="p">,</span><span class="nx">d</span><span class="p">)</span> <span class="p">{</span>
             <span class="k">if</span> <span class="p">(</span><span class="nx">w</span> <span class="o">===</span> <span class="nx">h</span><span class="p">)</span> <span class="p">{</span>
@@ -708,7 +708,7 @@ zebkit.require("ui", function(ui) {
 
 <p>Then let’s use the developed above shape to a component:</p>
 
-<div class="highlighter-rouge"><pre class="highlight"><code><span class="nx">zebkit</span><span class="p">.</span><span class="nx">require</span><span class="p">(</span><span class="s2">"ui"</span><span class="p">,</span> <span class="s2">"draw"</span><span class="p">,</span> <span class="kd">function</span><span class="p">(</span><span class="nx">ui</span><span class="p">,</span> <span class="nx">draw</span><span class="p">)</span> <span class="p">{</span>
+<div class="language-js highlighter-rouge"><pre class="highlight"><code><span class="nx">zebkit</span><span class="p">.</span><span class="nx">require</span><span class="p">(</span><span class="s2">"ui"</span><span class="p">,</span> <span class="s2">"draw"</span><span class="p">,</span> <span class="kd">function</span><span class="p">(</span><span class="nx">ui</span><span class="p">,</span> <span class="nx">draw</span><span class="p">)</span> <span class="p">{</span>
     <span class="p">...</span>
     <span class="kd">var</span> <span class="nx">r</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">ui</span><span class="p">.</span><span class="nx">zCanvas</span><span class="p">(</span><span class="s2">"roundShape"</span><span class="p">,</span> <span class="mi">300</span><span class="p">,</span> <span class="mi">300</span><span class="p">).</span><span class="nx">root</span><span class="p">;</span>
     <span class="nx">r</span><span class="p">.</span><span class="nx">setBorderLayout</span><span class="p">();</span>
@@ -766,7 +766,7 @@ zebkit.require("ui", "draw", function(ui, draw) {
 
 <p>If the shaped component needs to handle input events, it is necessary to aware events manager which points belong to the component taking in account its round shape. It has to be done with <strong>“contains(x, y)”</strong> method implementation. The method returns <code class="highlighter-rouge">true</code> if the given point is inside the component shape. Let’s extending our example with possibility to change background color depending where mouse pointer is located:</p>
 
-<div class="highlighter-rouge"><pre class="highlight"><code><span class="nx">zebkit</span><span class="p">.</span><span class="nx">require</span><span class="p">(</span><span class="s2">"ui"</span><span class="p">,</span> <span class="s2">"draw"</span><span class="p">,</span> <span class="s2">"layout"</span><span class="p">,</span> <span class="kd">function</span><span class="p">(</span><span class="nx">ui</span><span class="p">,</span> <span class="nx">draw</span><span class="p">,</span> <span class="nx">layout</span><span class="p">)</span> <span class="p">{</span>
+<div class="language-js highlighter-rouge"><pre class="highlight"><code><span class="nx">zebkit</span><span class="p">.</span><span class="nx">require</span><span class="p">(</span><span class="s2">"ui"</span><span class="p">,</span> <span class="s2">"draw"</span><span class="p">,</span> <span class="s2">"layout"</span><span class="p">,</span> <span class="kd">function</span><span class="p">(</span><span class="nx">ui</span><span class="p">,</span> <span class="nx">draw</span><span class="p">,</span> <span class="nx">layout</span><span class="p">)</span> <span class="p">{</span>
     <span class="p">...</span>
     <span class="nx">r</span><span class="p">.</span><span class="nx">add</span><span class="p">(</span><span class="k">new</span> <span class="nx">ui</span><span class="p">.</span><span class="nx">Panel</span><span class="p">({</span>
         <span class="na">border</span><span class="p">:</span> <span class="k">new</span> <span class="nx">RoundShape</span><span class="p">(),</span>

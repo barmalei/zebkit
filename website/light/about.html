@@ -32,7 +32,7 @@
     <!-- RSS -->
     <link rel="alternate" type="application/rss+xml" title="RSS" href="/atom.xml">
 
-    <script type="text/javascript" src="/build/zebkit.js?11072017">  </script>
+    <script type="text/javascript" src="/build/zebkit.js?25082018">  </script>
 
     <script type="text/javascript">
         zebkit.ui.config("theme", "light");
@@ -335,7 +335,7 @@
 
             <tr>
                 <td align="right" colspan="2" style="border-width: 0px; border-top: 1px solid orange;">
-                    <small><a href="mailto:ask@zebkit.org">Andrei Vishneuski (c), 2017</a></small>
+                    <small><a href="mailto:ask@zebkit.org">Andrei Vishneuski (c), 2018</a></small>
                 </td>
             </tr>
 
@@ -419,7 +419,7 @@ Zebkit is perfect choice for development of mobile, single page applications wit
 zebkit.require("ui", "layout", "ui.design", function(ui, layout, design) {
     var root = (new ui.zCanvas("designer", 400, 300)).root;
     root.properties({
-        layout : new layout.BorderLayout(4, 4),
+        borderLayout : [4, 4],
         padding: 8,
         kids: {
             center: new ui.BorderPan("Designer panel", new ui.Panel({
@@ -449,7 +449,7 @@ zebkit.require("ui", "layout", "ui.design", function(ui, layout, design) {
             })),
 
             bottom: new ui.Button("Align", [
-                function fire() {
+                function $fire() {
                     this.$super();
                     var y = 10; 
                     root.byPath("//zebkit.ui.design.ShaperPan", function(c) {
@@ -468,7 +468,7 @@ zebkit.require("ui", "layout", "ui.design", function(ui, layout, design) {
 
 <p><strong>Easy OOP JavaScript concept</strong> <em>Dart</em>, <em>CoffeeScript</em>, <em>TypeScript</em> and other helping intermediate technologies are not necessary. Zebkit easy JavaScript OOP gives power to keep code under control, increases re-usability and simplifies support. Easy OOP produces classes and interfaces, inheritance and mixing, constructor, static context, method overriding, <strong>true access to super context</strong>, <strong>anonymous classes</strong>, packaging, dynamic class extension, etc.</p>
 
-<div class="highlighter-rouge"><pre class="highlight"><code><span class="kd">var</span> <span class="nx">A</span> <span class="o">=</span> <span class="nx">zebkit</span><span class="p">.</span><span class="nx">Class</span><span class="p">([</span>  <span class="c1">// class A declaration </span>
+<div class="language-js highlighter-rouge"><pre class="highlight"><code><span class="kd">var</span> <span class="nx">A</span> <span class="o">=</span> <span class="nx">zebkit</span><span class="p">.</span><span class="nx">Class</span><span class="p">([</span>  <span class="c1">// class A declaration </span>
     <span class="kd">function</span><span class="p">()</span> <span class="p">{</span> <span class="p">...</span> <span class="p">},</span> <span class="c1">// constructor</span>
     <span class="kd">function</span> <span class="nx">a</span><span class="p">()</span> <span class="p">{</span> <span class="k">return</span> <span class="mi">1</span><span class="p">;</span> <span class="p">}</span> <span class="c1">// declare class method "a"</span>
 <span class="p">]);</span>
@@ -629,7 +629,7 @@ zebkit.require("ui", "layout", "draw", function(ui, layout, draw) {
     }, -2, 1, "#55DD22"))
 
     var pan = new ui.Panel({
-        layout: new layout.FlowLayout(8),
+        flowLayout: 8,
         kids: [ 
            new ui.Label(sh)
                  .setColor('light'=='light'?"gray":"white"), 
@@ -679,7 +679,7 @@ zebkit.require("ui", "layout", "draw", function(ui, layout, draw) {
             map.popup = new ui.Menu(["Zebkit", "Context", "Menu"]);
             gmap = map.element;
             c.root.properties({
-                layout : new layout.BorderLayout(8),
+                borderLayout : 8,
                 padding: 16,
                 border : new draw.Border("red", 2, 6),
                 kids: {
@@ -715,7 +715,7 @@ zebkit.require("ui", "layout", "draw", function(ui, layout, draw) {
 
 <p><strong>Unification of input events</strong> Mouse, touch screen, pen input events in zebkit are handled with one common approach. Keyboard events management produces the same sequence of events and its fields everywhere.</p>
 
-<div class="highlighter-rouge"><pre class="highlight"><code><span class="kd">var</span> <span class="nx">root</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">zebkit</span><span class="p">.</span><span class="nx">ui</span><span class="p">.</span><span class="nx">zCanvas</span><span class="p">(</span><span class="mi">300</span><span class="p">,</span> <span class="mi">300</span><span class="p">).</span><span class="nx">root</span><span class="p">;</span>
+<div class="language-js highlighter-rouge"><pre class="highlight"><code><span class="kd">var</span> <span class="nx">root</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">zebkit</span><span class="p">.</span><span class="nx">ui</span><span class="p">.</span><span class="nx">zCanvas</span><span class="p">(</span><span class="mi">300</span><span class="p">,</span> <span class="mi">300</span><span class="p">).</span><span class="nx">root</span><span class="p">;</span>
 <span class="nx">root</span><span class="p">.</span><span class="nx">pointerPressed</span> <span class="o">=</span> <span class="kd">function</span><span class="p">(</span><span class="nx">e</span><span class="p">)</span> <span class="p">{</span>
     <span class="c1">// catch and handle mouse pressed, touch etc events here</span>
     <span class="p">...</span> 
@@ -899,7 +899,7 @@ zebkit.require("ui", "draw", "layout", function(ui, draw, layout) {
         b3=new RoundButton(new ui.ImagePan("public/images/bug-o.png")
                                  .setPadding(6));
     root.add(new ui.Panel({
-        layout:new layout.FlowLayout("center","center","horizontal", 8),
+        flowLayout: [ "center","center","horizontal", 8 ],
         kids  : [ b1, b2, b3 ]
     }));
 
@@ -917,8 +917,8 @@ zebkit.require("ui", "draw", "layout", function(ui, draw, layout) {
 
 <p><strong>JSON UI descriptive language</strong> Zebkit UI can be defined and loaded with a special human readable JSON.</p>
 
-<div class="highlighter-rouge"><pre class="highlight"><code><span class="p">{</span><span class="w"> </span><span class="nt">"@zebkit.ui.Panel"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w">
-    </span><span class="nt">"layout"</span><span class="w"> </span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nt">"@zebkit.layout.BorderLayout"</span><span class="w"> </span><span class="p">:</span><span class="w"> </span><span class="mi">4</span><span class="w"> </span><span class="p">},</span><span class="w">
+<div class="language-json highlighter-rouge"><pre class="highlight"><code><span class="p">{</span><span class="w"> </span><span class="nt">"@zebkit.ui.Panel"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w">
+    </span><span class="nt">"borderLayout"</span><span class="w"> </span><span class="p">:</span><span class="w"> </span><span class="mi">4</span><span class="w"> </span><span class="p">,</span><span class="w">
     </span><span class="nt">"padding"</span><span class="p">:</span><span class="w"> </span><span class="mi">16</span><span class="p">,</span><span class="w"> 
     </span><span class="nt">"border"</span><span class="w"> </span><span class="p">:</span><span class="w"> </span><span class="s2">"plain"</span><span class="p">,</span><span class="w">
     </span><span class="nt">"kids"</span><span class="w">   </span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w">
@@ -977,7 +977,7 @@ zebkit.require("ui", "draw", "layout", function(ui, draw, layout) {
 
 </td><td align="left" valign="top" style="padding:0px;">
 
-      <div class="highlighter-rouge"><pre class="highlight"><code><span class="nx">zebkit</span><span class="p">.</span><span class="nx">require</span><span class="p">(</span><span class="s2">"ui"</span><span class="p">,</span><span class="s2">"layout"</span><span class="p">,</span>
+      <div class="language-js highlighter-rouge"><pre class="highlight"><code><span class="nx">zebkit</span><span class="p">.</span><span class="nx">require</span><span class="p">(</span><span class="s2">"ui"</span><span class="p">,</span><span class="s2">"layout"</span><span class="p">,</span>
 <span class="kd">function</span><span class="p">(</span><span class="nx">ui</span><span class="p">,</span> <span class="nx">lay</span><span class="p">)</span> <span class="p">{</span>
     <span class="kd">var</span> <span class="nx">c</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">ui</span><span class="p">.</span><span class="nx">zCanvas</span><span class="p">(</span><span class="mi">300</span><span class="p">,</span><span class="mi">300</span><span class="p">),</span>
         <span class="nx">r</span> <span class="o">=</span> <span class="nx">c</span><span class="p">.</span><span class="nx">root</span><span class="p">;</span>
@@ -1229,11 +1229,11 @@ zebkit.require("ui", "layout", function(ui, layout) {
             })),
             new ui.CollapsiblePan("Page 2", 
                 new ui.Panel({
-                    layout : new layout.FlowLayout("center", "center"),
+                    flowLayout : ["center", "center" ],
                     background : "#202220",
-                   kids   : [
+                    kids       : [
                         new ui.Label("No content is available")
-                   ]
+                    ]
                })),
             new ui.CollapsiblePan("Page 3", 
                                  new ui.Label("..."))
@@ -1334,7 +1334,7 @@ zebkit.require("ui", "layout", function(ui, layout) {
     var r = new ui.zCanvas("layoutSample1", 500, 400).root;
     r.setBorderLayout();
     r.add(new ui.Panel({
-        layout : new layout.BorderLayout(4),
+        borderLayout : 4,
         kids   : {
             "center": new ui.Button("CENTER"),
             "left":   new ui.Button("LEFT"),

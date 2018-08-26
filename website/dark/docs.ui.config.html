@@ -32,7 +32,7 @@
     <!-- RSS -->
     <link rel="alternate" type="application/rss+xml" title="RSS" href="/atom.xml">
 
-    <script type="text/javascript" src="/build/zebkit.js?11072017">  </script>
+    <script type="text/javascript" src="/build/zebkit.js?25082018">  </script>
 
     <script type="text/javascript">
         zebkit.ui.config("theme", "dark");
@@ -356,7 +356,7 @@
 
             <tr>
                 <td align="right" colspan="2" style="border-width: 0px; border-top: 1px solid orange;">
-                    <small><a href="mailto:ask@zebkit.org">Andrei Vishneuski (c), 2017</a></small>
+                    <small><a href="mailto:ask@zebkit.org">Andrei Vishneuski (c), 2018</a></small>
                 </td>
             </tr>
 
@@ -414,7 +414,7 @@
 
 <p>Zebkit UI components apply default properties values during its instantiation. The default properties values are read from static context of appropriate UI component class or from a parent class (if it has been configured). For instance, to change color of all subsequent “zebkit.ui.Label” component instances set appropriate property on label component class level:</p>
 
-<div class="highlighter-rouge"><pre class="highlight"><code><span class="c1">// specify default label color value in label class static context  </span>
+<div class="language-js highlighter-rouge"><pre class="highlight"><code><span class="c1">// specify default label color value in label class static context  </span>
 <span class="nx">zebkit</span><span class="p">.</span><span class="nx">ui</span><span class="p">.</span><span class="nx">Label</span><span class="p">.</span><span class="nx">color</span> <span class="o">=</span> <span class="s2">"orange"</span><span class="p">;</span>
 <span class="p">...</span>
 <span class="c1">// all label instances will have color set to "orange"</span>
@@ -426,7 +426,7 @@
 
 <p>By default properties values defined on parent class level are not applied to an instance of a class that inherits the parent class. To change the behavior do the following:</p>
 
-<div class="highlighter-rouge"><pre class="highlight"><code><span class="c1">// zebkit.ui.TextField class inherits zebkit.ui.Label</span>
+<div class="language-js highlighter-rouge"><pre class="highlight"><code><span class="c1">// zebkit.ui.TextField class inherits zebkit.ui.Label</span>
 <span class="c1">// class. To take in account label default properties </span>
 <span class="c1">// let's set "inheritProperties" to true </span>
 <span class="nx">zebkit</span><span class="p">.</span><span class="nx">ui</span><span class="p">.</span><span class="nx">TextField</span><span class="p">.</span><span class="nx">inheritProperties</span> <span class="o">=</span> <span class="kc">true</span><span class="p">;</span>
@@ -444,7 +444,7 @@
 
 <p>By default UI configuration JSON files are stored on the same level with zebkit UI components JS file(s) in “rs” sub-folder. The structure of zebkit UI configuration resources are shown below:</p>
 
-<div class="highlighter-rouge"><pre class="highlight"><code><span class="o">[</span>rs]                      <span class="c"># root resource folder</span>
+<div class="language-sh highlighter-rouge"><pre class="highlight"><code><span class="o">[</span>rs]                      <span class="c"># root resource folder</span>
  +-- <span class="o">[</span>light]              <span class="c"># light theme resources folder</span>
  |     +--  ui.json       <span class="c"># zebkit.ui package configuration  </span>
  |     +--  ui.web.json   <span class="c"># zebkit.ui.web package configuration</span>
@@ -462,7 +462,7 @@
 
 <p>Loading JSON configurations setups static fields for appropriate package entities (classes, interfaces, etc) that will be later used as default properties values for the entities instances. Configuration Zebkit keeps JSON configuration per package (if necessary). It is also possible to load a custom configuration manually with <strong>“configWith([path])”</strong> method. For instance, imagine we have created JSON shown below to customize text field component properties:</p>
 
-<div class="highlighter-rouge"><pre class="highlight"><code><span class="p">{</span><span class="w">
+<div class="language-json highlighter-rouge"><pre class="highlight"><code><span class="p">{</span><span class="w">
     </span><span class="err">...</span><span class="w">
     </span><span class="nt">"TextField"</span><span class="w"> </span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w">
         </span><span class="nt">"border"</span><span class="w">    </span><span class="p">:{</span><span class="nt">"@zebkit.draw.Border"</span><span class="p">:[</span><span class="s2">"red"</span><span class="p">,</span><span class="w"> </span><span class="mi">2</span><span class="p">]},</span><span class="w">
@@ -475,7 +475,7 @@
 
 <p>To apply the JSON do the following:</p>
 
-<div class="highlighter-rouge"><pre class="highlight"><code><span class="nx">zebkit</span><span class="p">.</span><span class="nx">ui</span><span class="p">.</span><span class="nx">configWith</span><span class="p">(</span><span class="s2">"/tf.json"</span><span class="p">);</span>
+<div class="language-js highlighter-rouge"><pre class="highlight"><code><span class="nx">zebkit</span><span class="p">.</span><span class="nx">ui</span><span class="p">.</span><span class="nx">configWith</span><span class="p">(</span><span class="s2">"/tf.json"</span><span class="p">);</span>
 </code></pre>
 </div>
 
@@ -491,21 +491,21 @@
 
 <p>By default zebkit expects a theme resources are located in appropriate sub-folder in “rs”. To switch UI theme set “theme” configuration variable (that has to match a sub-folder hosted in “rs” folder):</p>
 
-<div class="highlighter-rouge"><pre class="highlight"><code><span class="c1">// say to use light theme</span>
+<div class="language-js highlighter-rouge"><pre class="highlight"><code><span class="c1">// say to use light theme</span>
 <span class="nx">zebkit</span><span class="p">.</span><span class="nx">ui</span><span class="p">.</span><span class="nx">config</span><span class="p">(</span><span class="s2">"theme"</span><span class="p">,</span> <span class="s2">"light"</span><span class="p">);</span>
 </code></pre>
 </div>
 
 <p>In a case if zebkit theme is located in other place specify base directory where the theme resources are stored:</p>
 
-<div class="highlighter-rouge"><pre class="highlight"><code><span class="c1">// define path to custom theme    </span>
+<div class="language-js highlighter-rouge"><pre class="highlight"><code><span class="c1">// define path to custom theme    </span>
 <span class="nx">zebkit</span><span class="p">.</span><span class="nx">ui</span><span class="p">.</span><span class="nx">config</span><span class="p">(</span><span class="s2">"basedir"</span><span class="p">,</span><span class="s2">"http://test.com./myfolder/mytheme"</span><span class="p">);</span>
 </code></pre>
 </div>
 
 <p>If there are number of themes you need to host in a custom place specify “basedir” as follow:</p>
 
-<div class="highlighter-rouge"><pre class="highlight"><code><span class="c1">// define path to light theme    </span>
+<div class="language-js highlighter-rouge"><pre class="highlight"><code><span class="c1">// define path to light theme    </span>
 <span class="nx">zebkit</span><span class="p">.</span><span class="nx">ui</span><span class="p">.</span><span class="nx">config</span><span class="p">(</span><span class="s2">"basedir"</span><span class="p">,</span><span class="s2">"http://test.com./myfolder/%{theme}"</span><span class="p">);</span>
 <span class="p">...</span>
 <span class="c1">// specify theme to be used</span>
@@ -515,7 +515,7 @@
 
 <p><strong>Note:</strong> Note that configuration variables (theme, base directory, etc) have to be adjusted outside of “require” or “package” zebkit sections. The customization should look something like the following:</p>
 
-<div class="highlighter-rouge"><pre class="highlight"><code><span class="nt">&lt;script&gt;</span>
+<div class="language-html highlighter-rouge"><pre class="highlight"><code><span class="nt">&lt;script&gt;</span>
     <span class="c1">// adjust theme variable</span>
     <span class="nx">zebkit</span><span class="p">.</span><span class="nx">ui</span><span class="p">.</span><span class="nx">config</span><span class="p">(</span><span class="s2">"theme"</span><span class="p">,</span><span class="s2">"light"</span><span class="p">);</span>
 
@@ -533,7 +533,7 @@
 
 <p>To load the JSON UI definition the following code can be used:</p>
 
-<div class="highlighter-rouge"><pre class="highlight"><code><span class="nx">zebkit</span><span class="p">.</span><span class="nx">require</span><span class="p">(</span><span class="s2">"ui"</span><span class="p">,</span> <span class="kd">function</span><span class="p">(</span><span class="nx">ui</span><span class="p">)</span> <span class="p">{</span>
+<div class="language-js highlighter-rouge"><pre class="highlight"><code><span class="nx">zebkit</span><span class="p">.</span><span class="nx">require</span><span class="p">(</span><span class="s2">"ui"</span><span class="p">,</span> <span class="kd">function</span><span class="p">(</span><span class="nx">ui</span><span class="p">)</span> <span class="p">{</span>
     <span class="c1">// load root component content with "simple.json" file</span>
     <span class="k">new</span> <span class="nx">ui</span><span class="p">.</span><span class="nx">zCanvas</span><span class="p">(</span><span class="mi">400</span><span class="p">,</span> <span class="mi">300</span><span class="p">).</span><span class="nx">root</span><span class="p">.</span><span class="nx">load</span><span class="p">(</span><span class="s2">"simple.json"</span><span class="p">);</span>
 <span class="p">});</span>
@@ -542,11 +542,11 @@
 
 <p>For example, let’s load the following Zson:</p>
 
-<div class="highlighter-rouge"><pre class="highlight"><code><span class="p">{</span><span class="w">
-    </span><span class="nt">"layout"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nt">"@zebkit.layout.StackLayout"</span><span class="w"> </span><span class="p">:</span><span class="w"> </span><span class="p">[]},</span><span class="w">
+<div class="language-json highlighter-rouge"><pre class="highlight"><code><span class="p">{</span><span class="w">
+    </span><span class="nt">"stackLayout"</span><span class="p">:</span><span class="w"> </span><span class="p">[],</span><span class="w">
     </span><span class="nt">"kids"</span><span class="w">  </span><span class="p">:</span><span class="w"> </span><span class="p">[{</span><span class="w">
         </span><span class="nt">"@zebkit.ui.Panel"</span><span class="p">:</span><span class="w"> </span><span class="p">[],</span><span class="w">
-        </span><span class="nt">"layout"</span><span class="w"> </span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nt">"@zebkit.layout.BorderLayout"</span><span class="w"> </span><span class="p">:</span><span class="mi">4</span><span class="w"> </span><span class="p">},</span><span class="w">
+        </span><span class="nt">"borderLayout"</span><span class="w"> </span><span class="p">:</span><span class="w"> </span><span class="mi">4</span><span class="p">,</span><span class="w">
         </span><span class="nt">"padding"</span><span class="p">:</span><span class="w"> </span><span class="mi">4</span><span class="p">,</span><span class="w">
         </span><span class="nt">"border"</span><span class="w"> </span><span class="p">:</span><span class="w"> </span><span class="s2">"plain"</span><span class="p">,</span><span class="w">
         </span><span class="nt">"kids"</span><span class="w">   </span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w">
@@ -621,8 +621,7 @@ Optional an event name that has to be handled from the source
 <tr><td>
 "#actions.condition"    
 </td><td>
-Optional a condition the source event is handled. Condition is dictionary of source properties and its values. If all properties values of the specified condition match the correspondent properties of source component the event 
-will be handled.   
+Optional condition that defines when the source event has to be handled. The condition is a dictionary of properties and its values. Source component properties have to match all properties defined with the condition, otherwise source event will be ignored.   
 </td></tr>
 
 <tr><td>
@@ -642,7 +641,7 @@ Path to detect a target component
 <tr><td>
 "#actions.target.condition"    
 </td><td>
-Optional a condition the target "update" and "do" sections will be applied. Condition is dictionary of target properties and its values. If all properties values of the specified condition match the correspondent properties of target component "update" and "do" sections are applied to the target.
+Optional condition that defines if target "update" and "do" sections have to be applied. Condition is a dictionary of properties and its values. If all properties values of the specified condition match the correspondent properties of target component then "update" and/or "do" sections are applied to the target component.
 </td></tr>
 
 <tr><td>
@@ -665,7 +664,7 @@ Set of actions over the target component
 
 <p>To combine multiple JSONs:</p>
 
-<div class="highlighter-rouge"><pre class="highlight"><code><span class="p">{</span><span class="w">
+<div class="language-json highlighter-rouge"><pre class="highlight"><code><span class="p">{</span><span class="w">
     </span><span class="nt">"%{../external1.json}"</span><span class="p">:</span><span class="w"> </span><span class="s2">""</span><span class="p">,</span><span class="w">
     </span><span class="nt">"%{../external2.json}"</span><span class="p">:</span><span class="w"> </span><span class="s2">""</span><span class="p">,</span><span class="w">
     </span><span class="nt">"key"</span><span class="w"> </span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w">
@@ -677,7 +676,7 @@ Set of actions over the target component
 
 <p>Or you can fulfill a value with the given JSON as follow:</p>
 
-<div class="highlighter-rouge"><pre class="highlight"><code><span class="p">{</span><span class="w">
+<div class="language-json highlighter-rouge"><pre class="highlight"><code><span class="p">{</span><span class="w">
     </span><span class="nt">"key"</span><span class="w"> </span><span class="p">:</span><span class="w"> </span><span class="s2">"%{../external.json}"</span><span class="w">
 </span><span class="p">}</span><span class="w">
 </span></code></pre>
@@ -685,12 +684,12 @@ Set of actions over the target component
 
 <p>For example let use slightly modified JSON from previous UI example to populate the same UI four times:</p>
 
-<div class="highlighter-rouge"><pre class="highlight"><code><span class="p">{</span><span class="w">
+<div class="language-json highlighter-rouge"><pre class="highlight"><code><span class="p">{</span><span class="w">
     </span><span class="nt">"@zebkit.ui.Panel"</span><span class="p">:</span><span class="w"> </span><span class="p">[],</span><span class="w">
-    </span><span class="nt">"layout"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nt">"@zebkit.layout.StackLayout"</span><span class="w"> </span><span class="p">:</span><span class="w"> </span><span class="p">[]},</span><span class="w">
+    </span><span class="nt">"stackLayout"</span><span class="p">:</span><span class="w"> </span><span class="p">[],</span><span class="w">
     </span><span class="nt">"kids"</span><span class="w">  </span><span class="p">:</span><span class="w"> </span><span class="p">[{</span><span class="w">
         </span><span class="nt">"@zebkit.ui.Panel"</span><span class="p">:[],</span><span class="w">
-        </span><span class="nt">"layout"</span><span class="w"> </span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nt">"@zebkit.layout.BorderLayout"</span><span class="w"> </span><span class="p">:</span><span class="mi">4</span><span class="w"> </span><span class="p">},</span><span class="w">
+        </span><span class="nt">"borderLayout"</span><span class="w"> </span><span class="p">:</span><span class="w"> </span><span class="mi">4</span><span class="p">,</span><span class="w">
         </span><span class="nt">"padding"</span><span class="p">:</span><span class="w"> </span><span class="mi">4</span><span class="p">,</span><span class="w">
         </span><span class="nt">"border"</span><span class="w"> </span><span class="p">:</span><span class="w"> </span><span class="s2">"plain"</span><span class="p">,</span><span class="w">
         </span><span class="nt">"kids"</span><span class="w">   </span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w">
@@ -718,8 +717,8 @@ Set of actions over the target component
 
 <p>Find JSON to load external JSON mentioned above four times below:</p>
 
-<div class="highlighter-rouge"><pre class="highlight"><code><span class="p">{</span><span class="w">
-    </span><span class="nt">"layout"</span><span class="w"> </span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nt">"@zebkit.layout.GridLayout"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="mi">2</span><span class="p">,</span><span class="w"> </span><span class="mi">2</span><span class="p">,</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span><span class="w"> </span><span class="kc">true</span><span class="p">]</span><span class="w"> </span><span class="p">},</span><span class="w">
+<div class="language-json highlighter-rouge"><pre class="highlight"><code><span class="p">{</span><span class="w">
+    </span><span class="nt">"gridLayout"</span><span class="w"> </span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="mi">2</span><span class="p">,</span><span class="w"> </span><span class="mi">2</span><span class="p">,</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span><span class="w"> </span><span class="kc">true</span><span class="p">],</span><span class="w">
     </span><span class="nt">"kids"</span><span class="w">   </span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="w">
         </span><span class="s2">"%{./simple.json}"</span><span class="p">,</span><span class="w">
         </span><span class="s2">"%{./simple.json}"</span><span class="p">,</span><span class="w">

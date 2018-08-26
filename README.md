@@ -133,7 +133,7 @@ To have an idea what zebkit programming looks like see the example code below:
                 // create Canvas using JSON like style
                 var zc = new ui.zCanvas();
                 zc.root.properties({
-                    layout: new layout.BorderLayout(4),
+                    borderLayout: 4,
                     padding: 8,
                     kids  : {
                         center: new ui.TextArea("", true),
@@ -156,6 +156,42 @@ To have an idea what zebkit programming looks like see the example code below:
 You can create, for instance, "sample.html" in zebkit home folder. Then fill the file with the content shown above and run it in a browser with the URL below:
 
 "http://localhost:8090/sample.html"
+
+# Bundle zebkit stuff in single JS file
+
+Zebkit loads multiple configuration files (JSONs) and resources (images) during its initialization. The process costs additional time and makes impossible running of zebkit and its applications without HTTP server because of security restrictions browsers issue. 
+
+The latest version of zebkit allows developers to bundle all required with zebkit stuff in single "zebkit.js" or "zebkit.min.js" file. This feature improves zebkit bootstrap time significantly and lets building applications that can be run without HTTP server, just by opening its in a browser as HTML file. 
+
+To create bundled version of zebkit use the following command:
+```bash
+    gulp zebkit --bundle true
+```
+
+# UI YAML support
+
+Together with JSON format developers can use less talkative and more readable YAML format to describe zebkit UI forms:
+```YAML
+kids:
+  -  class: zebkit.ui.Panel
+     borderLayout: [4, 4]
+     padding: 4
+     border: plain
+     kids:
+        top:
+            class: { "zebkit.ui.BoldLabel": "Simple application" }
+            padding: 4
+            background: lightGray
+
+        center:
+            class: zebkit.ui.TextField
+
+        bottom:
+            class : { "zebkit.ui.Button": Clear }
+```
+
+To support YAML format add open source "js-yaml" (https://github.com/nodeca/js-yaml/blob/master/dist/js-yaml.min.js) script into header of your page. Zebkit detects YAML by file extension (yaml).
+
 
 # License
 

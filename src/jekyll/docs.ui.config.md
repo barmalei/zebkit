@@ -137,10 +137,10 @@ For example, let's load the following Zson:
 
 ```json
 {
-    "layout": { "@zebkit.layout.StackLayout" : []},
+    "stackLayout": [],
     "kids"  : [{
         "@zebkit.ui.Panel": [],
-        "layout" : { "@zebkit.layout.BorderLayout" :4 },
+        "borderLayout" : 4,
         "padding": 4,
         "border" : "plain",
         "kids"   : {
@@ -200,8 +200,7 @@ Optional an event name that has to be handled from the source
 <tr><td>
 "#actions.condition"    
 </td><td>
-Optional a condition the source event is handled. Condition is dictionary of source properties and its values. If all properties values of the specified condition match the correspondent properties of source component the event 
-will be handled.   
+Optional condition that defines when the source event has to be handled. The condition is a dictionary of properties and its values. Source component properties have to match all properties defined with the condition, otherwise source event will be ignored.   
 </td></tr>
 
 <tr><td>
@@ -221,7 +220,7 @@ Path to detect a target component
 <tr><td>
 "#actions.target.condition"    
 </td><td>
-Optional a condition the target "update" and "do" sections will be applied. Condition is dictionary of target properties and its values. If all properties values of the specified condition match the correspondent properties of target component "update" and "do" sections are applied to the target.
+Optional condition that defines if target "update" and "do" sections have to be applied. Condition is a dictionary of properties and its values. If all properties values of the specified condition match the correspondent properties of target component then "update" and/or "do" sections are applied to the target component.
 </td></tr>
 
 <tr><td>
@@ -267,10 +266,10 @@ For example let use slightly modified JSON from previous UI example to populate 
 ```json
 {
     "@zebkit.ui.Panel": [],
-    "layout": { "@zebkit.layout.StackLayout" : []},
+    "stackLayout": [],
     "kids"  : [{
         "@zebkit.ui.Panel":[],
-        "layout" : { "@zebkit.layout.BorderLayout" :4 },
+        "borderLayout" : 4,
         "padding": 4,
         "border" : "plain",
         "kids"   : {
@@ -299,7 +298,7 @@ Find JSON to load external JSON mentioned above four times below:
 
 ```json
 {
-    "layout" : { "@zebkit.layout.GridLayout": [2, 2, true, true] },
+    "gridLayout" : [2, 2, true, true],
     "kids"   : [
         "%{./simple.json}",
         "%{./simple.json}",

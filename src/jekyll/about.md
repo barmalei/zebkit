@@ -21,7 +21,7 @@ Zebkit is perfect choice for development of mobile, single page applications wit
 zebkit.require("ui", "layout", "ui.design", function(ui, layout, design) {
     var root = (new ui.zCanvas("designer", 400, 300)).root;
     root.properties({
-        layout : new layout.BorderLayout(4, 4),
+        borderLayout : [4, 4],
         padding: 8,
         kids: {
             center: new ui.BorderPan("Designer panel", new ui.Panel({
@@ -51,7 +51,7 @@ zebkit.require("ui", "layout", "ui.design", function(ui, layout, design) {
             })),
 
             bottom: new ui.Button("Align", [
-                function fire() {
+                function $fire() {
                     this.$super();
                     var y = 10; 
                     root.byPath("//zebkit.ui.design.ShaperPan", function(c) {
@@ -219,7 +219,7 @@ zebkit.require("ui", "layout", "draw", function(ui, layout, draw) {
     }, -2, 1, "#55DD22"))
 
     var pan = new ui.Panel({
-        layout: new layout.FlowLayout(8),
+        flowLayout: 8,
         kids: [ 
            new ui.Label(sh)
                  .setColor('{{site.themeId}}'=='light'?"gray":"white"), 
@@ -258,7 +258,7 @@ zebkit.require("ui", "layout", "draw", function(ui, layout, draw) {
             map.popup = new ui.Menu(["Zebkit", "Context", "Menu"]);
             gmap = map.element;
             c.root.properties({
-                layout : new layout.BorderLayout(8),
+                borderLayout : 8,
                 padding: 16,
                 border : new draw.Border("red", 2, 6),
                 kids: {
@@ -463,7 +463,7 @@ zebkit.require("ui", "draw", "layout", function(ui, draw, layout) {
         b3=new RoundButton(new ui.ImagePan("public/images/bug-o.png")
                                  .setPadding(6));
     root.add(new ui.Panel({
-        layout:new layout.FlowLayout("center","center","horizontal", 8),
+        flowLayout: [ "center","center","horizontal", 8 ],
         kids  : [ b1, b2, b3 ]
     }));
 
@@ -483,7 +483,7 @@ zebkit.require("ui", "draw", "layout", function(ui, draw, layout) {
 
 ```json
 { "@zebkit.ui.Panel": {
-    "layout" : { "@zebkit.layout.BorderLayout" : 4 },
+    "borderLayout" : 4 ,
     "padding": 16, 
     "border" : "plain",
     "kids"   : {
@@ -762,11 +762,11 @@ zebkit.require("ui", "layout", function(ui, layout) {
             })),
             new ui.CollapsiblePan("Page 2", 
                 new ui.Panel({
-                    layout : new layout.FlowLayout("center", "center"),
+                    flowLayout : ["center", "center" ],
                     background : "#202220",
-                   kids   : [
+                    kids       : [
                         new ui.Label("No content is available")
-                   ]
+                    ]
                })),
             new ui.CollapsiblePan("Page 3", 
                                  new ui.Label("..."))
@@ -839,7 +839,7 @@ zebkit.require("ui", "layout", function(ui, layout) {
     var r = new ui.zCanvas("layoutSample1", 500, 400).root;
     r.setBorderLayout();
     r.add(new ui.Panel({
-        layout : new layout.BorderLayout(4),
+        borderLayout : 4,
         kids   : {
             "center": new ui.Button("CENTER"),
             "left":   new ui.Button("LEFT"),

@@ -17,7 +17,7 @@ zebkitBase:       /build
 apidocBase:       /apidoc
 
 themeId:         "light"
-revision:        "11072017"
+revision:        "25082018"
 
 author:
   name:           'Andrei Vishneuski'

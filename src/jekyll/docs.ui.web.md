@@ -242,7 +242,7 @@ zebkit.require("ui", "ui.web", "draw", function(ui, web, dr) {
 ```
 
 
-### Goodle map in zebkit layout
+### Google map in zebkit layout
 
 {% include zsample.html canvas_id='sampleGoogleMap1' title="DOM elements integrated in zebkit layout" description=description %}
 

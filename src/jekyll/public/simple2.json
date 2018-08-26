@@ -1,5 +1,5 @@
 {
-    "layout" : { "@zebkit.layout.GridLayout": [2, 2, true, true] },
+    "gridLayout" : [2, 2, true, true],
     "kids"   : [
         "%{./simple3.json?a='100'}",
         "%{./simple3.json?a='200'}",

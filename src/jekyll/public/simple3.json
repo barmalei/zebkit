@@ -1,9 +1,9 @@
 {
     "@zebkit.ui.Panel": [],
-    "layout": { "@zebkit.layout.StackLayout" : []},
+    "stackLayout": [],
     "kids"  : [{
         "@zebkit.ui.Panel":[],
-        "layout" : { "@zebkit.layout.BorderLayout" :4 },
+        "borderLayout" : 4,
         "padding": 4,
         "border" : "plain",
         "kids"   : {

@@ -1,6 +1,6 @@
 {
     "@zebkit.ui.Panel": {
-        "layout" : { "@zebkit.layout.BorderLayout" : 4 },
+        "borderLayout" :4,
         "padding": 16, "border" : "plain",
         "kids"   : {
             "center": {

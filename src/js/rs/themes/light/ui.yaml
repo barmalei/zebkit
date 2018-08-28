@@ -1,0 +1,483 @@
+---
+themeName: light
+"%{../ui.common.json}":
+font: { ".font": [ Arial, 14 ] }
+boldFont: { ".font": [ Arial, bold, 14 ] }
+smallFont: { ".font": [ Arial, 10 ] }
+palette:
+  white: "#FFFFFF"
+  black: "#000000"
+  gray: "#A1A1A1"
+  fontColor: "#808080"
+"#views":
+  raised: { "@zebkit.draw.Raised": [] }
+  sunken: { "@zebkit.draw.Sunken": [] }
+  etched: { "@zebkit.draw.Etched": [] }
+  plain: { ".border": ["#C5C5C5", 1, 3] }
+  dot: { "@zebkit.draw.Dotted": [] }
+pictures: { zebkit: "%{<img> zebkit.png}" }
+BoldLabel: { font: "%{boldFont}" }
+Link:
+  font: bold
+  colors:
+    pressed.over: red
+    out: red
+    over: orange
+    pressed.out: red
+    disabled: gray
+  canHaveFocus: false
+Button:
+  Label:
+    font: [Arial, bold, 15]
+    disabledColor: white
+  ImageLabel:
+    Label:
+      font: [Arial, bold, 15]
+      disabledColor: lightGray
+  Link: { inheritProperties: true }
+  flowLayout: [ center, center, horizontal, 2]
+  background:
+    pressed.over: "#FFFFFF"
+    out: { ".gradient": [ "rgb(250, 250, 250)", rgb(234, 234, 234) ] }
+    over:  { ".gradient": [ "rgb(234, 234, 234)", rgb(214, 214, 214) ] }
+    disabled: lightGray
+  border:
+    focuson: { ".border": ["#66CCFF", 2, 3] }
+    focusoff: {  ".border": ["#C5C5C5", 1,3] }
+  focusMarkerView: plain
+  padding: 6
+ArrowButton:
+  padding: 2
+  arrowSize: 10
+  stretchArrow: false
+  stateProperties:
+    out: { fillColor: "#66CCFF" }
+    over: { fillColor: red }
+    pressed.over: { fillColor: gray }
+    disabled: { fillColor: lightGray }
+Checkbox:
+  Box:
+    preferredSize: [16, 16]
+    border: plain
+    background:
+      "*": { ".gradient": ["rgb(250, 250, 250)", "rgb(234, 234, 234)" ] }
+      disabled: lightGray
+      pressed.disabled: lightGray
+    view:
+      pressed.out: { "@zebkit.draw.CheckboxView": [] }
+      out: { "@zebkit.draw.View": [] }
+      over: { "@zebkit.draw.CheckboxView": lightGray }
+      pressed.over: { "@zebkit.draw.CheckboxView": red }
+      pressed.disabled: { "@zebkit.draw.CheckboxView": "#AAAAAA" }
+      disabled: { "@zebkit.draw.View": [] }
+  Label: { disabledColor: lightGray }
+  flowLayout: [ left, center, horizontal, 6]
+  border:
+    focuson: { ".border": ["#66CCFF", 1, 4] }
+    focusoff: { "@zebkit.draw.View": [] }
+  padding: 2
+  canHaveFocus: true
+Radiobox:
+  inheritProperties: true
+  Label: { disabledColor: lightGray }
+  Box:
+    preferredSize: [16, 16]
+    border: { "@zebkit.draw.RoundBorder": ["rgb(197,197,197)", 1] }
+    background:
+      "*": { ".gradient": [ "rgb(250, 250, 250)", "rgb(234, 234, 234)" ] }
+      disabled: lightGray
+      pressed.disabled: lightGray
+    view:
+      pressed.out: { "@zebkit.draw.RadioView": [] }
+      out: { "@zebkit.draw.View": [] }
+      over: { "@zebkit.draw.RadioView": [ lightGray, "#DDDDDD" ] }
+      pressed.over: { "@zebkit.draw.RadioView": [ "#111111", red] }
+      pressed.disabled: { "@zebkit.draw.RadioView": ["#AAAAAA", "#AAAAAA"] }
+      disabled: { "@zebkit.draw.View": [] }
+BorderPan:
+  Label:
+    font: "%{boldFont}"
+    color: "%{palette.gray}"
+  ImageLabel:
+    Label:
+      font: 120%
+      color: "%{palette.gray}"
+  Checkbox:
+    inheritProperties: true
+    Label:
+      font: 120%
+      color: "%{palette.gray}"
+  border: { "@zebkit.draw.TitledBorder": [plain, center] }
+SplitPan:
+  Bar:
+    border: plain
+    background:
+      "*": white
+      over: rgb(65, 131, 255)
+      pressed.*: red
+    preferredSize: [6, 6]
+Scroll:
+  LeftArrowButton:
+    direction: right
+    padding: 0
+    preferredSize: [14, 14]
+  RightArrowButton:
+    direction: left
+    padding: 0
+    preferredSize: [14, 14]
+  TopArrowButton:
+    direction: bottom
+    padding: 0
+    preferredSize: [14, 14]
+  BottomArrowButton:
+    direction: top
+    padding: 0
+    preferredSize: [14, 14]
+  VerticalThumb:
+    preferredSize: [8, -1]
+    border: { ".border": [4, 4] }
+    background: "#66CCFF"
+  HorizontalThumb:
+    preferredSize: [-1, 8]
+    border: { ".border": [ 4, 4 ] }
+    background: "#66CCFF"
+  background:
+  padding: 1
+  border: { ".border": [0, 4] }
+ScrollPan: { autoHide: "%{<js> window.innerWidth < 600}" }
+TextField:
+  HintRender:
+    inheritProperties: true
+    font: [Arial, "bold italic", 12]
+    color: "#C1C1C1"
+  border:
+    focuson: { ".border": ["#66CCFF", 2, 8] }
+    focusoff:  { ".border": ["#DDDDDD", 2, 8] }
+  background: rgb(248, 250, 255)
+  selectView: "#d3edad"
+  color: "#515151"
+  cursorView: "%{palette.black}"
+  cursorWidth: 1
+  padding: [4,4,4,4]
+TextArea: { inheritProperties: true }
+PassTextField: { inheritProperties: true }
+Progress:
+  border: { ".border": [ "rgb(200,200,255)", 1, 3 ] }
+  barView: "#66CCFF"
+  padding: 2
+Tabs:
+  TabView:
+    TabPan: { flowLayout: 4 }
+    captionRender: "%{zebkit.draw.StringRender}"
+    fontColor: "%{palette.fontColor}"
+    selectedFontColor: black
+    font: "%{font}"
+    selectedFont: [Arial, bold, 14]
+  border: { "@zebkit.draw.TitledBorder": { ".border": [ gray, 1, 6 ] } }
+  views:
+    outTab: { "@zebkit.draw.TabBorder": out }
+    overTab: { "@zebkit.draw.TabBorder": over }
+    selectedTab: { "@zebkit.draw.TabBorder": selected }
+    marker: { ".border": [ "#66CCFF", 1, 3] }
+  pageGaps: [2, 2]
+BaseList:
+  views:
+    select: rgb(228,244,252)
+    topMarker: { ".border":[ "#0081C4", 1, 4 ] }
+    marker: "#DEF1FF"
+  border:
+    focuson: { ".border":[ "#66CCFF", 3, 4 ] }
+    focusoff: plain
+  padding: 0
+List:
+  inheritProperties: true
+  gap: 4
+ImageLabel:
+  padding: 4
+  Label: { inheritProperties: true }
+  ImagePan: { inheritProperties: true }
+  imgAlignment: left
+CompList:
+  inheritProperties: true
+  Label: { padding: 4 }
+  ImageLabel: { padding: 4 }
+  listLayout: 0
+Combo:
+  ComboPadPan:
+    border:  { ".border":[ "#969696", 1, 3] }
+    background: "%{palette.white}"
+    autoHide: true
+  ReadonlyContentPan: { padding: 0 }
+  EditableContentPan:
+    TextField:
+      inheritProperties: true
+      border:
+      background:
+      padding: [0,0,0,0]
+    padding: 4
+    borderLayout: 0
+  ArrowButton:
+    inheritProperties: true
+    preferredSize: 12
+    padding: [4,0,4,0]
+  List:
+    inheritProperties: true
+    border:
+  CompList:
+    inheritProperties: true
+    Label: { padding: 4 }
+    ImageLabel: { padding: 4 }
+    border:
+  padding: [0, 4, 0, 4]
+  border:
+    focuson: { ".border": [ "#66CCFF", 2, 8 ] }
+    focusoff: { ".border": [ "#DDDDDD", 2, 8] }
+  background: { ".gradient": [ "rgb(250, 250, 250)", "rgb(234, 234, 234)" ] }
+  borderLayout: 0
+  selectView:
+RulerPan:
+  NumLabels: { color: red }
+  PercentageLabels: { color: red }
+Slider:
+  GaugePan:
+    preferredSize: [2, 2]
+    background: lightGray
+  border:
+    focuson: { ".border": ["#66CCFF", 1, 3] }
+    focusoff: { "@zebkit.draw.View": [] }
+  views:
+    horHandle: { ".pic":[ "%{pictures.zebkit}", 49, 0, 11, 18] }
+    verHandle: { ".pic":[ "%{pictures.zebkit}", 60, 0, 18, 11] }
+  padding: 2
+MenuItem:
+  padding: [4,4,4,4]
+  ImageLabel:
+    color: "#5A5A5A"
+    padding: 4
+    font: [Arial, bold, 14]
+    disabledColor: lightGray
+  Checkbox:
+    disabledColor: lightGray
+    view:
+      pressed.*:
+        "@zebkit.draw.StringRender":
+        - "✓"
+        - ".font":
+          - Arial
+          - bold
+          - 16
+        - red
+      pressed.disabled:
+        "@zebkit.draw.StringRender":
+        - "✓"
+        - ".font":
+          - Arial
+          - bold
+          - 16
+        - lightGray
+      "*":
+  Radiobox:
+    disabledColor: lightGray
+    view:
+      pressed.*:
+        "@zebkit.draw.StringRender":
+        - "•"
+        - ".font":
+          - Arial
+          - bold
+          - 18
+        - red
+      pressed.disabled:
+        "@zebkit.draw.StringRender":
+        - "•"
+        - ".font":
+          - Arial
+          - bold
+          - 18
+        - lightGray
+      "*":
+  SubImage:
+    padding: [0, 0, 0, 4]
+    view:
+      pressed:
+        "@zebkit.draw.ArrowView":
+        - right
+        -
+        - black
+        width: 8
+        height: 10
+      "*":
+Menu:
+  Line: { padding: 4 }
+  MenuItem:
+    inheritProperties: true
+    ImageLabel: { inheritProperties: true }
+  border: { ".border": [] }
+  background: rgba(255,255,255, 0.8)
+  padding: [4,0,4,0]
+  views:
+    marker: { ".gradient":[ "rgb(228,244,252)", "rgb(167,217,245)" ] }
+  listLayout: 0
+Menubar:
+  MenuItem:
+    inheritProperties: true
+    padding: [6,16,6,16]
+    ImageLabel:  { inheritProperties: true }
+  inheritProperties: true
+  background:
+  - - "#DCF0F7"
+    - ".gradient":
+      - rgba(255, 255, 255, 0.8)
+      - rgba(255, 255, 255, 0.0)
+  padding: [0,0,0,0]
+  flowLayout: 0
+  views:
+    select: { ".gradient":[ "rgb(228,244,252)", "rgb(167,217,245)" ] }
+    marker: { ".gradient":[ "rgb(218,234,242)", "rgb(157,207,235)" ] }
+Toolbar:
+  Combo:
+    background: "%{palette.white}"
+    border: { ".border": "rgb(200,180,200)" }
+    padding: [1,4,1,1]
+  ToolPan:
+    padding: 2
+    border:
+      over: { ".border": ["#32B6E6", 1, 6] }
+      "*":
+      pressed.over: { ".border":[ "#E6563A", 1, 6] }
+    background:
+      over: "#E1F0F5"
+      "*":
+      pressed.over: "#FF8637"
+  ImagePan: { padding: 4 }
+  Checkbox:
+    inheritProperties: true
+    canHaveFocus: false
+    padding: 4
+    background:
+      pressed.*: orange
+      "*":
+  Radiobox: { inheritProperties: true }
+  flowLayout: [ left, center, horizontal, 6]
+  border: plain
+  padding: 4
+Tooltip:
+  Label:
+    font: 12px Helvetica
+    color: white
+    padding: 4
+  background: "#66CCFF"
+  border:
+    "@zebkit.ui.Tooltip.TooltipBorder": ["#0E4EAD", 1]
+  flowLayout: [center, top]
+CollapsiblePan:
+  Label:
+    font: "%{boldFont}"
+    color: "#66CCFF"
+  Header:
+    padding: 4
+    flowLayout: 4
+    border:
+      over: {".border": [ "#66CCFF", 1, 0, "bottom"] }
+      "*": {".border": [ "lightGray", 1, 0, "bottom"] }
+  Toogle:
+    Box:
+      padding: 0
+      preferredSize: [-1, -1]
+      background:
+      border:
+      view:
+        "*":
+          "@zebkit.draw.ToggleView":
+          - true
+          - gray
+          -
+          - 14
+          - 14
+          -
+        pressed.*:
+          "@zebkit.draw.ToggleView":
+          - false
+          - gray
+          -
+          - 14
+          - 14
+          -
+  GroupPan: { border: plain }
+  borderLayout: 0
+  border: plain
+Window:
+  CaptionPan:
+    borderLayout: 0
+    background:
+      active: { "@zebkit.draw.CaptionBgView": ["#66CCFF"] }
+      inactive: { "@zebkit.draw.CaptionBgView": ["lightGray"] }
+    padding: 8
+  ContentPan:
+    borderLayout: 0
+  TitleLab:
+    font: [Verdana, 16]
+    color: "%{palette.white}"
+  StatusPan:
+    flowLayout: [right, center]
+  SizerPan:
+    padding: [0,0,1,2]
+    view: { ".pic": [ "%{pictures.zebkit}", 0, 32, 9, 8] }
+  Icon: { visible: false }
+  border:
+    active: { ".border": [ "#33AAFF", 2, 8 ]}
+      gap: 2
+    inactive: { ".border": [lightGray, 2, 8]}
+      gap: 2
+  background: "#ECECEC"
+  padding: [0,0,2,0]
+  buttons:
+    close:
+      view:
+        over: { ".pic": [ "%{pictures.zebkit}", 16, 0, 16, 16] }
+        out:  { ".pic": [ "%{pictures.zebkit}", 0, 0, 16, 16] }
+        pressed: { ".pic": [ "%{pictures.zebkit}", 32, 0, 16, 16] }
+Spin:
+  IncButton:
+    inheritProperties: true
+    fireParams: [true, 100, 1000]
+    arrowSize:  [16, 12]
+    padding: 0
+    direction: top
+  DecButton:
+    inheritProperties: true
+    padding: 0
+    fireParams: [true, 100, 1000]
+    arrowSize: [16, 12]
+    direction: bottom
+  canHaveFocus: true
+  padding: [2,4,2,4]
+  TextField:
+    background:
+    font: bold
+  border:
+    focuson: { ".border": ["#66CCFF", 2, 8] }
+    focusoff: { ".border": ["#DDDDDD", 2, 8] }
+  background: rgb(248, 250, 255)
+StatusBarPan:
+  Label:
+    color: white
+    font: bold
+  Line:
+    color: white
+    padding: [1, 4, 1, 4]
+  Combo:
+    List:
+      color: white
+      font: bold
+      border:
+      background: "#999999"
+      views:
+        marker: gray
+        select: black
+    ArrowButton: { fillColor: red }
+    canHaveFocus: false
+    background:
+    padding: 0
+  padding: 2
+  background: "#999999"

@@ -1,0 +1,301 @@
+---
+WEEKS:
+- name: Sunday
+  nickname: Sun
+  isWeekend: true
+  color: red
+- name: Monday
+  nickname: Mon
+- name: Tuesday
+  nickname: Tue
+- name: Wednesday
+  nickname: Wed
+- name: Thursday
+  nickname: Thu
+- name: Friday
+  nickname: Fri
+- name: Saturday
+  nickname: Sat
+  isWeekend: true
+  color: red
+MONTHS:
+- name: January
+  nickname: Jan
+  value: 0
+- name: February
+  nickname: Feb
+  value: 1
+- name: March
+  nickname: Mar
+  value: 2
+- name: April
+  nickname: Apr
+  value: 3
+- name: May
+  nickname: May
+  value: 4
+- name: June
+  nickname: Jun
+  value: 5
+- name: July
+  nickname: Jul
+  value: 6
+- name: August
+  nickname: Aug
+  value: 7
+- name: September
+  nickname: Sep
+  value: 8
+- name: October
+  nickname: Oct
+  value: 9
+- name: November
+  nickname: Nov
+  value: 10
+- name: December
+  nickname: Dec
+  value: 11
+MonthDaysGrid:
+  DefViews:
+    background:
+  GridCaption:
+    Label:
+      padding:
+      - 0
+      - 2
+      - 0
+      - 2
+      font: "%{zebkit.ui.boldFont}"
+    border:
+    background:
+    namesOfWeekDays:
+    - "%{WEEKS}"
+  DayPan:
+    flowLayout:
+    - right
+    - center
+    - horizontal
+    - 2
+    Label:
+      color: "#442244"
+      font:
+      - Arial
+      - bold
+      - '14'
+      border:
+      background:
+      padding: 0
+      textDecorations: []
+    IconPan:
+      border:
+      background:
+      view:
+      padding: 0
+      preferredSize:
+      - -1
+      - -1
+    border:
+    background:
+    preferredSize:
+    - 32
+    - -1
+  tagsDecoration:
+    prevMonth:
+      color: lightGray
+    nextMonth:
+      color: lightGray
+    today:
+      icon/:
+        view:
+        border:
+          "@zebkit.draw.RoundBorder": []
+        background: "#65B661"
+        preferredSize:
+        - 8
+        - 8
+    notSelectable:
+      color: gray
+      textDecorations: strike
+      textDecorationsColor: red
+  paintPosMarkerOver: false
+  usePsMetric: true
+  drawLines:
+  - false
+  - true
+  lineSize: 0
+  lineColor: lightGray
+  defCellAlignments:
+  - right
+  - center
+  views:
+    offmarker: rgba(234, 243, 119, 0.5)
+    marker: rgba(234, 243, 119, 1.0)
+    notSelectableMarker:
+      ".border": lightGray
+Calendar:
+  LeftArrowButton:
+    arrowSize:
+    - 14
+    - 14
+    padding: 0
+    id: leftButton
+    direction: left
+  RightArrowButton:
+    arrowSize:
+    - 14
+    - 14
+    padding: 0
+    id: rightButton
+    direction: right
+  TopArrowButton:
+    id: topButton
+    direction: top
+    padding: 0
+    arrowSize:
+    - 16
+    - 10
+  BottomArrowButton:
+    id: bottomButton
+    padding: 0
+    direction: bottom
+    arrowSize:
+    - 16
+    - 10
+  Link:
+    id: nowLink
+    font:
+    - Arial
+    - 11
+    visible: false
+  DotButton:
+    id: dotButton
+    enabled: false
+    border:
+      "@zebkit.draw.RoundBorder":
+      -
+      - 0
+    background:
+      out: black
+      over: red
+      pressed.over: black
+      disabled: lightGray
+    preferredSize:
+    - 10
+    - 10
+  MonthsCombo:
+    Label:
+      font:
+      - Arial
+      - bold
+      - '14'
+      padding: 4
+      inheritProperties: true
+    CompList:
+      border:
+      padding: 2
+    id: monthsCombo
+    months:
+    - "%{MONTHS}"
+    padding: 2
+    background:
+    inheritProperties: true
+    border:
+      focusoff:
+      focuson:
+        "@zebkit.draw.LineView":
+        - bottom
+        - black
+        - 1
+  YearField:
+    id: yearField
+    font:
+    - Arial
+    - bold
+    - '14'
+    editable: false
+    background:
+    cursorView:
+    color: "#276733"
+    border:
+      focusoff:
+      focuson:
+        "@zebkit.draw.LineView":
+        - bottom
+        - black
+        - 1
+  InfoPan:
+    background: "#C0F785"
+    padding:
+    - 2
+    - 8
+    - 2
+    - 8
+  border: plain
+  background: "#ECFFE6"
+DateTextField:
+  editable: false
+DateInputField:
+  DateTextField:
+    border:
+    editable: false
+  Button:
+    border:
+    padding: 4
+    canHaveFocus: false
+  Calendar:
+    MonthsCombo:
+      inheritProperties: true
+    inheritProperties: true
+  border:
+    ".border": gray
+  format: "${date}/${month2}/${fullYear}"
+DateRangeInput:
+  DateInputPan:
+    flowLayout: 2
+  MinDateTextField:
+    inheritProperties: true
+    border:
+    background:
+    format: "${date}/${month2}/${fullYear}"
+  MaxDateTextField:
+    inheritProperties: true
+    border:
+    background:
+    textAlign: right
+    format: "${date}/${month2}/${fullYear}"
+  LeftArrowButton:
+    direction: left
+    padding: 0
+    arrowSize:
+    - 10
+    - 14
+  RightArrowButton:
+    direction: right
+    padding: 0
+    arrowSize:
+    - 10
+    - 14
+  Line:
+    colors:
+    - black
+    - gray
+    preferredSize:
+    - 10
+    - -1
+  tags:
+    startDate:
+      border:
+        ".border":
+        - black
+        - 1
+        - 4
+    endDate:
+      border:
+        ".border": []
+  border: plain
+  flowLayout: 2
+  padding:
+  - 2
+  - 4
+  - 2
+  - 4

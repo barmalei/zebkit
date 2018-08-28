@@ -480,7 +480,7 @@ Package.prototype.join = function() {
  * @param  {Function} [callback] a call back method that is called in package
  * context. The method has to be used to populate the given package classes,
  * interfaces and variables.
- * @param  {String|Boolean} [config] a path to configuration JSON file or boolean flag that says
+ * @param  {String|Boolean} [path] a path to configuration JSON file or boolean flag that says
  * to perform configuration using package as configuration name
  * @example
  *     // declare package "zebkit.log"
@@ -534,7 +534,7 @@ Package.prototype.package = function(name, callback, path) {
                 target = p;
             }
         } else {
-            path    = callback;
+            path     = callback;
             callback = name;
         }
 
@@ -632,7 +632,7 @@ Package.prototype.configWith = function(path, cb) {
  */
 Package.prototype.configWithRs = function(path, cb) {
     if (URI.isAbsolute(path)) {
-        throw new Error("Absulute path cannot be used");
+        throw new Error("Absolute path cannot be used");
     }
 
     var pkg = this;

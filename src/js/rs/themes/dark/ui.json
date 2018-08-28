@@ -672,11 +672,6 @@
         "borderLayout": 0
     },
 
-    "pictures" : {
-        "zebkit" : "%{<img> zebkit.png}"
-    },
-
-
     "Window": {
         "CaptionPan": {
             "borderLayout": 0,
@@ -712,22 +707,16 @@
 
         "border": {
             "active"   : { ".border":["red", 4, 8], "gap":2 },
-            "inactive" : { ".border":["red", 2, 8], "gap":2 }
+            "inactive" : { ".border":["red", 4, 8], "gap":2 }
         },
 
         "background": "black",
         "padding"   : [0,0,2,0],
         "buttons"   : {
             "close" : {
-                "view" : {
-                    "over"   : { "@zebkit.draw.Picture": [ "%{pictures.zebkit}",16,0,16,16   ]},
-                    "out"    : { "@zebkit.draw.Picture": [ "%{pictures.zebkit}",0,0,16,16    ]},
-                    "pressed": { "@zebkit.draw.Picture": [ "%{pictures.zebkit}",32,0,16,16   ]}
-                },
-
-                "background2" : {
+                "background" : {
                     "over"   : { "@zebkit.draw.CheckboxView": [ "white" ] },
-                    "out"    : { "@zebkit.draw.CheckboxView": [ "red" ] },
+                    "out"    : { "@zebkit.draw.CheckboxView": [ "black" ] },
                     "pressed": { "@zebkit.draw.CheckboxView": [ "orange" ] }
                 },
                 "preferredSize" : [ 16, 16 ]

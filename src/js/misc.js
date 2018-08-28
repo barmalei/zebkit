@@ -53,76 +53,18 @@ function $export() {
     }
 }
 
-
 if (typeof zebkitEnvironment === 'function') {
     $zenv = zebkitEnvironment();
 } else if (typeof window !== 'undefined') {
     $zenv = window;
 }
 
-// Map class definition for old browsers
-function $Map() {
-    var Map = function() {
-        this.keys   = [];
-        this.values = [];
-        this.size   = 0 ;
-    };
-
-    Map.prototype = {
-        set : function(key, value) {
-            var i = this.keys.indexOf(key);
-            if (i < 0) {
-                this.keys.push(key);
-                this.values.push(value);
-                this.size++;
-            } else {
-               this.values[i] = value;
-            }
-            return this;
-         },
-
-        delete: function(key) {
-            var i = this.keys.indexOf(key);
-            if (i < 0) {
-               return false;
-            }
-
-            this.keys.splice(i, 1);
-            this.values.splice(i, 1);
-            this.size--;
-            return true;
-        },
-
-        get : function(key) {
-            var i = this.keys.indexOf(key);
-            return i < 0 ? undefined : this.values[i];
-        },
-
-        clear : function() {
-            this.keys = [];
-            this.keys.length = 0;
-            this.values = [];
-            this.values.length = 0;
-            this.size = 0;
-        },
-
-        has : function(key) {
-            return this.keys.indexOf(key) >= 0;
-        },
-
-        forEach: function(callback, context) {
-            var $this = arguments.length < 2 ? this : context;
-            for(var i = 0 ; i < this.size; i++) {
-                callback.call($this, this.values[i], this.keys[i], this);
-            }
-        }
-    };
-    return Map;
-}
-
-// ES6 Map is class
-if (typeof Map === 'undefined' && (typeof $global !== 'undefined' || typeof $global.Map === "undefined")) {
-    $global.Map = $Map();
+function $buildReqError(url, req) {
+    var e = new Error("HTTP error '" + req.statusText + "', code = " + req.status + " '" + url + "'");
+    e.status     = req.status;
+    e.statusText = req.statusText;
+    e.readyState = req.readyState;
+    return e;
 }
 
 function GET(url) {
@@ -137,11 +79,7 @@ function GET(url) {
             if (req.readyState === 4) {
                 // evaluate HTTP response
                 if (req.status >= 400 || req.status < 100) {
-                    var e = new Error("HTTP error '" + req.statusText + "', code = " + req.status + " '" + url + "'");
-                    e.status     = req.status;
-                    e.statusText = req.statusText;
-                    e.readyState = req.readyState;
-                    $this.error(e);
+                    $this.error($buildErrorByResponse(url, req));
                 } else {
                     jn(req);
                 }
@@ -155,6 +93,36 @@ function GET(url) {
         }
     });
 }
+
+function HEAD(url) {
+    var req = $zenv.getHttpRequest();
+    req.open("HEAD", url, true);
+
+    return new DoIt(function() {
+        var jn    = this.join(),
+            $this = this;
+
+        req.onreadystatechange = function() {
+            if (req.readyState === 4) {
+                // evaluate HTTP response
+                if (req.status == 404) {
+                    jn(false);
+                } else  if (req.status >= 400 || req.status < 100) {
+                    $this.error($buildErrorByResponse(url, req));
+                } else {
+                    jn(true);
+                }
+            }
+        };
+
+        try {
+            req.send(null);
+        } catch(e) {
+            this.error(e);
+        }
+    });
+}
+
 
 // Micro file system
 var ZFS = {
@@ -188,6 +156,17 @@ var ZFS = {
             }
         }
         return null;
+    },
+
+    touch : function(uri) {
+        var f = ZFS.read(uri);
+        if (f !== null) {
+            return new DoIt(function() {
+                return true;
+            });
+        } else {
+            return HEAD(uri);
+        }
     },
 
     GET: function(uri) {
@@ -1024,7 +1003,7 @@ URI.join = function() {
 };
 
 $export(
-    URI,        isNumber, isString, $Map, isAtomic,
+    URI,        isNumber, isString, isAtomic,
     dumpError,  image,    getPropertySetter,
     getPropertyValue,     getPropertyGetter,
     properties, GET,      isBoolean, DoIt,

@@ -116,15 +116,10 @@ if (typeof(zebkit) === "undefined") {
     }
 
     zebkit.runTests("Easy OOP",
-        function test_custom_map(b) {
-            test_a_map(zebkit.$Map());
-        },
-
         function test_standard_map() {
             if (typeof Map === "undefined") {
                 console.warn("Standard Map class is not provided by the environment");
-            }
-            else {
+            } else {
                 test_a_map(Map, true);
             }
         },

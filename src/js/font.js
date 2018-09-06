@@ -78,14 +78,6 @@ var Font = Class([
          * @type {Integer}
          */
         this.height = mt.height;
-
-        /**
-         * Ascent of the font
-         * @attribute ascent
-         * @readOnly
-         * @type {Integer}
-         */
-        this.ascent = mt.ascent;
     },
 
     function $clazz() {
@@ -234,8 +226,10 @@ function $font() {
             return arguments[0];
         } if (Array.isArray(arguments[0])) {
             return Font.newInstance.apply(Font, arguments[0]);
-        } else {
+        } else if (arguments[0] !== null) {
             return new Font(arguments[0]);
+        } else {
+            return null;
         }
     } else if (arguments.length > 1) {
         return Font.newInstance.apply(Font, arguments);

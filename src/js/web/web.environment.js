@@ -1,5 +1,4 @@
 (function() {
-
     /**
      * WEB environment implementation. Provides elementary API zebkit needs to perform an
      * environment specific operations.
@@ -361,21 +360,11 @@
                 e = document.createElement("div");
                 e.setAttribute("id", "zebkit.fm");  // !!! position fixed below allows to avoid 1px size in HTML layout for "zebkit.fm" element
                 e.setAttribute("style", "visibility:hidden;line-height:0;height:1px;vertical-align:baseline;position:fixed;");
-                e.innerHTML = "<span id='zebkit.fm.text' style='display:inline;vertical-align:baseline;'>&nbsp;</span>" +
-                              "<img id='zebkit.fm.image' style='width:1px;height:1px;display:inline;vertical-align:baseline;' width='1' height='1'/>";
+                e.innerHTML = "<span id='zebkit.fm.text' style='display:inline;vertical-align:baseline;'>&nbsp;</span>";
                 document.body.appendChild(e);
             }
             var $fmCanvas = document.createElement("canvas").getContext("2d"),
-                $fmText   = document.getElementById("zebkit.fm.text"),
-                $fmImage  = document.getElementById("zebkit.fm.image");
-
-            $fmImage.onload = function() {
-                // TODO: hope the base64 specified image load synchronously and
-                // checking it with "join()"
-            };
-
-            // set 1x1 transparent picture
-            $fmImage.src = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABAQMAAAAl21bKAAAAA1BMVEUAAACnej3aAAAAAXRSTlMAQObYZgAAAApJREFUCNdjYAAAAAIAAeIhvDMAAAAASUVORK5CYII%3D';
+                $fmText   = document.getElementById("zebkit.fm.text");
 
             pkg.fontMeasure = $fmCanvas;
 
@@ -394,21 +383,7 @@
                 if ($fmText.style.font !== font) {
                     $fmText.style.font = font;
                 }
-
-                var height = $fmText.offsetHeight;
-                //!!!
-                // Something weird is going sometimes in IE10 !
-                // Sometimes the property offsetHeight is 0 but
-                // second attempt to access to the property gives
-                // proper result
-                if (height === 0) {
-                    height = $fmText.offsetHeight;
-                }
-
-                return {
-                    height : height,
-                    ascent : $fmImage.offsetTop - $fmText.offsetTop + 1
-                };
+                return { height : $fmText.offsetHeight };
             };
         }
 

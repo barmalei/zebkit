@@ -28,24 +28,24 @@ zebkit.require("ui", "layout", "ui.design", function(ui, layout, design) {
                 padding: 6,
                 kids: [
                     new design.ShaperPan(new ui.Checkbox("Check-box")
-                            .properties({
-                        value:true,
-                        location: [10, 10]
-                            })
+                        .properties({
+                            value:true,
+                            location: [20, 20]
+                        })
                     ),
 
                     new design.ShaperPan(new ui.Button("Button")
-                            .properties({
-                        value:true,
-                        location: [190, 50]
-                            })
+                        .properties({
+                            value:true,
+                            location: [190, 50]
+                        })
                     ),
 
                     new design.ShaperPan(new ui.TextField("Text Field")
-                            .properties({
-                        size : [120, 60],
-                        location: [30, 100]
-                            })
+                        .properties({
+                            size : [120, 60],
+                            location: [30, 100]
+                        })
                     )
                 ]
             })),
@@ -483,9 +483,7 @@ zebkit.require("ui", "draw", "layout", function(ui, draw, layout) {
 
 ```json
 { "@zebkit.ui.Panel": {
-    "borderLayout" : 4 ,
-    "padding": 16, 
-    "border" : "plain",
+    "borderLayout": 4, "padding": 16,  "border": "plain",
     "kids"   : {
         "center": {
             "@zebkit.ui.Tabs" : [],
@@ -494,16 +492,12 @@ zebkit.require("ui", "draw", "layout", function(ui, draw, layout) {
                 "Tree"     : { "@zebkit.ui.tree.Tree" : {
                     "value" : "Root Node",
                     "kids"  : [
-                        { 
-                            "value" : "Node 1",
-                            "kids"  : [ 
-                                "Sub node of node 1.1", 
-                                "Sub node of node 1.2"
-                            ] 
+                        {   "value" : "Node 1",
+                            "kids"  :[ "Sub node of node 1.1", 
+                                       "Sub node of node 1.2"] 
                         },"Node 2", "Node 3"
                     ]}
-                },
-                "Grid" : { "@zebkit.ui.grid.Grid" :  [
+                },"Grid" : { "@zebkit.ui.grid.Grid" :  [
                     [  [ "Item 1",  "Item 2",  "Item 3" ],
                        [ "Item 4",  "Item 5",  "Item 6" ],
                        [ "Item 7",  "Item 8",  "Item 9" ],
@@ -514,6 +508,36 @@ zebkit.require("ui", "draw", "layout", function(ui, draw, layout) {
         }
     }
 }}
+```
+YAML can be also supported, you should add "yaml-js" script into your page:
+
+```yaml
+---
+class: zebkit.ui.Panel
+borderLayout: 4
+padding: 16
+border: plain
+kids:
+    center:
+      class: zebkit.ui.Tabs
+      kids:
+        TextArea: { "@zebkit.ui.TextArea": Text }
+        Tree:
+          "@zebkit.ui.tree.Tree":
+            value: Root Node
+            kids:
+            - value: Node 1
+              kids: ["Sub node of node 1.1", "Sub node of node 1.2"]
+            - Node 2
+            - Node 3
+        Grid:
+          "@zebkit.ui.grid.Grid":
+          - - [ "Item 1", "Item 2", "Item 3" ]
+            - [ "Item 4", "Item 5", "Item 6" ]
+            - [ "Item 7", "Item 8", "Item 9" ]
+            - [ "Item 10", "Item 11", "Item 12" ]
+            - [ "Item 13", "Item 14", "Item 15" ]
+          topCaption: [ "Head 1", "Head 2", "Head 3" ]
 ```
 
 Find below zebkit application that has been created and loaded with the JSON shown above:

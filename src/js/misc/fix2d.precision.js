@@ -21,14 +21,14 @@ zebkit.package("ui", function() {
         this.$lineTo(x + c.dx, y + c.dy);
     };
 
-    ctx.fillText = function(t, x, y) {
+    ctx.fillText = function(t, x, y, maxWidth) {
         var c = this.$states[this.$curState];
-        this.$fillText(t, x + c.dx, y + c.dy);
+        this.$fillText(t, x + c.dx, y + c.dy, maxWidth);
     };
 
-    ctx.strokeText = function(t, x, y) {
+    ctx.strokeText = function(t, x, y, maxWidth) {
         var c = this.$states[this.$curState];
-        this.$strokeText(t, x + c.dx, y + c.dy);
+        this.$strokeText(t, x + c.dx, y + c.dy, maxWidth);
     };
 
     ctx.clearRect = function(x, y, w, h) {

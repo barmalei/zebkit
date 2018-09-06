@@ -9,7 +9,7 @@ var $exports     = {},
     isIE         = $isInBrowser && (Object.hasOwnProperty.call(window, "ActiveXObject") ||
                                   !!window.ActiveXObject ||
                                   window.navigator.userAgent.indexOf("Edge") > -1),
-    isFF         = $isInBrowser && window.mozInnerScreenX !== null,
+    isFF         = $isInBrowser && window.mozInnerScreenX !== null && window.navigator.userAgent && window.navigator.userAgent.toLowerCase().indexOf("firefox") > 0,
     isMacOS      = $isInBrowser && navigator.platform.toUpperCase().indexOf('MAC') !== -1,
     $FN          = null;
 

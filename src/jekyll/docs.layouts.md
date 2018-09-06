@@ -418,7 +418,7 @@ zebkit.require("ui", "layout", function(ui, lay) {
     }).setPreferredSize(320, -1));
 
     r.add(new PAN({
-        layout : new lay.PercentLayout("horizontal", 2, false),
+        layout : new lay.PercentLayout("horizontal", 2),
         kids   : {
            20: new ui.Button("20%"),
            30: new ui.Button("30%"),
@@ -427,7 +427,7 @@ zebkit.require("ui", "layout", function(ui, lay) {
     }).setPreferredSize(320, -1));
 
     r.add(new PAN({
-        layout : new lay.PercentLayout("vertical", 2, false),
+        layout : new lay.PercentLayout("vertical", 2),
         kids   : {
            20: new ui.Button("20%"),
            30: new ui.Button("30%"),
@@ -436,7 +436,7 @@ zebkit.require("ui", "layout", function(ui, lay) {
     }));
  
     r.add(new PAN({
-        layout : new lay.PercentLayout("vertical", 2, true),
+        layout : new lay.PercentLayout("vertical", 2, "stretch", "stretch", 1),
         kids   : {
            20: new ui.Button("20%"),
            30: new ui.Button("30%"),

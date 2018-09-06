@@ -17,7 +17,7 @@ zebkit.package("web", function(pkg, Class) {
                                                                                                        : 1);
 
     pkg.$windowSize = function() {
-        // iOS retina devices can have a problem with performance
+        // Old iOS retina devices can have a problem with performance
         // in landscape mode because of a bug (full page size is
         // just 1 pixels column more than video memory that can keep it)
         // So, just make width always one pixel less.
@@ -244,7 +244,7 @@ zebkit.package("web", function(pkg, Class) {
                                                     // adjust canvas to screen DPI
             if (pkg.$deviceRatio != ctx.$ratio) {
                 var r = pkg.$deviceRatio / ctx.$ratio;
-                ctx.getImageData= function(x, y, w, h) {
+                ctx.getImageData = function(x, y, w, h) {
                     return this.$getImageData(x * r, y * r, w, h);
                 };
             }
@@ -263,8 +263,6 @@ zebkit.package("web", function(pkg, Class) {
         if (ctx.$ratio != pkg.$deviceRatio) {
             var ratio = ctx.$ratio !== 1 ? pkg.$deviceRatio / ctx.$ratio
                                          : pkg.$deviceRatio;
-
-
             if (Number.isInteger(ratio)) {
                 cw = cw * ratio;
                 ch = ch * ratio;
@@ -302,7 +300,28 @@ zebkit.package("web", function(pkg, Class) {
         // TODO: top works not good in FF and it is better don't use it
         // So, ascent has to be taking in account as it was implemented
         // before
-        if (ctx.textBaseline !== "top" ) {
+        if (zebkit.isFF === true)  {
+            // FF works properly only with "middle" text base line
+            if (ctx.textBaseline !== "middle") {
+                ctx.textBaseline = "middle";
+            }
+
+            if (ctx._fillText === undefined) {
+                ctx._fillText = ctx.fillText;
+                ctx.fillText = function() {
+                    var height = (arguments.length > 4) ? arguments[4].height
+                                                        : zebkit.environment.fontMetrics(this.font).height;
+                    this._fillText(arguments[0], arguments[1], arguments[2] + Math.floor(height / 2), arguments[3]);
+                };
+
+                ctx._strokeText = ctx.strokeText;
+                ctx.strokeText = function() {
+                    var height = (arguments.length > 4) ? arguments[4].height
+                                                        : zebkit.environment.fontMetrics(this.font).height;
+                    this._strokeText(arguments[0], arguments[1], arguments[2] + Math.floor(height / 2), arguments[3]);
+                };
+            }
+        } else if (ctx.textBaseline !== "top") {
             ctx.textBaseline = "top";
         }
 

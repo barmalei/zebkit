@@ -65,18 +65,6 @@ zebkit.package("ui", function(pkg, Class) {
      */
     pkg.Tabs = Class(pkg.Panel, pkg.HostDecorativeViews, [
         function(o) {
-            /**
-             * Selected tab page index
-             * @attribute selectedIndex
-             * @type {Integer}
-             * @readOnly
-             */
-            this.vgap = this.hgap = this.tabAreaX = 0;
-            this.repaintWidth = this.repaintHeight = this.repaintX = this.repaintY = 0;
-
-            this.tabAreaY = this.tabAreaWidth = this.tabAreaHeight = 0;
-            this.overTab = this.selectedIndex = -1;
-
             this.pages = [];
             this.views = {};
 
@@ -340,6 +328,20 @@ zebkit.package("ui", function(pkg, Class) {
              * @readOnly
              */
             this.canHaveFocus = true;
+
+            /**
+             * Selected tab page index
+             * @attribute selectedIndex
+             * @type {Integer}
+             * @readOnly
+             */
+            this.selectedIndex = -1;
+
+            this.vgap = this.hgap = this.tabAreaX = 0;
+            this.repaintWidth = this.repaintHeight = this.repaintX = this.repaintY = 0;
+            this.tabAreaY = this.tabAreaWidth = this.tabAreaHeight = 0;
+            this.overTab = -1;
+
 
             /**
              * Define pointer moved event handler

@@ -620,6 +620,14 @@ var EventProducer = Interface([
 ]);
 
 // class instance method
+
+/**
+ * Extends zebkit.Class with the possibility to evaluate if the
+ * given event is fired with the class.
+ * @param {String} name an event name.
+ * @method isEventFired
+ * @for  zebkit.Class
+ */
 classTemplateProto.isEventFired = function(name) {
     if (this.clazz.Listeners === undefined) {
         return false;

@@ -416,6 +416,13 @@ zebkit.package("ui", function(pkg, Class) {
         },
 
         function $prototype() {
+            /**
+             * Image loader runner.
+             * @attribute $runner
+             * @readOnly
+             * @private
+             * @type {zebkit.DoIt}
+             */
             this.$runner = null;
 
             /**
@@ -459,14 +466,12 @@ zebkit.package("ui", function(pkg, Class) {
                         $this.$runner = null;
                         $this.setView(null);
                     });
+                } else if (this.$runner === null) {
+                    this.setView(null);
                 } else {
-                    if (this.$runner === null) {
-                        this.setView(null);
-                    } else {
-                        this.$runner.then(function() {
-                            $this.setView(null);
-                        });
-                    }
+                    this.$runner.then(function() {
+                        $this.setView(null);
+                    });
                 }
                 return this;
             };
@@ -1057,6 +1062,13 @@ zebkit.package("ui", function(pkg, Class) {
             this.barView = "blue";
 
 
+            /**
+             * Title element view .
+             * @attribute titleView
+             * @readOnly
+             * @type {zebkit.draw.View}
+             * @default null
+             */
             this.titleView = null;
 
             /**

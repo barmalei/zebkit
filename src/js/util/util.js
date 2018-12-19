@@ -263,36 +263,6 @@ zebkit.package("util", function(pkg, Class) {
      */
     pkg.Position = Class([
         function(pi){
-            /**
-             * Shows if the position object is in valid state.
-             * @private
-             * @type {Boolean}
-             * @attribute isValid
-             */
-            this.isValid = false;
-
-            /**
-             * Current virtual cursor line position
-             * @attribute currentLine
-             * @type {Integer}
-             * @readOnly
-             */
-
-            /**
-             * Current virtual cursor column position
-             * @attribute currentCol
-             * @type {Integer}
-             * @readOnly
-             */
-
-            /**
-             * Current virtual cursor offset
-             * @attribute offset
-             * @type {Integer}
-             * @readOnly
-             */
-
-            this.currentLine = this.currentCol = this.offset = 0;
             this.setMetric(pi);
         },
 
@@ -336,6 +306,38 @@ zebkit.package("util", function(pkg, Class) {
          *  @for zebkit.util.Position
          */
         function $prototype() {
+            /**
+             * Current virtual cursor line position
+             * @attribute currentLine
+             * @type {Integer}
+             * @readOnly
+             */
+            this.currentLine = 0;
+
+            /**
+             * Current virtual cursor column position
+             * @attribute currentCol
+             * @type {Integer}
+             * @readOnly
+             */
+             this.currentCol = 0;
+
+            /**
+             * Current virtual cursor offset
+             * @attribute offset
+             * @type {Integer}
+             * @readOnly
+             */
+            this.offset = 0;
+
+            /**
+             * Shows if the position object is in valid state.
+             * @private
+             * @type {Boolean}
+             * @attribute isValid
+             */
+            this.isValid = false;
+
             /**
              * Set the specified virtual cursor offsest
              * @param {Integer} o an offset, pass null to set position to indefinite state.

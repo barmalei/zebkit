@@ -72,6 +72,11 @@ zebkit.package("ui", function(pkg, Class) {
                 return this;
             };
 
+            /**
+             * Fire event.
+             * @private
+             * @method $fire
+             */
             this.$fire = function() {
                 this.fire("fired", [ this ]);
                 if (this.fired !== undefined) {
@@ -191,6 +196,27 @@ zebkit.package("ui", function(pkg, Class) {
 
 
             this.catchInput = true;
+
+
+            this.setCaption = function(c) {
+                this.property("//~Label", "value", c);
+                return this;
+            };
+
+            this.setFont = function(f) {
+                this.property("//~Label", "font", f);
+                return this;
+            };
+
+            this.setImage = function(img) {
+                this.property("//~Label/@image", image);
+                return this;
+            };
+
+            this.setColor = function(color) {
+                this.property("//~Label/@color", color);
+                return this;
+            };
         }
     ]).events("fired");
 
@@ -210,14 +236,21 @@ zebkit.package("ui", function(pkg, Class) {
      */
     pkg.Group = Class([
         function(un) {
-            this.selected = null;
-
             if (arguments.length > 0) {
                 this.allowNoneSelected = un;
             }
         },
 
         function $prototype() {
+            /**
+             * Selected group item
+             * @attribute selected
+             * @readOnly
+             * @type {Object}
+             * @default null
+             */
+            this.selected = null;
+
             /**
              * indicates if group can have no one item selected.
              * @attribute allowNoneSelected
@@ -240,6 +273,12 @@ zebkit.package("ui", function(pkg, Class) {
                         this.allowNoneSelected === true);
             };
 
+            /**
+             * Called to attach an element to the group.
+             * @param  {Object} c an element to be attached to the group.
+             * @protected
+             * @method  attach
+             */
             this.attach = function(c) {
                 if (this.$group === null) {
                     this.$group = [];
@@ -253,7 +292,12 @@ zebkit.package("ui", function(pkg, Class) {
                     c.setValue(false);
                 }
 
-                c.on(this);
+                if (c.isEventFired("fired")) {
+                    c.on(this);
+                } else {
+                    throw new Error("Component cannot be attached to group since it doesn't generate 'fired' event");
+                }
+
                 this.$group.push(c);
             };
 
@@ -267,6 +311,7 @@ zebkit.package("ui", function(pkg, Class) {
                 }
 
                 c.off(this);
+
                 var i = this.$group.indexOf(c);
                 this.$group.splice(i, 1);
 
@@ -914,6 +959,11 @@ zebkit.package("ui", function(pkg, Class) {
                 return this;
             };
 
+            /**
+             * Set stretch mode.
+             * @method  setStretchArrow
+             * @param {Boolean} b a stretch mode
+             */
             this.setStretchArrow = function(b) {
                 if (this.view.stretched !== b) {
                     this.view.stretched = b;
@@ -922,6 +972,12 @@ zebkit.package("ui", function(pkg, Class) {
                 return this;
             };
 
+            /**
+             * Set arrow size.
+             * @param {Number} w an arrow button width
+             * @param {Number} h an arrow button height
+             * @method setArrowSize
+             */
             this.setArrowSize = function(w, h) {
                 if (arguments.length === 1) {
                     h = w;
@@ -936,6 +992,11 @@ zebkit.package("ui", function(pkg, Class) {
                 return this;
             };
 
+            /**
+             * Set arrow fill color.
+             * @param {String} c an arrow button fill color.
+             * @method setFillColor
+             */
             this.setFillColor = function(c) {
                 if (this.view.fillColor !== c) {
                     this.view.fillColor = c;
@@ -944,6 +1005,11 @@ zebkit.package("ui", function(pkg, Class) {
                 return this;
             };
 
+            /**
+             * Set arrow line color.
+             * @param {String} c an arrow button line color.
+             * @method setColor
+             */
             this.setColor = function(c) {
                 if (this.view.color !== c) {
                     this.view.color = c;
@@ -952,6 +1018,11 @@ zebkit.package("ui", function(pkg, Class) {
                 return this;
             };
 
+            /**
+             * Set arrow line width.
+             * @param {Number} s an arrow button line width.
+             * @method setLineSize
+             */
             this.setLineSize = function(s) {
                 if (this.view.lineSize !== s) {
                     this.view.lineSize = s;

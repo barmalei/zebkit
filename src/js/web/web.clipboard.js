@@ -142,7 +142,6 @@ zebkit.package("web", function(pkg, Class) {
                     }
                 };
 
-                if (zebkit.isFF === true) {
                     this.$clipboard.addEventListener("input", function(ee) {
                         var dest = $this.getDestination();
                         if (dest !== null && dest.clipPaste !== undefined) {
@@ -151,22 +150,7 @@ zebkit.package("web", function(pkg, Class) {
                                 $this.clipPaste(dest, $this.$clipboard.value);
                             }
                         }
-
                     }, false);
-                } else {
-                    this.$clipboard.onpaste = function(ee) {
-                        var dest = $this.getDestination();
-                        if (dest !== null && dest.clipPaste !== undefined) {
-                            var txt = (ee.clipboardData === undefined) ? window.clipboardData.getData('Text')  // IE
-                                                                       : ee.clipboardData.getData('text/plain');
-                            dest.clipPaste(txt);
-                            if ($this.clipPaste !== undefined) {
-                                $this.clipPaste(dest, txt);
-                            }
-                        }
-                        $this.$clipboard.value = "";
-                    };
-                }
 
                 document.body.appendChild(this.$clipboard);
             }

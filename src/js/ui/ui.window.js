@@ -400,13 +400,6 @@ zebkit.package("ui", function(pkg, Class) {
      */
     pkg.Window = Class(pkg.StatePan, [
         function (s, c) {
-            //!!! for some reason state has to be set beforehand
-            this.state = "inactive";
-
-            this.prevH = this.prevX = this.prevY = 0;
-            this.px = this.py = this.dx = this.dy = 0;
-            this.prevW = this.action = -1;
-
             /**
              * Window caption panel. The panel contains window
              * icons, button and title label
@@ -502,6 +495,12 @@ zebkit.package("ui", function(pkg, Class) {
         },
 
         function $prototype() {
+            this.state = "inactive";
+
+            this.prevH = this.prevX = this.prevY = 0;
+            this.px = this.py = this.dx = this.dy = 0;
+            this.prevW = this.action = -1;
+
             var MOVE_ACTION = 1, SIZE_ACTION = 2;
 
             this.sizer = this.caption = null;

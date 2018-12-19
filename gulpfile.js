@@ -247,6 +247,19 @@ var profile = {
             }
         },
 
+        "zebkit.bundle" : {
+            deps: [
+                'zfs',
+                'zebkit'
+            ],
+            files: [
+                'build/zebkit.js',
+                'build/zfs.js'
+            ],
+            type: "js",
+            minimize: true
+        },
+
         "runtime" : {
             files: [
                 "build/rs/**/*",
@@ -285,7 +298,7 @@ var profile = {
                 '-c', 'src/yuidoc/yuidoc.json',
                 "-o", "apidoc/dark",
                 "-n",
-                './build'
+                './build/zebkit.js'
             ],
             type: "process"
         },
@@ -540,7 +553,7 @@ function buildFS(files, base) {
 
     var data = {},
         binaries = [ ".jpg", ".jpeg", ".tiff", ".gif", ".png", ".ico", ".pdf" ],
-        txt      = [ ".txt", ".md", ".json", ".html", ".htm", ".properties", ".conf", ".xml", ".crt", "yaml" ],
+        txt      = [ ".txt", ".md", ".json", ".html", ".htm", ".properties", ".conf", ".xml", ".crt", ".yaml" ],
         txtB64   = [ ];
 
     for(var i = 0; i < files.length; i++) {
@@ -569,7 +582,7 @@ function buildFS(files, base) {
                     data: fs.readFileSync(p).toString()
                 };
             } else {
-                console.err("Unknown file type '" + ext + "'")
+                console.error("Unknown file type '" + ext + "'")
             }
         });
     }

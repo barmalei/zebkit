@@ -32,12 +32,8 @@ zebkit.package("ui.tree", function(pkg, Class) {
      */
     pkg.Tree = Class(pkg.BaseTree, [
         function (d, b){
-            if (arguments.length < 2) {
-                b  = true;
-            }
-
             this.setViewProvider(new pkg.DefViews());
-            this.$super(d, b);
+            this.$supera(arguments);
         },
 
         function $prototype() {

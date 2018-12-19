@@ -73,7 +73,7 @@ zebkit.package("ui", function(pkg, Class) {
         },
 
         function setValue(v) {
-            this.kids[0].setValue(v);
+            this.property("/*", "value", v);
             return this;
         },
 

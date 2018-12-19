@@ -455,9 +455,9 @@ zebkit.package("ui", function(pkg, Class) {
              * Get a menu item by the given index
              * @param  {Integer} i a menu item index
              * @return {zebkit.ui.Panel} a menu item component
-             * @method getMenuItem
+             * @method getMenuItemAt
              */
-            this.getMenuItem = function(i) {
+            this.getMenuItemAt = function(i) {
                 if (zebkit.isString(i) === true) {
                     var item = this.byPath(i);
                     if (item !== null) {
@@ -465,7 +465,7 @@ zebkit.package("ui", function(pkg, Class) {
                     }
 
                     for (var k in this.menus) {
-                        item = this.menus[k].getMenuItem(i);
+                        item = this.menus[k].getMenuItemAt(i);
                         if (item !== null) {
                             return item;
                         }

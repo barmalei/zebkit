@@ -270,20 +270,15 @@ zebkit.package("ui.tree", function(pkg, Class) {
       */
     pkg.BaseTree = Class(ui.Panel, ui.HostDecorativeViews, [
         function (d, b) {
-            if (arguments.length < 2) {
-                b = true;
+            if (arguments.length > 1) {
+                this.isOpenVal = b;
             }
-
-            this.maxw = this.maxh = 0;
 
             this.views     = {};
             this.viewSizes = {};
+            this.nodes     = {};
 
-            this._isVal = false;
-            this.nodes = {};
             this.setLineColor("gray");
-
-            this.isOpenVal = b;
 
             this.setSelectable(true);
             this.$super();
@@ -292,6 +287,18 @@ zebkit.package("ui.tree", function(pkg, Class) {
         },
 
         function $prototype() {
+            this._isVal = false;
+
+            this.maxw = this.maxh = 0;
+
+            /**
+             * Default parent nodes toggle state
+             * @type {Boolean}
+             * @attribute isOpenVal
+             * @default true
+             */
+            this.isOpenVal = true;
+
              /**
               * Tree component line color
               * @attribute lnColor
@@ -387,8 +394,7 @@ zebkit.package("ui.tree", function(pkg, Class) {
             this.vVisibility = function (){
                 if (this.model === null) {
                     this.firstVisible = null;
-                }
-                else {
+                } else {
                     var nva = ui.$cvp(this, {});
                     if (nva === null) {
                         this.firstVisible = null;
@@ -567,6 +573,14 @@ zebkit.package("ui.tree", function(pkg, Class) {
                 return y;
             };
 
+            /**
+             * Test if the given node is in opened state: the node itself is
+             * toggled on and there is no on parent that toggled off
+             * @param  {zebkit.data.Item}  i a node to be evaluated
+             * @return {Boolean}  true if the node is in opened state.
+             * @method $isOpen
+             * @private
+             */
             this.$isOpen = function(i) {
                 return i === null || (i.kids.length > 0 && this.getIM(i).isOpen && this.$isOpen(i.parent));
             };
@@ -822,6 +836,14 @@ zebkit.package("ui.tree", function(pkg, Class) {
                 }
             };
 
+            /**
+             * Paint the given tree node branch.
+             * @param  {2DContext} g  a graphical 2D context
+             * @param  {zebkit.data.Item} root a node to be rendered
+             * @return {Boolean} return true if the was something to be rendered
+             * @method paintBranch
+             * @protected
+             */
             this.paintBranch = function (g, root){
                 if (root === null) {
                     return false;
@@ -983,6 +1005,7 @@ zebkit.package("ui.tree", function(pkg, Class) {
              * @param  {zebkit.data.Item} item an item to be selected. Use null value to clear
              * any selection
              * @method  select
+             * @chainable
              */
             this.select = function(item){
                 if (this.isSelectable === true && this.selected !== item){
@@ -1010,6 +1033,7 @@ zebkit.package("ui.tree", function(pkg, Class) {
                                      m.width, m.height);
                     }
                 }
+                return this;
             };
 
             /**
@@ -1112,6 +1136,7 @@ zebkit.package("ui.tree", function(pkg, Class) {
              * Say if items of the tree component should be selectable
              * @param {Boolean} b true is tree component items can be selected
              * @method setSelectable
+             * @chainable
              */
             this.setSelectable = function(b){
                 if (this.isSelectable !== b){

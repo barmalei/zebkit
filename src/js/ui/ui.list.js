@@ -29,18 +29,30 @@ zebkit.package("ui", function(pkg, Class) {
         function (m, b) {
             if (arguments.length === 0) {
                 m = [];
-                b = false;
             } else if (arguments.length === 1) {
                 if (zebkit.isBoolean(m))  {
-                    b = m;
+                    this.isComboMode = m;
                     m = [];
-                } else {
-                    b = false;
                 }
-            } else if (m === null) {
-                m = [];
+            } else if (arguments.length === 2) {
+                this.isComboMode = b;
             }
 
+            this.scrollManager = new pkg.ScrollManager(this);
+            this.$super();
+
+            // position manager should be set before model initialization
+            this.setPosition(new zebkit.util.Position(this));
+
+            /**
+             * List model
+             * @readOnly
+             * @attribute model
+             */
+            this.setModel(m === null ? [] : m);
+        },
+
+        function $prototype() {
             /**
              * Currently selected list item index
              * @type {Integer}
@@ -57,7 +69,7 @@ zebkit.package("ui", function(pkg, Class) {
              * @attribute isComboMode
              * @type {Boolean}
              */
-            this.isComboMode = b;
+            this.isComboMode = false;
 
             /**
              * Scroll manager
@@ -66,22 +78,6 @@ zebkit.package("ui", function(pkg, Class) {
              * @protected
              * @type {zebkit.ui.ScrollManager}
              */
-            this.scrollManager = new pkg.ScrollManager(this);
-
-            this.$super();
-
-            // position manager should be set before model initialization
-            this.setPosition(new zebkit.util.Position(this));
-
-            /**
-             * List model
-             * @readOnly
-             * @attribute model
-             */
-            this.setModel(m);
-        },
-
-        function $prototype() {
             this.scrollManager = null;
 
             /**
@@ -260,6 +256,12 @@ zebkit.package("ui", function(pkg, Class) {
                 return this.getLines() - 1;
             };
 
+            /**
+             * Catch and handle scrolling event
+             * @param  {Integer} psx previous horizontal scroll location
+             * @param  {Integer} psy previous vertical scroll location
+             * @method catchScrolled
+             */
             this.catchScrolled = function(psx, psy) {
                 this.repaint();
             };
@@ -506,6 +508,14 @@ zebkit.package("ui", function(pkg, Class) {
                 }
             };
 
+            /**
+             * Data model element inserted event handler.
+             * @param  {zebkit.data.ListModel} target a target model.
+             * @param  {Object} e   an inserted element.
+             * @param  {Integer} index an index the element has been inserted at.
+             * @method elementInserted
+             * @protected
+             */
             this.elementInserted = function(target, e,index){
                 this.invalidate();
                 if (this.selectedIndex >= 0 && this.selectedIndex >= index) {
@@ -515,6 +525,14 @@ zebkit.package("ui", function(pkg, Class) {
                 this.repaint();
             };
 
+            /**
+             * Data model element removed event handler.
+             * @param  {zebkit.data.ListModel} target a target model.
+             * @param  {Object} e   a removed element.
+             * @param  {Integer} index an index the element has been removed at.
+             * @method elementRemoved
+             * @protected
+             */
             this.elementRemoved = function(target, e,index){
                 this.invalidate();
                 if (this.selectedIndex === index || this.model.count() === 0) {
@@ -528,6 +546,15 @@ zebkit.package("ui", function(pkg, Class) {
                 this.repaint();
             };
 
+            /**
+             * Data model element updated event handler.
+             * @param  {zebkit.data.ListModel} target a target model.
+             * @param  {Object} e   a new element value.
+             * @param  {Object} pe   a previous value.
+             * @param  {Integer} index an index of updated element .
+             * @method elementSet
+             * @protected
+             */
             this.elementSet = function (target, e, pe,index){
                 if (this.selectedIndex === index) {
                     this.select(-1);
@@ -667,6 +694,11 @@ zebkit.package("ui", function(pkg, Class) {
                 return this;
             };
 
+            /**
+             * Make selected element visible.
+             * @method makeSelectedVisible
+             * @chainable
+             */
             this.makeSelectedVisible = function(){
                 if (this.selectedIndex >= 0) {
                     this.makeItemVisible(this.selectedIndex);
@@ -769,32 +801,6 @@ zebkit.package("ui", function(pkg, Class) {
      */
     pkg.List = Class(pkg.BaseList, [
         function (m, b){
-            /**
-             * Index of the first visible list item
-             * @readOnly
-             * @attribute firstVisible
-             * @type {Integer}
-             * @private
-             */
-            this.firstVisible = -1;
-
-            /**
-             * Y coordinate of the first visible list item
-             * @readOnly
-             * @attribute firstVisibleY
-             * @type {Integer}
-             * @private
-             */
-            this.firstVisibleY = this.psWidth_ = this.psHeight_ = 0;
-
-            /**
-             * Internal flag to track list items visibility status. It is set
-             * to false to trigger list items metrics and visibility recalculation
-             * @attribute visValid
-             * @type {Boolean}
-             * @private
-             */
-            this.visValid = false;
             this.setViewProvider(new this.clazz.ViewProvider());
             this.$supera(arguments);
         },
@@ -846,6 +852,36 @@ zebkit.package("ui", function(pkg, Class) {
         },
 
         function $prototype() {
+            /**
+             * Index of the first visible list item
+             * @readOnly
+             * @attribute firstVisible
+             * @type {Integer}
+             * @private
+             */
+            this.firstVisible = -1;
+
+            /**
+             * Y coordinate of the first visible list item
+             * @readOnly
+             * @attribute firstVisibleY
+             * @type {Integer}
+             * @private
+             */
+            this.firstVisibleY = 0;
+
+
+            this.psWidth_ = this.psHeight_ = 0;
+
+            /**
+             * Internal flag to track list items visibility status. It is set
+             * to false to trigger list items metrics and visibility recalculation
+             * @attribute visValid
+             * @type {Boolean}
+             * @private
+             */
+            this.visValid = false;
+
             this.heights = this.widths = this.vArea = null;
 
             /**
@@ -913,11 +949,23 @@ zebkit.package("ui", function(pkg, Class) {
                 }
             };
 
+            /**
+             * Set item color.
+             * @param {String} c a color
+             * @method setColor
+             * @chainable
+             */
             this.setColor = function(c) {
                 this.provider.setColor(c);
                 return this;
             };
 
+            /**
+             * Set item font.
+             * @param {String|zebkit.Font} f a font
+             * @method setFont
+             * @chainable
+             */
             this.setFont = function(f) {
                 this.provider.setFont(f);
                 return this;
@@ -957,6 +1005,11 @@ zebkit.package("ui", function(pkg, Class) {
                          height: this.psHeight_ };
             };
 
+            /**
+             * Validate items visibility.
+             * @method vVisibility
+             * @private
+             */
             this.vVisibility = function(){
                 this.validate();
                 var prev = this.vArea;
@@ -1074,10 +1127,11 @@ zebkit.package("ui", function(pkg, Class) {
      * @class zebkit.ui.CompList
      * @constructor
      * @extends zebkit.ui.BaseList
+     * @uses zebkit.data.DataModel
      * @param {Boolean} [isComboMode] true if the list navigation has to be triggered by
      * pointer cursor moving
      */
-    pkg.CompList = Class(pkg.BaseList, [
+    pkg.CompList = Class(pkg.BaseList, zebkit.data.DataModel, [
         function (b) {
             this.model = this;
 

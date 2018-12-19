@@ -70,7 +70,7 @@ zebkit.package("ui", function(pkg, Class) {
              * @type {zebkit.ui.Panel}
              * @readOnly
              */
-             this.label = null;
+            this.label = null;
 
             /**
              * Vertical gap. Define top and bottom paddings between
@@ -80,6 +80,7 @@ zebkit.package("ui", function(pkg, Class) {
              * @readOnly
              * @default 0
              */
+            this.vGap = 2;
 
              /**
               * Horizontal gap. Define left and right paddings between
@@ -89,7 +90,7 @@ zebkit.package("ui", function(pkg, Class) {
               * @readOnly
               * @default 0
               */
-            this.vGap = this.hGap = 2;
+            this.hGap = 2;
 
              /**
               * Border panel label indent
@@ -98,7 +99,7 @@ zebkit.package("ui", function(pkg, Class) {
               * @readOnly
               * @default 4
               */
-            this.indent = 4;
+             this.indent = 4;
 
             /**
              * Border panel title area arrangement. Border title can be placed
@@ -377,6 +378,7 @@ zebkit.package("ui", function(pkg, Class) {
              * @readOnly
              * @default 50
              */
+            this.leftMinSize = 50;
 
             /**
              * A minimal size of right (or bottom) sizable panel
@@ -385,6 +387,7 @@ zebkit.package("ui", function(pkg, Class) {
              * @readOnly
              * @default 50
              */
+            this.rightMinSize = 50;
 
             /**
              * Indicates if the splitter bar can be moved
@@ -393,6 +396,7 @@ zebkit.package("ui", function(pkg, Class) {
              * @readOnly
              * @default true
              */
+            this.isMoveable = true;
 
             /**
              * A gap between gripper element and first and second UI components
@@ -401,6 +405,7 @@ zebkit.package("ui", function(pkg, Class) {
              * @readOnly
              * @default 1
              */
+            this.gap = 1;
 
             /**
              * A reference to gripper UI component
@@ -408,6 +413,7 @@ zebkit.package("ui", function(pkg, Class) {
              * @type {zebkit.ui.Panel}
              * @readOnly
              */
+            this.gripper = null;
 
             /**
              * A reference to left (top) sizable UI component
@@ -415,6 +421,7 @@ zebkit.package("ui", function(pkg, Class) {
              * @type {zebkit.ui.Panel}
              * @readOnly
              */
+            this.leftComp = null;
 
             /**
              * A reference to right (bottom) sizable UI component
@@ -422,15 +429,28 @@ zebkit.package("ui", function(pkg, Class) {
              * @type {zebkit.ui.Panel}
              * @readOnly
              */
+            this.rightComp = null;
 
-            this.leftMinSize = this.rightMinSize = 50;
-            this.isMoveable = true;
-            this.gap = 1;
+            /**
+             * Split panel orientation
+             * @attribute orient
+             * @type {String}
+             * @readOnly
+             */
             this.orient = "vertical";
 
-            this.minXY = this.maxXY = 0;
+            /**
+             * Split panel bar location.
+             * @attribute barLocation
+             * @type {Number}
+             * @protected
+             * @readOnly
+             */
             this.barLocation = 70;
-            this.leftComp = this.rightComp = this.gripper = null;
+
+            this.minXY = 0;
+
+            this.maxXY = 0;
 
             this.normalizeBarLoc = function(xy){
                 if (xy < this.minXY) {
@@ -793,7 +813,7 @@ zebkit.package("ui", function(pkg, Class) {
 
         function $prototype() {
             /**
-             * Title panel
+             * Header panel
              * @type {zebkit.ui.Panel}
              * @attribute headerPan
              * @readOnly
@@ -816,6 +836,12 @@ zebkit.package("ui", function(pkg, Class) {
              */
             this.togglePan = null;
 
+            /**
+             * Set collapsing state.
+             * @param {boolean} b a collapsing state.
+             * @method setValue
+             * @chainable
+             */
             this.setValue = function(b) {
                 if (this.togglePan !== null) {
                     this.togglePan.setValue(b);
@@ -823,10 +849,21 @@ zebkit.package("ui", function(pkg, Class) {
                 return this;
             };
 
-            this.getValue = function(b) {
+            /**
+             * Get collapsing state
+             * @return {boolean}  a collapsing state
+             * @method getValue
+             */
+            this.getValue = function() {
                 return (this.togglePan !== null) ? this.togglePan.getValue() : false;
             };
 
+            /**
+             * Set group.
+             * @method setGroup
+             * @param {zebkit.ui.Group} g a group
+             * @chainable
+             */
             this.setGroup = function(g) {
                 if (this.togglePan !== null) {
                     this.togglePan.setGroup(g);
@@ -834,6 +871,11 @@ zebkit.package("ui", function(pkg, Class) {
                 return this;
             };
 
+            /**
+             * Toggle collapsing state
+             * @chainable
+             * @method toggle
+             */
             this.toggle = function() {
                 if (this.togglePan !== null) {
                     this.togglePan.toggle();
@@ -884,6 +926,12 @@ zebkit.package("ui", function(pkg, Class) {
         },
 
         function $prototype() {
+            /**
+             * Applied to elements border view
+             * @attribute borderView
+             * @readOnly
+             * @type {zebkit.draw.View}
+             */
             this.borderView = null;
 
             /**

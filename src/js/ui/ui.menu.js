@@ -148,6 +148,13 @@ zebkit.package("ui", function(pkg, Class) {
         },
 
         function $prototype() {
+            /**
+             * Menu item handler function.
+             * @private
+             * @attribute $handler
+             * @readOnly
+             * @type {Function}
+             */
             this.$handler = null;
 
             /**
@@ -402,6 +409,13 @@ zebkit.package("ui", function(pkg, Class) {
         },
 
         function $prototype() {
+            /**
+             * Parent menu reference/
+             * @attribute $parentMenu
+             * @readOnly
+             * @private
+             * @type {zebkit.ui.Menu}
+             */
             this.$parentMenu = null;
 
             this.canHaveFocus = true;
@@ -517,7 +531,12 @@ zebkit.package("ui", function(pkg, Class) {
                 }
             };
 
-            // TODO: not stable API
+            /**
+             * Get menu item by id.
+             * @param  {String} id an id.
+             * @return {zebkit.ui.MenuItem} a menu item
+             * @method menuItemById
+             */
             this.menuItemById = function(id) {
                 for (var i = 0; i < this.kids.length; i++)  {
                     var mi = this.kids[i];

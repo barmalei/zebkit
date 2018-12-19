@@ -34,17 +34,33 @@ zebkit.package("ui", function(pkg, Class) {
       */
     pkg.ScrollManager = Class([
         function(c) {
+            this.target = c;
+        },
+
+        function $prototype() {
             /**
              * Target UI component for that the scroll manager has been instantiated
              * @attribute target
              * @type {zebkit.ui.Panel}
              * @readOnly
              */
-            this.target = c;
-        },
+            this.target = null;
 
-        function $prototype() {
-            this.sx = this.sy = 0;
+            /**
+             * Current x scroll location.
+             * @attribute sx
+             * @type {Integer}
+             * @readOnly
+             */
+            this.sx = 0;
+
+            /**
+             * Current y scroll location.
+             * @attribute sy
+             * @type {Integer}
+             * @readOnly
+             */
+            this.sy = 0;
 
             /**
              * Get current target component x scroll location
@@ -100,6 +116,7 @@ zebkit.package("ui", function(pkg, Class) {
                     if (this.scrollStateUpdated !== undefined) {
                         this.scrollStateUpdated(x, y, psx, psy);
                     }
+
                     if (this.target.catchScrolled !== undefined) {
                         this.target.catchScrolled(psx, psy);
                     }
@@ -135,10 +152,10 @@ zebkit.package("ui", function(pkg, Class) {
     /**
      * Scroll bar UI component
      * @param {String} [t] orientation of the scroll bar components:
-
-            "vertical" - vertical scroll bar
-            "horizontal"- horizontal scroll bar
-
+     *
+     *       "vertical" - vertical scroll bar
+     *       "horizontal"- horizontal scroll bar
+     *
      * @class zebkit.ui.Scroll
      * @constructor
      * @extends zebkit.ui.Panel
@@ -150,29 +167,6 @@ zebkit.package("ui", function(pkg, Class) {
                 this.orient = zebkit.util.validateValue(t, "vertical", "horizontal");
             }
 
-            /**
-             * Increment button
-             * @attribute incBt
-             * @type {zebkit.ui.Button}
-             * @readOnly
-             */
-
-            /**
-             * Decrement button
-             * @attribute decBt
-             * @type {zebkit.ui.Button}
-             * @readOnly
-             */
-
-            /**
-             * Scroll bar thumb component
-             * @attribute thumb
-             * @type {zebkit.ui.Panel}
-             * @readOnly
-             */
-
-            this.thumbLoc = 0;
-            this.startDragLoc = Number.MAX_VALUE;
             this.$super(this);
 
             var b = (this.orient === "vertical");
@@ -207,7 +201,55 @@ zebkit.package("ui", function(pkg, Class) {
         function $prototype() {
             this.MIN_BUNDLE_SIZE = 16;
 
-            this.incBt = this.decBt = this.thumb = this.position = null;
+            /**
+             * Thumb dragging location  location
+             * @attribute $thumbLoc
+             * @type {Number}
+             * @private
+             * @readOnly
+             */
+            this.$thumbLoc = 0;
+
+            /**
+             * Start dragging location
+             * @attribute $startDragLoc
+             * @type {Number}
+             * @private
+             * @readOnly
+             */
+            this.$startDragLoc = Number.MAX_VALUE;
+
+            /**
+             * Increment button
+             * @attribute incBt
+             * @type {zebkit.ui.Button}
+             * @readOnly
+             */
+            this.incBt = null;
+
+            /**
+             * Decrement button
+             * @attribute decBt
+             * @type {zebkit.ui.Button}
+             * @readOnly
+             */
+            this.decBt = null;
+
+            /**
+             * Scroll bar thumb component
+             * @attribute thumb
+             * @type {zebkit.ui.Panel}
+             * @readOnly
+             */
+            this.thumb = null;
+
+            /**
+             * Position manager.
+             * @readOnly
+             * @attribute position
+             * @type {zebkit.util.Position}
+             */
+            this.position = null;
 
             /**
              * Maximal possible value
@@ -216,7 +258,9 @@ zebkit.package("ui", function(pkg, Class) {
              * @readOnly
              * @default 100
              */
-            this.extra = this.max  = 100;
+            this.max = 100;
+
+            this.extra = 100;
 
             /**
              * Page increment value
@@ -317,9 +361,9 @@ zebkit.package("ui", function(pkg, Class) {
              * @method pointerDragged
              */
             this.pointerDragged = function(e){
-                if (Number.MAX_VALUE !== this.startDragLoc) {
-                    this.position.setOffset(this.pixel2value(this.thumbLoc -
-                                                             this.startDragLoc +
+                if (Number.MAX_VALUE !== this.$startDragLoc) {
+                    this.position.setOffset(this.pixel2value(this.$thumbLoc -
+                                                             this.$startDragLoc +
                                                              ((this.orient === "horizontal") ? e.x : e.y)));
                 }
             };
@@ -331,8 +375,8 @@ zebkit.package("ui", function(pkg, Class) {
              */
             this.pointerDragStarted = function (e){
                 if (this.isDragable === true && this.isInThumb(e.x, e.y)) {
-                    this.startDragLoc = this.orient === "horizontal" ? e.x : e.y;
-                    this.thumbLoc    = this.orient === "horizontal" ? this.thumb.x : this.thumb.y;
+                    this.$startDragLoc = this.orient === "horizontal" ? e.x : e.y;
+                    this.$thumbLoc     = this.orient === "horizontal" ? this.thumb.x : this.thumb.y;
                 }
             };
 
@@ -342,7 +386,7 @@ zebkit.package("ui", function(pkg, Class) {
              * @method pointerDragEnded
              */
             this.pointerDragEnded = function(e) {
-                this.startDragLoc = Number.MAX_VALUE;
+                this.$startDragLoc = Number.MAX_VALUE;
             };
 
             /**
@@ -446,6 +490,12 @@ zebkit.package("ui", function(pkg, Class) {
                 return this;
             };
 
+            /**
+             * Set position controller.
+             * @param {zebkit.util.Position} p a position controller.
+             * @method setPosition
+             * @chainable
+             */
             this.setPosition = function(p){
                 if (p !== this.position){
                     if (this.position !== null) {
@@ -931,6 +981,15 @@ zebkit.package("ui", function(pkg, Class) {
                 }
             };
 
+            /**
+             * Set scrolling increments.
+             * @param {Number} hUnit horizontal smooth scrolling increment. The parameter has no effect if it equals -1.
+             * @param {Number} hPage horizontal page scrolling increment. The parameter has no effect if it equals -1.
+             * @param {Number} vUnit vertical smooth scrolling increment. The parameter has no effect if it equals -1.
+             * @param {Number} vPage vertical page scrolling increment. The parameter has no effect if it equals -1.
+             * @method setIncrements
+             * @chainable
+             */
             this.setIncrements = function (hUnit,hPage,vUnit,vPage) {
                 if (this.hBar !== null){
                     if (hUnit !==  -1) {

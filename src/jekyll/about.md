@@ -333,6 +333,8 @@ zebkit.require("ui", "draw", "layout", function(ui, draw, layout) {
                 "over" : "red",
                 "out" : "orange"
             });
+
+            this.setFocusMarkerView(new draw.RoundBorder("gray"));
         },
 
         function contains(x, y) {

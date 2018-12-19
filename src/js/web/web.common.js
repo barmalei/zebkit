@@ -300,7 +300,7 @@ zebkit.package("web", function(pkg, Class) {
         // TODO: top works not good in FF and it is better don't use it
         // So, ascent has to be taking in account as it was implemented
         // before
-        if (zebkit.isFF === true)  {
+        //if (zebkit.isFF === true)  {
             // FF works properly only with "middle" text base line
             if (ctx.textBaseline !== "middle") {
                 ctx.textBaseline = "middle";
@@ -309,21 +309,23 @@ zebkit.package("web", function(pkg, Class) {
             if (ctx._fillText === undefined) {
                 ctx._fillText = ctx.fillText;
                 ctx.fillText = function() {
-                    var height = (arguments.length > 4) ? arguments[4].height
-                                                        : zebkit.environment.fontMetrics(this.font).height;
-                    this._fillText(arguments[0], arguments[1], arguments[2] + Math.floor(height / 2), arguments[3]);
+                    var height = arguments.length > 4 ? arguments[4].height
+                                                      : zebkit.environment.fontMetrics(this.font).height;
+                    this._fillText(arguments[0],
+                                   arguments[1],
+                                   arguments[2] + Math.floor(height / 2), arguments[3]);
                 };
 
                 ctx._strokeText = ctx.strokeText;
                 ctx.strokeText = function() {
-                    var height = (arguments.length > 4) ? arguments[4].height
-                                                        : zebkit.environment.fontMetrics(this.font).height;
+                    var height = arguments.length > 4 ? arguments[4].height
+                                                      : zebkit.environment.fontMetrics(this.font).height;
                     this._strokeText(arguments[0], arguments[1], arguments[2] + Math.floor(height / 2), arguments[3]);
                 };
             }
-        } else if (ctx.textBaseline !== "top") {
-            ctx.textBaseline = "top";
-        }
+        // } else if (ctx.textBaseline !== "top") {
+        //     ctx.textBaseline = "top";
+        // }
 
         return ctx;
     };

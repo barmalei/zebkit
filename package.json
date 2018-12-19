@@ -15,7 +15,7 @@
   },
   "homepage": "https://github.com/barmalei/zebra",
   "devDependencies": {
-    "gulp": "latest",
+    "gulp": "3.9.1",
     "gulp-concat": "latest",
     "gulp-expect-file": "latest",
     "gulp-jshint": "latest",

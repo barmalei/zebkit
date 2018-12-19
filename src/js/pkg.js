@@ -84,6 +84,12 @@ function Package(name, parent) {
      */
     this.$config = {};
 
+    /**
+     * Package ready promise.
+     * @attribute $ready
+     * @type {zebkit.DoIt}
+     * @private
+     */
     this.$ready = new DoIt();
 
     /**

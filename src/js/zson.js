@@ -338,6 +338,15 @@ var Zson = Class([
             }
         };
 
+        /**
+         * Resolve the given reference
+         * @param  {Object} target a target object
+         * @param  {Array} names a reference names
+         * @return {Object | zebkit.DoIt} a resolved by the reference value of promise if
+         * the object cannot be resolved immediately
+         * @private
+         * @method $resolveRef
+         */
         this.$resolveRef = function(target, names) {
             var fn = function(ref, rn) {
                 rn.then(function(target) {
@@ -386,6 +395,13 @@ var Zson = Class([
             return target;
         };
 
+        /**
+         * Build the given array. Building means all references have to be resolved.
+         * @param  {Array} d an array to be resolved.
+         * @return {Array|zebkit.DoIt} a resolved object of promise if the array cannot be resolved immediately
+         * @private
+         * @method $buildArray
+         */
         this.$buildArray = function(d) {
             var hasAsync = false;
             for (var i = 0; i < d.length; i++) {
@@ -489,6 +505,13 @@ var Zson = Class([
             }
         };
 
+        /**
+         * Map query string parameters to dictionary of variables.
+         * @param  {String|zebkitURI} uri an URI.
+         * @return {Object} a set of variables fetched from the query string of the given URI.
+         * @method $qsToVars
+         * @private
+         */
         this.$qsToVars = function(uri) {
             var qs   = null,
                 vars = null;
@@ -512,6 +535,12 @@ var Zson = Class([
             return vars;
         };
 
+        /**
+         * Resolve the given reference.
+         * @param  {String} d a reference.
+         * @return {Object|zebkit.DoIt} a resolved reference value or promise if it cannot be resolved immediately.
+         * @method $buildRef
+         */
         this.$buildRef = function(d) {
             var idx = -1;
 
@@ -761,6 +790,13 @@ var Zson = Class([
             return dest;
         };
 
+        /**
+         * One level mixing of values of the destination object with the source object values.
+         * @param  {Object} dest a destination object
+         * @param  {Object} src  a source object
+         * @method mixin
+         * @protected
+         */
         this.mixin = function(dest, src) {
             if (src instanceof DoIt) {
                 var $this = this;
@@ -806,6 +842,12 @@ var Zson = Class([
             }
         };
 
+        /**
+         * Evaluate the given expression
+         * @param  {String} expr an expression.
+         * @return {Object} a result of the expression evaluation
+         * @method expr
+         */
         this.expr = function(expr) {
             if (expr.length > 300) {
                 throw new Error("Out of evaluated script limit");

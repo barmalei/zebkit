@@ -396,8 +396,6 @@ zebkit.package("draw", function(pkg, Class) {
      */
     pkg.rgb = Class(pkg.View, [
         function (r, g, b, a) {
-            this.isOpaque = true;
-
             if (arguments.length === 1) {
                 if (zebkit.isString(r)) {
                     this.s = r = r.trim();
@@ -1002,14 +1000,36 @@ zebkit.package("draw", function(pkg, Class) {
              */
             this.fillColor = null;
 
-            //TODO: comment
-            this.width = this.height = 8;
+            /**
+             * Fixed width of the shape view
+             * @attribute width
+             * @type {Number}
+             * @default 8
+             */
+            this.width = 8;
 
-            //TODO: comment
+            /**
+             * Fixed height of the shape view
+             * @attribute height
+             * @type {Number}
+             * @default 8
+             */
+            this.height = 8;
+
+            /**
+             * The attribute indicates if the view has to be stretched of fixed width
+             * and height has to be used.
+             * @attribute stretched
+             * @type {Boolean}
+             * @default true
+             */
             this.stretched = true;
 
-
-            // TODO: comment
+            /**
+             * Set the shape line width.
+             * @param {Number} w a line width
+             * @method setLineWidth
+             */
             this.setLineWidth = function(w) {
                 if (w !== this.lineWidth) {
                     this.lineWidth = this.gap = w;

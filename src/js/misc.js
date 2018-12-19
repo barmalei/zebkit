@@ -322,7 +322,8 @@ Number.isInteger = Number.isInteger || function(value) {
  * Get property value for the given object and the specified property path
  * @param  {Object} obj  a target object.
  * as the target object
- * @param  {String} path property path.
+ * @param  {String} path property path. Use "`*" as path to collect all available public
+ * properties.
  * @param  {Boolean} [useGetter] says too try getter method when it exists.
  * By default the parameter is false
  * @return {Object} a property value, return undefined if property cannot
@@ -366,6 +367,14 @@ function getPropertyValue(obj, path, useGetter) {
                 return undefined;
             }
         }
+    } else if (path === '*') {
+        var res = {};
+        for (var k in obj) {
+            if (k[0] !== '$' && obj.hasOwnProperty(k)) {
+                res[k] = getPropertyValue(obj, k, useGetter === true);
+            }
+        }
+        return res;
     } else {
         if (useGetter === true) {
             m = getPropertyGetter(obj, path);

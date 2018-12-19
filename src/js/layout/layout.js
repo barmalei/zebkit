@@ -376,12 +376,12 @@ zebkit.package("layout", function(pkg, Class) {
              */
             this.properties = function(path, props) {
                 if (arguments.length === 1) {
-                    return zebkit.properties(this, path);
-                }
-
+                    zebkit.properties(this, arguments[0]);
+                } else if (arguments.length === 2) {
                 this.byPath(path, function(kid) {
                     zebkit.properties(kid, props);
                 });
+                }
                 return this;
             };
 

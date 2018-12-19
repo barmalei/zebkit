@@ -40,8 +40,8 @@ zebkit.package("draw", function(pkg, Class) {
              * @readOnly
              * @type {Array}
              */
-
             this.colors = Array.prototype.slice.call(arguments, 0);
+
             if (arguments.length > 2) {
                 this.orient = arguments[arguments.length - 1];
                 this.colors.pop();
@@ -91,15 +91,21 @@ zebkit.package("draw", function(pkg, Class) {
 
     /**
     * Radial gradient view
-    * @param {String} startColor a start color
-    * @param {String} stopColor a stop color
+    * @param {String} [colors]* a colors set of the radial gradient.
     * @constructor
     * @class zebkit.draw.Radial
     * @extends zebkit.draw.View
     */
     pkg.Radial = Class(pkg.View, [
         function() {
+            /**
+             * Colors set of the radial gradient.
+             * @attribute colors
+             * @readOnly
+             * @type {Array}
+             */
             this.colors = [];
+
             for(var i = 0; i < arguments.length; i++) {
                 this.colors[i] = arguments[i] !== null ? arguments[i].toString() : null;
             }
@@ -112,6 +118,12 @@ zebkit.package("draw", function(pkg, Class) {
             this.$cx1 = this.$cy1 = this.$rad1 = this.$rad2 = 0;
             this.$colors = [];
 
+            /**
+             * Radius of radial gradient.
+             * @attribute radius
+             * @readOnly
+             * @type {Number}
+             */
             this.radius = 10;
 
             this.paint = function(g,x,y,w,h,d){

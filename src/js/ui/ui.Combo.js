@@ -83,16 +83,6 @@ zebkit.package("ui", function(pkg, Class) {
                                                                                 : new this.clazz.List(list, true);
             }
 
-            /**
-             * Maximal size the combo box height can have
-             * @attribute maxPadHeight
-             * @readOnly
-             * @type {Integer}
-             */
-            this.maxPadHeight = 0;
-
-            this.$lockListSelEvent = false;
-
             this.setList(list);
 
             this.$super();
@@ -330,6 +320,16 @@ zebkit.package("ui", function(pkg, Class) {
          * @for zebkit.ui.Combo
          */
         function $prototype() {
+            this.$lockListSelEvent = false;
+
+            /**
+             * Maximal size the combo box height can have
+             * @attribute maxPadHeight
+             * @readOnly
+             * @type {Integer}
+             */
+            this.maxPadHeight = 0;
+
             /**
              * Reference to combo box winpad list component
              * @attribute list

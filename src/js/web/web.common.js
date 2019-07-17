@@ -206,8 +206,8 @@ zebkit.package("web", function(pkg, Class) {
         // if CSS width or height has not been set for the canvas
         // it has to be done, otherwise scaling on hi-DPI screen
         // will not work
-        if (isNaN(parseInt(c.style.width ))||
-            isNaN(parseInt(c.style.height))  )
+        if (isNaN(parseInt(c.style.width, 10 ))||
+            isNaN(parseInt(c.style.height, 10))  )
         {
             c.style.width  = "" + cw + "px";
             c.style.height = "" + ch + "px";
@@ -234,7 +234,6 @@ zebkit.package("web", function(pkg, Class) {
             ctx.$ratio = (ctx.webkitBackingStorePixelRatio ||   // backing store ratio
                           ctx.mozBackingStorePixelRatio    ||
                           ctx.msBackingStorePixelRatio     ||
-                          ctx.backingStorePixelRatio       ||
                           ctx.backingStorePixelRatio       || 1);
 
             ctx.$getImageData = ctx.getImageData;

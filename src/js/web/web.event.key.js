@@ -4,6 +4,15 @@ zebkit.package("web", function(pkg, Class) {
     // rp  - repeatable key, true if not defined
     // map  - map code to another code
     // ignore  - don't fire the given event, false by default
+
+    //!!!
+    // keyCode   - unique integer code of a key
+    // code      - unique string representation of a key
+    // key       - char that has been pressed
+    //!!!
+
+
+    //  { "string:code" => { keyCode : "int",  key: "string" (a character entered), "rp": "boolean" }  }
     var CODES = {
             "KeyA"  : { keyCode: 65 },
             "KeyB"  : { keyCode: 66 },
@@ -144,7 +153,7 @@ zebkit.package("web", function(pkg, Class) {
                     throw new Error("Invalid mapping for code = '" + k + "'");
                 }
             } else if (code.keyCode === undefined) {
-                throw new Error("unknown keyCode  for code = '" + k + "'");
+                throw new Error("Unknown keyCode for code = '" + k + "'");
             }
         }
 
@@ -202,6 +211,7 @@ zebkit.package("web", function(pkg, Class) {
 
                 this.code = pkg.$fetchKeyCode(e);
 
+                // try to fetch and normalize "key" field
                 if (this.code === "Enter" || this.code === "Space" || this.code === "Tab") {
                     this.key = CODES[this.code].key;
                 } else if (e.key != null) {
@@ -371,6 +381,7 @@ zebkit.package("web", function(pkg, Class) {
                     // TODO: may be put the "if" logic into prevent default
                     $this.preventDefault(e, key);
                 }
+
                 e.stopPropagation();
 
                 // fire key pressed event

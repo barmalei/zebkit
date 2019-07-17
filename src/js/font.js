@@ -109,8 +109,9 @@ var Font = Class([
                         size = defaultSize + size;
                     } else if (s[0] === '-') {
                         size = defaultSize - size;
+                    } else {
+                        return size + "px";
                     }
-                    return size + "px";
                 }
             }
             return s === null ? null : s + "px";

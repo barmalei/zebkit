@@ -286,7 +286,7 @@ zebkit.package("io", function(pkg, Class) {
                     };
 
                     try {
-                        req.send(arguments.length > 2 ? data : null);
+                        req.send(data !== null ? data : null);
                     } catch(e) {
                         this.error(e);
                     }
